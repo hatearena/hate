@@ -35,11 +35,11 @@ void throttle() {
                                throttle_accel, throttle_decel);
 };
 
-void newname(char *name) {
+void newname(const char *name) {
   c2sinit = false;
   strn0cpy(player1->name, name, 16);
 };
-void newteam(char *name) {
+void newteam(const char *name) {
   c2sinit = false;
   strn0cpy(player1->team, name, 5);
 };
@@ -184,7 +184,7 @@ void initclientnet() {
   ctext[0] = 0;
   toservermap[0] = 0;
   clientpassword[0] = 0;
-  newname("unnamed");
+  newname("hater");
   newteam("red");
 };
 
