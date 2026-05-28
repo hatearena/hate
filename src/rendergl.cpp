@@ -273,8 +273,9 @@ VAR(fogcolour, 0, 0x8099B3, 0xFFFFFF);
 
 VARP(hudgun, 0, 1, 1);
 
-char *hudgunnames[] = {"hudguns/fist", "hudguns/hate_shotg", "hudguns/chaing",
-                       "hudguns/rocket", "hudguns/rifle"};
+char *hudgunnames[] = {"hudguns/fist", "hudguns/hate_shotg",
+                       "hudguns/hate_rifle", "hudguns/hate_rocket",
+                       "hudguns/hate_rail"};
 
 void drawhudmodel(int start, int end, float speed, int base) {
   rendermodel(hudgunnames[player1->gunselect], start, end, 0, 1.0f,
