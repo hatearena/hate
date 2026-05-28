@@ -32,7 +32,7 @@ void quit() {
 };
 
 static bool __dummy_quit =
-    addcommand((char *)"quit", (void (*)())quit, ARG_NONE);
+    addcommand((char *)"Exit", (void (*)())quit, ARG_NONE);
 
 void fatal(const char *s, const char *o) {
   sprintf_sd(msg)("%s%s (%s)\n", s, o, SDL_GetError());
@@ -50,10 +50,15 @@ void setresolution();
 VARFP(scr_w, 320, 1366, 7680, setresolution());
 VARFP(scr_h, 240, 768, 4320, setresolution());
 void setresolution() {
-    if(window) { SDL_SetWindowSize(window, scr_w, scr_h); gl_init(scr_w, scr_h); }
+  if (window) {
+    SDL_SetWindowSize(window, scr_w, scr_h);
+    gl_init(scr_w, scr_h);
+  }
 };
 
-VARFP(fullscreen, 0, 0, 1, if(window) SDL_SetWindowFullscreen(window, fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0));
+VARFP(fullscreen, 0, 0, 1,
+      if (window) SDL_SetWindowFullscreen(
+          window, fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0));
 
 #if 0
 void screenshot()
@@ -93,8 +98,7 @@ void var_gamespeed() {
 int minmillis =
     variable((char *)"minmillis", 0, 7, 1000, &minmillis, __null, true);
 
-int maxfps =
-    variable((char *)"maxfps", 0, 144, 1000, &maxfps, __null, true);
+int maxfps = variable((char *)"maxfps", 0, 144, 1000, &maxfps, __null, true);
 
 int islittleendian = 1;
 int framesinmap = 0;
