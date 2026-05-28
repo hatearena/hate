@@ -1,0 +1,10 @@
+*config.cfg
+*.o
+bin_unix
+content/config.cfg
+*/cube_client
+*/cube_server
+enet/*.a
+content/screenshots/*
+content/demos/*
+
