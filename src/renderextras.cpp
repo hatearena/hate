@@ -71,6 +71,37 @@ void blendbox(int x1, int y1, int x2, int y2, bool border)
 	glDepthMask(GL_TRUE);
 };
 
+void overlay(int a) {
+    glDepthMask(GL_FALSE);
+    glDisable(GL_TEXTURE_2D);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glBegin(GL_QUADS);
+    glColor4ub(0, 0, 0, a);
+    glVertex2i(0, 0);
+    glVertex2i(VIRTW, 0);
+    glVertex2i(VIRTW, VIRTH);
+    glVertex2i(0, VIRTH);
+    glEnd();
+    glEnable(GL_TEXTURE_2D);
+    glDepthMask(GL_TRUE);
+};
+
+void gradientbox(int x1, int y1, int x2, int y2, int r1, int g1, int b1, int r2, int g2, int b2) {
+    glDepthMask(GL_FALSE);
+    glDisable(GL_TEXTURE_2D);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glBegin(GL_QUADS);
+    glColor3ub(r1, g1, b1);
+    glVertex2i(x1, y1);
+    glVertex2i(x2, y1);
+    glColor3ub(r2, g2, b2);
+    glVertex2i(x2, y2);
+    glVertex2i(x1, y2);
+    glEnd();
+    glEnable(GL_TEXTURE_2D);
+    glDepthMask(GL_TRUE);
+};
+
 const int MAXSPHERES = 50;
 struct sphere { vec o; float size, max; int type; sphere *next; };
 sphere spheres[MAXSPHERES], *slist = NULL, *sempty = NULL;

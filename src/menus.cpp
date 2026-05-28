@@ -73,13 +73,14 @@ bool rendermenu() {
   int h = (mdisp + 2) * step;
   int y = (VIRTH - h) / 2;
   int x = (VIRTW - w) / 2;
-  blendbox(x - FONTH / 2 * 3, y - FONTH, x + w + FONTH / 2 * 3, y + h + FONTH,
-           true);
+  overlay(160);
+  int pad = FONTH / 2 * 3;
+  gradientbox(x - pad, y - FONTH, x + w + pad, y + h + FONTH, 20, 20, 50, 8, 8, 20);
   draw_text(title, x, y, 2);
   y += FONTH * 2;
   if (vmenu) {
     int bh = y + m.menusel * step;
-    blendbox(x - FONTH, bh - 10, x + w + FONTH, bh + FONTH + 10, false);
+    gradientbox(x - FONTH, bh - 10, x + w + FONTH, bh + FONTH + 10, 50, 100, 200, 30, 60, 150);
   };
   loopj(mdisp) {
     draw_text(m.items[j].text, x, y, 2);
