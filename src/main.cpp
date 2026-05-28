@@ -46,8 +46,14 @@ void *alloc(int s) {
   return b;
 };
 
-int scr_w = 640;
-int scr_h = 480;
+void setresolution();
+VARFP(scr_w, 320, 1366, 7680, setresolution());
+VARFP(scr_h, 240, 768, 4320, setresolution());
+void setresolution() {
+    if(window) { SDL_SetWindowSize(window, scr_w, scr_h); gl_init(scr_w, scr_h); }
+};
+
+VARFP(fullscreen, 0, 0, 1, if(window) SDL_SetWindowFullscreen(window, fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0));
 
 #if 0
 void screenshot()
@@ -94,7 +100,7 @@ int islittleendian = 1;
 int framesinmap = 0;
 
 int main(int argc, char **argv) {
-  bool dedicated = false, fullscreen = true;
+  bool dedicated = false;
   int uprate = 0, maxcl = 4;
   char *sdesc = (char *)"", *ip = (char *)"", *master = NULL,
        *passwd = (char *)"";
@@ -111,7 +117,7 @@ int main(int argc, char **argv) {
         dedicated = true;
         break;
       case 't':
-        fullscreen = false;
+        fullscreen = 0;
         break;
       case 'w':
         scr_w = atoi(a);
@@ -168,6 +174,9 @@ int main(int argc, char **argv) {
                             SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
   if (window == NULL)
     fatal("Unable to create OpenGL screen");
+
+  if (fullscreen)
+    SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
 
   SDL_GLContext glcontext = SDL_GL_CreateContext(window);
   if (glcontext == NULL)
