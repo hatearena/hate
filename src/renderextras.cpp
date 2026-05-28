@@ -376,8 +376,8 @@ void gl_drawhud(int w, int h, int curfps, int nquads, int curvert,
       glBegin(GL_QUADS);
       glColor4ub(10, 10, 10, 130);
       glVertex2i(230, 1580);
-      glVertex2i(420, 1580);
-      glVertex2i(420, 1750);
+      glVertex2i(450, 1580);
+      glVertex2i(450, 1750);
       glVertex2i(230, 1750);
       glEnd();
     }
