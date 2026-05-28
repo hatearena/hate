@@ -58,7 +58,7 @@ bool rendermenu() {
   if (vmenu == 1)
     refreshservers();
   gmenu &m = menus[vmenu];
-  sprintf_sd(title)(vmenu > 1 ? "[ %s menu ]" : "%s", m.name);
+  sprintf_sd(title)(vmenu > 1 ? "[ %s ]" : "%s", m.name);
   int mdisp = m.items.length();
   int w = 0;
   loopi(mdisp) {
