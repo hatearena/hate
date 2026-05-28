@@ -343,10 +343,10 @@ void gl_drawhud(int w, int h, int curfps, int nquads, int curvert,
     glPopMatrix();
     glPushMatrix();
     glOrtho(0, VIRTW * 3 / 2, VIRTH * 3 / 2, 0, -1, 1);
-    draw_textf("fps %d", 3200, 100, 2, curfps);
-    draw_textf("wqd %d", 3200, 170, 2, nquads);
-    draw_textf("wvt %d", 3200, 240, 2, curvert);
-    draw_textf("evt %d", 3200, 310, 2, xtraverts);
+    draw_textf("FPS: %d", 3000, 100, 2, curfps);
+    draw_textf("QS: %d", 3000, 170, 2, nquads);
+    draw_textf("CTV: %d", 3000, 240, 2, curvert);
+    draw_textf("XVS: %d", 3000, 310, 2, xtraverts);
   };
 
   glPopMatrix();
