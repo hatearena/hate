@@ -256,7 +256,7 @@ void transplayer()
 	glTranslated(-player1->o.x, (player1->state==CS_DEAD ? player1->eyeheight-0.2f : 0)-player1->o.z, -player1->o.y);
 };
 
-VARP(fov, 10, 105, 120);
+VARP(fov, 10, 120, 150);
 
 int xtraverts;
 
