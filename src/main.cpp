@@ -210,15 +210,19 @@ int main(int argc, char **argv) {
           "bin directory)");
 
   log("sound");
+
   initsound();
 
   log("cfg");
+
   newmenu("frags\tpj\tping\tteam\tname");
   newmenu("ping\tplr\tserver");
+
   exec("data/keymap.cfg");
   exec("data/menus.cfg");
   exec("data/sounds.cfg");
   exec("servers.cfg");
+
   if (!execfile("config.cfg")) {
     execfile("data/default.cfg");
     writecfg();
@@ -227,10 +231,11 @@ int main(int argc, char **argv) {
   log("localconnect");
   localconnect();
   changemap("drowned");
-
   log("mainloop");
+
   int ignore = 5;
   int delay = 500;
+
   for (;;) {
     delay--;
     int millis = SDL_GetTicks() * gamespeed / 100;
