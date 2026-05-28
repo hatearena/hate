@@ -85,7 +85,10 @@ void var_gamespeed() {
 };
 
 int minmillis =
-    variable((char *)"minmillis", 0, 5, 1000, &minmillis, __null, true);
+    variable((char *)"minmillis", 0, 7, 1000, &minmillis, __null, true);
+
+int maxfps =
+    variable((char *)"maxfps", 0, 144, 1000, &maxfps, __null, true);
 
 int islittleendian = 1;
 int framesinmap = 0;
@@ -170,6 +173,8 @@ int main(int argc, char **argv) {
   if (glcontext == NULL)
     fatal("Unable to create OpenGL context");
 
+  SDL_GL_SetSwapInterval(0);
+
   log("video: misc");
   SDL_SetRelativeMouseMode(SDL_TRUE);
   SDL_ShowCursor(0);
@@ -220,8 +225,11 @@ int main(int argc, char **argv) {
       lastmillis = millis - 200;
     else if (millis - lastmillis < 1)
       lastmillis = millis - 1;
-    if (millis - lastmillis < minmillis)
-      SDL_Delay(minmillis - (millis - lastmillis));
+    if (maxfps > 0) {
+      int maxfpsdelay = 1000 / maxfps;
+      if (millis - lastmillis < maxfpsdelay)
+        SDL_Delay(maxfpsdelay - (millis - lastmillis));
+    }
     cleardlights();
     updateworld(millis);
     if (!demoplayback)
