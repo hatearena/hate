@@ -226,7 +226,7 @@ int main(int argc, char **argv) {
 
   log("localconnect");
   localconnect();
-  changemap("metl3");
+  changemap("drowned");
 
   log("mainloop");
   int ignore = 5;
