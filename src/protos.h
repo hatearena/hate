@@ -146,6 +146,7 @@ extern void newsphere(vec &o, float max, int type);
 extern void renderspheres(int time);
 extern void gl_drawhud(int w, int h, int curfps, int nquads, int curvert, bool underwater);
 extern void readdepth(int w, int h);
+extern void drawicon(float tx, float ty, int x, int y, int s);
 extern void blendbox(int x1, int y1, int x2, int y2, bool border);
 extern void overlay(int a);
 extern void gradientbox(int x1, int y1, int x2, int y2, int r1, int g1, int b1, int r2, int g2, int b2);
