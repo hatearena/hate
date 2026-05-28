@@ -27,7 +27,6 @@ Set computer desktop color depth to 16 bit mode. (this can be a big help in fram
 
 Turn off any applications running in the background (firewall, anti-virus, etc...).
 
-If this still doesn't help, sorry, you need a better computer/video card.
 ================================================================
 This Map was play tested on the following machines:
 
