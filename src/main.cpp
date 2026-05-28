@@ -1,12 +1,9 @@
-// main.cpp: initialisation & main loop
-
 #include "cube.h"
 
-SDL_Window *window = NULL; // temporary and nasty cleanup workaround
+SDL_Window *window = NULL;
 SDL_GLContext glcontext = NULL;
 
-void cleanup(char *msg) // single program exit point;
-{
+void cleanup(char *msg) {
   stop();
   disconnect(true);
   writecfg();
@@ -18,7 +15,7 @@ void cleanup(char *msg) // single program exit point;
 #ifdef WIN32
     MessageBox(NULL, msg, "cube fatal error", MB_OK | MB_SYSTEMMODAL);
 #else
-    printf(msg);
+    printf("%s", msg);
 #endif
   };
   if (window)
@@ -29,25 +26,23 @@ void cleanup(char *msg) // single program exit point;
   exit(1);
 };
 
-void quit() // normal exit
-{
+void quit() {
   writeservercfg();
   cleanup(NULL);
 };
-COMMAND(quit, ARG_NONE);
 
-void fatal(const char *s, const char *o) // failure exit
-{
+static bool __dummy_quit =
+    addcommand((char *)"quit", (void (*)())quit, ARG_NONE);
+
+void fatal(const char *s, const char *o) {
   sprintf_sd(msg)("%s%s (%s)\n", s, o, SDL_GetError());
   cleanup(msg);
 };
 
-void *
-alloc(int s) // for some big chunks... most other allocs use the memory pool
-{
+void *alloc(int s) {
   void *b = calloc(1, s);
   if (!b)
-    fatal("out of memory!");
+    fatal("out of memory.");
   return b;
 };
 
@@ -81,8 +76,16 @@ void screenshot()
 COMMAND(screenshot, ARG_NONE);
 #endif
 
-VARF(gamespeed, 10, 100, 1000, if (multiplayer()) gamespeed = 100);
-VARP(minmillis, 0, 5, 1000);
+void var_gamespeed();
+static int gamespeed = variable((char *)"gamespeed", 10, 100, 1000, &gamespeed,
+                                var_gamespeed, false);
+void var_gamespeed() {
+  if (multiplayer())
+    gamespeed = 100;
+};
+
+int minmillis =
+    variable((char *)"minmillis", 0, 5, 1000, &minmillis, __null, true);
 
 int islittleendian = 1;
 int framesinmap = 0;
@@ -90,7 +93,8 @@ int framesinmap = 0;
 int main(int argc, char **argv) {
   bool dedicated = false, fullscreen = true;
   int uprate = 0, maxcl = 4;
-  char *sdesc = "", *ip = "", *master = NULL, *passwd = "";
+  char *sdesc = (char *)"", *ip = (char *)"", *master = NULL,
+       *passwd = (char *)"";
   islittleendian = *((char *)&islittleendian);
 
 #define log(s) conoutf("init: %s", s)
@@ -145,8 +149,7 @@ int main(int argc, char **argv) {
     fatal("Unable to initialize network module");
 
   initclient();
-  initserver(dedicated, uprate, sdesc, ip, master, passwd,
-             maxcl); // never returns if dedicated
+  initserver(dedicated, uprate, sdesc, ip, master, passwd, maxcl);
 
   log("world");
   empty_world(7);
@@ -157,10 +160,9 @@ int main(int argc, char **argv) {
 
   log("video: creating window");
   SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-  window = SDL_CreateWindow(
-      "cube engine", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, scr_w,
-      // scr_h, SDL_WINDOW_OPENGL | (fullscreen ? SDL_WINDOW_FULLSCREEN : 0));
-      scr_h, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
+  window = SDL_CreateWindow("cube engine", SDL_WINDOWPOS_CENTERED,
+                            SDL_WINDOWPOS_CENTERED, scr_w, scr_h,
+                            SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
   if (window == NULL)
     fatal("Unable to create OpenGL screen");
 
@@ -206,15 +208,13 @@ int main(int argc, char **argv) {
 
   log("localconnect");
   localconnect();
-  changemap("metl3"); // if this map is changed, also change depthcorrect()
+  changemap("metl3");
 
   log("mainloop");
   int ignore = 5;
   int delay = 500;
   for (;;) {
     delay--;
-    // if (delay <= 0)
-    //   break;
     int millis = SDL_GetTicks() * gamespeed / 100;
     if (millis - lastmillis > 200)
       lastmillis = millis - 200;
@@ -233,9 +233,7 @@ int main(int argc, char **argv) {
     SDL_GL_SwapWindow(window);
     extern void updatevol();
     updatevol();
-    if (framesinmap++ < 5) // cheap hack to get rid of initial sparklies, even
-                           // when triple buffering etc.
-    {
+    if (framesinmap++ < 5) {
       player1->yaw += 5;
       gl_drawframe(scr_w, scr_h, fps);
       player1->yaw -= 5;
@@ -255,8 +253,6 @@ int main(int argc, char **argv) {
 
       case SDL_KEYDOWN:
       case SDL_KEYUP:
-        // printf("KEYPRESS sym %d state %d\n", event.key.keysym.sym,
-        // event.key.state==SDL_PRESSED);
         keypress(event.key.keysym.sym, event.key.state == SDL_PRESSED, false,
                  0);
         break;
@@ -272,7 +268,7 @@ int main(int argc, char **argv) {
       case SDL_MOUSEBUTTONDOWN:
       case SDL_MOUSEBUTTONUP:
         if (lasttype == event.type && lastbut == event.button.button)
-          break; // why?? get event twice without it
+          break;
         keypress(-event.button.button, event.button.state != 0, false, 0);
         lasttype = event.type;
         lastbut = event.button.button;

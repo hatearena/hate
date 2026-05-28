@@ -7,8 +7,8 @@ extern int getvar(char *name);
 extern bool identexists(char *name);
 extern bool addcommand(char *name, void (*fun)(), int narg);
 extern int execute(char *p, bool down = true);
-extern void exec(char *cfgfile);
-extern bool execfile(char *cfgfile);
+extern void exec(const char *cfgfile);
+extern bool execfile(const char *cfgfile);
 extern void resetcomplete();
 extern void complete(char *s);
 extern void alias(char *name, char *action);
@@ -28,7 +28,7 @@ extern void menuset(int menu);
 extern void menumanual(int m, int n, char *text);
 extern void sortmenu(int start, int num);
 extern bool menukey(int code, bool isdown);
-extern void newmenu(char *name);
+extern void newmenu(const char *name);
 
 // serverbrowser
 extern void addserver(char *servername);
@@ -78,7 +78,7 @@ extern void writeclientinfo(FILE *f);
 extern void mousemove(int dx, int dy);
 extern void updateworld(int millis);
 extern void startmap(char *name);
-extern void changemap(char *name);
+extern void changemap(const char *name);
 extern void initclient();
 extern void spawnplayer(dynent *d);
 extern void selfdamage(int damage, int actor, dynent *act);
