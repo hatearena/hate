@@ -1,5 +1,3 @@
-// rendergl.cpp: core opengl rendering stuff
-
 #include "cube.h"
 
 #ifdef DARWIN
@@ -268,6 +266,113 @@ VARP(fov, 10, 120, 150);
 
 int xtraverts;
 
+static GLuint bloomtex[2] = {0, 0};
+static int bloomw = 0, bloomh = 0;
+
+VARP(bloom, 0, 1, 1);
+VARP(bloomintensity, 0, 30, 100);
+
+void addbloom(int w, int h) {
+  if (!bloom || w < 8 || h < 8)
+    return;
+  if (!bloomtex[0])
+    glGenTextures(2, bloomtex);
+
+  int bw = max(8, w >> 2);
+  int bh = max(8, h >> 2);
+
+  glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+  loopi(2) {
+    glBindTexture(GL_TEXTURE_2D, bloomtex[i]);
+    if (bloomw != w || bloomh != h)
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, i == 0 ? w : bw, i == 0 ? h : bh,
+                   0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  };
+  bloomw = w;
+  bloomh = h;
+
+  glMatrixMode(GL_PROJECTION);
+  glPushMatrix();
+  glMatrixMode(GL_MODELVIEW);
+  glPushMatrix();
+  glBindTexture(GL_TEXTURE_2D, bloomtex[0]);
+  glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, w, h);
+  glViewport(0, 0, bw, bh);
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
+  glOrtho(0, bw, 0, bh, -1, 1);
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity();
+
+  glDisable(GL_DEPTH_TEST);
+  glDisable(GL_BLEND);
+  glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+
+  glBindTexture(GL_TEXTURE_2D, bloomtex[0]);
+  glColor3f(1, 1, 1);
+  glBegin(GL_QUADS);
+  glTexCoord2f(0, 0);
+  glVertex2i(0, 0);
+  glTexCoord2f(1, 0);
+  glVertex2i(bw, 0);
+  glTexCoord2f(1, 1);
+  glVertex2i(bw, bh);
+  glTexCoord2f(0, 1);
+  glVertex2i(0, bh);
+  glEnd();
+
+  glBindTexture(GL_TEXTURE_2D, bloomtex[1]);
+  glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, bw, bh);
+  glViewport(0, 0, w, h);
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
+  glOrtho(0, w, 0, h, -1, 1);
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity();
+  glBindTexture(GL_TEXTURE_2D, bloomtex[0]);
+  glColor3f(1, 1, 1);
+  glBegin(GL_QUADS);
+  glTexCoord2f(0, 0);
+  glVertex2i(0, 0);
+  glTexCoord2f(1, 0);
+  glVertex2i(w, 0);
+  glTexCoord2f(1, 1);
+  glVertex2i(w, h);
+  glTexCoord2f(0, 1);
+  glVertex2i(0, h);
+  glEnd();
+
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_ONE, GL_ONE);
+
+  float intensity = bloomintensity / 100.0f;
+  glColor3f(intensity, intensity, intensity);
+  glBindTexture(GL_TEXTURE_2D, bloomtex[1]);
+  glBegin(GL_QUADS);
+  glTexCoord2f(0, 0);
+  glVertex2i(0, 0);
+  glTexCoord2f(1, 0);
+  glVertex2i(w, 0);
+  glTexCoord2f(1, 1);
+  glVertex2i(w, h);
+  glTexCoord2f(0, 1);
+  glVertex2i(0, h);
+  glEnd();
+
+  glDisable(GL_BLEND);
+  glEnable(GL_DEPTH_TEST);
+
+  glMatrixMode(GL_PROJECTION);
+  glPopMatrix();
+  glMatrixMode(GL_MODELVIEW);
+  glPopMatrix();
+};
+
 VAR(fog, 64, 180, 1024);
 VAR(fogcolour, 0, 0x8099B3, 0xFFFFFF);
 
@@ -397,6 +502,8 @@ void gl_drawframe(int w, int h, float curfps) {
   overbright(2);
   render_particles(curtime);
   overbright(1);
+
+  addbloom(w, h);
 
   glDisable(GL_FOG);
 
