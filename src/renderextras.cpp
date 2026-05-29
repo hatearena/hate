@@ -303,7 +303,7 @@ void gl_drawhud(int w, int h, int curfps, int nquads, int curvert,
   char *command = getcurcommand();
   char *player = playerincrosshair();
   if (command)
-    draw_textf("> %s_", 20, 1400, 2, command);
+    draw_textf("$ %s_", 20, 1400, 2, command);
   else if (player)
     draw_text(player, 20, 1400, 2);
 
