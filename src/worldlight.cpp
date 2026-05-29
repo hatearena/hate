@@ -5,6 +5,7 @@
 extern bool hasoverbright;
 
 VAR(lightscale,1,4,100);
+VARP(ambient, 0, 3, 255);
 
 void lightray(float bx, float by, persistent_entity &light)     // done in realtime, needs to be fast
 {
@@ -143,7 +144,7 @@ void calclight()
 	loop(x,ssize) loop(y,ssize)
 	{
 		sqr *s = S(x,y);
-		s->r = s->g = s->b = 10;
+		s->r = s->g = s->b = ambient;
 	};
 
 	loopv(ents)
