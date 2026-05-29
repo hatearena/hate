@@ -16,7 +16,7 @@ static parttype parttypes[] = {
     {1.0f, 1.0f, 1.0f, 20, 8, 1.2f},  // 6: white fireball2
     {1.0f, 1.0f, 1.0f, 20, 9, 1.2f},  // 7: white fireball3
     {1.0f, 0.1f, 0.1f, 0, 7, 0.2f},   // 8: red demotrack
-    {1.0f, 1.0f, 1.0f, 0, 7, 0.15f},  // 9: white pickup glow (smoke, soft)
+    {1.0f, 1.0f, 1.0f, 0, 7, 0.05f},  // 9: white pickup glow
 };
 struct particle {
   vec o, d;
