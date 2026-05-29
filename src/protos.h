@@ -154,6 +154,7 @@ extern void damageblend(int n);
 
 // renderparticles
 extern void setorient(vec &r, vec &u);
+extern void newparticlecol(vec &o, vec &d, int fade, int type, uchar r, uchar g, uchar b);
 extern void particle_splash(int type, int num, int fade, vec &p);
 extern void particle_trail(int type, int fade, vec &from, vec &to);
 extern void render_particles(int time);
