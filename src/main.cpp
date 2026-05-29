@@ -173,7 +173,7 @@ int main(int argc, char **argv) {
 
   log("video: creating window");
   SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-  window = SDL_CreateWindow("cube engine", SDL_WINDOWPOS_CENTERED,
+  window = SDL_CreateWindow("HATE v0.0.1", SDL_WINDOWPOS_CENTERED,
                             SDL_WINDOWPOS_CENTERED, scr_w, scr_h,
                             SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
   if (window == NULL)
