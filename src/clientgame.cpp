@@ -259,6 +259,8 @@ void updateworld(int millis) // main game update loop
           respawn();
       } else if (!intermission) {
         moveplayer(player1, 20, true);
+        if (player1->outsidemap && player1->o.z < -100)
+          selfdamage(10000, -1, player1);
         checkitems();
       };
       c2sinfo(player1); // do this last, to reduce the effective frame lag

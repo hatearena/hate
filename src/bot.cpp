@@ -264,6 +264,12 @@ void botthink() {
         b->ammo[GUN_RIFLE] = max(b->ammo[GUN_RIFLE], 8);
       }
       botaction(b);
+      if (b->outsidemap && b->o.z < -100) {
+        b->state = CS_DEAD;
+        b->lastaction = lastmillis;
+        b->attacking = false;
+        spawngibs(b->o, 4);
+      }
     } else if (b->state == CS_DEAD && lastmillis - b->lastaction > 5000) {
       spawnplayer(b);
       b->health = 100;

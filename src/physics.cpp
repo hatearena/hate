@@ -75,7 +75,7 @@ bool collide(dynent *d, bool spawn, float drop, float rise) {
   const int y1 = fast_f2nat(fy1);
   const int x2 = fast_f2nat(fx2);
   const int y2 = fast_f2nat(fy2);
-  float hi = 127, lo = -128;
+  float hi = 10000, lo = -10000;
   float minfloor = (d->monsterstate && !spawn && d->health > 100)
                        ? d->o.z - d->eyeheight - 4.5f
                        : -1000.0f;
@@ -84,7 +84,7 @@ bool collide(dynent *d, bool spawn, float drop, float rise) {
     for (int y = y1; y <= y2; y++) // collide with map
     {
       if (OUTBORD(x, y))
-        return false;
+        continue;
       sqr *s = S(x, y);
       float ceil = s->ceil;
       float floor = s->floor;
@@ -118,8 +118,10 @@ bool collide(dynent *d, bool spawn, float drop, float rise) {
                  S(x + 1, y + 1)->vdelta) /
                 16.0f;
       };
-      if (ceil < hi)
-        hi = ceil;
+      if (s->type != SPACE) {
+        if (ceil < hi && d->o.z - d->eyeheight < ceil)
+          hi = ceil;
+      }
       if (floor > lo)
         lo = floor;
       if (floor < minfloor)
