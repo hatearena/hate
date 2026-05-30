@@ -18,24 +18,19 @@ GLUquadricObj *qsphere = NULL;
 int glmaxtexsize = 256;
 
 void gl_init(int w, int h) {
-  // #define fogvalues 0.5f, 0.6f, 0.7f, 1.0f
-
   glViewport(0, 0, w, h);
   glClearDepth(1.0);
   glDepthFunc(GL_LESS);
   glEnable(GL_DEPTH_TEST);
   glShadeModel(GL_SMOOTH);
-
   glEnable(GL_FOG);
   glFogi(GL_FOG_MODE, GL_LINEAR);
   glFogf(GL_FOG_DENSITY, 0.25);
   glHint(GL_FOG_HINT, GL_NICEST);
-
   glEnable(GL_LINE_SMOOTH);
   glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
   glEnable(GL_POLYGON_OFFSET_LINE);
   glPolygonOffset(-3.0, -3.0);
-
   glCullFace(GL_FRONT);
   glEnable(GL_CULL_FACE);
 
@@ -76,7 +71,7 @@ bool installtex(int tnum, char *texname, int &xs, int &ys, bool clamp) {
     conoutf("texture must be 24bpp: %s", texname);
     return false;
   };
-  // loopi(s->w*s->h*3) { uchar *p = (uchar *)s->pixels+i; *p = 255-*p; };
+
   glBindTexture(GL_TEXTURE_2D, tnum);
   glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,
@@ -85,14 +80,17 @@ bool installtex(int tnum, char *texname, int &xs, int &ys, bool clamp) {
                   clamp ? GL_CLAMP_TO_EDGE : GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
-                  GL_LINEAR_MIPMAP_LINEAR); // NEAREST);
+                  GL_LINEAR_MIPMAP_LINEAR);
   glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+
   xs = s->w;
   ys = s->h;
+
   while (xs > glmaxtexsize || ys > glmaxtexsize) {
     xs /= 2;
     ys /= 2;
   };
+
   void *scaledimg = s->pixels;
   if (xs != s->w) {
     conoutf("warning: quality loss: scaling %s",
@@ -110,19 +108,15 @@ bool installtex(int tnum, char *texname, int &xs, int &ys, bool clamp) {
   return true;
 };
 
-// management of texture slots
-// each texture slot can have multople texture frames, of which currently only
-// the first is used additional frames can be used for various shaders
-
 const int MAXTEX = 1000;
 int texx[MAXTEX]; // ( loaded texture ) -> ( name, size )
 int texy[MAXTEX];
 string texname[MAXTEX];
 int curtex = 0;
-const int FIRSTTEX = 1000; // opengl id = loaded id + FIRSTTEX
-// std 1+, sky 14+, mdls 20+
 
-const int MAXFRAMES = 2;     // increase to allow more complex shader defs
+const int FIRSTTEX = 1000; // opengl id = loaded id + FIRSTTEX
+const int MAXFRAMES = 2;   // increase to allow more complex shader defs
+
 int mapping[256][MAXFRAMES]; // ( cube texture, frame ) -> ( opengl id, name )
 string mapname[256][MAXFRAMES];
 
@@ -157,10 +151,9 @@ int lookuptexture(int tex, int &xs, int &ys) {
 
   xs = ys = 16;
   if (!tid)
-    return 1; // crosshair :)
+    return 1;
 
-  loopi(curtex) // lazily happens once per "texture" command, basically
-  {
+  loopi(curtex) {
     if (strcmp(mapname[tex][frame], texname[i]) == 0) {
       mapping[tex][frame] = tid = i + FIRSTTEX;
       xs = texx[i];
@@ -487,6 +480,7 @@ void gl_drawframe(int w, int h, float curfps) {
 
   renderclients();
   monsterrender();
+  botrender();
 
   renderentities();
 

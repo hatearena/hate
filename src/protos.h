@@ -227,6 +227,13 @@ extern dvector &getmonsters();
 extern void monsterpain(dynent *m, int damage, dynent *d);
 extern void endsp(bool allkilled);
 
+// bot
+extern void botclear();
+extern void botthink();
+extern void botrender();
+extern dvector &getbots();
+extern void botpain(dynent *m, int damage, dynent *d);
+
 // entities
 extern void putitems(uchar *&p);
 extern void checkquad(int time);

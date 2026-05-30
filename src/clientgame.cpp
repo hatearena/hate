@@ -151,6 +151,8 @@ void arenarespawn() {
     bool oneteam = true;
     loopv(players) if (players[i])
         arenacount(players[i], alive, dead, lastteam, oneteam);
+    dvector &bs = getbots();
+    loopv(bs) if(bs[i]) arenacount(bs[i], alive, dead, lastteam, oneteam);
     arenacount(player1, alive, dead, lastteam, oneteam);
     if (dead > 0 && (alive <= 1 || (m_teammode && oneteam))) {
       conoutf("arena round is over! next round in 5 seconds...");
@@ -234,6 +236,7 @@ void updateworld(int millis) // main game update loop
     otherplayers();
     if (!demoplayback) {
       monsterthink();
+      botthink();
       if (player1->state == CS_DEAD) {
         if (lastmillis - player1->lastaction < 2000) {
           player1->move = player1->strafe = 0;
@@ -437,6 +440,7 @@ void startmap(char *name) // called just after a map load
   };
   sleepwait = 0;
   monsterclear();
+  botclear();
   projreset();
   spawncycle = -1;
   spawnplayer(player1);

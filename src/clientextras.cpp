@@ -88,6 +88,8 @@ void renderscores()
 	scorelines.setsize(0);
 	if(!demoplayback) renderscore(player1);
 	loopv(players) if(players[i]) renderscore(players[i]);
+	dvector &bs = getbots();
+	loopv(bs) if(bs[i]) renderscore(bs[i]);
 	sortmenu(0, scorelines.length());
 	if(m_teammode)
 	{

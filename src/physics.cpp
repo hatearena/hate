@@ -124,6 +124,8 @@ bool collide(dynent *d, bool spawn, float drop, float rise)
 	// this loop can be a performance bottleneck with many monster on a slow cpu,
 	// should replace with a blockmap but seems mostly fast enough
 	loopv(v) if(!vreject(d->o, v[i]->o, 7.0f) && d!=v[i] && !plcollide(d, v[i], headspace, hi, lo)) return false;
+	dvector &bv = getbots();
+	loopv(bv) if(!vreject(d->o, bv[i]->o, 7.0f) && d!=bv[i] && !plcollide(d, bv[i], headspace, hi, lo)) return false;
 	headspace -= 0.01f;
 
 	mmcollide(d, hi, lo);    // collide with map models

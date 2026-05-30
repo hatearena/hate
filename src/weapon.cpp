@@ -108,6 +108,11 @@ char *playerincrosshair() {
     if (intersect(o, player1->o, worldpos))
       return o->name;
   };
+  dvector &bv = getbots();
+  loopv(bv) {
+    if (intersect(bv[i], player1->o, worldpos))
+      return bv[i]->name;
+  };
   return NULL;
 };
 
@@ -143,6 +148,8 @@ void newprojectile(vec &from, vec &to, float speed, bool local, dynent *owner,
 void hit(int target, int damage, dynent *d, dynent *at) {
   if (d == player1)
     selfdamage(damage, at == player1 ? -1 : -2, at);
+  else if (d->monsterstate && d->mtype == -1)
+    botpain(d, damage, at);
   else if (d->monsterstate)
     monsterpain(d, damage, at);
   else {
@@ -198,6 +205,9 @@ void splash(projectile *p, vec &v, vec &vold, int notthisplayer,
     dvector &mv = getmonsters();
     loopv(mv) if (i != notthismonster)
         radialeffect(mv[i], v, i, qdam, p->owner);
+    dvector &bv = getbots();
+    loopv(bv)
+        radialeffect(bv[i], v, -2, qdam, p->owner);
   };
 };
 
@@ -236,6 +246,9 @@ void moveprojectiles(float time) {
       dvector &mv = getmonsters();
       loopv(mv) if (!vreject(mv[i]->o, v, 10.0f) && mv[i] != p->owner)
           projdamage(mv[i], p, v, -1, i, qdam);
+      dvector &bv = getbots();
+      loopv(bv) if (!vreject(bv[i]->o, v, 10.0f) && bv[i] != p->owner)
+          projdamage(bv[i], p, v, -1, -1, qdam);
     };
     if (p->inuse) {
       if (time == dtime)
@@ -377,6 +390,9 @@ void shoot(dynent *d, vec &targ) {
 
   dvector &v = getmonsters();
   loopv(v) if (v[i] != d) raydamage(v[i], from, to, d, -2);
+
+  dvector &bv = getbots();
+  loopv(bv) if (bv[i] != d) raydamage(bv[i], from, to, d, -2);
 
   if (d->monsterstate)
     raydamage(player1, from, to, d, -1);

@@ -7,7 +7,7 @@ CXXFLAGS=$(CXXOPTFLAGS) `sdl2-config --cflags`
 CLIENT_LIBS=-lenet `sdl2-config --libs` -lSDL2_image -lSDL2_mixer -lz -lGL -lGLU -lX11
 CLIENT_OBJS= client.o clientextras.o clientgame.o clients2c.o command.o \
 			 console.o editing.o entities.o main.o menus.o monster.o physics.o \
-			 rendercubes.o renderextras.o rendergl.o rendermd2.o \
+			 bot.o rendercubes.o renderextras.o rendergl.o rendermd2.o \
 			 renderparticles.o rendertext.o rndmap.o savegamedemo.o server.o \
 			 serverbrowser.o serverms.o serverutil.o sound.o tools.o weapon.o \
 			 world.o worldio.o worldlight.o worldocull.o worldrender.o
