@@ -18,19 +18,19 @@ SERVER_OBJS= standalone.o serverms.o server.o tools.o
 default: all
 
 all: client server
-	cp cube_client ../content && \
+	cp hate_client ../content && \
 		cd ../content && \
-		./cube_client
+		./hate_client
 
 clean:
-	-rm -f $(SERVER_OBJS) $(CLIENT_OBJS) cube_server cube_client
+	-rm -f $(SERVER_OBJS) $(CLIENT_OBJS) hate_server hate_client
 
 standalone.o:
 	$(CXX) $(CXXFLAGS) -DSTANDALONE -o standalone.o -c serverutil.cpp
 
 client: $(CLIENT_OBJS)
-	$(CXX) $(CXXFLAGS) -o cube_client $(CLIENT_OBJS) $(CLIENT_LIBS)
+	$(CXX) $(CXXFLAGS) -o hate_client $(CLIENT_OBJS) $(CLIENT_LIBS)
 
 server: $(SERVER_OBJS)
-	$(CXX) $(CXXFLAGS) -o cube_server $(SERVER_OBJS) $(SERVER_LIBS)
+	$(CXX) $(CXXFLAGS) -o hate_server $(SERVER_OBJS) $(SERVER_LIBS)
 

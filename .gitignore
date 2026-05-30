@@ -2,6 +2,8 @@
 *.o
 bin_unix
 content/config.cfg
+*/hate_client
+*/hate_server
 */cube_client
 */cube_server
 enet/*.a

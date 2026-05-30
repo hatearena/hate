@@ -206,7 +206,7 @@ int main(int argc, char **argv) {
       !installtex(4, path(newstring("data/explosion.jpg")), xs, ys) ||
       !installtex(5, path(newstring("data/items.png")), xs, ys) ||
       !installtex(1, path(newstring("data/crosshair.png")), xs, ys))
-    fatal("could not find core textures (hint: run cube from the parent of the "
+    fatal("could not find core textures (hint: run HATE from the parent of the "
           "bin directory)");
 
   log("sound");
