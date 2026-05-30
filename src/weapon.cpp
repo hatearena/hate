@@ -13,7 +13,7 @@ vec sg[SGRAYS];
 int gunswitchtime = 0;
 
 guninfo guns[NUMGUNS] = {
-    {S_PUNCH1, 250, 50, 0, 0, 1, "fist"},
+    {S_CSAW, 150, 20, 0, 0, 3, "chainsaw"},
     {S_SG, 1400, 10, 0, 0, 20, "shotgun"},
     {S_CG, 100, 30, 0, 0, 7, "chaingun"},
     {S_RLFIRE, 800, 120, 80, 0, 10, "rocketlauncher"},
@@ -44,7 +44,7 @@ void selectgun(int a, int b, int c) {
   else if (s != GUN_RIFLE && player1->ammo[GUN_RIFLE])
     s = GUN_RIFLE;
   else
-    s = GUN_FIST;
+    s = GUN_CSAW;
   if (s != player1->gunselect) {
     playsoundc(S_WEAPLOAD);
     gunswitchtime = lastmillis;
@@ -306,7 +306,7 @@ void shootv(int gun, vec &from, vec &to, dynent *d,
   playsound(guns[gun].sound, d == player1 ? NULL : &d->o);
   int pspeed = 25;
   switch (gun) {
-  case GUN_FIST:
+  case GUN_CSAW:
     break;
 
   case GUN_SG: {
@@ -394,7 +394,7 @@ void shoot(dynent *d, vec &targ) {
   if (d->pitch < 80.0f)
     d->pitch += guns[d->gunselect].kickamount * 0.05f;
 
-  if (d->gunselect == GUN_FIST || d->gunselect == GUN_BITE) {
+  if (d->gunselect == GUN_CSAW || d->gunselect == GUN_BITE) {
     vmul(unitv, 3); // punch range
     to = from;
     vadd(to, unitv);

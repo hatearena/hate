@@ -95,7 +95,7 @@ struct vec { float x, y, z; };
 struct block { int x, y, xs, ys; };
 struct mapmodelinfo { int rad, h, zoff, snap; char *name; };
 
-enum { GUN_FIST = 0, GUN_SG, GUN_CG, GUN_RL, GUN_RIFLE, GUN_FIREBALL, GUN_ICEBALL, GUN_SLIMEBALL, GUN_BITE, NUMGUNS };
+enum { GUN_CSAW = 0, GUN_SG, GUN_CG, GUN_RL, GUN_RIFLE, GUN_FIREBALL, GUN_ICEBALL, GUN_SLIMEBALL, GUN_BITE, NUMGUNS };
 
 struct dynent                           // players & monsters
 {
@@ -176,6 +176,7 @@ enum
 	S_PAIND, S_DEATHD,
 	S_PIGR1, S_ICEBALL, S_SLIMEBALL,
 	S_JUMPPAD,
+	S_CSAW,
 };
 
 // vertex array format

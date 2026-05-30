@@ -52,7 +52,7 @@ void spawnstate(dynent *d) // reset player state not persistent accross spawns
   d->lastaction = 0;
   gunswitchtime = 0;
   loopi(NUMGUNS) d->ammo[i] = 0;
-  d->ammo[GUN_FIST] = 1;
+  d->ammo[GUN_CSAW] = 1;
   if (m_noitems) {
     d->gunselect = GUN_RIFLE;
     d->armour = 0;
@@ -61,7 +61,7 @@ void spawnstate(dynent *d) // reset player state not persistent accross spawns
       d->ammo[GUN_RIFLE] = 100;
     } else {
       if (gamemode == 12) {
-        d->gunselect = GUN_FIST;
+        d->gunselect = GUN_CSAW;
         return;
       }; // eihrul's secret "instafist" mode
       d->health = 256;

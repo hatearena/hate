@@ -403,7 +403,7 @@ VARP(hudgun, 0, 1, 1);
 VARP(viewbob, 0, 1, 1);
 VARP(viewbobamp, 0, 10, 50);
 
-char *hudgunnames[] = {"hudguns/fist", "hudguns/hate_shotg",
+char *hudgunnames[] = {"hudguns/hate_csaw", "hudguns/hate_shotg",
                        "hudguns/hate_rifle", "hudguns/hate_rocket",
                        "hudguns/hate_rail"};
 
