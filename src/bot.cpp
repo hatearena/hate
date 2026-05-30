@@ -5,7 +5,74 @@ int numbots = 0;
 
 dvector &getbots() { return bots; }
 
+#define MAXGIBS 48
+
+struct gib {
+  vec o, vel;
+  int lifetime;
+  const char *mdl;
+  bool inuse;
+};
+
+static gib gibs[MAXGIBS];
+
+static void initgibs() { loopi(MAXGIBS) gibs[i].inuse = false; }
+
+static void spawngibs(vec &pos, int count) {
+  int n = 0;
+  loopi(MAXGIBS) {
+    if (gibs[i].inuse)
+      continue;
+    gibs[i].o = pos;
+    gibs[i].vel.x = (float)(rnd(61) - 30);
+    gibs[i].vel.y = (float)(rnd(61) - 30);
+    gibs[i].vel.z = (float)(rnd(21) + 5);
+    gibs[i].lifetime = 4000 + rnd(2000);
+    gibs[i].mdl = rnd(2) ? "gibc" : "gibh";
+    gibs[i].inuse = true;
+    if (++n >= count)
+      break;
+  }
+}
+
+static void updategibs() {
+  loopi(MAXGIBS) {
+    if (!gibs[i].inuse)
+      continue;
+    float dt = curtime / 1000.0f;
+    gibs[i].vel.z -= 18.0f * dt;
+    gibs[i].o.x += gibs[i].vel.x * dt;
+    gibs[i].o.y += gibs[i].vel.y * dt;
+    gibs[i].o.z += gibs[i].vel.z * dt;
+    int x = (int)gibs[i].o.x, y = (int)gibs[i].o.y;
+    if (!OUTBORD(x, y)) {
+      float floor = S(x, y)->floor;
+      if (gibs[i].o.z < floor) {
+        gibs[i].o.z = floor;
+        gibs[i].vel.x *= -0.3f;
+        gibs[i].vel.y *= -0.3f;
+        gibs[i].vel.z *= -0.3f;
+        if (fabs(gibs[i].vel.z) < 1.0f)
+          gibs[i].vel.z = 0;
+      }
+    }
+    gibs[i].lifetime -= curtime;
+    if (gibs[i].lifetime <= 0)
+      gibs[i].inuse = false;
+  }
+}
+
+static void rendergibs() {
+  loopi(MAXGIBS) {
+    if (!gibs[i].inuse)
+      continue;
+    rendermodel((char *)gibs[i].mdl, 0, 1, 0, 1.5f, gibs[i].o.x, gibs[i].o.z,
+                gibs[i].o.y, (float)(i * 37), 0, false, 1.2f, 100.0f, 0, 0);
+  }
+}
+
 void botclear() {
+  initgibs();
   loopv(bots) gp()->dealloc(bots[i], sizeof(dynent));
   bots.setsize(0);
   numbots = 0;
@@ -110,6 +177,7 @@ static void botaction(dynent *m) {
 }
 
 void botthink() {
+  updategibs();
   loopv(bots) {
     dynent *b = bots[i];
     if (b->state == CS_ALIVE) {
@@ -121,6 +189,7 @@ void botthink() {
       b->state = CS_ALIVE;
       b->monsterstate = M_HOME;
       b->enemy = player1;
+      b->lastmove = 0;
       b->move = 1;
       b->attacking = false;
     }
@@ -128,8 +197,10 @@ void botthink() {
 }
 
 void botrender() {
+  rendergibs();
   loopv(bots) {
-    if(bots[i]->state == CS_DEAD) continue;
+    if (bots[i]->state == CS_DEAD)
+      continue;
     float saved = bots[i]->maxspeed;
     bots[i]->maxspeed = 20.0f;
     renderclient(bots[i], false, "monster/player", false, 1.25f);
@@ -148,6 +219,7 @@ void botpain(dynent *m, int damage, dynent *d) {
     m->state = CS_DEAD;
     m->lastaction = lastmillis;
     m->attacking = false;
+    spawngibs(m->o, 4);
     if (d == player1) {
       player1->frags++;
       addmsg(1, 2, SV_FRAGS, player1->frags);
@@ -179,6 +251,7 @@ void addbotcmd() {
   b->monsterstate = M_HOME;
   b->mtype = -1;
   b->enemy = player1;
+  b->lastmove = 0;
   b->move = 1;
   b->targetyaw = b->yaw;
   b->gunselect = GUN_SG + rnd(4);
