@@ -10,6 +10,8 @@ const int SGRAYS = 20;
 const float SGSPREAD = 2;
 vec sg[SGRAYS];
 
+int gunswitchtime = 0;
+
 guninfo guns[NUMGUNS] = {
     {S_PUNCH1, 250, 50, 0, 0, 1, "fist"},
     {S_SG, 1400, 10, 0, 0, 20, "shotgun"},
@@ -43,8 +45,10 @@ void selectgun(int a, int b, int c) {
     s = GUN_RIFLE;
   else
     s = GUN_FIST;
-  if (s != player1->gunselect)
+  if (s != player1->gunselect) {
     playsoundc(S_WEAPLOAD);
+    gunswitchtime = lastmillis;
+  }
   player1->gunselect = s;
   // conoutf("%s selected", (int)guns[s].name);
 };
@@ -66,6 +70,7 @@ void nextweapon() {
       if (g != player1->gunselect) {
         player1->gunselect = g;
         playsoundc(S_WEAPLOAD);
+        gunswitchtime = lastmillis;
       }
       return;
     }
@@ -80,6 +85,7 @@ void prevweapon() {
       if (g != player1->gunselect) {
         player1->gunselect = g;
         playsoundc(S_WEAPLOAD);
+        gunswitchtime = lastmillis;
       }
       return;
     }

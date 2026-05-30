@@ -50,6 +50,7 @@ void spawnstate(dynent *d) // reset player state not persistent accross spawns
   d->gunwait = 0;
   d->attacking = false;
   d->lastaction = 0;
+  gunswitchtime = 0;
   loopi(NUMGUNS) d->ammo[i] = 0;
   d->ammo[GUN_FIST] = 1;
   if (m_noitems) {

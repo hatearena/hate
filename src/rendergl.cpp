@@ -415,9 +415,24 @@ void drawhudmodel(int start, int end, float speed, int base) {
     bz = sinf(bobphase * 2.0f) * bobamp;
     bx = sinf(bobphase) * bobamp * 0.3f;
   }
+
+  float scale = 1.0f;
+
+  if (gunswitchtime) {
+    int elapsed = lastmillis - gunswitchtime;
+    if (elapsed < 250) {
+      float t = (float)elapsed / 250.0f;
+      float ease = t * (2.0f - t);
+      bz += (1.0f - ease) * -1.5f;
+      scale = 0.8f + 0.2f * ease;
+    } else {
+      gunswitchtime = 0;
+    }
+  }
+
   rendermodel(hudgunnames[player1->gunselect], start, end, 0, 1.0f,
               player1->o.x + bx, player1->o.z + bz, player1->o.y,
-              player1->yaw + 90, player1->pitch, false, 1.0f, speed, 0, base);
+              player1->yaw + 90, player1->pitch, false, scale, speed, 0, base);
 };
 
 void drawhudgun(float fovy, float aspect, int farplane) {
