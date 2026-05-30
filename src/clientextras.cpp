@@ -1,10 +1,4 @@
-// clientextras.cpp: stuff that didn't fit in client.cpp or clientgame.cpp :)
-
 #include "cube.h"
-
-// render players & monsters
-// very messy ad-hoc handling of animation frames, should be made more
-// configurable
 
 //              D    D    D    D'   D    D    D    D'   A   A'  P   P'  I   I'
 //              R,  R'  E    L    J   J'
@@ -40,9 +34,6 @@ void renderclient(dynent *d, bool team, char *mdlname, bool hellpig,
     };
     if (mz < -1000)
       return;
-    // mdl = (((int)d>>6)&1)+1;
-    // mz = d->o.z-d->eyeheight+0.2f;
-    // scale = 1.2f;
   } else if (d->state == CS_LAGGED) {
     n = 17;
   } else if (d->monsterstate == M_ATTACKING) {
@@ -161,7 +152,7 @@ void sendmap(char *mapname) {
   sendstring(mapname, p);
   putint(p, mapsize);
   if (65535 - (p - start) < mapsize) {
-    conoutf("map %s is too large to send", mapname);
+    conoutf("Map %s is too large to send", mapname);
     free(mapdata);
     enet_packet_destroy(packet);
     return;
@@ -172,8 +163,8 @@ void sendmap(char *mapname) {
   *(ushort *)start = ENET_HOST_TO_NET_16(p - start);
   enet_packet_resize(packet, p - start);
   sendpackettoserv(packet);
-  conoutf("sending map %s to server...", mapname);
-  sprintf_sd(msg)("[map %s uploaded to server, \"getmap\" to receive it]",
+  conoutf("Sending map %s to server...", mapname);
+  sprintf_sd(msg)("[Map %s uploaded to server, \"getmap\" to receive it]",
                   mapname);
   toserver(msg);
 }
