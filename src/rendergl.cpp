@@ -400,15 +400,24 @@ VAR(fog, 64, 180, 1024);
 VAR(fogcolour, 0, 0x8099B3, 0xFFFFFF);
 
 VARP(hudgun, 0, 1, 1);
+VARP(viewbob, 0, 1, 1);
+VARP(viewbobamp, 0, 10, 50);
 
 char *hudgunnames[] = {"hudguns/fist", "hudguns/hate_shotg",
                        "hudguns/hate_rifle", "hudguns/hate_rocket",
                        "hudguns/hate_rail"};
 
 void drawhudmodel(int start, int end, float speed, int base) {
+  float bx = 0, bz = 0;
+  if (viewbob && player1->onfloor && (player1->move || player1->strafe)) {
+    float bobamp = viewbobamp * 0.004f;
+    float bobphase = lastmillis * 0.008f;
+    bz = sinf(bobphase * 2.0f) * bobamp;
+    bx = sinf(bobphase) * bobamp * 0.3f;
+  }
   rendermodel(hudgunnames[player1->gunselect], start, end, 0, 1.0f,
-              player1->o.x, player1->o.z, player1->o.y, player1->yaw + 90,
-              player1->pitch, false, 1.0f, speed, 0, base);
+              player1->o.x + bx, player1->o.z + bz, player1->o.y,
+              player1->yaw + 90, player1->pitch, false, 1.0f, speed, 0, base);
 };
 
 void drawhudgun(float fovy, float aspect, int farplane) {
