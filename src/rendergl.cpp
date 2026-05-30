@@ -450,7 +450,7 @@ void drawhudgun(float fovy, float aspect, int farplane) {
   int rtime = reloadtime(player1->gunselect);
   if (player1->lastaction && player1->lastattackgun == player1->gunselect &&
       lastmillis - player1->lastaction < rtime) {
-    drawhudmodel(7, 18, rtime / 18.0f, player1->lastaction);
+    drawhudmodel(7, 18, rtime / 16.0f, player1->lastaction);
   } else {
     drawhudmodel(25, 1, 100, 0);
   };
