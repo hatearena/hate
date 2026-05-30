@@ -131,6 +131,8 @@ void botrender() {
 }
 
 void botpain(dynent *m, int damage, dynent *d) {
+  if(m->state == CS_DEAD) return;
+
   if (d != m && d->state == CS_ALIVE)
     m->enemy = d;
 
