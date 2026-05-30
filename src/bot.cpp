@@ -79,8 +79,9 @@ static void botaction(dynent *m) {
 
   if (m->blocked) {
     m->blocked = false;
-    if (!rnd(3)) {
+    if (!rnd(3) && lastmillis - m->lastmove > 1500) {
       m->jumpnext = true;
+      m->lastmove = lastmillis;
     } else {
       m->targetyaw += 90 + rnd(180);
     }
@@ -128,6 +129,7 @@ void botthink() {
 
 void botrender() {
   loopv(bots) {
+    if(bots[i]->state == CS_DEAD) continue;
     float saved = bots[i]->maxspeed;
     bots[i]->maxspeed = 20.0f;
     renderclient(bots[i], false, "monster/player", false, 1.25f);
@@ -144,7 +146,7 @@ void botpain(dynent *m, int damage, dynent *d) {
 
   if ((m->health -= damage) <= 0) {
     m->state = CS_DEAD;
-    m->lastaction = lastmillis - 800;
+    m->lastaction = lastmillis;
     m->attacking = false;
     if (d == player1) {
       player1->frags++;
