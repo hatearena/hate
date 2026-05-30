@@ -1,5 +1,3 @@
-// menus.cpp: ingame menu system (also used for scores and serverlist)
-
 #include "cube.h"
 
 struct mitem {
@@ -75,12 +73,14 @@ bool rendermenu() {
   int x = (VIRTW - w) / 2;
   overlay(160);
   int pad = FONTH / 2 * 3;
-  gradientbox(x - pad, y - FONTH, x + w + pad, y + h + FONTH, 20, 20, 50, 8, 8, 20);
+  gradientbox(x - pad, y - FONTH, x + w + pad, y + h + FONTH, 20, 20, 50, 8, 8,
+              20);
   draw_text(title, x, y, 2);
   y += FONTH * 2;
   if (vmenu) {
     int bh = y + m.menusel * step;
-    gradientbox(x - FONTH, bh - 10, x + w + FONTH, bh + FONTH + 10, 50, 100, 200, 30, 60, 150);
+    gradientbox(x - FONTH, bh - 10, x + w + FONTH, bh + FONTH + 10, 50, 100,
+                200, 30, 60, 150);
   };
   loopj(mdisp) {
     draw_text(m.items[j].text, x, y, 2);
