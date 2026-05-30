@@ -127,6 +127,21 @@ static void botaction(dynent *m) {
   m->enemy = enemy;
 
   vdist(disttoenemy, vectoenemy, m->o, m->enemy->o);
+
+  if (disttoenemy < 3.5f) {
+    if (m->gunselect != GUN_FIST)
+      m->gunselect = GUN_FIST;
+  } else if (m->gunselect == GUN_FIST) {
+    if (m->ammo[GUN_RL])
+      m->gunselect = GUN_RL;
+    else if (m->ammo[GUN_CG])
+      m->gunselect = GUN_CG;
+    else if (m->ammo[GUN_SG])
+      m->gunselect = GUN_SG;
+    else if (m->ammo[GUN_RIFLE])
+      m->gunselect = GUN_RIFLE;
+  }
+
   float enemyyaw =
       -(float)atan2(m->enemy->o.x - m->o.x, m->enemy->o.y - m->o.y) / PI * 180 +
       180;
@@ -157,7 +172,7 @@ static void botaction(dynent *m) {
   m->move = 1;
   m->strafe = 0;
 
-  if (disttoenemy < 4) {
+  if (disttoenemy < 4 && m->gunselect != GUN_FIST) {
     m->move = -1;
   } else if (disttoenemy < 12) {
     m->strafe = (rnd(3) - 1);

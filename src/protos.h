@@ -215,6 +215,8 @@ extern ENetPacket *recvmap(int n);
 
 // weapon
 extern void selectgun(int a = -1, int b = -1, int c =-1);
+extern void nextweapon();
+extern void prevweapon();
 extern void shoot(dynent *d, vec &to);
 extern void shootv(int gun, vec &from, vec &to, dynent *d = 0, bool local = false);
 extern void createrays(vec &from, vec &to);

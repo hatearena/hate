@@ -58,6 +58,34 @@ void weapon(char *a1, char *a2, char *a3) {
 
 COMMAND(weapon, ARG_3STR);
 
+void nextweapon() {
+  int s = player1->gunselect;
+  for (int i = 1; i <= 4; i++) {
+    int g = (s + i) % 5;
+    if (player1->ammo[g]) {
+      if (g != player1->gunselect) {
+        player1->gunselect = g;
+        playsoundc(S_WEAPLOAD);
+      }
+      return;
+    }
+  }
+}
+
+void prevweapon() {
+  int s = player1->gunselect;
+  for (int i = 1; i <= 4; i++) {
+    int g = (s - i + 5) % 5;
+    if (player1->ammo[g]) {
+      if (g != player1->gunselect) {
+        player1->gunselect = g;
+        playsoundc(S_WEAPLOAD);
+      }
+      return;
+    }
+  }
+}
+
 void createrays(vec &from,
                 vec &to) // create random spread of rays for the shotgun
 {

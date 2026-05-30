@@ -301,6 +301,13 @@ int main(int argc, char **argv) {
         lasttype = event.type;
         lastbut = event.button.button;
         break;
+
+      case SDL_MOUSEWHEEL:
+        if (event.wheel.y > 0)
+          prevweapon();
+        else if (event.wheel.y < 0)
+          nextweapon();
+        break;
       };
     };
   };
