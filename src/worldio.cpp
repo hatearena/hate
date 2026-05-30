@@ -211,17 +211,17 @@ void load_world(char *mname) // still supports all map formats that have existed
   setnames(mname);
   gzFile f = gzopen(cgzname, "rb9");
   if (!f) {
-    conoutf("could not read map %s", cgzname);
+    conoutf("Could not read map %s", cgzname);
     return;
   };
   gzread(f, &hdr, sizeof(header) - sizeof(int) * 16);
   endianswap(&hdr.version, sizeof(int), 4);
   if (strncmp(hdr.head, "CUBE", 4) != 0)
-    fatal("while reading map: header malformatted");
+    fatal("While reading map: header malformatted");
   if (hdr.version > MAPVERSION)
-    fatal("this map requires a newer version of cube");
+    fatal("This map requires a newer version of Cube/HATE.");
   if (sfactor < SMALLEST_FACTOR || sfactor > LARGEST_FACTOR)
-    fatal("illegal map size");
+    fatal("Illegal map size");
   if (hdr.version >= 4) {
     gzread(f, &hdr.waterlevel, sizeof(int) * 16);
     endianswap(&hdr.waterlevel, sizeof(int), 16);
