@@ -93,8 +93,7 @@ bool installtex(int tnum, char *texname, int &xs, int &ys, bool clamp) {
 
   void *scaledimg = s->pixels;
   if (xs != s->w) {
-    conoutf("warning: quality loss: scaling %s",
-            texname); // for voodoo cards under linux
+    conoutf("warning: quality loss: scaling %s", texname);
     scaledimg = alloc(xs * ys * 3);
     gluScaleImage(GL_RGB, s->w, s->h, GL_UNSIGNED_BYTE, s->pixels, xs, ys,
                   GL_UNSIGNED_BYTE, scaledimg);
@@ -250,10 +249,14 @@ void getcamerapos(float &vx, float &vy, float &vz) {
     vy = player1->o.y + dist * cosf(yawrad);
     vz = player1->o.z;
     int sz = ssize;
-    if (vx < MINBORD) vx = MINBORD;
-    if (vx > sz - MINBORD) vx = sz - MINBORD;
-    if (vy < MINBORD) vy = MINBORD;
-    if (vy > sz - MINBORD) vy = sz - MINBORD;
+    if (vx < MINBORD)
+      vx = MINBORD;
+    if (vx > sz - MINBORD)
+      vx = sz - MINBORD;
+    if (vy < MINBORD)
+      vy = MINBORD;
+    if (vy > sz - MINBORD)
+      vy = sz - MINBORD;
   } else {
     vx = player1->o.x;
     vy = player1->o.y;
@@ -480,8 +483,8 @@ void gl_drawframe(int w, int h, float curfps) {
 
   float vx, vy, vz;
   getcamerapos(vx, vy, vz);
-  render_world(vx, vy, vz, (int)player1->yaw,
-               (int)player1->pitch, (float)fov, w, h);
+  render_world(vx, vy, vz, (int)player1->yaw, (int)player1->pitch, (float)fov,
+               w, h);
   finishstrips();
 
   setupworld();
@@ -508,7 +511,9 @@ void gl_drawframe(int w, int h, float curfps) {
   xtraverts = 0;
 
   renderclients();
-  if (thirdperson) renderclient(player1, isteam(player1->team, player1->team), "monster/player", false, 1.0f);
+  if (thirdperson)
+    renderclient(player1, isteam(player1->team, player1->team),
+                 "monster/player", false, 1.25f);
   monsterrender();
   botrender();
 
@@ -519,7 +524,8 @@ void gl_drawframe(int w, int h, float curfps) {
 
   glDisable(GL_CULL_FACE);
 
-  if (!thirdperson) drawhudgun(fovy, aspect, farplane);
+  if (!thirdperson)
+    drawhudgun(fovy, aspect, farplane);
 
   overbright(1);
   int nquads = renderwater(hf);
