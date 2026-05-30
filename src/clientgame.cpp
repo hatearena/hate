@@ -454,7 +454,7 @@ void startmap(char *name) // called just after a map load
   showscores(false);
   intermission = false;
   framesinmap = 0;
-  conoutf("game mode is %s", modestr(gamemode));
+  conoutf("Gamemode: %s", modestr(gamemode));
 };
 
 COMMANDN(map, changemap, ARG_1STR);

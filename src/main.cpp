@@ -110,7 +110,7 @@ int main(int argc, char **argv) {
        *passwd = (char *)"";
   islittleendian = *((char *)&islittleendian);
 
-#define log(s) conoutf("init: %s", s)
+#define log(s) conoutf("Initialization: %s", s)
   log("sdl");
 
   for (int i = 1; i < argc; i++) {
