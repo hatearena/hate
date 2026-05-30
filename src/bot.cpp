@@ -116,11 +116,14 @@ static void rendergibs() {
   }
 }
 
+static int lastammorefill = 0;
+
 void botclear() {
   initgibs();
   loopv(bots) gp()->dealloc(bots[i], sizeof(dynent));
   bots.setsize(0);
   numbots = 0;
+  lastammorefill = 0;
 }
 
 static void normalise(dynent *m, float angle) {
@@ -173,10 +176,21 @@ static void botaction(dynent *m) {
 
   vdist(disttoenemy, vectoenemy, m->o, m->enemy->o);
 
-  if (disttoenemy < 3.5f) {
+  if (disttoenemy < 8.0f) {
     if (m->gunselect != GUN_CSAW)
       m->gunselect = GUN_CSAW;
-  } else if (m->gunselect == GUN_CSAW) {
+  } else if (!m->ammo[m->gunselect]) {
+    if (m->ammo[GUN_RL])
+      m->gunselect = GUN_RL;
+    else if (m->ammo[GUN_CG])
+      m->gunselect = GUN_CG;
+    else if (m->ammo[GUN_SG])
+      m->gunselect = GUN_SG;
+    else if (m->ammo[GUN_RIFLE])
+      m->gunselect = GUN_RIFLE;
+    else
+      m->gunselect = GUN_CSAW;
+  } else if (m->gunselect == GUN_CSAW && disttoenemy > 15.0f) {
     if (m->ammo[GUN_RL])
       m->gunselect = GUN_RL;
     else if (m->ammo[GUN_CG])
@@ -206,7 +220,9 @@ static void botaction(dynent *m) {
 
   if (m->blocked) {
     m->blocked = false;
-    if (!rnd(3) && lastmillis - m->lastmove > 1500) {
+    if (m->gunselect == GUN_CSAW) {
+      m->jumpnext = false;
+    } else if (!rnd(3) && lastmillis - m->lastmove > 1500) {
       m->jumpnext = true;
       m->lastmove = lastmillis;
     } else {
@@ -225,11 +241,10 @@ static void botaction(dynent *m) {
 
   if (disttoenemy < 128 && m->enemy->state == CS_ALIVE) {
     int attacktime = lastmillis - m->lastaction;
-    if (attacktime > 200 + rnd(500)) {
+    if (attacktime > 50) {
       m->attacktarget = m->enemy->o;
       m->attacking = true;
       shoot(m, m->attacktarget);
-      m->lastaction = lastmillis;
     }
   }
 
@@ -241,6 +256,13 @@ void botthink() {
   loopv(bots) {
     dynent *b = bots[i];
     if (b->state == CS_ALIVE) {
+      if (lastmillis - lastammorefill > 15000) {
+        lastammorefill = lastmillis;
+        b->ammo[GUN_SG] = max(b->ammo[GUN_SG], 10);
+        b->ammo[GUN_CG] = max(b->ammo[GUN_CG], 40);
+        b->ammo[GUN_RL] = max(b->ammo[GUN_RL], 8);
+        b->ammo[GUN_RIFLE] = max(b->ammo[GUN_RIFLE], 8);
+      }
       botaction(b);
     } else if (b->state == CS_DEAD && lastmillis - b->lastaction > 5000) {
       spawnplayer(b);
