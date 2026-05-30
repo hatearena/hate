@@ -141,7 +141,7 @@ void arenarespawn() {
   if (arenarespawnwait) {
     if (arenarespawnwait < lastmillis) {
       arenarespawnwait = 0;
-      conoutf("new round starting... fight!");
+      conoutf("New round starting. FIGHT.");
       respawnself();
     };
   } else if (arenadetectwait == 0 || arenadetectwait < lastmillis) {
@@ -152,14 +152,14 @@ void arenarespawn() {
     loopv(players) if (players[i])
         arenacount(players[i], alive, dead, lastteam, oneteam);
     dvector &bs = getbots();
-    loopv(bs) if(bs[i]) arenacount(bs[i], alive, dead, lastteam, oneteam);
+    loopv(bs) if (bs[i]) arenacount(bs[i], alive, dead, lastteam, oneteam);
     arenacount(player1, alive, dead, lastteam, oneteam);
     if (dead > 0 && (alive <= 1 || (m_teammode && oneteam))) {
-      conoutf("arena round is over! next round in 5 seconds...");
+      conoutf("Arena round is over. Next round in 5 seconds...");
       if (alive)
-        conoutf("team %s is last man standing", lastteam);
+        conoutf("Team %s is last man standing", lastteam);
       else
-        conoutf("everyone died!");
+        conoutf("Everyone died.");
       arenarespawnwait = lastmillis + 5000;
       arenadetectwait = lastmillis + 10000;
       player1->roll = 0;
@@ -193,7 +193,7 @@ void respawn() {
   if (player1->state == CS_DEAD) {
     player1->attacking = false;
     if (m_arena) {
-      conoutf("waiting for new round to start...");
+      conoutf("Waiting for new round to start...");
       return;
     };
     if (m_sp) {
@@ -374,18 +374,18 @@ void selfdamage(int damage, int actor, dynent *act) {
                                                // on amount of damage
   if ((player1->health -= damage) <= 0) {
     if (actor == -2) {
-      conoutf("you got killed by %s!", act->name);
+      conoutf("You got killed by %s.", act->name);
     } else if (actor == -1) {
       actor = getclientnum();
-      conoutf("you suicided!");
+      conoutf("You suicided.");
       addmsg(1, 2, SV_FRAGS, --player1->frags);
     } else {
       dynent *a = getclient(actor);
       if (a) {
         if (isteam(a->team, player1->team)) {
-          conoutf("you got fragged by a teammate (%s)", a->name);
+          conoutf("You were fragged by a teammate (%s)", a->name);
         } else {
-          conoutf("you got fragged by %s", a->name);
+          conoutf("You were fragged by %s", a->name);
         };
       };
     };
@@ -408,11 +408,11 @@ void timeupdate(int timeremain) {
   if (!timeremain) {
     intermission = true;
     player1->attacking = false;
-    conoutf("intermission:");
-    conoutf("game has ended!");
+    conoutf("Intermission:");
+    conoutf("Game ended.");
     showscores(true);
   } else {
-    conoutf("time remaining: %d minutes", timeremain);
+    conoutf("Time remaining: %d minutes", timeremain);
   };
 };
 
