@@ -450,9 +450,15 @@ void drawhudgun(float fovy, float aspect, int farplane) {
   int rtime = reloadtime(player1->gunselect);
   if (player1->lastaction && player1->lastattackgun == player1->gunselect &&
       lastmillis - player1->lastaction < rtime) {
-    drawhudmodel(7, 18, rtime / 16.0f, player1->lastaction);
+    if (player1->gunselect == GUN_RIFLE)
+      drawhudmodel(7, 18, rtime / 16.0f, player1->lastaction);
+    else
+      drawhudmodel(7, 18, rtime / 18.0f, player1->lastaction);
   } else {
-    drawhudmodel(25, 1, 100, 0);
+    if (player1->gunselect == GUN_RIFLE)
+      drawhudmodel(25, 1, 100, 0);
+    else
+      drawhudmodel(6, 1, 100, 0);
   };
 
   glMatrixMode(GL_PROJECTION);
