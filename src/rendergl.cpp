@@ -420,8 +420,8 @@ void addgodrays(int w, int h) {
   loopi(2) {
     glBindTexture(GL_TEXTURE_2D, grtex[i]);
     if (grw != w || grh != h)
-      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, i == 0 ? w : bw,
-                   i == 0 ? h : bh, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, i == 0 ? w : bw, i == 0 ? h : bh,
+                   0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -537,9 +537,169 @@ void addgodrays(int w, int h) {
   glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 };
 
+static GLuint flaretex = 0;
+
+VARP(lensflare, 0, 1, 1);
+VARP(lensflareintensity, 0, 12, 100);
+VARP(lensflarethreshold, 0, 60, 255);
+VARP(sunyaw, 0, 270, 360);
+VARP(sunpitch, -90, 30, 90);
+
+void genflaretex() {
+  const int S = 64;
+  unsigned char pixels[S * S * 4];
+  float c = (S - 1) * 0.5f;
+  for (int y = 0; y < S; y++)
+    for (int x = 0; x < S; x++) {
+      float d = sqrtf((x - c) * (x - c) + (y - c) * (y - c)) / c;
+      float a = d < 1 ? (1 - d) * (1 - d) : 0;
+      int i = (y * S + x) * 4;
+      pixels[i] = pixels[i + 1] = pixels[i + 2] = 255;
+      pixels[i + 3] = (uchar)(a * 255);
+    };
+  glGenTextures(1, &flaretex);
+  glBindTexture(GL_TEXTURE_2D, flaretex);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, S, S, 0, GL_RGBA, GL_UNSIGNED_BYTE,
+               pixels);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+};
+
+void addlensflare(int w, int h) {
+  if (!lensflare)
+    return;
+  if (OUTBORD((int)player1->o.x, (int)player1->o.y))
+    return;
+  sqr *sq = S((int)player1->o.x, (int)player1->o.y);
+  if (!sq || (sq->r + sq->g + sq->b) / 3 < lensflarethreshold)
+    return;
+  if (!flaretex)
+    genflaretex();
+
+  float sy = sinf(sunyaw * (PI / 180.0f)), cy = cosf(sunyaw * (PI / 180.0f));
+  float sp = sinf(sunpitch * (PI / 180.0f)),
+        cp = cosf(sunpitch * (PI / 180.0f));
+  float sunwx = cp * sy, sunwy = cp * cy, sunwz = sp;
+  float swx = player1->o.x + 1000 * sunwx;
+  float swy = player1->o.y + 1000 * sunwy;
+  float swz = player1->o.z + 1000 * sunwz;
+
+  GLdouble mv[16], proj[16];
+  GLint vp[4];
+  glGetDoublev(GL_MODELVIEW_MATRIX, mv);
+  glGetDoublev(GL_PROJECTION_MATRIX, proj);
+  glGetIntegerv(GL_VIEWPORT, vp);
+
+  GLdouble sx, sy2, sz;
+  if (gluProject(swx, swy, swz, mv, proj, vp, &sx, &sy2, &sz) == GL_FALSE)
+    return;
+  if (sz < 0 || sz > 1)
+    return;
+
+  float lx = (float)sx;
+  float ly = (float)(h - sy2);
+  if (lx < -w * 0.5f || lx > w * 1.5f || ly < -h * 0.5f || ly > h * 1.5f)
+    return;
+
+  float scx = w * 0.5f, scy = h * 0.5f;
+  float dx = scx - lx, dy = scy - ly;
+  float len = sqrtf(dx * dx + dy * dy);
+  if (len < 1)
+    dx = 1, dy = 0;
+  float intensity = lensflareintensity / 100.0f;
+
+  float margin = max(w, h) * 0.15f;
+  float fade = 1.0f;
+  if (lx < -margin)
+    fade = max(0.0f, (lx + w * 0.5f) / margin);
+  else if (lx > w + margin)
+    fade = max(0.0f, (w + margin - lx) / margin);
+  if (ly < -margin)
+    fade = min(fade, max(0.0f, (ly + h * 0.5f) / margin));
+  else if (ly > h + margin)
+    fade = min(fade, max(0.0f, (h + margin - ly) / margin));
+  intensity *= fade;
+
+  glMatrixMode(GL_PROJECTION);
+  glPushMatrix();
+  glLoadIdentity();
+  glOrtho(0, w, 0, h, -1, 1);
+  glMatrixMode(GL_MODELVIEW);
+  glPushMatrix();
+  glLoadIdentity();
+
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+  glDisable(GL_DEPTH_TEST);
+  glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+  glBindTexture(GL_TEXTURE_2D, flaretex);
+
+  float maxdim = max(w, h);
+
+  {
+    float s = maxdim * 0.15f, a = intensity * 0.35f;
+    glColor3f(a, a * 0.7f, a * 0.3f);
+    glBegin(GL_QUADS);
+    glTexCoord2f(0, 0);
+    glVertex2f(lx - s, ly - s);
+    glTexCoord2f(1, 0);
+    glVertex2f(lx + s, ly - s);
+    glTexCoord2f(1, 1);
+    glVertex2f(lx + s, ly + s);
+    glTexCoord2f(0, 1);
+    glVertex2f(lx - s, ly + s);
+    glEnd();
+  };
+
+  {
+    float s = maxdim * 0.035f, a = intensity;
+    glColor3f(a, a * 0.88f, a * 0.65f);
+    glBegin(GL_QUADS);
+    glTexCoord2f(0, 0);
+    glVertex2f(lx - s, ly - s);
+    glTexCoord2f(1, 0);
+    glVertex2f(lx + s, ly - s);
+    glTexCoord2f(1, 1);
+    glVertex2f(lx + s, ly + s);
+    glTexCoord2f(0, 1);
+    glVertex2f(lx - s, ly + s);
+    glEnd();
+  };
+
+  {
+    float dists[6] = {0.3f, 0.7f, 1.0f, 1.6f, 2.5f, 4.0f};
+    float sizes[6] = {0.025f, 0.02f, 0.015f, 0.012f, 0.009f, 0.005f};
+    float alphas[6] = {0.5f, 0.4f, 0.25f, 0.15f, 0.08f, 0.04f};
+    for (int i = 0; i < 6; i++) {
+      float px = lx + dx * dists[i];
+      float py = ly + dy * dists[i];
+      float s = maxdim * sizes[i], a = intensity * alphas[i];
+      glColor3f(a, a * 0.92f, a * 0.85f);
+      glBegin(GL_QUADS);
+      glTexCoord2f(0, 0);
+      glVertex2f(px - s, py - s);
+      glTexCoord2f(1, 0);
+      glVertex2f(px + s, py - s);
+      glTexCoord2f(1, 1);
+      glVertex2f(px + s, py + s);
+      glTexCoord2f(0, 1);
+      glVertex2f(px - s, py + s);
+      glEnd();
+    };
+  };
+
+  glDisable(GL_BLEND);
+  glEnable(GL_DEPTH_TEST);
+  glMatrixMode(GL_PROJECTION);
+  glPopMatrix();
+  glMatrixMode(GL_MODELVIEW);
+  glPopMatrix();
+};
+
 VAR(fog, 64, 180, 1024);
 VAR(fogcolour, 0, 0x8099B3, 0xFFFFFF);
-
 VARP(hudgun, 0, 1, 1);
 VARP(viewbob, 0, 1, 1);
 VARP(viewbobamp, 0, 10, 50);
@@ -707,6 +867,7 @@ void gl_drawframe(int w, int h, float curfps) {
 
   addbloom(w, h);
   addgodrays(w, h);
+  addlensflare(w, h);
 
   glDisable(GL_FOG);
 
