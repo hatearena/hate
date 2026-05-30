@@ -39,6 +39,7 @@ extern void writeservercfg();
 extern void gl_init(int w, int h);
 extern void cleangl();
 extern void gl_drawframe(int w, int h, float curfps);
+extern void getcamerapos(float &vx, float &vy, float &vz);
 extern bool installtex(int tnum, char *texname, int &xs, int &ys, bool clamp = false);
 extern void mipstats(int a, int b, int c);
 extern void vertf(float v1, float v2, float v3, sqr *ls, float t1, float t2);

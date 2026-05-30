@@ -242,6 +242,20 @@ VARFP(gamma, 30, 100, 300, {
   };
 });
 
+void getcamerapos(float &vx, float &vy, float &vz) {
+  if (thirdperson && player1->state == CS_ALIVE) {
+    float dist = 10;
+    float yawrad = rad(player1->yaw);
+    vx = player1->o.x - dist * sinf(yawrad);
+    vy = player1->o.y + dist * cosf(yawrad);
+    vz = player1->o.z;
+  } else {
+    vx = player1->o.x;
+    vy = player1->o.y;
+    vz = player1->o.z;
+  }
+}
+
 void transplayer() {
   glLoadIdentity();
 
@@ -459,7 +473,9 @@ void gl_drawframe(int w, int h, float curfps) {
   curvert = 0;
   strips.setsize(0);
 
-  render_world(player1->o.x, player1->o.y, player1->o.z, (int)player1->yaw,
+  float vx, vy, vz;
+  getcamerapos(vx, vy, vz);
+  render_world(vx, vy, vz, (int)player1->yaw,
                (int)player1->pitch, (float)fov, w, h);
   finishstrips();
 

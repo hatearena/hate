@@ -254,7 +254,9 @@ int main(int argc, char **argv) {
       serverslice((int)time(NULL), 0);
     static float fps = 30.0f;
     fps = (1000.0f / curtime + fps * 50) / 51;
-    computeraytable(player1->o.x, player1->o.y);
+    float vx, vy, vz;
+    getcamerapos(vx, vy, vz);
+    computeraytable(vx, vy);
     readdepth(scr_w, scr_h);
     SDL_GL_SwapWindow(window);
     extern void updatevol();
