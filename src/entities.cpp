@@ -37,31 +37,21 @@ void renderentities() {
         if (e.type < I_SHELLS || e.type > TELEPORT)
           continue;
         renderent(e, entmdlnames[e.type - I_SHELLS], 1.0f, lastmillis / 10.0f);
-        if(e.spawned && (rnd(8) == 0))
-        {
-            float f = S(e.x, e.y)->floor;
-            vec pos = {
-                (float)e.x + (rnd(21)-10)*0.1f,
-                (float)e.y + (rnd(21)-10)*0.1f,
-                f + 0.8f + (rnd(11)-5)*0.08f
-            };
-            vec vel = {
-                (rnd(21)-10)*0.6f,
-                (rnd(21)-10)*0.6f,
-                3.0f + rnd(8)*0.5f
-            };
-            static const uchar glowcols[9][3] = {
-                { 160, 130, 60  },
-                { 130, 130, 70  },
-                { 160, 100, 50  },
-                { 80,  140, 180 },
-                { 160, 80,  80  },
-                { 80,  160, 80  },
-                { 80,  150, 80  },
-                { 160, 150, 60  },
-                { 160, 80,  160 },
-            };
-            newparticlecol(pos, vel, rnd(300)+400, 9, glowcols[e.type-I_SHELLS][0], glowcols[e.type-I_SHELLS][1], glowcols[e.type-I_SHELLS][2]);
+        if (e.spawned && (rnd(8) == 0)) {
+          float f = S(e.x, e.y)->floor;
+          vec pos = {(float)e.x + (rnd(21) - 10) * 0.1f,
+                     (float)e.y + (rnd(21) - 10) * 0.1f,
+                     f + 0.8f + (rnd(11) - 5) * 0.08f};
+          vec vel = {(rnd(21) - 10) * 0.6f, (rnd(21) - 10) * 0.6f,
+                     3.0f + rnd(8) * 0.5f};
+          static const uchar glowcols[9][3] = {
+              {160, 130, 60}, {130, 130, 70}, {160, 100, 50},
+              {80, 140, 180}, {160, 80, 80},  {80, 160, 80},
+              {80, 150, 80},  {160, 150, 60}, {160, 80, 160},
+          };
+          newparticlecol(
+              pos, vel, rnd(300) + 400, 9, glowcols[e.type - I_SHELLS][0],
+              glowcols[e.type - I_SHELLS][1], glowcols[e.type - I_SHELLS][2]);
         };
       } else
         switch (e.attr2) {
@@ -100,9 +90,6 @@ struct itemstat {
 };
 
 void baseammo(int gun) { player1->ammo[gun] = itemstats[gun - 1].add * 2; };
-
-// these two functions are called when the server acknowledges that you really
-// picked up the item (in multiplayer someone may grab it before you).
 
 void radditem(int i, int &v) {
   itemstat &is = itemstats[ents[i].type - I_SHELLS];
@@ -146,7 +133,7 @@ void realpickup(int n, dynent *d) {
 
   case I_QUAD:
     radditem(n, d->quadmillis);
-    conoutf("you got the quad!");
+    conoutf("You got quad damage.");
     break;
   };
 };
@@ -285,7 +272,7 @@ void checkquad(int time) {
   if (player1->quadmillis && (player1->quadmillis -= time) < 0) {
     player1->quadmillis = 0;
     playsoundc(S_PUPOUT);
-    conoutf("quad damage is over");
+    conoutf("Quad damage is over.");
   };
 };
 
