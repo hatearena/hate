@@ -388,6 +388,8 @@ void selfdamage(int damage, int actor, dynent *act) {
   if ((player1->health -= damage) <= 0) {
     if (actor == -2) {
       conoutf("You got killed by %s.", act->name);
+      if (act->monsterstate && act->mtype == -1)
+        act->frags++;
     } else if (actor == -1) {
       actor = getclientnum();
       conoutf("You suicided.");

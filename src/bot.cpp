@@ -3,6 +3,51 @@
 dvector bots;
 int numbots = 0;
 
+static const char *botnames[] = {"Cerelo", "Dingus", "Ceria", "Deathly"};
+static const int numbotnames = sizeof(botnames) / sizeof(botnames[0]);
+
+static void genbotname(char *buf) {
+  const char *base = botnames[rnd(numbotnames)];
+  int suffix = 1;
+  for (;;) {
+    if (suffix == 1) {
+      bool taken = !strcmp(base, player1->name);
+      if (!taken)
+        loopv(players) if (players[i] && !strcmp(base, players[i]->name)) {
+          taken = true;
+          break;
+        }
+      if (!taken)
+        loopv(bots) if (!strcmp(base, bots[i]->name)) {
+          taken = true;
+          break;
+        }
+      if (!taken) {
+        sprintf_s(buf)("%s", base);
+        return;
+      }
+    } else {
+      sprintf_sd(tmp)("%s (%d)", base, suffix);
+      bool taken = !strcmp(tmp, player1->name);
+      if (!taken)
+        loopv(players) if (players[i] && !strcmp(tmp, players[i]->name)) {
+          taken = true;
+          break;
+        }
+      if (!taken)
+        loopv(bots) if (!strcmp(tmp, bots[i]->name)) {
+          taken = true;
+          break;
+        }
+      if (!taken) {
+        sprintf_s(buf)("%s", tmp);
+        return;
+      }
+    }
+    suffix++;
+  }
+}
+
 dvector &getbots() { return bots; }
 
 #define MAXGIBS 48
@@ -238,6 +283,8 @@ void botpain(dynent *m, int damage, dynent *d) {
     if (d == player1) {
       player1->frags++;
       addmsg(1, 2, SV_FRAGS, player1->frags);
+    } else if (d->monsterstate && d->mtype == -1) {
+      d->frags++;
     }
     conoutf("%s fragged %s", d->name, m->name);
   } else {
@@ -279,7 +326,8 @@ void addbotcmd() {
   b->state = CS_ALIVE;
   b->pitch = 0;
   b->roll = 0;
-  sprintf_s(b->name)("bot %d", ++numbots);
+  numbots++;
+  genbotname(b->name);
   bots.add(b);
   conoutf("%s spawned.", b->name);
 }

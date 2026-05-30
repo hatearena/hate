@@ -184,7 +184,7 @@ void initclientnet() {
   ctext[0] = 0;
   toservermap[0] = 0;
   clientpassword[0] = 0;
-  newname("hater");
+  newname("Hater");
   newteam("red");
 };
 
