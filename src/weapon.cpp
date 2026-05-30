@@ -206,8 +206,7 @@ void splash(projectile *p, vec &v, vec &vold, int notthisplayer,
     loopv(mv) if (i != notthismonster)
         radialeffect(mv[i], v, i, qdam, p->owner);
     dvector &bv = getbots();
-    loopv(bv)
-        radialeffect(bv[i], v, -2, qdam, p->owner);
+    loopv(bv) radialeffect(bv[i], v, -2, qdam, p->owner);
   };
 };
 
