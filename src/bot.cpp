@@ -127,7 +127,7 @@ void botthink() {
 }
 
 void botrender() {
-  loopv(bots) renderclient(bots[i], false, "monster/player", false, 1.0f);
+  loopv(bots) renderclient(bots[i], false, "monster/player", false, 1.25f);
 }
 
 void botpain(dynent *m, int damage, dynent *d) {
