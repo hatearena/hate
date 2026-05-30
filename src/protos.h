@@ -75,6 +75,7 @@ extern void changemapserv(char *name, int mode);
 extern void writeclientinfo(FILE *f);
 
 // clientgame
+extern int thirdperson;
 extern void mousemove(int dx, int dy);
 extern void updateworld(int millis);
 extern void startmap(char *name);
@@ -175,6 +176,7 @@ extern void demodamage(int damage, vec &o);
 extern void demoblend(int damage);
 
 // physics
+extern float rad(float x);
 extern void moveplayer(dynent *pl, int moveres, bool local);
 extern bool collide(dynent *d, bool spawn, float drop, float rise);
 extern void entinmap(dynent *d);

@@ -16,6 +16,7 @@ dvector players;               // other clients
 VARP(sensitivity, 0, 10, 10000);
 VARP(sensitivityscale, 1, 1, 10000);
 VARP(invmouse, 0, 0, 1);
+VARP(thirdperson, 0, 0, 1);
 
 int lastmillis = 0;
 int curtime = 10;
@@ -456,5 +457,8 @@ void startmap(char *name) // called just after a map load
   framesinmap = 0;
   conoutf("Gamemode: %s", modestr(gamemode));
 };
+
+void toggletp() { thirdperson = !thirdperson; };
+COMMAND(toggletp, ARG_NONE);
 
 COMMANDN(map, changemap, ARG_1STR);

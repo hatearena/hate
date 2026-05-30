@@ -249,10 +249,18 @@ void transplayer() {
   glRotated(player1->pitch, -1.0, 0.0, 0.0);
   glRotated(player1->yaw, 0.0, 1.0, 0.0);
 
-  glTranslated(-player1->o.x,
-               (player1->state == CS_DEAD ? player1->eyeheight - 0.2f : 0) -
-                   player1->o.z,
-               -player1->o.y);
+  if (thirdperson && player1->state == CS_ALIVE) {
+    float dist = 10;
+    float yawrad = rad(player1->yaw);
+    float cam_x = player1->o.x - dist * sinf(yawrad);
+    float cam_y = player1->o.y + dist * cosf(yawrad);
+    glTranslated(-cam_x, -player1->o.z, -cam_y);
+  } else {
+    glTranslated(-player1->o.x,
+                 (player1->state == CS_DEAD ? player1->eyeheight - 0.2f : 0) -
+                     player1->o.z,
+                 -player1->o.y);
+  }
 };
 
 VARP(fov, 10, 120, 150);
@@ -479,6 +487,7 @@ void gl_drawframe(int w, int h, float curfps) {
   xtraverts = 0;
 
   renderclients();
+  if (thirdperson) renderclient(player1, isteam(player1->team, player1->team), "monster/player", false, 1.0f);
   monsterrender();
   botrender();
 
@@ -489,7 +498,7 @@ void gl_drawframe(int w, int h, float curfps) {
 
   glDisable(GL_CULL_FACE);
 
-  drawhudgun(fovy, aspect, farplane);
+  if (!thirdperson) drawhudgun(fovy, aspect, farplane);
 
   overbright(1);
   int nquads = renderwater(hf);
