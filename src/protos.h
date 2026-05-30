@@ -151,6 +151,8 @@ extern void blendbox(int x1, int y1, int x2, int y2, bool border);
 extern void overlay(int a);
 extern void gradientbox(int x1, int y1, int x2, int y2, int r1, int g1, int b1, int r2, int g2, int b2);
 extern void damageblend(int n);
+extern void newbeam(vec &from, vec &to, int duration);
+extern void renderbeams(int time);
 
 // renderparticles
 extern void setorient(vec &r, vec &u);

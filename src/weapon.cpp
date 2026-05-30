@@ -302,7 +302,7 @@ void shootv(int gun, vec &from, vec &to, dynent *d,
   case GUN_RIFLE:
     particle_splash(0, 80, 350, to);
     particle_splash(1, 15, 500, to);
-    particle_trail(1, 500, from, to);
+    newbeam(from, to, 150);
     break;
   };
 };

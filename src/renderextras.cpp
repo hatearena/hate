@@ -128,6 +128,124 @@ void newsphere(vec &o, float max, int type) {
   };
 };
 
+const int MAXBEAMS = 50;
+struct beam {
+  vec from, to;
+  int spawntime;
+  int duration;
+  beam *next;
+};
+beam beams[MAXBEAMS], *blist = NULL, *bempty = NULL;
+bool binitb = false;
+
+void newbeam(vec &from, vec &to, int duration) {
+  if (!binitb) {
+    loopi(MAXBEAMS) {
+      beams[i].next = bempty;
+      bempty = &beams[i];
+    };
+    binitb = true;
+  };
+  if (bempty) {
+    beam *p = bempty;
+    bempty = p->next;
+    p->from = from;
+    p->to = to;
+    p->spawntime = lastmillis;
+    p->duration = duration;
+    p->next = blist;
+    blist = p;
+  };
+};
+
+void renderbeams(int time) {
+  glDepthMask(GL_FALSE);
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+  glDisable(GL_TEXTURE_2D);
+
+  for (beam *p, **pp = &blist; p = *pp;) {
+    int lifetime = lastmillis - p->spawntime;
+    if (lifetime > p->duration) {
+      *pp = p->next;
+      p->next = bempty;
+      bempty = p;
+    } else {
+      float alpha = 1.0f - (float)lifetime / p->duration;
+      float width = (0.08f + 0.25f * alpha);
+
+      vec dir = p->to;
+      vsub(dir, p->from);
+      float len = (float)sqrt(dotprod(dir, dir));
+      if (len > 0) {
+        float invlen = 1.0f / len;
+        vmul(dir, invlen);
+
+        vec up = {0, 0, 1};
+        float dp = dotprod(dir, up);
+        if (dp > 0.9f || dp < -0.9f) {
+          up.x = 1;
+          up.y = 0;
+          up.z = 0;
+        };
+
+        vec right;
+        right.x = dir.y * up.z - dir.z * up.y;
+        right.y = dir.z * up.x - dir.x * up.z;
+        right.z = dir.x * up.y - dir.y * up.x;
+        float rlen = (float)sqrt(dotprod(right, right));
+        if (rlen > 0) {
+          float rinv = 1.0f / rlen;
+          vmul(right, rinv);
+        };
+
+        vec vup;
+        vup.x = right.y * dir.z - right.z * dir.y;
+        vup.y = right.z * dir.x - right.x * dir.z;
+        vup.z = right.x * dir.y - right.y * dir.x;
+
+        float gw = width * 1.5f;
+        glColor4f(1.0f, 0.2f, 0.05f, alpha * 0.3f);
+        glBegin(GL_QUADS);
+#define BEAMQUAD(rv)                                                           \
+  glVertex3f(p->from.x + rv.x * gw, p->from.z + rv.z * gw,                     \
+             p->from.y + rv.y * gw);                                           \
+  glVertex3f(p->from.x - rv.x * gw, p->from.z - rv.z * gw,                     \
+             p->from.y - rv.y * gw);                                           \
+  glVertex3f(p->to.x - rv.x * gw, p->to.z - rv.z * gw, p->to.y - rv.y * gw);   \
+  glVertex3f(p->to.x + rv.x * gw, p->to.z + rv.z * gw, p->to.y + rv.y * gw);
+        BEAMQUAD(right);
+        BEAMQUAD(vup);
+#undef BEAMQUAD
+        glEnd();
+
+        glColor4f(1.0f, 0.5f, 0.2f, alpha);
+        glBegin(GL_QUADS);
+#define BEAMQUAD(rv)                                                           \
+  glVertex3f(p->from.x + rv.x * width, p->from.z + rv.z * width,               \
+             p->from.y + rv.y * width);                                        \
+  glVertex3f(p->from.x - rv.x * width, p->from.z - rv.z * width,               \
+             p->from.y - rv.y * width);                                        \
+  glVertex3f(p->to.x - rv.x * width, p->to.z - rv.z * width,                   \
+             p->to.y - rv.y * width);                                          \
+  glVertex3f(p->to.x + rv.x * width, p->to.z + rv.z * width,                   \
+             p->to.y + rv.y * width);
+        BEAMQUAD(right);
+        BEAMQUAD(vup);
+#undef BEAMQUAD
+        glEnd();
+
+        xtraverts += 16;
+      };
+      pp = &p->next;
+    };
+  };
+
+  glEnable(GL_TEXTURE_2D);
+  glDisable(GL_BLEND);
+  glDepthMask(GL_TRUE);
+};
+
 void renderspheres(int time) {
   glDepthMask(GL_FALSE);
   glEnable(GL_BLEND);

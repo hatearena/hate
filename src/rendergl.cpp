@@ -485,6 +485,7 @@ void gl_drawframe(int w, int h, float curfps) {
   renderentities();
 
   renderspheres(curtime);
+  renderbeams(curtime);
 
   glDisable(GL_CULL_FACE);
 
