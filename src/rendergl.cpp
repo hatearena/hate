@@ -249,6 +249,11 @@ void getcamerapos(float &vx, float &vy, float &vz) {
     vx = player1->o.x - dist * sinf(yawrad);
     vy = player1->o.y + dist * cosf(yawrad);
     vz = player1->o.z;
+    int sz = ssize;
+    if (vx < MINBORD) vx = MINBORD;
+    if (vx > sz - MINBORD) vx = sz - MINBORD;
+    if (vy < MINBORD) vy = MINBORD;
+    if (vy > sz - MINBORD) vy = sz - MINBORD;
   } else {
     vx = player1->o.x;
     vy = player1->o.y;

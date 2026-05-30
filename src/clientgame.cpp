@@ -229,8 +229,19 @@ void updateworld(int millis) // main game update loop
     moveprojectiles((float)curtime);
     demoplaybackstep();
     if (!demoplayback) {
-      if (getclientnum() >= 0)
+      if (getclientnum() >= 0) {
+        if (thirdperson) {
+            float yawrad = rad(player1->yaw);
+            float pitchrad = rad(player1->pitch);
+            float cp = cosf(pitchrad);
+            vec from = player1->o;
+            from.z -= 0.2f;
+            worldpos.x = from.x + 1000 * sinf(yawrad) * cp;
+            worldpos.y = from.y - 1000 * cosf(yawrad) * cp;
+            worldpos.z = from.z + 1000 * sinf(pitchrad);
+        }
         shoot(player1, worldpos); // only shoot when connected to server
+    }
       gets2c(); // do this first, so we have most accurate information when our
                 // player moves
     };
