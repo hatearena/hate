@@ -15,7 +15,7 @@ int gunidletime = 0;
 
 guninfo guns[NUMGUNS] = {
     {S_CSAW, 150, 20, 0, 0, 3, "chainsaw"},
-    {S_SG, 1400, 10, 0, 0, 20, "shotgun"},
+    {S_SG, 1000, 10, 0, 0, 20, "shotgun"},
     {S_CG, 100, 30, 0, 0, 7, "chaingun"},
     {S_RLFIRE, 800, 120, 80, 0, 10, "rocketlauncher"},
     {S_RIFLE, 1500, 100, 0, 0, 30, "rifle"},

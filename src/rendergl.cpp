@@ -17,9 +17,8 @@ void purgetextures();
 GLUquadricObj *qsphere = NULL;
 int glmaxtexsize = 256;
 
-VARFP(fsaa, 0, 0, 16, {
-    conoutf("Anti-aliasing will take effect on next restart");
-});
+VARFP(fsaa, 0, 0, 16,
+      { conoutf("Anti-aliasing will take effect on next restart"); });
 
 void gl_init(int w, int h) {
   glViewport(0, 0, w, h);
@@ -38,7 +37,8 @@ void gl_init(int w, int h) {
   glCullFace(GL_FRONT);
   glEnable(GL_CULL_FACE);
 
-  if (fsaa) glEnable(GL_MULTISAMPLE);
+  if (fsaa)
+    glEnable(GL_MULTISAMPLE);
 
   char *exts = (char *)glGetString(GL_EXTENSIONS);
 
@@ -862,8 +862,7 @@ void gl_drawframe(int w, int h, float curfps) {
 
   float vx, vy, vz;
   getcamerapos(vx, vy, vz);
-  render_world(vx, vy, vz, (int)player1->yaw, (int)player1->pitch, afov,
-               w, h);
+  render_world(vx, vy, vz, (int)player1->yaw, (int)player1->pitch, afov, w, h);
   finishstrips();
 
   setupworld();
