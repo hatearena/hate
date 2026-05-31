@@ -149,10 +149,10 @@ int main(int argc, char **argv) {
         maxcl = atoi(a);
         break;
       default:
-        conoutf("unknown commandline option");
+        conoutf("Unknown commandline option");
       }
     else
-      conoutf("unknown commandline argument");
+      conoutf("Unknown commandline argument");
   }
 
   if (SDL_Init(SDL_INIT_TIMER | SDL_INIT_VIDEO) < 0)
