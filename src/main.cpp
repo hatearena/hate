@@ -40,9 +40,7 @@ void fatal(const char *s, const char *o) {
   cleanup(msg);
 };
 
-void keyrepeat(bool on) {
-  // SDL2 handles key repeat natively; this matches SDL 1.2 API
-};
+void keyrepeat(bool on) {};
 
 void *alloc(int s) {
   void *b = calloc(1, s);
