@@ -31,7 +31,7 @@ void alias(char *name, char *action) {
     if (b->type == ID_ALIAS)
       b->action = exchangestr(b->action, action);
     else
-      conoutf("cannot redefine builtin %s with an alias", name);
+      conoutf("Cannot redefine builtin %s with an alias", name);
   };
 };
 
@@ -168,7 +168,7 @@ int execute(char *p, bool isdown) // all evaluation happens here, recursively
     if (!id) {
       val = ATOI(c);
       if (!val && *c != '0')
-        conoutf("unknown command: %s", c);
+        conoutf("Unknown command: %s", c);
     } else
       switch (id->type) {
       case ID_COMMAND: // game defined commands
@@ -261,12 +261,12 @@ int execute(char *p, bool isdown) // all evaluation happens here, recursively
                                                  // prints its current value
           else {
             if (id->min > id->max) {
-              conoutf("variable is read-only");
+              conoutf("This variable is read-only");
             } else {
               int i1 = ATOI(w[1]);
               if (i1 < id->min || i1 > id->max) {
                 i1 = i1 < id->min ? id->min : id->max; // clamp to valid range
-                conoutf("valid range for %s is %d..%d", c, id->min, id->max);
+                conoutf("Valid range for %s is %d..%d", c, id->min, id->max);
               }
               *id->storage = i1;
             };
@@ -338,7 +338,7 @@ bool execfile(const char *cfgfile) {
 
 void exec(const char *cfgfile) {
   if (!execfile(cfgfile))
-    conoutf("could not read \"%s\"", cfgfile);
+    conoutf("Could not read \"%s\"", cfgfile);
 };
 
 void writecfg() {
@@ -347,11 +347,11 @@ void writecfg() {
     return;
   fprintf(
       f,
-      "// this file contains all your settings for the game.\n"
-      "// delete this file to have data/default.cfg executed and written "
+      "// This file contains all player settings for the game.\n"
+      "// Delete this file to have data/default.cfg executed and written "
       "here.\n"
-      "// if you wish to modify settings below, do it after closing the game,\n"
-      "// because they'll get overwritten without being read.\n\n");
+      "// If you want to modify settings below, do it after closing the game,\n"
+      "// because they'll get overwritten without being read, otherwise.\n\n");
 
   writeclientinfo(f);
   fprintf(f, "\n");
