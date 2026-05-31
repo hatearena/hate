@@ -199,7 +199,7 @@ void save_world(char *mname) {
   };
   spurge;
   gzclose(f);
-  conoutf("wrote map file %s", cgzname);
+  conoutf("Wrote map file %s", cgzname);
   settagareas();
 };
 
