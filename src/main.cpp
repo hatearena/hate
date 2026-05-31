@@ -57,17 +57,17 @@ void setresolution() {
   }
 };
 
-VARFP(fullscreen, 0, 0, 1,
-      if (window) {
-        SDL_SetWindowFullscreen(
-            window, fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0);
-        int w;
-        int h;
-        SDL_GetWindowSize(window, &w, &h);
-        scr_w = w;
-        scr_h = h;
-        gl_init(scr_w, scr_h);
-      });
+VARFP(
+    fullscreen, 0, 0, 1, if (window) {
+      SDL_SetWindowFullscreen(window,
+                              fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0);
+      int w;
+      int h;
+      SDL_GetWindowSize(window, &w, &h);
+      scr_w = w;
+      scr_h = h;
+      gl_init(scr_w, scr_h);
+    });
 
 #if 0
 void screenshot()
@@ -192,7 +192,8 @@ int main(int argc, char **argv) {
       char line[256];
       while (fgets(line, sizeof(line), cfg)) {
         int v;
-        if (sscanf(line, " fsaa %d", &v) == 1 || sscanf(line, "fsaa %d", &v) == 1) {
+        if (sscanf(line, " fsaa %d", &v) == 1 ||
+            sscanf(line, "fsaa %d", &v) == 1) {
           if (v >= 0 && v <= 16) {
             setvar("fsaa", v);
             if (v > 0) {
@@ -267,7 +268,7 @@ int main(int argc, char **argv) {
 
   log("localconnect");
   localconnect();
-  changemap("duel3");
+  changemap("flux");
   log("mainloop");
 
   int ignore = 5;
