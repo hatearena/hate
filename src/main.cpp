@@ -58,8 +58,16 @@ void setresolution() {
 };
 
 VARFP(fullscreen, 0, 0, 1,
-      if (window) SDL_SetWindowFullscreen(
-          window, fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0));
+      if (window) {
+        SDL_SetWindowFullscreen(
+            window, fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0);
+        int w;
+        int h;
+        SDL_GetWindowSize(window, &w, &h);
+        scr_w = w;
+        scr_h = h;
+        gl_init(scr_w, scr_h);
+      });
 
 #if 0
 void screenshot()
@@ -184,8 +192,10 @@ int main(int argc, char **argv) {
   if (window == NULL)
     fatal("Unable to create OpenGL screen");
 
-  if (fullscreen)
+  if (fullscreen) {
     SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
+    SDL_GetWindowSize(window, &scr_w, &scr_h);
+  }
 
   SDL_GLContext glcontext = SDL_GL_CreateContext(window);
   if (glcontext == NULL)
