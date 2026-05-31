@@ -389,7 +389,7 @@ void selfdamage(int damage, int actor, dynent *act) {
                                                // on amount of damage
   if ((player1->health -= damage) <= 0) {
     if (actor == -2) {
-      conoutf("%s fragged <you>", act->name);
+      conoutf("%s fragged %s", act->name, player1->name);
       if (act->monsterstate && act->mtype == -1)
         act->frags++;
     } else if (actor == -1) {
@@ -466,7 +466,11 @@ void startmap(char *name) // called just after a map load
   player1->frags = 0;
   player1->deaths = 0;
   player1->suicides = 0;
-  loopv(players) if (players[i]) { players[i]->frags = 0; players[i]->deaths = 0; players[i]->suicides = 0; }
+  loopv(players) if (players[i]) {
+    players[i]->frags = 0;
+    players[i]->deaths = 0;
+    players[i]->suicides = 0;
+  }
   resetspawns();
   strcpy_s(clientmap, name);
   setvar("gamespeed", 100);
