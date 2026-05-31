@@ -6,8 +6,8 @@ extern bool los(float lx, float ly, float lz, float bx, float by, float bz,
 dvector bots;
 int numbots = 0;
 
-static const char *botnames[] = {"Cerelo", "Diaso", "Ceria", "Deathly",
-                                 "Ra",     "Va",    "Never"};
+static const char *botnames[] = {"Cerelo", "Diaso", "Ceria", "Deathly", "Ra",
+                                 "Va",     "Never", "Abu",   "Re"};
 static const int numbotnames = sizeof(botnames) / sizeof(botnames[0]);
 
 static void genbotname(char *buf) {
