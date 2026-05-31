@@ -222,8 +222,8 @@ int main(int argc, char **argv) {
 
   log("cfg");
 
-  newmenu("frags\tdeaths\tsuic\tping\tteam\tname");
-  newmenu("ping\tplr\tserver");
+  newmenu("Frags\tDeaths\tSuicides\tPing\tTeam\tName");
+  newmenu("Ping\tPlr\tServer");
 
   exec("data/keymap.cfg");
   exec("data/menus.cfg");
