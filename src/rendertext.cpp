@@ -118,12 +118,19 @@ void draw_text(char *str, int left, int top, int gl_num) {
   if (!font_inited)
     return;
 
+  string filtered;
+  char *dst = filtered;
+  for (char *src = str; *src; src++)
+    if (*src != '\f')
+      *dst++ = *src;
+  *dst = 0;
+
   SDL_Color white = {255, 255, 255, 255};
   if (str[0] == '\f')
-    draw_texture(TTF_RenderUTF8_Blended(font, str + 1, white), left, top, 64,
+    draw_texture(TTF_RenderUTF8_Blended(font, filtered, white), left, top, 64,
                  255, 128);
   else
-    draw_texture(TTF_RenderUTF8_Blended(font, str, white), left, top, 255, 255,
+    draw_texture(TTF_RenderUTF8_Blended(font, filtered, white), left, top, 255, 255,
                  255);
 }
 
