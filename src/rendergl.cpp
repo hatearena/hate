@@ -759,7 +759,9 @@ void drawhudgun(float fovy, float aspect, int farplane) {
         drawhudmodel(9, 11, 100.0f, player1->lastaction);
       else
         drawhudmodel(19, 1, 100, 0);
-    } else
+    } else if (player1->gunselect == GUN_CSAW)
+      drawhudmodel(2, 3, rtime / 3.0f, player1->lastaction);
+    else
       drawhudmodel(7, 18, rtime / 18.0f, player1->lastaction);
   } else {
     if (player1->gunselect == GUN_RIFLE && player1->lastaction &&
@@ -772,6 +774,8 @@ void drawhudgun(float fovy, float aspect, int farplane) {
       drawhudmodel(25, 1, 100, 0);
     else if (player1->gunselect == GUN_SG)
       drawhudmodel(19, 1, 100, 0);
+    else if (player1->gunselect == GUN_CSAW)
+      drawhudmodel(1, 1, 100, 0);
     else
       drawhudmodel(6, 1, 100, 0);
   };
