@@ -1,5 +1,3 @@
-// client processing of the incoming network stream
-
 #include "cube.h"
 
 extern int clientnum;
@@ -8,7 +6,7 @@ extern string toservermap;
 extern string clientpassword;
 
 void neterr(char *s) {
-  conoutf("illegal network message (%s)", s);
+  conoutf("Illegal network message: %s", s);
   disconnect();
 };
 
@@ -22,10 +20,6 @@ void changemap(const char *name) // request map change, server may ignore
 {
   strcpy_s(toservermap, name);
 };
-
-// update the position of other clients in the game in our world
-// don't care if he's in the scenery or other players,
-// just don't overlap with our client
 
 void updatepos(dynent *d) {
   const float r = player1->radius + d->radius;

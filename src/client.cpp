@@ -1,5 +1,3 @@
-// client.cpp, mostly network related client game code
-
 #include "cube.h"
 
 ENetHost *clienthost = NULL;
