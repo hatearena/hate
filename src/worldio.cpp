@@ -97,19 +97,19 @@ void writemap(char *mname, int msize, uchar *mdata) {
   backup(cgzname, bakname);
   FILE *f = fopen(cgzname, "wb");
   if (!f) {
-    conoutf("could not write map to %s", cgzname);
+    conoutf("Could not write map to %s", cgzname);
     return;
   };
   fwrite(mdata, 1, msize, f);
   fclose(f);
-  conoutf("wrote map %s as file %s", mname, cgzname);
+  conoutf("Wrote map %s as file %s", mname, cgzname);
 }
 
 uchar *readmap(char *mname, int *msize) {
   setnames(mname);
   uchar *mdata = (uchar *)loadfile(cgzname, msize);
   if (!mdata) {
-    conoutf("could not read map %s", cgzname);
+    conoutf("Could not read map %s", cgzname);
     return NULL;
   };
   return mdata;
@@ -283,7 +283,7 @@ void load_world(char *mname) // still supports all map formats that have existed
     default: {
       if (type < 0 || type >= MAXTYPE) {
         sprintf_sd(t)("%d @ %d", type, k);
-        fatal("while reading map: type out of range: ", t);
+        fatal("Error while reading map: type out of range: ", t);
       };
       s->type = type;
       s->floor = gzgetc(f);
