@@ -231,11 +231,11 @@ void entproperty(int prop, int amount) {
 void delent() {
   int e = closestent();
   if (e < 0) {
-    conoutf("no more entities");
+    conoutf("No more entities remain");
     return;
   };
   int t = ents[e].type;
-  conoutf("%s entity deleted", entnames[t]);
+  conoutf("Entity deleted: %s", entnames[t]);
   ents[e].type = NOTUSED;
   addmsg(1, 10, SV_EDITENT, e, NOTUSED, 0, 0, 0, 0, 0, 0, 0);
   if (t == LIGHT)
@@ -244,7 +244,7 @@ void delent() {
 
 int findtype(char *what) {
   loopi(MAXENTTYPES) if (strcmp(what, entnames[i]) == 0) return i;
-  conoutf("unknown entity type \"%s\"", what);
+  conoutf("Unknown entity type \"%s\"", what);
   return NOTUSED;
 }
 
