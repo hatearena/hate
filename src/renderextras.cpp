@@ -544,7 +544,7 @@ void gl_drawhud(int w, int h, int curfps, int nquads, int curvert,
 
   glPopMatrix();
 
-  if (player1->state == CS_ALIVE) {
+  if (player1->state == CS_ALIVE && !editmode) {
     glPushMatrix();
     glOrtho(0, VIRTW, VIRTH, 0, -1, 1);
     glDisable(GL_TEXTURE_2D);
