@@ -499,9 +499,21 @@ void edittag(int tag) {
 };
 
 void newent(char *what, char *a1, char *a2, char *a3, char *a4) {
-  EDITSEL;
-  newentity(sel.x, sel.y, (int)player1->o.z, what, ATOI(a1), ATOI(a2), ATOI(a3),
-            ATOI(a4));
+  if (noteditmode())
+    return;
+  int v1 = ATOI(a1), v2 = ATOI(a2), v3 = ATOI(a3), v4 = ATOI(a4);
+  if (findtype(what) == NOTUSED)
+    return;
+  if (selset) {
+    loop(x, sel.xs) loop(y, sel.ys) {
+      sqr *s = S(sel.x + x, sel.y + y);
+      if (SOLID(s))
+        continue;
+      newentity(sel.x + x, sel.y + y, s->floor + 1, what, v1, v2, v3, v4);
+    };
+  } else {
+    newentity(cx, cy, ch + 1, what, v1, v2, v3, v4);
+  };
 };
 
 COMMANDN(select, selectpos, ARG_4INT);

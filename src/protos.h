@@ -115,6 +115,7 @@ extern int findentity(int type, int index = 0);
 extern void trigger(int tag, int type, bool savegame);
 extern void resettagareas();
 extern void settagareas();
+extern int findtype(char *what);
 extern entity *newentity(int x, int y, int z, char *what, int v1, int v2, int v3, int v4);
 
 // worldlight
