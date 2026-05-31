@@ -519,5 +519,6 @@ COMMANDN(undo, editundo, ARG_NONE);
 COMMAND(copy, ARG_NONE);
 COMMAND(paste, ARG_NONE);
 COMMAND(edittex, ARG_2INT);
+COMMANDN(editdrag, editdrag, ARG_DOWN);
 COMMAND(newent, ARG_5STR);
 COMMAND(perlin, ARG_3INT);

@@ -339,7 +339,12 @@ int main(int argc, char **argv) {
       case SDL_MOUSEBUTTONUP:
         if (lasttype == event.type && lastbut == event.button.button)
           break;
-        keypress(-event.button.button, event.button.state != 0, false, 0);
+        if (editmode && event.button.button == 1) {
+          extern void editdrag(bool);
+          editdrag(event.button.state != 0);
+        } else {
+          keypress(-event.button.button, event.button.state != 0, false, 0);
+        };
         lasttype = event.type;
         lastbut = event.button.button;
         break;
