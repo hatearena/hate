@@ -345,7 +345,7 @@ int main(int argc, char **argv) {
           case SDLK_u:
             execute("undo");
             break;
-          case SDLK_x:
+          case SDLK_z:
             execute("delent");
             break;
           default:
