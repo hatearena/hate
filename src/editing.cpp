@@ -91,3 +91,15 @@ void archvertex(int span, int vert, int delta) {
 VARF(fullbright, 0, 0, 1, if (fullbright) { return; };);
 
 COMMAND(archvertex, ARG_3INT);
+
+bool allowedittoggle() {
+    return !multiplayer();
+};
+
+void edittoggle() {
+    if (!allowedittoggle()) return;
+    editmode = !editmode;
+    conoutf("editmode %s", editmode ? "enabled" : "disabled");
+};
+
+COMMAND(edittoggle, ARG_NONE);
