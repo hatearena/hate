@@ -366,8 +366,9 @@ void boostn(bool on) {
   if (player1->boostmillis > 0)
     return;
   float yawrad = rad(player1->yaw);
-  player1->vel.x += sinf(yawrad) * 60.0f;
-  player1->vel.y += -cosf(yawrad) * 60.0f;
+  float strength = player1->onfloor ? 2.5f : 1.2f;
+  player1->vel.x += sinf(yawrad) * strength;
+  player1->vel.y += -cosf(yawrad) * strength;
   player1->boostmillis = 4000;
   playsoundc(S_BOOST);
 };

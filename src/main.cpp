@@ -355,6 +355,9 @@ int main(int argc, char **argv) {
           };
           if (!handled)
             keypress(event.key.keysym.sym, true, false, 0);
+        } else if (event.key.keysym.sym == SDLK_LSHIFT) {
+          extern void boostn(bool);
+          boostn(event.key.state == SDL_PRESSED);
         } else {
           keypress(event.key.keysym.sym, event.key.state == SDL_PRESSED, false,
                    0);
