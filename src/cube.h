@@ -200,7 +200,8 @@ extern vector<entity> ents;             // map entities
 extern vec worldpos;                    // current target of the crosshair in the world
 extern int lastmillis;                  // last time
 extern int curtime;                     // current frame time
-extern int gunswitchtime;       
+extern int gunswitchtime;
+extern int gunidletime;       
 extern int gamemode, nextmode;
 extern int xtraverts;
 extern bool demoplayback;

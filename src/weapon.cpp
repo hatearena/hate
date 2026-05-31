@@ -11,6 +11,7 @@ const float SGSPREAD = 2;
 vec sg[SGRAYS];
 
 int gunswitchtime = 0;
+int gunidletime = 0;
 
 guninfo guns[NUMGUNS] = {
     {S_CSAW, 150, 20, 0, 0, 3, "chainsaw"},
