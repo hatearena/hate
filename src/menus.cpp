@@ -1,5 +1,7 @@
 #include "cube.h"
 
+extern int botdifficulty, botamount;
+
 struct mitem {
   char *text, *action;
   bool checkbox;
@@ -242,7 +244,19 @@ bool rendermenu() {
                 200, 30, 60, 150);
   };
   loopj(mdisp) {
-    draw_text(m.items[j].text, x, y, 2);
+    if (m.items[j].checkbox) {
+      const char *action = m.items[j].action;
+      int check = 0;
+      if (!strncmp(action, "botdifficulty ", 14) && botdifficulty == atoi(action + 14))
+        check = 1;
+      else if (!strncmp(action, "botamount ", 10) && botamount == atoi(action + 10))
+        check = 1;
+      string buf;
+      sprintf_s(buf)("[%c] %s", check ? 'X' : ' ', m.items[j].text);
+      draw_text(buf, x, y, 2);
+    } else {
+      draw_text(m.items[j].text, x, y, 2);
+    };
     y += step;
   };
   return true;
