@@ -1,5 +1,3 @@
-// clientgame.cpp: core game related stuff
-
 #include "cube.h"
 
 int nextmode = 0; // nextmode becomes gamemode after next map load
@@ -365,8 +363,6 @@ void mousemove(int dx, int dy) {
                     (invmouse ? -1 : 1);
   fixplayer1range();
 };
-
-// damage arriving from the network, monsters, yourself, all ends up here.
 
 void selfdamage(int damage, int actor, dynent *act) {
   if (player1->state != CS_ALIVE || intermission)
