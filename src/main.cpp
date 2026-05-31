@@ -351,11 +351,19 @@ int main(int argc, char **argv) {
 
       case SDL_MOUSEWHEEL:
         if (editmode) {
-          extern int flrceil;
-          if (event.wheel.y > 0)
-            execute("editheight $flrceil 1");
-          else if (event.wheel.y < 0)
-            execute("editheight $flrceil -1");
+          const Uint8 *k = SDL_GetKeyboardState(NULL);
+          if (k[SDL_SCANCODE_X]) {
+            if (event.wheel.y > 0)
+              execute("edittex 1 1");
+            else if (event.wheel.y < 0)
+              execute("edittex 1 -1");
+          } else {
+            extern int flrceil;
+            if (event.wheel.y > 0)
+              execute("editheight $flrceil 1");
+            else if (event.wheel.y < 0)
+              execute("editheight $flrceil -1");
+          };
         } else {
           if (event.wheel.y > 0)
             prevweapon();
