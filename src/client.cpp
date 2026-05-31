@@ -158,7 +158,7 @@ void addmsg(int rel, int num, int type, ...) {
 };
 
 void server_err() {
-  conoutf("server network error, disconnecting...");
+  conoutf("Server network error, disconnecting...");
   disconnect();
 };
 
@@ -283,11 +283,11 @@ void gets2c() // get updates from the server
   if (!clienthost)
     return;
   if (connecting && lastmillis / 3000 > connecting / 3000) {
-    conoutf("attempting to connect...");
+    conoutf("Attempting to connect...");
     connecting = lastmillis;
     ++connattempts;
     if (connattempts > 3) {
-      conoutf("could not connect to server");
+      conoutf("Could not connect to server");
       disconnect();
       return;
     };
@@ -295,14 +295,14 @@ void gets2c() // get updates from the server
   while (clienthost != NULL && enet_host_service(clienthost, &event, 0) > 0)
     switch (event.type) {
     case ENET_EVENT_TYPE_CONNECT:
-      conoutf("connected to server");
+      conoutf("Connected to server");
       connecting = 0;
       throttle();
       break;
 
     case ENET_EVENT_TYPE_RECEIVE:
       if (disconnecting)
-        conoutf("attempting to disconnect...");
+        conoutf("Attempting to disconnect...");
       else
         localservertoclient(event.packet->data, event.packet->dataLength);
       enet_packet_destroy(event.packet);
