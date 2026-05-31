@@ -753,9 +753,13 @@ void drawhudgun(float fovy, float aspect, int farplane) {
       lastmillis - player1->lastaction < rtime) {
     if (player1->gunselect == GUN_RIFLE)
       drawhudmodel(7, 18, rtime / 16.0f, player1->lastaction);
-    else if (player1->gunselect == GUN_SG)
-      drawhudmodel(9, 11, rtime / 9.0f, player1->lastaction);
-    else
+    else if (player1->gunselect == GUN_SG) {
+      int sgtime = lastmillis - player1->lastaction;
+      if (sgtime < 900)
+        drawhudmodel(9, 11, 100.0f, player1->lastaction);
+      else
+        drawhudmodel(19, 1, 100, 0);
+    } else
       drawhudmodel(7, 18, rtime / 18.0f, player1->lastaction);
   } else {
     if (player1->gunselect == GUN_RIFLE && player1->lastaction &&
