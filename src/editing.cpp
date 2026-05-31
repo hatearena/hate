@@ -2,9 +2,6 @@
 
 bool editmode = false;
 
-// the current selection, used by almost all editing commands
-// invariant: all code assumes that these are kept inside MINBORD distance of
-// the edge of the map
 block sel = {
     variable("selx", 0, 0, 4096, &sel.x, NULL, false),
     variable("sely", 0, 0, 4096, &sel.y, NULL, false),
@@ -63,10 +60,12 @@ void toggleedit() {
 COMMANDN(edittoggle, toggleedit, ARG_NONE);
 
 bool allowedittoggle() {
-    if (multiplayer()) return false;
-    extern int numbots;
-    if (numbots > 0) return false;
-    return true;
+  if (multiplayer())
+    return false;
+  extern int numbots;
+  if (numbots > 0)
+    return false;
+  return true;
 };
 
 void correctsel() {
@@ -83,13 +82,13 @@ void correctsel() {
 bool noteditmode() {
   correctsel();
   if (!editmode)
-    conoutf("this function is only allowed in edit mode");
+    conoutf("This function is only allowed in edit mode");
   return !editmode;
 };
 
 bool noselection() {
   if (!selset)
-    conoutf("no selection");
+    conoutf("Editing: No selection");
   return !selset;
 };
 
@@ -197,8 +196,7 @@ void cursorupdate() {
     linestyle(GRIDS, 0xFF, 0xFF, 0xFF);
     block b = {cx, cy, 1, 1};
     box(b, ih, sheight(s, SWS(s, 1, 0, ssize), z),
-        sheight(s, SWS(s, 1, 1, ssize), z),
-        sheight(s, SWS(s, 0, 1, ssize), z));
+        sheight(s, SWS(s, 1, 1, ssize), z), sheight(s, SWS(s, 0, 1, ssize), z));
     linestyle(GRIDS, 0xFF, 0x00, 0x00);
     dot(cx, cy, ih);
     ch = (int)ih;
@@ -250,14 +248,14 @@ void copy() {
 void paste() {
   EDITMP;
   if (!copybuf) {
-    conoutf("nothing to paste");
+    conoutf("Editing: Nothing to paste");
     return;
   };
   sel.xs = copybuf->xs;
   sel.ys = copybuf->ys;
   correctsel();
   if (!selset || sel.xs != copybuf->xs || sel.ys != copybuf->ys) {
-    conoutf("incorrect selection");
+    conoutf("Editing: Incorrect selection");
     return;
   };
   makeundo();
@@ -380,7 +378,7 @@ void edittype(int type) {
   EDITSEL;
   if (type == CORNER && (sel.xs != sel.ys || sel.xs == 3 || sel.xs > 4) &&
       (sel.xs != 8 || sel.x & ~-sel.xs || sel.y & ~-sel.ys)) {
-    conoutf("corner selection must be power of 2 aligned");
+    conoutf("Editing: Corner selection must be power of 2 aligned");
     return;
   };
   edittypexy(type, sel);
@@ -491,11 +489,12 @@ void perlin(int scale, int seed, int psize) {
   sel.ys--;
 };
 
-VARF(fullbright, 0, 0, 1, if (fullbright) {
-  if (noteditmode())
-    return;
-  loopi(mipsize) world[i].r = world[i].g = world[i].b = 176;
-};);
+VARF(
+    fullbright, 0, 0, 1, if (fullbright) {
+      if (noteditmode())
+        return;
+      loopi(mipsize) world[i].r = world[i].g = world[i].b = 176;
+    };);
 
 void edittag(int tag) {
   EDITSELMP;
