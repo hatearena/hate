@@ -258,7 +258,7 @@ void menumanual(int m, int n, char *text) {
     menus[m].items.setsize(0);
   mitem &mitem = menus[m].items.add();
   mitem.text = text;
-  mitem.action = "";
+  mitem.action = (char *)"";
 }
 
 void menuitem(char *text, char *action) {
