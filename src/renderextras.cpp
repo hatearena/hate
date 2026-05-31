@@ -510,7 +510,9 @@ void gl_drawhud(int w, int h, int curfps, int nquads, int curvert,
     glEnable(GL_TEXTURE_2D);
 
     glBlendFunc(GL_ONE, GL_ONE);
+    glColor4ub(255, 255, 255, 255);
     drawicon(128, 128, 30, 1620, 64);
+    glColor4ub(10, 10, 10, 130);
     draw_textf("%d", 105, 1660, 2, player1->health);
 
     if (player1->armour) {
