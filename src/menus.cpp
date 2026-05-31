@@ -50,8 +50,8 @@ void showmenu(char *name) {
 };
 
 int menucompare(mitem *a, mitem *b) {
-  int x = atoi(a->text);
-  int y = atoi(b->text);
+  float x = atof(a->text);
+  float y = atof(b->text);
   if (x > y)
     return -1;
   if (x < y)

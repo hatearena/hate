@@ -86,9 +86,11 @@ void renderscore(dynent *d) {
   sprintf_sd(sbuf)("%3d", d->suicides);
   sprintf_sd(pbuf)("%4d", d->ping);
   sprintf_sd(name)("%s [Dead]", d->name);
-  sprintf_s(scorelines.add().s)("%s\t%s\t%s\t%s\t%s\t%s",
-                                d->state == CS_DEAD ? name : d->name, fbuf, dbuf,
-                                sbuf, pbuf, d->team);
+  float kd = d->deaths > 0 ? (float)d->frags / d->deaths : (float)d->frags;
+  sprintf_sd(kdbuf)("%.2f", kd);
+  sprintf_s(scorelines.add().s)("%s\t%s\t%s\t%s\t%s\t%s\t%s",
+                                kdbuf, d->state == CS_DEAD ? name : d->name,
+                                fbuf, dbuf, sbuf, pbuf, d->team);
   menumanual(0, scorelines.length() - 1, scorelines.last().s);
 };
 
