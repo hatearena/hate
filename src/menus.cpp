@@ -165,14 +165,8 @@ bool rendermenu() {
     {
       glDisable(GL_TEXTURE_2D);
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-      glBegin(GL_QUADS);
-      glColor4ub(20, 20, 50, 217);
-      glVertex2i(x0, y0);
-      glVertex2i(x0 + tablew, y0);
-      glColor4ub(8, 8, 20, 217);
-      glVertex2i(x0 + tablew, y0 + tableh);
-      glVertex2i(x0, y0 + tableh);
-      glEnd();
+      glColor4ub(50, 15, 15, 217);
+      roundedbox(x0, y0, x0 + tablew, y0 + tableh, FONTH / 2);
       glEnable(GL_TEXTURE_2D);
     }
 
@@ -181,7 +175,7 @@ bool rendermenu() {
 
     glDisable(GL_TEXTURE_2D);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glColor3ub(50, 55, 85);
+    glColor3ub(85, 50, 50);
     glBegin(GL_QUADS);
     glVertex2i(x0 + border, headery);
     glVertex2i(x0 + tablew - border, headery);
@@ -193,7 +187,7 @@ bool rendermenu() {
     loopi(ncols) draw_text(hdr[i], colx[i], headery, 2);
 
     glDisable(GL_TEXTURE_2D);
-    glColor3ub(90, 95, 140);
+    glColor3ub(140, 90, 90);
     glBegin(GL_LINES);
     glVertex2i(x0 + border, sep_y);
     glVertex2i(x0 + tablew - border, sep_y);
@@ -205,7 +199,7 @@ bool rendermenu() {
       if (i % 2 == 1) {
         glDisable(GL_TEXTURE_2D);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        glColor4ub(35, 35, 60, 100);
+        glColor4ub(60, 35, 35, 100);
         glBegin(GL_QUADS);
         glVertex2i(x0 + border, datay);
         glVertex2i(x0 + tablew - border, datay);
@@ -217,7 +211,7 @@ bool rendermenu() {
       loopj(ncols) draw_text(rows_text[i][j], colx[j], datay, 2);
 
       glDisable(GL_TEXTURE_2D);
-      glColor4ub(55, 55, 85, 120);
+      glColor4ub(85, 55, 55, 120);
       glBegin(GL_LINES);
       glVertex2i(x0 + border, datay + rowstep);
       glVertex2i(x0 + tablew - border, datay + rowstep);
@@ -227,7 +221,7 @@ bool rendermenu() {
     };
 
     glDisable(GL_TEXTURE_2D);
-    glColor4ub(65, 65, 100, 150);
+    glColor4ub(100, 65, 65, 150);
     glBegin(GL_LINES);
     cx = x0 + border;
     loopi(ncols - 1) {
@@ -238,7 +232,7 @@ bool rendermenu() {
     };
     glEnd();
 
-    glColor3ub(75, 80, 120);
+    glColor3ub(120, 75, 75);
     glBegin(GL_LINE_LOOP);
     glVertex2i(x0 + border, y0 + border);
     glVertex2i(x0 + tablew - border, y0 + border);
@@ -274,14 +268,8 @@ bool rendermenu() {
   {
     glDisable(GL_TEXTURE_2D);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glBegin(GL_QUADS);
-    glColor4ub(20, 20, 50, 217);
-    glVertex2i(x - pad, y - FONTH);
-    glVertex2i(x + w + pad, y - FONTH);
-    glColor4ub(8, 8, 20, 217);
-    glVertex2i(x + w + pad, y + h + FONTH);
-    glVertex2i(x - pad, y + h + FONTH);
-    glEnd();
+    glColor4ub(50, 15, 15, 217);
+    roundedbox(x - pad, y - FONTH, x + w + pad, y + h + FONTH, FONTH / 2);
     glEnable(GL_TEXTURE_2D);
   }
   draw_text(title, x, y, 2);
@@ -291,10 +279,10 @@ bool rendermenu() {
     glDisable(GL_TEXTURE_2D);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glBegin(GL_QUADS);
-    glColor4ub(50, 100, 200, 217);
+    glColor4ub(200, 50, 50, 217);
     glVertex2i(x - FONTH, bh - 10);
     glVertex2i(x + w + FONTH, bh - 10);
-    glColor4ub(30, 60, 150, 217);
+    glColor4ub(150, 30, 30, 217);
     glVertex2i(x + w + FONTH, bh + FONTH + 10);
     glVertex2i(x - FONTH, bh + FONTH + 10);
     glEnd();
