@@ -1,11 +1,13 @@
 #include "cube.h"
 
-extern bool los(float lx, float ly, float lz, float bx, float by, float bz, vec &v);
+extern bool los(float lx, float ly, float lz, float bx, float by, float bz,
+                vec &v);
 
 dvector bots;
 int numbots = 0;
 
-static const char *botnames[] = {"Cerelo", "Dingus", "Ceria", "Deathly"};
+static const char *botnames[] = {"Cerelo", "Diaso", "Ceria", "Deathly",
+                                 "Ra",     "Va",    "Never"};
 static const int numbotnames = sizeof(botnames) / sizeof(botnames[0]);
 
 static void genbotname(char *buf) {
@@ -245,8 +247,8 @@ static void botaction(dynent *m) {
     int attacktime = lastmillis - m->lastaction;
     if (attacktime > 50) {
       vec tmp;
-      if (los(m->o.x, m->o.y, m->o.z - 0.2f,
-              m->enemy->o.x, m->enemy->o.y, m->enemy->o.z, tmp)) {
+      if (los(m->o.x, m->o.y, m->o.z - 0.2f, m->enemy->o.x, m->enemy->o.y,
+              m->enemy->o.z, tmp)) {
         m->attacktarget = m->enemy->o;
         m->attacking = true;
         shoot(m, m->attacktarget);
