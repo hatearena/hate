@@ -592,6 +592,28 @@ void gl_drawhud(int w, int h, int curfps, int nquads, int curvert,
     glPopMatrix();
   };
 
+  if (editmode) {
+    extern int closestent();
+    int e = closestent();
+    glPushMatrix();
+    glOrtho(0, VIRTW, VIRTH, 0, -1, 1);
+    glEnable(GL_TEXTURE_2D);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glColor4ub(10, 10, 10, 160);
+    roundedbox(20, 1660, VIRTW - 20, 1760, 10);
+    glColor4ub(255, 255, 255, 255);
+    if (e >= 0) {
+      entity &ent = ents[e];
+      draw_textf("[%s] pos:(%d,%d,%d)  a1:%d a2:%d a3:%d a4:%d",
+                 30, 1690, 2, entnames[ent.type],
+                 ent.x, ent.y, ent.z,
+                 ent.attr1, ent.attr2, ent.attr3, ent.attr4);
+    } else {
+      draw_text("[ ]", 30, 1690, 2);
+    }
+    glPopMatrix();
+  };
+
   glDepthMask(GL_TRUE);
   glDisable(GL_BLEND);
   glDisable(GL_TEXTURE_2D);
