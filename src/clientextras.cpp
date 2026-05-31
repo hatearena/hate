@@ -81,10 +81,12 @@ struct sline {
 vector<sline> scorelines;
 
 void renderscore(dynent *d) {
-  sprintf_sd(lag)("%d", d->plag);
+  sprintf_sd(fbuf)("%3d", d->frags);
+  sprintf_sd(dbuf)("%3d", d->deaths);
+  sprintf_sd(sbuf)("%3d", d->suicides);
+  sprintf_sd(pbuf)("%4d", d->ping);
   sprintf_sd(name)("%s [Dead]", d->name);
-  sprintf_s(scorelines.add().s)("%d\t%s\t%d\t%s\t%s", d->frags,
-                                d->state == CS_LAGGED ? "LAG" : lag, d->ping,
+  sprintf_s(scorelines.add().s)("%s\t%s\t%s\t%s\t%s\t%s", fbuf, dbuf, sbuf, pbuf,
                                 d->team, d->state == CS_DEAD ? name : d->name);
   menumanual(0, scorelines.length() - 1, scorelines.last().s);
 };

@@ -309,6 +309,7 @@ void botpain(dynent *m, int damage, dynent *d) {
     m->state = CS_DEAD;
     m->lastaction = lastmillis;
     m->attacking = false;
+    m->deaths++;
     spawngibs(m->o, 4);
     if (d == player1) {
       player1->frags++;

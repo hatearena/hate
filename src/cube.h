@@ -113,6 +113,7 @@ struct dynent                           // players & monsters
 	int lifesequence;                   // sequence id for each respawn, used in damage test
 	int state;                          // one of CS_* below
 	int frags;
+	int deaths, suicides;
 	int health, armour, armourtype, quadmillis;
 	int gunselect, gunwait;
 	int lastaction, lastattackgun, lastmove;

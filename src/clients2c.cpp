@@ -215,6 +215,7 @@ void localservertoclient(uchar *buf,
       int actor = getint(p);
       if (actor == cn) {
         conoutf("%s suicided", d->name);
+        d->suicides++;
       } else if (actor == clientnum) {
         int frags;
         if (isteam(player1->team, d->team)) {
@@ -235,6 +236,7 @@ void localservertoclient(uchar *buf,
           };
         };
       };
+      d->deaths++;
       playsound(S_DIE1 + rnd(2), &d->o);
       d->lifesequence++;
       break;

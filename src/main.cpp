@@ -215,7 +215,7 @@ int main(int argc, char **argv) {
 
   log("cfg");
 
-  newmenu("frags\tpj\tping\tteam\tname");
+  newmenu("frags\tdeaths\tsuic\tping\tteam\tname");
   newmenu("ping\tplr\tserver");
 
   exec("data/keymap.cfg");

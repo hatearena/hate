@@ -56,6 +56,154 @@ bool rendermenu() {
   if (vmenu == 1)
     refreshservers();
   gmenu &m = menus[vmenu];
+
+  if (vmenu == 0) {
+    int numrows = m.items.length();
+    if (numrows < 1) return true;
+    int numcols = 1;
+    for (char *p = m.name; *p; p++) if (*p == '\t') numcols++;
+
+    enum { MAXCOLS = 16, MAXROWS = 128 };
+    string hdr[MAXCOLS];
+    string rows_text[MAXROWS][MAXCOLS];
+    int ncols = min(numcols, MAXCOLS);
+    int nrows = min(numrows, MAXROWS);
+
+    {
+      string buf;
+      strcpy_s(buf, m.name);
+      char *start = buf;
+      loopi(ncols) {
+        char *end = start;
+        while (*end && *end != '\t') end++;
+        char saved = *end;
+        *end = '\0';
+        strcpy_s(hdr[i], start);
+        if (!saved) { ncols = i + 1; break; };
+        start = end + 1;
+      };
+    };
+
+    loopi(nrows) {
+      string buf;
+      strcpy_s(buf, m.items[i].text);
+      char *start = buf;
+      loopj(ncols) {
+        char *end = start;
+        while (*end && *end != '\t') end++;
+        char saved = *end;
+        *end = '\0';
+        strcpy_s(rows_text[i][j], start);
+        if (!saved) break;
+        start = end + 1;
+      };
+    };
+
+    int colpad = FONTH / 3;
+    int gap = FONTH / 4;
+    int rowstep = FONTH / 4 * 5;
+    int border = FONTH / 2;
+
+    int colw[MAXCOLS];
+    loopi(ncols) {
+      colw[i] = text_width(hdr[i]);
+      loopj(nrows) {
+        int w = text_width(rows_text[j][i]);
+        if (w > colw[i]) colw[i] = w;
+      };
+    };
+
+    int tablew = border * 2;
+    loopi(ncols) tablew += colw[i] + 2 * colpad;
+    tablew += (ncols - 1) * gap;
+
+    int tableh = (nrows + 1) * rowstep + border * 2;
+    int x0 = (VIRTW - tablew) / 2;
+    int y0 = (VIRTH - tableh) / 2;
+
+    int colx[MAXCOLS];
+    int cx = x0 + border;
+    loopi(ncols) {
+      colx[i] = cx + colpad;
+      cx += colw[i] + 2 * colpad + gap;
+    };
+
+    overlay(160);
+    gradientbox(x0, y0, x0 + tablew, y0 + tableh, 20, 20, 50, 8, 8, 20);
+
+    int headery = y0 + border;
+    int sep_y = headery + rowstep;
+
+    glDisable(GL_TEXTURE_2D);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glColor3ub(50, 55, 85);
+    glBegin(GL_QUADS);
+    glVertex2i(x0 + border, headery);
+    glVertex2i(x0 + tablew - border, headery);
+    glVertex2i(x0 + tablew - border, sep_y);
+    glVertex2i(x0 + border, sep_y);
+    glEnd();
+    glEnable(GL_TEXTURE_2D);
+
+    loopi(ncols) draw_text(hdr[i], colx[i], headery, 2);
+
+    glDisable(GL_TEXTURE_2D);
+    glColor3ub(90, 95, 140);
+    glBegin(GL_LINES);
+    glVertex2i(x0 + border, sep_y);
+    glVertex2i(x0 + tablew - border, sep_y);
+    glEnd();
+    glEnable(GL_TEXTURE_2D);
+
+    int datay = sep_y + 1;
+    loopi(nrows) {
+      if (i % 2 == 1) {
+        glDisable(GL_TEXTURE_2D);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glColor4ub(35, 35, 60, 100);
+        glBegin(GL_QUADS);
+        glVertex2i(x0 + border, datay);
+        glVertex2i(x0 + tablew - border, datay);
+        glVertex2i(x0 + tablew - border, datay + rowstep);
+        glVertex2i(x0 + border, datay + rowstep);
+        glEnd();
+        glEnable(GL_TEXTURE_2D);
+      };
+      loopj(ncols) draw_text(rows_text[i][j], colx[j], datay, 2);
+
+      glDisable(GL_TEXTURE_2D);
+      glColor4ub(55, 55, 85, 120);
+      glBegin(GL_LINES);
+      glVertex2i(x0 + border, datay + rowstep);
+      glVertex2i(x0 + tablew - border, datay + rowstep);
+      glEnd();
+      glEnable(GL_TEXTURE_2D);
+      datay += rowstep;
+    };
+
+    glDisable(GL_TEXTURE_2D);
+    glColor4ub(65, 65, 100, 150);
+    glBegin(GL_LINES);
+    cx = x0 + border;
+    loopi(ncols - 1) {
+      cx += colw[i] + 2 * colpad + gap / 2;
+      glVertex2i(cx, y0 + border + 1);
+      glVertex2i(cx, y0 + tableh - border - 1);
+      cx += gap / 2;
+    };
+    glEnd();
+
+    glColor3ub(75, 80, 120);
+    glBegin(GL_LINE_LOOP);
+    glVertex2i(x0 + border, y0 + border);
+    glVertex2i(x0 + tablew - border, y0 + border);
+    glVertex2i(x0 + tablew - border, y0 + tableh - border);
+    glVertex2i(x0 + border, y0 + tableh - border);
+    glEnd();
+    glEnable(GL_TEXTURE_2D);
+    return true;
+  };
+
   sprintf_sd(title)(vmenu > 1 ? "[ %s ]" : "%s", m.name);
   int mdisp = m.items.length();
   int w = 0;

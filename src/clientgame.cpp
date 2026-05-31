@@ -106,6 +106,8 @@ dynent *newdynent() // create a new blank player or monster
   d->eyeheight = 3.2f;
   d->aboveeye = 0.7f;
   d->frags = 0;
+  d->deaths = 0;
+  d->suicides = 0;
   d->plag = 0;
   d->ping = 0;
   d->lastupdate = lastmillis;
@@ -394,6 +396,7 @@ void selfdamage(int damage, int actor, dynent *act) {
       actor = getclientnum();
       conoutf("You suicided.");
       addmsg(1, 2, SV_FRAGS, --player1->frags);
+      player1->suicides++;
     } else {
       dynent *a = getclient(actor);
       if (a) {
@@ -404,6 +407,7 @@ void selfdamage(int damage, int actor, dynent *act) {
         };
       };
     };
+    player1->deaths++;
     showscores(true);
     addmsg(1, 2, SV_DIED, actor);
     player1->lifesequence++;
@@ -460,7 +464,9 @@ void startmap(char *name) // called just after a map load
   spawncycle = -1;
   spawnplayer(player1);
   player1->frags = 0;
-  loopv(players) if (players[i]) players[i]->frags = 0;
+  player1->deaths = 0;
+  player1->suicides = 0;
+  loopv(players) if (players[i]) { players[i]->frags = 0; players[i]->deaths = 0; players[i]->suicides = 0; }
   resetspawns();
   strcpy_s(clientmap, name);
   setvar("gamespeed", 100);
