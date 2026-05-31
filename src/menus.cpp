@@ -2,6 +2,7 @@
 
 struct mitem {
   char *text, *action;
+  bool checkbox;
 };
 
 struct gmenu {
@@ -266,9 +267,19 @@ void menuitem(char *text, char *action) {
   mitem &mi = menu.items.add();
   mi.text = newstring(text);
   mi.action = action[0] ? newstring(action) : mi.text;
+  mi.checkbox = false;
+};
+
+void menuitem_checkbox(char *text, char *action) {
+  gmenu &menu = menus.last();
+  mitem &mi = menu.items.add();
+  mi.text = newstring(text);
+  mi.action = action[0] ? newstring(action) : mi.text;
+  mi.checkbox = true;
 };
 
 COMMAND(menuitem, ARG_2STR);
+COMMANDN(menuitem_checkbox, menuitem_checkbox, ARG_2STR);
 COMMAND(showmenu, ARG_1STR);
 COMMAND(newmenu, ARG_1STR);
 
@@ -297,9 +308,13 @@ bool menukey(int code, bool isdown) {
       char *action = menus[vmenu].items[menusel].action;
       if (vmenu == 1)
         connects(getservername(menusel));
-      menustack.add(vmenu);
-      menuset(-1);
-      execute(action, true);
+      if (menus[vmenu].items[menusel].checkbox) {
+        execute(action, true);
+      } else {
+        menustack.add(vmenu);
+        menuset(-1);
+        execute(action, true);
+      };
     };
   };
   return true;

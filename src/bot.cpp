@@ -5,6 +5,8 @@ extern bool los(float lx, float ly, float lz, float bx, float by, float bz,
 
 dvector bots;
 int numbots = 0;
+VAR(botdifficulty, 0, 4, 4);
+VAR(botamount, 1, 4, 16);
 
 static const char *botnames[] = {"Cerelo", "Diaso", "Ceria", "Deathly", "Ra",
                                  "Va",     "Never", "Abu",   "Re"};
@@ -209,11 +211,20 @@ static void botaction(dynent *m) {
       -(float)atan2(m->enemy->o.x - m->o.x, m->enemy->o.y - m->o.y) / PI * 180 +
       180;
 
+  float aimspread = (4 - botdifficulty) * 6.0f;
+  if (aimspread > 0) {
+    enemyyaw += (rnd(101) - 50) / 100.0f * aimspread;
+  }
   m->targetyaw = enemyyaw;
-  m->pitch = atan2(m->enemy->o.z - m->o.z, disttoenemy) * 180 / PI;
+
+  float enemypitch = atan2(m->enemy->o.z - m->o.z, disttoenemy) * 180 / PI;
+  if (aimspread > 0) {
+    enemypitch += (rnd(101) - 50) / 100.0f * aimspread * 0.5f;
+  }
+  m->pitch = enemypitch;
 
   normalise(m, m->targetyaw);
-  float turnrate = curtime * 0.3f;
+  float turnrate = curtime * (0.15f + botdifficulty * 0.05f);
   float yawdiff = m->targetyaw - m->yaw;
   if (fabs(yawdiff) < turnrate)
     m->yaw = m->targetyaw;
@@ -243,9 +254,12 @@ static void botaction(dynent *m) {
     m->strafe = (rnd(3) - 1);
   }
 
-  if (disttoenemy < 128 && m->enemy->state == CS_ALIVE) {
+  int maxrange = 48 + botdifficulty * 20;
+  int reacttime = 200 - botdifficulty * 40;
+  if (reacttime < 50) reacttime = 50;
+  if (disttoenemy < maxrange && m->enemy->state == CS_ALIVE) {
     int attacktime = lastmillis - m->lastaction;
-    if (attacktime > 50) {
+    if (attacktime > reacttime) {
       vec tmp;
       if (los(m->o.x, m->o.y, m->o.z - 0.2f, m->enemy->o.x, m->enemy->o.y,
               m->enemy->o.z, tmp)) {
@@ -274,8 +288,8 @@ void botthink() {
       botaction(b);
     } else if (b->state == CS_DEAD && lastmillis - b->lastaction > 5000) {
       spawnplayer(b);
-      b->health = 100;
-      b->armour = 0;
+      b->health = 50 + botdifficulty * 25;
+      b->armour = botdifficulty * 25;
       b->state = CS_ALIVE;
       b->monsterstate = M_HOME;
       b->enemy = player1;
@@ -325,20 +339,7 @@ void botpain(dynent *m, int damage, dynent *d) {
 
 extern bool isdedicated;
 
-void addbotcmd() {
-  if (isdedicated) {
-    conoutf("bots not supported on dedicated servers");
-    return;
-  }
-  if (multiplayer()) {
-    conoutf("only the server admin can spawn bots");
-    return;
-  }
-  if (gamemode < 0) {
-    conoutf("bots only work in multiplayer modes");
-    return;
-  }
-
+static void spawnonebot() {
   dynent *b = newdynent();
   spawnplayer(b);
   b->monsterstate = M_HOME;
@@ -348,9 +349,9 @@ void addbotcmd() {
   b->move = 1;
   b->targetyaw = b->yaw;
   b->gunselect = GUN_SG + rnd(4);
-  b->maxspeed = 36.0f;
-  b->health = 100;
-  b->armour = 0;
+  b->maxspeed = 28.0f + botdifficulty * 4.0f;
+  b->health = 50 + botdifficulty * 25;
+  b->armour = botdifficulty * 25;
   loopi(NUMGUNS) b->ammo[i] = 100;
   b->anger = 0;
   b->lastupdate = lastmillis;
@@ -363,4 +364,26 @@ void addbotcmd() {
   conoutf("%s spawned.", b->name);
 }
 
-COMMANDN(addbot, addbotcmd, ARG_NONE);
+void addbotcmd(int n) {
+  if (isdedicated) {
+    conoutf("bots not supported on dedicated servers");
+    return;
+  }
+  if (multiplayer()) {
+    conoutf("only the server admin can spawn bots");
+    return;
+  }
+  if (gamemode < 0) {
+    conoutf("bots only work in multiplayer modes");
+    return;
+  }
+  if (n < 1) n = 1;
+  loopi(n) spawnonebot();
+}
+
+void addbotspawn() {
+  addbotcmd(botamount);
+}
+
+COMMANDN(addbot, addbotcmd, ARG_1INT);
+COMMANDN(addbotspawn, addbotspawn, ARG_NONE);

@@ -237,7 +237,7 @@ int main(int argc, char **argv) {
 
   log("localconnect");
   localconnect();
-  changemap("drowned");
+  changemap("duel3");
   log("mainloop");
 
   int ignore = 5;
