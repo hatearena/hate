@@ -321,7 +321,8 @@ int main(int argc, char **argv) {
 
       case SDL_KEYDOWN:
       case SDL_KEYUP:
-        if (editmode && event.key.state == SDL_PRESSED) {
+        extern bool saycommandon;
+        if (editmode && event.key.state == SDL_PRESSED && !saycommandon) {
           bool handled = true;
           switch (event.key.keysym.sym) {
           case SDLK_INSERT:
