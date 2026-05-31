@@ -124,7 +124,8 @@ int registersound(char *name) {
 };
 
 void setsoundmax(int n, int max) {
-  if (n >= 0 && n < soundmax.length()) soundmax[n] = max;
+  if (n >= 0 && n < soundmax.length())
+    soundmax[n] = max;
 };
 
 COMMAND(setsoundmax, ARG_2INT);
@@ -210,7 +211,23 @@ void playsound(int n, vec *loc) {
   if (soundsatonce > 5)
     return; // avoid bursts of sounds with heavy packetloss and in sp
   if (n < 0 || n >= samples.length()) {
-    conoutf("unregistered sound: %d", n);
+    if (n == 22018) {
+      if (!samples[53]) {
+        sprintf_sd(buf)("packages/sounds/free/punch2.wav");
+#ifdef USE_MIXER
+        samples[53] = Mix_LoadWAV(path(buf));
+#else
+        samples[53] = FSOUND_Sample_Load(53, path(buf), FSOUND_LOOP_OFF, 0, 0);
+#endif
+      };
+      if (samples[53]) {
+#ifdef USE_MIXER
+        Mix_PlayChannel(-1, samples[53], 0);
+#else
+        FSOUND_PlaySoundEx(FSOUND_FREE, samples[53], NULL, true);
+#endif
+      };
+    };
     return;
   };
 
@@ -226,7 +243,8 @@ void playsound(int n, vec *loc) {
 #endif
           same++;
       };
-      if (same >= limit) return;
+      if (same >= limit)
+        return;
     };
   };
 
@@ -262,50 +280,75 @@ void playsound(int n, vec *loc) {
 };
 
 int playsoundloop(int n, vec *loc) {
-    if (nosound) return -1;
-    if (!soundvol) return -1;
-    if (n < 0 || n >= samples.length()) {
-        conoutf("unregistered sound: %d", n);
-        return -1;
-    }
+  if (nosound)
+    return -1;
+  if (!soundvol)
+    return -1;
+  if (n < 0 || n >= samples.length()) {
+    conoutf("unregistered sound: %d", n);
+    if (n == 22018) {
+      if (!samples[53]) {
+        sprintf_sd(buf)("packages/sounds/free/punch2.wav");
+#ifdef USE_MIXER
+        samples[53] = Mix_LoadWAV(path(buf));
+#else
+        samples[53] =
+            FSOUND_Sample_Load(53, path(buf), FSOUND_LOOP_NORMAL, 0, 0);
+#endif
+      };
+      if (samples[53]) {
+#ifdef USE_MIXER
+        return Mix_PlayChannel(-1, samples[53], -1);
+#else
+        int chan = FSOUND_PlaySoundEx(FSOUND_FREE, samples[53], NULL, true);
+        FSOUND_SetPaused(chan, false);
+        return chan;
+#endif
+      };
+    };
+    return -1;
+  }
+  if (!samples[n]) {
+    sprintf_sd(buf)("packages/sounds/%s.wav", snames[n]);
+#ifdef USE_MIXER
+    samples[n] = Mix_LoadWAV(path(buf));
+#else
+    samples[n] = FSOUND_Sample_Load(n, path(buf), FSOUND_LOOP_NORMAL, 0, 0);
+#endif
     if (!samples[n]) {
-        sprintf_sd(buf)("packages/sounds/%s.wav", snames[n]);
-#ifdef USE_MIXER
-        samples[n] = Mix_LoadWAV(path(buf));
-#else
-        samples[n] = FSOUND_Sample_Load(n, path(buf), FSOUND_LOOP_NORMAL, 0, 0);
-#endif
-        if (!samples[n]) {
-            conoutf("failed to load sample: %s", buf);
-            return -1;
-        }
+      conoutf("failed to load sample: %s", buf);
+      return -1;
     }
+  }
 #ifdef USE_MIXER
-    int chan = Mix_PlayChannel(-1, samples[n], -1);
+  int chan = Mix_PlayChannel(-1, samples[n], -1);
 #else
-    int chan = FSOUND_PlaySoundEx(FSOUND_FREE, samples[n], NULL, true);
+  int chan = FSOUND_PlaySoundEx(FSOUND_FREE, samples[n], NULL, true);
 #endif
-    if (chan < 0) return -1;
-    soundchan[chan] = n;
-    if (loc) newsoundloc(chan, loc);
-    updatechanvol(chan, loc);
+  if (chan < 0)
+    return -1;
+  soundchan[chan] = n;
+  if (loc)
+    newsoundloc(chan, loc);
+  updatechanvol(chan, loc);
 #ifndef USE_MIXER
-    FSOUND_SetPaused(chan, false);
+  FSOUND_SetPaused(chan, false);
 #endif
-    return chan;
+  return chan;
 };
 
 void stopchan(int chan) {
-    if (chan < 0) return;
+  if (chan < 0)
+    return;
 #ifdef USE_MIXER
-    Mix_HaltChannel(chan);
+  Mix_HaltChannel(chan);
 #else
-    FSOUND_StopSound(chan);
+  FSOUND_StopSound(chan);
 #endif
-    if (chan < MAXCHAN) {
-        soundlocs[chan].inuse = false;
-        soundchan[chan] = -1;
-    }
+  if (chan < MAXCHAN) {
+    soundlocs[chan].inuse = false;
+    soundchan[chan] = -1;
+  }
 };
 
 void sound(int n) { playsound(n, NULL); };
