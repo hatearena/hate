@@ -399,8 +399,6 @@ void moveplayer(dynent *pl, int moveres, bool local, int curtime) {
         pl->o.z > s->ceil + (s->type == CHF ? s->vdelta / 4 : 0);
   };
 
-  // automatically apply smooth roll when strafing
-
   if (pl->strafe == 0) {
     pl->roll = pl->roll / (1 + (float)sqrt((float)curtime) / 25);
   } else {
@@ -410,8 +408,6 @@ void moveplayer(dynent *pl, int moveres, bool local, int curtime) {
     if (pl->roll < -maxroll)
       pl->roll = (float)-maxroll;
   };
-
-  // play sounds on water transitions
 
   if (!pl->inwater && water) {
     playsound(S_SPLASH2, &pl->o);
