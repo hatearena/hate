@@ -228,7 +228,7 @@ void makeundo() {
 void editundo() {
   EDITMP;
   if (undos.empty()) {
-    conoutf("nothing more to undo");
+    conoutf("Editing: Nothing more to undo");
     return;
   };
   block *p = undos.pop();
