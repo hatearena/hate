@@ -1,4 +1,4 @@
-This repo contains the code for HATE.
+This repo contains the code for HATE, a free and open source multiplayer FPS.
 
 It is based off of the original Cube engine.
 
