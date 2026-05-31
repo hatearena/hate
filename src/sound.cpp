@@ -17,6 +17,9 @@ struct soundloc {
   bool inuse;
 } soundlocs[MAXCHAN];
 
+int soundchan[MAXCHAN];
+VAR(maxsamesound, 1, 2, 8);
+
 #ifdef USE_MIXER
 #include "SDL_mixer.h"
 #define MAXVOL MIX_MAX_VOLUME
@@ -53,6 +56,7 @@ VAR(soundbufferlen, 128, 1024, 4096);
 
 void initsound() {
   memset(soundlocs, 0, sizeof(soundloc) * MAXCHAN);
+  loopi(MAXCHAN) soundchan[i] = -1;
 #ifdef USE_MIXER
   if (Mix_OpenAudio(SOUNDFREQ, MIX_DEFAULT_FORMAT, 2, soundbufferlen) < 0) {
     conoutf("sound init failed (SDL_mixer): %s", (size_t)Mix_GetError());
@@ -171,8 +175,10 @@ void updatevol() {
     if (FSOUND_IsPlaying(i))
 #endif
       updatechanvol(i, &soundlocs[i].loc);
-    else
+    else {
       soundlocs[i].inuse = false;
+      soundchan[i] = -1;
+    };
   };
 };
 
@@ -200,6 +206,19 @@ void playsound(int n, vec *loc) {
     return;
   };
 
+  {
+    int same = 0;
+    loopi(MAXCHAN) if (soundchan[i] == n) {
+#ifdef USE_MIXER
+      if (Mix_Playing(i))
+#else
+      if (FSOUND_IsPlaying(i))
+#endif
+        same++;
+    };
+    if (same >= maxsamesound) return;
+  };
+
   if (!samples[n]) {
     sprintf_sd(buf)("packages/sounds/%s.wav", snames[n]);
 
@@ -222,6 +241,7 @@ void playsound(int n, vec *loc) {
 #endif
   if (chan < 0)
     return;
+  soundchan[chan] = n;
   if (loc)
     newsoundloc(chan, loc);
   updatechanvol(chan, loc);
