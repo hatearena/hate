@@ -253,6 +253,8 @@ void pickup(int n, dynent *d) {
 };
 
 void checkitems() {
+  if (editmode)
+    return;
   loopv(ents) {
     entity &e = ents[i];
     if (e.type == NOTUSED)
