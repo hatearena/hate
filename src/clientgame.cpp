@@ -340,6 +340,20 @@ COMMAND(left, ARG_DOWN);
 COMMAND(right, ARG_DOWN);
 COMMANDN(jump, jumpn, ARG_DOWN);
 COMMAND(attack, ARG_DOWN);
+
+void ads(bool on) {
+  if (intermission)
+    return;
+  if (player1->gunselect == GUN_CSAW) {
+    player1->ads = false;
+    return;
+  };
+  player1->ads = on;
+  if (on)
+    player1->adstime = lastmillis;
+};
+
+COMMANDN(ads, ads, ARG_DOWN);
 COMMAND(showscores, ARG_DOWN);
 
 void fixplayer1range() {

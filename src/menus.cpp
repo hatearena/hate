@@ -50,8 +50,13 @@ void showmenu(char *name) {
 };
 
 int menucompare(mitem *a, mitem *b) {
-  float x = atof(a->text);
-  float y = atof(b->text);
+  const char *pa = a->text, *pb = b->text;
+  while (*pa && *pa != '\t') pa++;
+  while (*pb && *pb != '\t') pb++;
+  if (*pa) pa++;
+  if (*pb) pb++;
+  float x = atof(pa);
+  float y = atof(pb);
   if (x > y)
     return -1;
   if (x < y)

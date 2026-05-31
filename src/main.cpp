@@ -222,7 +222,7 @@ int main(int argc, char **argv) {
 
   log("cfg");
 
-  newmenu("KD\tName\tFrags\tDeaths\tSuicides\tPing\tTeam");
+  newmenu("Name\tKD\tFrags\tDeaths\tSuicides\tPing\tTeam");
   newmenu("Ping\tPlr\tServer");
 
   exec("data/keymap.cfg");

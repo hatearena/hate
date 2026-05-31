@@ -188,7 +188,7 @@ void localservertoclient(uchar *buf,
       e.y = getint(p) / DMF;
       e.z = getint(p) / DMF;
       if (gun == GUN_SG)
-        createrays(s, e);
+        createrays(s, e, d->ads);
       shootv(gun, s, e, d);
       break;
     };

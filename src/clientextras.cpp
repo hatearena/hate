@@ -89,7 +89,7 @@ void renderscore(dynent *d) {
   float kd = d->deaths > 0 ? (float)d->frags / d->deaths : (float)d->frags;
   sprintf_sd(kdbuf)("%.2f", kd);
   sprintf_s(scorelines.add().s)("%s\t%s\t%s\t%s\t%s\t%s\t%s",
-                                kdbuf, d->state == CS_DEAD ? name : d->name,
+                                d->state == CS_DEAD ? name : d->name, kdbuf,
                                 fbuf, dbuf, sbuf, pbuf, d->team);
   menumanual(0, scorelines.length() - 1, scorelines.last().s);
 };

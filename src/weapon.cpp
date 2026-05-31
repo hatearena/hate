@@ -93,11 +93,11 @@ void prevweapon() {
   }
 }
 
-void createrays(vec &from,
-                vec &to) // create random spread of rays for the shotgun
+void createrays(vec &from, vec &to, bool ads) // create random spread of rays for the shotgun
 {
   vdist(dist, dvec, from, to);
-  float f = dist * SGSPREAD / 1000;
+  float s = ads ? SGSPREAD * 0.5f : SGSPREAD;
+  float f = dist * s / 1000;
   loopi(SGRAYS) {
 #define RNDD (rnd(101) - 50) * f
     vec r = {RNDD, RNDD, RNDD};
@@ -401,7 +401,7 @@ void shoot(dynent *d, vec &targ) {
     vadd(to, unitv);
   };
   if (d->gunselect == GUN_SG)
-    createrays(from, to);
+    createrays(from, to, d->ads);
 
   if (d->quadmillis && attacktime > 200)
     playsoundc(S_ITEMPUP);

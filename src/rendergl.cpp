@@ -731,6 +731,14 @@ void drawhudmodel(int start, int end, float speed, int base) {
     }
   }
 
+  if (player1->ads && player1->gunselect != GUN_CSAW) {
+    int elapsed = lastmillis - player1->adstime;
+    float t = elapsed < 200 ? (float)elapsed / 200.0f : 1.0f;
+    bx *= 1.0f - t;
+    bz -= t * 1.2f;
+    scale += t * 0.1f;
+  }
+
   rendermodel(hudgunnames[player1->gunselect], start, end, 0, 1.0f,
               player1->o.x + bx, player1->o.z + bz, player1->o.y,
               player1->yaw + 90, player1->pitch, false, scale, speed, 0, base);
@@ -790,7 +798,13 @@ void drawhudgun(float fovy, float aspect, int farplane) {
 
 void gl_drawframe(int w, int h, float curfps) {
   float hf = hdr.waterlevel - 0.3f;
-  float fovy = (float)fov * h / w;
+  float afov = (float)fov;
+  if (player1->ads && player1->gunselect != GUN_CSAW) {
+    int elapsed = lastmillis - player1->adstime;
+    float t = elapsed < 200 ? (float)elapsed / 200.0f : 1.0f;
+    afov = fov * (1.0f - t * 0.45f);
+  };
+  float fovy = afov * h / w;
   float aspect = w / (float)h;
   bool underwater = player1->o.z < hf;
 
@@ -832,7 +846,7 @@ void gl_drawframe(int w, int h, float curfps) {
 
   float vx, vy, vz;
   getcamerapos(vx, vy, vz);
-  render_world(vx, vy, vz, (int)player1->yaw, (int)player1->pitch, (float)fov,
+  render_world(vx, vy, vz, (int)player1->yaw, (int)player1->pitch, afov,
                w, h);
   finishstrips();
 

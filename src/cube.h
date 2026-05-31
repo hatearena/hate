@@ -138,7 +138,8 @@ struct dynent // players & monsters
   int health, armour, armourtype, quadmillis;
   int gunselect, gunwait;
   int lastaction, lastattackgun, lastmove;
-  bool attacking;
+  bool attacking, ads;
+  int adstime;
   int ammo[NUMGUNS];
   int monsterstate;     // one of M_* below, M_NONE means human
   int mtype;            // see monster.cpp

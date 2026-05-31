@@ -222,7 +222,7 @@ extern void nextweapon();
 extern void prevweapon();
 extern void shoot(dynent *d, vec &to);
 extern void shootv(int gun, vec &from, vec &to, dynent *d = 0, bool local = false);
-extern void createrays(vec &from, vec &to);
+extern void createrays(vec &from, vec &to, bool ads = false);
 extern void moveprojectiles(float time);
 extern void projreset();
 extern char *playerincrosshair();
