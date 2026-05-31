@@ -372,8 +372,8 @@ void boostn(bool on) {
   player1->boostmillis = 4000;
   playsoundc(S_BOOST);
 };
-COMMANDN(boost, boostn, ARG_DOWN);
 
+COMMANDN(boost, boostn, ARG_DOWN);
 COMMAND(showscores, ARG_DOWN);
 
 void fixplayer1range() {
