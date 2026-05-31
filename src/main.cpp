@@ -345,10 +345,18 @@ int main(int argc, char **argv) {
         break;
 
       case SDL_MOUSEWHEEL:
-        if (event.wheel.y > 0)
-          prevweapon();
-        else if (event.wheel.y < 0)
-          nextweapon();
+        if (editmode) {
+          extern int flrceil;
+          if (event.wheel.y > 0)
+            execute("editheight $flrceil 1");
+          else if (event.wheel.y < 0)
+            execute("editheight $flrceil -1");
+        } else {
+          if (event.wheel.y > 0)
+            prevweapon();
+          else if (event.wheel.y < 0)
+            nextweapon();
+        };
         break;
       };
     };
