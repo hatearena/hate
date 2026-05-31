@@ -2,9 +2,24 @@
 
 extern int botdifficulty, botamount;
 
+enum { ID_VAR, ID_COMMAND, ID_ALIAS };
+struct ident {
+  int type;
+  char *name;
+  int min, max;
+  int *storage;
+  void (*fun)();
+  int narg;
+  char *action;
+  bool persist;
+};
+extern hashtable<ident> *idents;
+
 struct mitem {
   char *text, *action;
   bool checkbox;
+  bool slider;
+  char *slidervar;
 };
 
 struct gmenu {
@@ -221,9 +236,14 @@ bool rendermenu() {
   int mdisp = m.items.length();
   int w = 0;
   loopi(mdisp) {
-    int x = text_width(m.items[i].text);
-    if (x > w)
-      w = x;
+    int tw = text_width(m.items[i].text);
+    if (m.items[i].slider) {
+      string buf;
+      sprintf_s(buf)("%s: 999", m.items[i].text);
+      tw = text_width(buf);
+    };
+    if (tw > w)
+      w = tw;
   };
   int tw = text_width(title);
   if (tw > w)
@@ -254,6 +274,11 @@ bool rendermenu() {
       string buf;
       sprintf_s(buf)("[%c] %s", check ? 'X' : ' ', m.items[j].text);
       draw_text(buf, x, y, 2);
+    } else if (m.items[j].slider) {
+      int val = getvar(m.items[j].slidervar);
+      string buf;
+      sprintf_s(buf)("%s: %d", m.items[j].text, val);
+      draw_text(buf, x, y, 2);
     } else {
       draw_text(m.items[j].text, x, y, 2);
     };
@@ -282,6 +307,7 @@ void menuitem(char *text, char *action) {
   mi.text = newstring(text);
   mi.action = action[0] ? newstring(action) : mi.text;
   mi.checkbox = false;
+  mi.slider = false;
 };
 
 void menuitem_checkbox(char *text, char *action) {
@@ -290,10 +316,22 @@ void menuitem_checkbox(char *text, char *action) {
   mi.text = newstring(text);
   mi.action = action[0] ? newstring(action) : mi.text;
   mi.checkbox = true;
+  mi.slider = false;
+};
+
+void menuitem_slider(char *text, char *varname) {
+  gmenu &menu = menus.last();
+  mitem &mi = menu.items.add();
+  mi.text = newstring(text);
+  mi.action = newstring(varname);
+  mi.checkbox = false;
+  mi.slider = true;
+  mi.slidervar = newstring(varname);
 };
 
 COMMAND(menuitem, ARG_2STR);
 COMMANDN(menuitem_checkbox, menuitem_checkbox, ARG_2STR);
+COMMANDN(menuitem_slider, menuitem_slider, ARG_2STR);
 COMMAND(showmenu, ARG_1STR);
 COMMAND(newmenu, ARG_1STR);
 
@@ -311,6 +349,25 @@ bool menukey(int code, bool isdown) {
       menusel--;
     else if (code == SDLK_DOWN || code == -5)
       menusel++;
+    else if ((code == SDLK_LEFT || code == -1) &&
+             menus[vmenu].items[menusel].slider) {
+      mitem &mi = menus[vmenu].items[menusel];
+      ident *id = idents->access(mi.slidervar);
+      if (id && id->type == ID_VAR && *id->storage > id->min) {
+        (*id->storage)--;
+        if (id->fun) id->fun();
+      };
+      return true;
+    } else if ((code == SDLK_RIGHT || code == -3) &&
+               menus[vmenu].items[menusel].slider) {
+      mitem &mi = menus[vmenu].items[menusel];
+      ident *id = idents->access(mi.slidervar);
+      if (id && id->type == ID_VAR && *id->storage < id->max) {
+        (*id->storage)++;
+        if (id->fun) id->fun();
+      };
+      return true;
+    };
     int n = menus[vmenu].items.length();
     if (menusel < 0)
       menusel = n - 1;
@@ -322,7 +379,8 @@ bool menukey(int code, bool isdown) {
       char *action = menus[vmenu].items[menusel].action;
       if (vmenu == 1)
         connects(getservername(menusel));
-      if (menus[vmenu].items[menusel].checkbox) {
+      if (menus[vmenu].items[menusel].checkbox ||
+          menus[vmenu].items[menusel].slider) {
         execute(action, true);
       } else {
         menustack.add(vmenu);
