@@ -731,12 +731,17 @@ void drawhudmodel(int start, int end, float speed, int base) {
     }
   }
 
-  if (player1->ads && player1->gunselect != GUN_CSAW) {
+  if (player1->gunselect != GUN_CSAW) {
     int elapsed = lastmillis - player1->adstime;
-    float t = elapsed < 200 ? (float)elapsed / 200.0f : 1.0f;
-    bx *= 1.0f - t;
-    bz -= t * 1.2f;
-    scale += t * 0.1f;
+    if (elapsed < 200) {
+      float t = (float)elapsed / 200.0f;
+      float adsp = player1->ads ? t : 1.0f - t;
+      bx *= 1.0f - adsp * 0.8f;
+      scale += adsp * 0.3f;
+    } else if (player1->ads) {
+      bx *= 0.2f;
+      scale += 0.3f;
+    };
   }
 
   rendermodel(hudgunnames[player1->gunselect], start, end, 0, 1.0f,
@@ -799,10 +804,15 @@ void drawhudgun(float fovy, float aspect, int farplane) {
 void gl_drawframe(int w, int h, float curfps) {
   float hf = hdr.waterlevel - 0.3f;
   float afov = (float)fov;
-  if (player1->ads && player1->gunselect != GUN_CSAW) {
+  if (player1->gunselect != GUN_CSAW) {
     int elapsed = lastmillis - player1->adstime;
-    float t = elapsed < 200 ? (float)elapsed / 200.0f : 1.0f;
-    afov = fov * (1.0f - t * 0.45f);
+    if (elapsed < 200) {
+      float t = (float)elapsed / 200.0f;
+      float adsp = player1->ads ? t : 1.0f - t;
+      afov = fov * (1.0f - adsp * 0.45f);
+    } else if (player1->ads) {
+      afov = fov * 0.55f;
+    };
   };
   float fovy = afov * h / w;
   float aspect = w / (float)h;

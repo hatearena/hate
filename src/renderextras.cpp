@@ -478,7 +478,7 @@ void gl_drawhud(int w, int h, int curfps, int nquads, int curvert,
     draw_text(player, 20, 1400, 2);
 
   renderscores();
-  if (!rendermenu() && !(player1->ads && player1->gunselect != GUN_CSAW)) {
+  if (!rendermenu()) {
     glBlendFunc(GL_SRC_ALPHA, GL_SRC_ALPHA);
     glBindTexture(GL_TEXTURE_2D, 1);
     glBegin(GL_QUADS);

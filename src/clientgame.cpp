@@ -344,13 +344,11 @@ COMMAND(attack, ARG_DOWN);
 void ads(bool on) {
   if (intermission)
     return;
-  if (player1->gunselect == GUN_CSAW) {
-    player1->ads = false;
+  if (player1->gunselect == GUN_CSAW && on)
     return;
-  };
-  player1->ads = on;
-  if (on)
+  if (player1->ads != on)
     player1->adstime = lastmillis;
+  player1->ads = on;
 };
 
 COMMANDN(ads, ads, ARG_DOWN);
