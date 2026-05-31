@@ -122,7 +122,7 @@ void draw_text(char *str, int left, int top, int gl_num) {
   char *dst = filtered;
   for (char *src = str; *src; src++)
     if (*src != '\f')
-      *dst++ = *src;
+      *dst++ = *src == '\t' ? ' ' : *src;
   *dst = 0;
 
   SDL_Color white = {255, 255, 255, 255};

@@ -235,13 +235,13 @@ void refreshservers() {
       if (si.protocol != PROTOCOL_VERSION)
         sprintf_s(si.full)("%s [different cube protocol]", si.name);
       else
-        sprintf_s(si.full)("%d\t%d\t%s, %s: %s %s", si.ping, si.numplayers,
+        sprintf_s(si.full)("%d ms  %d pl  %s: %s %s", si.ping, si.numplayers,
                            si.map[0] ? si.map : "[unknown]", modestr(si.mode),
                            si.name, si.sdesc);
     } else {
       sprintf_s(si.full)(si.address.host != ENET_HOST_ANY
                              ? "%s [waiting for server response]"
-                             : "%s [unknown host]\t",
+                             : "%s [unknown host]",
                          si.name);
     }
     si.full[50] = 0; // cut off too long server descriptions
