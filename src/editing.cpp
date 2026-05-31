@@ -23,12 +23,9 @@ bool selset = false;
   }
 
 int cx, cy, ch;
-
 int curedittex[] = {-1, -1, -1};
-
 bool dragging = false;
 int lastx, lasty, lasth;
-
 int lasttype = 0, lasttex = 0;
 sqr rtex;
 
