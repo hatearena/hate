@@ -48,6 +48,7 @@ void spawnstate(dynent *d) // reset player state not persistent accross spawns
   d->quadmillis = 0;
   d->lastattackgun = d->gunselect = GUN_SG;
   d->gunwait = 0;
+  d->boostmillis = 0;
   d->attacking = false;
   d->lastaction = 0;
   gunswitchtime = 0;
@@ -263,6 +264,8 @@ void updateworld(int millis) // main game update loop
         moveplayer(player1, 20, true);
         checkitems();
       };
+      if (player1->boostmillis > 0)
+        player1->boostmillis = max(0, player1->boostmillis - curtime);
       c2sinfo(player1); // do this last, to reduce the effective frame lag
     };
   };
@@ -354,6 +357,22 @@ void ads(bool on) {
 };
 
 COMMANDN(ads, ads, ARG_DOWN);
+
+extern bool editmode;
+
+void boostn(bool on) {
+  if (!on || intermission || editmode || player1->state != CS_ALIVE)
+    return;
+  if (player1->boostmillis > 0)
+    return;
+  float yawrad = rad(player1->yaw);
+  player1->vel.x += sinf(yawrad) * 60.0f;
+  player1->vel.y += -cosf(yawrad) * 60.0f;
+  player1->boostmillis = 4000;
+  playsoundc(S_BOOST);
+};
+COMMANDN(boost, boostn, ARG_DOWN);
+
 COMMAND(showscores, ARG_DOWN);
 
 void fixplayer1range() {

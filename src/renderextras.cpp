@@ -385,7 +385,7 @@ int lastdamage = 0;
 
 void damageblend(int n) {
   if (lastmillis - lastdamage < 300) {
-    dblend = min(dblend + n/2, 100);
+    dblend = min(dblend + n / 2, 100);
   } else {
     dblend = min(n, 100);
   }
@@ -396,55 +396,71 @@ VAR(hidestats, 0, 0, 1);
 VARP(crosshairfx, 0, 1, 1);
 
 void roundedbox(int x1, int y1, int x2, int y2, int r) {
-    int segs = 6;
-    glBegin(GL_QUADS);
-    glVertex2i(x1+r, y1+r);
-    glVertex2i(x2-r, y1+r);
-    glVertex2i(x2-r, y2-r);
-    glVertex2i(x1+r, y2-r);
-    glEnd();
-    glBegin(GL_QUADS);
-    glVertex2i(x1+r, y1);
-    glVertex2i(x2-r, y1);
-    glVertex2i(x2-r, y1+r);
-    glVertex2i(x1+r, y1+r);
-    glEnd();
-    glBegin(GL_QUADS);
-    glVertex2i(x1+r, y2-r);
-    glVertex2i(x2-r, y2-r);
-    glVertex2i(x2-r, y2);
-    glVertex2i(x1+r, y2);
-    glEnd();
-    glBegin(GL_QUADS);
-    glVertex2i(x1, y1+r);
-    glVertex2i(x1+r, y1+r);
-    glVertex2i(x1+r, y2-r);
-    glVertex2i(x1, y2-r);
-    glEnd();
-    glBegin(GL_QUADS);
-    glVertex2i(x2-r, y1+r);
-    glVertex2i(x2, y1+r);
-    glVertex2i(x2, y2-r);
-    glVertex2i(x2-r, y2-r);
-    glEnd();
-    float step = 90.0f / segs;
-    for (int c = 0; c < 4; c++) {
-        float ax, ay;
-        float start;
-        switch (c) {
-            case 0: ax = x1+r; ay = y1+r; start = 180.0f; break;
-            case 1: ax = x2-r; ay = y1+r; start = 270.0f; break;
-            case 2: ax = x2-r; ay = y2-r; start = 0.0f;   break;
-            case 3: ax = x1+r; ay = y2-r; start = 90.0f;  break;
-        }
-        glBegin(GL_TRIANGLE_FAN);
-        glVertex2f(ax, ay);
-        for (int i = 0; i <= segs; i++) {
-            float a = (start + step * i) * M_PI / 180.0f;
-            glVertex2f(ax + r * cosf(a), ay + r * sinf(a));
-        }
-        glEnd();
+  int segs = 6;
+  glBegin(GL_QUADS);
+  glVertex2i(x1 + r, y1 + r);
+  glVertex2i(x2 - r, y1 + r);
+  glVertex2i(x2 - r, y2 - r);
+  glVertex2i(x1 + r, y2 - r);
+  glEnd();
+  glBegin(GL_QUADS);
+  glVertex2i(x1 + r, y1);
+  glVertex2i(x2 - r, y1);
+  glVertex2i(x2 - r, y1 + r);
+  glVertex2i(x1 + r, y1 + r);
+  glEnd();
+  glBegin(GL_QUADS);
+  glVertex2i(x1 + r, y2 - r);
+  glVertex2i(x2 - r, y2 - r);
+  glVertex2i(x2 - r, y2);
+  glVertex2i(x1 + r, y2);
+  glEnd();
+  glBegin(GL_QUADS);
+  glVertex2i(x1, y1 + r);
+  glVertex2i(x1 + r, y1 + r);
+  glVertex2i(x1 + r, y2 - r);
+  glVertex2i(x1, y2 - r);
+  glEnd();
+  glBegin(GL_QUADS);
+  glVertex2i(x2 - r, y1 + r);
+  glVertex2i(x2, y1 + r);
+  glVertex2i(x2, y2 - r);
+  glVertex2i(x2 - r, y2 - r);
+  glEnd();
+  float step = 90.0f / segs;
+  for (int c = 0; c < 4; c++) {
+    float ax, ay;
+    float start;
+    switch (c) {
+    case 0:
+      ax = x1 + r;
+      ay = y1 + r;
+      start = 180.0f;
+      break;
+    case 1:
+      ax = x2 - r;
+      ay = y1 + r;
+      start = 270.0f;
+      break;
+    case 2:
+      ax = x2 - r;
+      ay = y2 - r;
+      start = 0.0f;
+      break;
+    case 3:
+      ax = x1 + r;
+      ay = y2 - r;
+      start = 90.0f;
+      break;
     }
+    glBegin(GL_TRIANGLE_FAN);
+    glVertex2f(ax, ay);
+    for (int i = 0; i <= segs; i++) {
+      float a = (start + step * i) * M_PI / 180.0f;
+      glVertex2f(ax + r * cosf(a), ay + r * sinf(a));
+    }
+    glEnd();
+  }
 }
 
 void gl_drawhud(int w, int h, int curfps, int nquads, int curvert,
@@ -589,6 +605,22 @@ void gl_drawhud(int w, int h, int curfps, int nquads, int curvert,
     drawicon((float)(g * 64), (float)r, VIRTW - 250, 1620, 64);
     draw_textf("%d", VIRTW - 170, 1660, 2, player1->ammo[player1->gunselect]);
 
+    glDisable(GL_TEXTURE_2D);
+    {
+      int bx = player1->armour ? 440 : 230;
+      glColor4ub(10, 10, 10, 130);
+      roundedbox(bx, 1580, bx + 205, 1750, 20);
+      int inner = 6;
+      int bw = 205 - inner * 2;
+      int bh = 1750 - 1580 - inner * 2;
+      int by = 1580 + inner;
+      float pct = player1->boostmillis > 0
+                      ? 1.0f - (float)player1->boostmillis / 4000.0f
+                      : 1.0f;
+      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+      glColor4ub(180, 180, 180, player1->boostmillis > 0 ? 20 : 54);
+      roundedbox(bx + inner, by, bx + inner + (int)(bw * pct), by + bh, 12);
+    };
     glPopMatrix();
   };
 
@@ -604,10 +636,9 @@ void gl_drawhud(int w, int h, int curfps, int nquads, int curvert,
     glColor4ub(255, 255, 255, 255);
     if (e >= 0) {
       entity &ent = ents[e];
-      draw_textf("[%s] pos:(%d,%d,%d)  a1:%d a2:%d a3:%d a4:%d",
-                 30, 1690, 2, entnames[ent.type],
-                 ent.x, ent.y, ent.z,
-                 ent.attr1, ent.attr2, ent.attr3, ent.attr4);
+      draw_textf("[%s] pos:(%d,%d,%d)  a1:%d a2:%d a3:%d a4:%d", 30, 1690, 2,
+                 entnames[ent.type], ent.x, ent.y, ent.z, ent.attr1, ent.attr2,
+                 ent.attr3, ent.attr4);
     } else {
       draw_text("[ ]", 30, 1690, 2);
     }

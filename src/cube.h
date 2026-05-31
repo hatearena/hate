@@ -148,6 +148,7 @@ struct dynent // players & monsters
   bool blocked, moving; // used by physics to signal ai
   bool walljump, walljumped; // wall jump state
   float wallnormal_x, wallnormal_y; // wall normal for wall jump push
+  int boostmillis;
   int trigger; // millis at which transition to another monsterstate takes place
   vec attacktarget; // delayed attacks
   int anger;        // how many times already hit by fellow monster
@@ -267,6 +268,7 @@ enum {
   S_JUMPPAD,
   S_CSAW,
   S_RUN,
+  S_BOOST,
 };
 
 // vertex array format
