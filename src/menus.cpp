@@ -157,7 +157,19 @@ bool rendermenu() {
     };
 
     overlay(160);
-    gradientbox(x0, y0, x0 + tablew, y0 + tableh, 20, 20, 50, 8, 8, 20);
+    {
+      glDisable(GL_TEXTURE_2D);
+      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+      glBegin(GL_QUADS);
+      glColor4ub(20, 20, 50, 217);
+      glVertex2i(x0, y0);
+      glVertex2i(x0 + tablew, y0);
+      glColor4ub(8, 8, 20, 217);
+      glVertex2i(x0 + tablew, y0 + tableh);
+      glVertex2i(x0, y0 + tableh);
+      glEnd();
+      glEnable(GL_TEXTURE_2D);
+    }
 
     int headery = y0 + border;
     int sep_y = headery + rowstep;
@@ -254,14 +266,34 @@ bool rendermenu() {
   int x = (VIRTW - w) / 2;
   overlay(160);
   int pad = FONTH / 2 * 3;
-  gradientbox(x - pad, y - FONTH, x + w + pad, y + h + FONTH, 20, 20, 50, 8, 8,
-              20);
+  {
+    glDisable(GL_TEXTURE_2D);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glBegin(GL_QUADS);
+    glColor4ub(20, 20, 50, 217);
+    glVertex2i(x - pad, y - FONTH);
+    glVertex2i(x + w + pad, y - FONTH);
+    glColor4ub(8, 8, 20, 217);
+    glVertex2i(x + w + pad, y + h + FONTH);
+    glVertex2i(x - pad, y + h + FONTH);
+    glEnd();
+    glEnable(GL_TEXTURE_2D);
+  }
   draw_text(title, x, y, 2);
   y += FONTH * 2;
   if (vmenu) {
     int bh = y + m.menusel * step;
-    gradientbox(x - FONTH, bh - 10, x + w + FONTH, bh + FONTH + 10, 50, 100,
-                200, 30, 60, 150);
+    glDisable(GL_TEXTURE_2D);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glBegin(GL_QUADS);
+    glColor4ub(50, 100, 200, 217);
+    glVertex2i(x - FONTH, bh - 10);
+    glVertex2i(x + w + FONTH, bh - 10);
+    glColor4ub(30, 60, 150, 217);
+    glVertex2i(x + w + FONTH, bh + FONTH + 10);
+    glVertex2i(x - FONTH, bh + FONTH + 10);
+    glEnd();
+    glEnable(GL_TEXTURE_2D);
   };
   loopj(mdisp) {
     if (m.items[j].checkbox) {
