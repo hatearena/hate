@@ -186,6 +186,26 @@ int main(int argc, char **argv) {
 
   log("video: creating window");
   SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+  {
+    FILE *cfg = fopen("config.cfg", "r");
+    if (cfg) {
+      char line[256];
+      while (fgets(line, sizeof(line), cfg)) {
+        int v;
+        if (sscanf(line, " fsaa %d", &v) == 1 || sscanf(line, "fsaa %d", &v) == 1) {
+          if (v >= 0 && v <= 16) {
+            setvar("fsaa", v);
+            if (v > 0) {
+              SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
+              SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, v);
+            }
+          }
+          break;
+        }
+      }
+      fclose(cfg);
+    }
+  }
   window = SDL_CreateWindow("HATE v0.0.1", SDL_WINDOWPOS_CENTERED,
                             SDL_WINDOWPOS_CENTERED, scr_w, scr_h,
                             SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);

@@ -17,6 +17,10 @@ void purgetextures();
 GLUquadricObj *qsphere = NULL;
 int glmaxtexsize = 256;
 
+VARFP(fsaa, 0, 0, 16, {
+    conoutf("Anti-aliasing will take effect on next restart");
+});
+
 void gl_init(int w, int h) {
   glViewport(0, 0, w, h);
   glClearDepth(1.0);
@@ -33,6 +37,8 @@ void gl_init(int w, int h) {
   glPolygonOffset(-3.0, -3.0);
   glCullFace(GL_FRONT);
   glEnable(GL_CULL_FACE);
+
+  if (fsaa) glEnable(GL_MULTISAMPLE);
 
   char *exts = (char *)glGetString(GL_EXTENSIONS);
 
