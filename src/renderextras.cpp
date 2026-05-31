@@ -621,6 +621,17 @@ void gl_drawhud(int w, int h, int curfps, int nquads, int curvert,
       glColor4ub(180, 180, 180, player1->boostmillis > 0 ? 20 : 54);
       roundedbox(bx + inner, by, bx + inner + (int)(bw * pct), by + bh, 12);
     };
+    glEnable(GL_TEXTURE_2D);
+    glBlendFunc(GL_ONE, GL_ONE);
+    glColor4ub(255, 255, 255, 255);
+    {
+      int bx = player1->armour ? 440 : 230;
+      int boostval =
+          player1->boostmillis > 0
+              ? (int)((1.0f - (float)player1->boostmillis / 4000.0f) * 100)
+              : 100;
+      draw_textf("%d", bx + 85, 1660, 2, boostval);
+    };
     glPopMatrix();
   };
 
