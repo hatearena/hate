@@ -1,5 +1,7 @@
 #include "cube.h"
 
+extern bool los(float lx, float ly, float lz, float bx, float by, float bz, vec &v);
+
 dvector bots;
 int numbots = 0;
 
@@ -242,9 +244,13 @@ static void botaction(dynent *m) {
   if (disttoenemy < 128 && m->enemy->state == CS_ALIVE) {
     int attacktime = lastmillis - m->lastaction;
     if (attacktime > 50) {
-      m->attacktarget = m->enemy->o;
-      m->attacking = true;
-      shoot(m, m->attacktarget);
+      vec tmp;
+      if (los(m->o.x, m->o.y, m->o.z - 0.2f,
+              m->enemy->o.x, m->enemy->o.y, m->enemy->o.z, tmp)) {
+        m->attacktarget = m->enemy->o;
+        m->attacking = true;
+        shoot(m, m->attacktarget);
+      }
     }
   }
 
