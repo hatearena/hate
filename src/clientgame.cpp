@@ -232,17 +232,17 @@ void updateworld(int millis) // main game update loop
     if (!demoplayback) {
       if (getclientnum() >= 0) {
         if (thirdperson) {
-            float yawrad = rad(player1->yaw);
-            float pitchrad = rad(player1->pitch);
-            float cp = cosf(pitchrad);
-            vec from = player1->o;
-            from.z -= 0.2f;
-            worldpos.x = from.x + 1000 * sinf(yawrad) * cp;
-            worldpos.y = from.y - 1000 * cosf(yawrad) * cp;
-            worldpos.z = from.z + 1000 * sinf(pitchrad);
+          float yawrad = rad(player1->yaw);
+          float pitchrad = rad(player1->pitch);
+          float cp = cosf(pitchrad);
+          vec from = player1->o;
+          from.z -= 0.2f;
+          worldpos.x = from.x + 1000 * sinf(yawrad) * cp;
+          worldpos.y = from.y - 1000 * cosf(yawrad) * cp;
+          worldpos.z = from.z + 1000 * sinf(pitchrad);
         }
         shoot(player1, worldpos); // only shoot when connected to server
-    }
+      }
       gets2c(); // do this first, so we have most accurate information when our
                 // player moves
     };
@@ -281,7 +281,7 @@ void entinmap(dynent *d) // brute force but effective way to find a free spawn
     d->o.x -= dx;
     d->o.y -= dy;
   };
-  conoutf("can't find entity spawn spot! (%d, %d)", (int)d->o.x, (int)d->o.y);
+  conoutf("Cannot find entity spawn spot. (%d, %d)", (int)d->o.x, (int)d->o.y);
   // leave ent at original pos, possibly stuck
 };
 
@@ -387,7 +387,7 @@ void selfdamage(int damage, int actor, dynent *act) {
                                                // on amount of damage
   if ((player1->health -= damage) <= 0) {
     if (actor == -2) {
-      conoutf("You got killed by %s.", act->name);
+      conoutf("%s fragged <you>", act->name);
       if (act->monsterstate && act->mtype == -1)
         act->frags++;
     } else if (actor == -1) {
