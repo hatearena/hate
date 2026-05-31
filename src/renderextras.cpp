@@ -485,8 +485,8 @@ void gl_drawhud(int w, int h, int curfps, int nquads, int curvert,
     glBegin(GL_QUADS);
     glColor4ub(10, 10, 10, 130);
     glVertex2i(20, 1580);
-    glVertex2i(240, 1580);
-    glVertex2i(240, 1750);
+    glVertex2i(225, 1580);
+    glVertex2i(225, 1750);
     glVertex2i(20, 1750);
     glEnd();
 
@@ -494,8 +494,8 @@ void gl_drawhud(int w, int h, int curfps, int nquads, int curvert,
       glBegin(GL_QUADS);
       glColor4ub(10, 10, 10, 130);
       glVertex2i(230, 1580);
-      glVertex2i(450, 1580);
-      glVertex2i(450, 1750);
+      glVertex2i(434, 1580);
+      glVertex2i(434, 1750);
       glVertex2i(230, 1750);
       glEnd();
     }
@@ -503,8 +503,8 @@ void gl_drawhud(int w, int h, int curfps, int nquads, int curvert,
     glBegin(GL_QUADS);
     glColor4ub(10, 10, 10, 130);
     glVertex2i(VIRTW - 260, 1580);
-    glVertex2i(VIRTW - 20, 1580);
-    glVertex2i(VIRTW - 20, 1750);
+    glVertex2i(VIRTW - 30, 1580);
+    glVertex2i(VIRTW - 30, 1750);
     glVertex2i(VIRTW - 260, 1750);
     glEnd();
     glEnable(GL_TEXTURE_2D);
