@@ -183,6 +183,9 @@ void *alloc(int s) {
     fatal("no memory!");
   return b;
 };
+void botclear() {};
+dvector &getbots() { static dvector empty; return empty; };
+int numbots = 0;
 
 int main(int argc, char *argv[]) {
   int uprate = 0, maxcl = 4;

@@ -133,6 +133,16 @@ COMMANDN(say, toserver, ARG_VARI);
 COMMANDN(connect, connects, ARG_1STR);
 COMMANDN(disconnect, trydisconnect, ARG_NONE);
 
+void kickcmd(char *name) {
+  sprintf_sd(buf)("/kick %s", name);
+  strn0cpy(ctext, buf, 80);
+};
+void kickallcmd() {
+  strn0cpy(ctext, "/kick_all_bots", 80);
+};
+COMMANDN(kick, kickcmd, ARG_1STR);
+COMMANDN(kick_all_bots, kickallcmd, ARG_NONE);
+
 vector<ivector> messages;
 
 void addmsg(int rel, int num, int type, ...) {

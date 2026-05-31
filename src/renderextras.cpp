@@ -381,7 +381,16 @@ void invertperspective() {
 VARP(crosshairsize, 0, 15, 50);
 
 int dblend = 0;
-void damageblend(int n) { dblend += n; };
+int lastdamage = 0;
+
+void damageblend(int n) {
+  if (lastmillis - lastdamage < 300) {
+    dblend = min(dblend + n/2, 100);
+  } else {
+    dblend = min(n, 100);
+  }
+  lastdamage = lastmillis;
+};
 
 VAR(hidestats, 0, 0, 1);
 VARP(crosshairfx, 0, 1, 1);
@@ -449,21 +458,37 @@ void gl_drawhud(int w, int h, int curfps, int nquads, int curvert,
   glEnable(GL_BLEND);
   glDepthMask(GL_FALSE);
 
-  if (dblend || underwater) {
+  if (dblend) {
+    int since = lastmillis - lastdamage;
+    float alpha = 0.0f;
+    if (since < 100) {
+      alpha = (since / 100.0f) * (dblend / 100.0f) * 0.3f;
+    } else if (since < 500) {
+      alpha = (1.0f - (since - 100) / 400.0f) * (dblend / 100.0f) * 0.3f;
+    }
+    if (alpha > 0.01f) {
+      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+      glBegin(GL_QUADS);
+      glColor4f(1.0f, 0.0f, 0.0f, alpha);
+      glVertex2i(0, 0);
+      glVertex2i(VIRTW, 0);
+      glVertex2i(VIRTW, VIRTH);
+      glVertex2i(0, VIRTH);
+      glEnd();
+    }
+    if (since > 500)
+      dblend = 0;
+  };
+
+  if (underwater) {
     glBlendFunc(GL_ZERO, GL_ONE_MINUS_SRC_COLOR);
     glBegin(GL_QUADS);
-    if (dblend)
-      glColor3d(0.0f, 0.9f, 0.9f);
-    else
-      glColor3d(0.9f, 0.5f, 0.0f);
+    glColor3d(0.9f, 0.5f, 0.0f);
     glVertex2i(0, 0);
     glVertex2i(VIRTW, 0);
     glVertex2i(VIRTW, VIRTH);
     glVertex2i(0, VIRTH);
     glEnd();
-    dblend -= curtime / 3;
-    if (dblend < 0)
-      dblend = 0;
   };
 
   glEnable(GL_TEXTURE_2D);

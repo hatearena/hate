@@ -170,9 +170,48 @@ void process(ENetPacket *packet, int sender) // sender may be -1
 
   while (p < end)
     switch (type = getint(p)) {
-    case SV_TEXT:
+    case SV_TEXT: {
       sgetstr();
+      if (text[0] == '/') {
+        if (strcmp(text + 1, "kick_all_bots") == 0) {
+          extern void botclear();
+          botclear();
+          sendservmsg("All bots have been kicked.");
+          return;
+        } else if (strncmp(text + 1, "kick ", 5) == 0) {
+          char *name = text + 6;
+          if (!name[0]) {
+            sendservmsg("Usage: /kick <name>");
+            return;
+          }
+          loopv(clients) {
+            if (clients[i].type != ST_EMPTY && strcmp(clients[i].name, name) == 0) {
+              sprintf_sd(msg)("%s has been kicked.", name);
+              disconnect_client(i, "kicked");
+              sendservmsg(msg);
+              return;
+            }
+          }
+          extern dvector &getbots();
+          extern int numbots;
+          dvector &bv = getbots();
+          loopv(bv) {
+            if (strcmp(bv[i]->name, name) == 0) {
+              gp()->dealloc(bv[i], sizeof(dynent));
+              bv.remove(i);
+              numbots--;
+              sprintf_sd(msg)("Bot %s kicked.", name);
+              sendservmsg(msg);
+              return;
+            }
+          }
+          sprintf_sd(msg)("Could not find player or bot \"%s\"", name);
+          sendservmsg(msg);
+          return;
+        }
+      }
       break;
+    }
 
     case SV_INITC2S:
       sgetstr();
