@@ -3,15 +3,6 @@
 static TTF_Font *font = NULL;
 static bool font_inited = false;
 
-struct texcache {
-  char key[260];
-  GLuint tex;
-  int w, h;
-  int pw, ph;
-};
-static texcache cache[64];
-static int cache_count = 0;
-
 void init_font() {
   font = TTF_OpenFont(path(newstring("data/font.ttf")), FONTH);
   if (!font)
@@ -26,23 +17,10 @@ static int pot(int v) {
   return p;
 }
 
-static GLuint lookup_or_create(char *str, int &tw, int &th, int &tpw,
-                               int &tph) {
-  for (int i = 0; i < cache_count; i++) {
-    if (!strcmp(cache[i].key, str)) {
-      tw = cache[i].w;
-      th = cache[i].h;
-      tpw = cache[i].pw;
-      tph = cache[i].ph;
-      return cache[i].tex;
-    }
-  }
-
-  SDL_Color white = {255, 255, 255, 255};
-  SDL_Surface *s = TTF_RenderUTF8_Blended(font, str, white);
+static void draw_texture(SDL_Surface *s, int left, int top, int cr, int cg,
+                         int cb) {
   if (!s)
-    return 0;
-
+    return;
   int w = s->w, h = s->h;
   int pw = pot(w), ph = pot(h);
 
@@ -50,7 +28,7 @@ static GLuint lookup_or_create(char *str, int &tw, int &th, int &tpw,
       SDL_CreateRGBSurface(0, w, h, 24, 0x0000FF, 0x00FF00, 0xFF0000, 0);
   if (!conv) {
     SDL_FreeSurface(s);
-    return 0;
+    return;
   }
 
   SDL_LockSurface(s);
@@ -58,8 +36,7 @@ static GLuint lookup_or_create(char *str, int &tw, int &th, int &tpw,
 
   uchar *src = (uchar *)s->pixels;
   uchar *dst = (uchar *)conv->pixels;
-
-  for (int gy = 0; gy < h; gy++) {
+  for (int gy = 0; gy < h; gy++)
     for (int gx = 0; gx < w; gx++) {
       uchar a = src[gy * s->pitch + gx * 4 + 3];
       uchar *dp = dst + gy * conv->pitch + gx * 3;
@@ -67,7 +44,6 @@ static GLuint lookup_or_create(char *str, int &tw, int &th, int &tpw,
       dp[1] = a;
       dp[2] = a;
     }
-  }
 
   SDL_UnlockSurface(conv);
   SDL_UnlockSurface(s);
@@ -100,24 +76,28 @@ static GLuint lookup_or_create(char *str, int &tw, int &th, int &tpw,
                    conv->pixels);
     }
   }
-
-  tw = w;
-  th = h;
-  tpw = pw;
-  tph = ph;
   SDL_FreeSurface(conv);
 
-  if (cache_count < 64) {
-    strncpy(cache[cache_count].key, str, 259);
-    cache[cache_count].key[259] = 0;
-    cache[cache_count].tex = tex;
-    cache[cache_count].w = w;
-    cache[cache_count].h = h;
-    cache[cache_count].pw = pw;
-    cache[cache_count].ph = ph;
-    cache_count++;
-  }
-  return tex;
+  float umax = (float)w / (float)pw;
+  float vmax = (float)h / (float)ph;
+
+  glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+  glBlendFunc(GL_ONE, GL_ONE);
+  glBindTexture(GL_TEXTURE_2D, tex);
+  glColor3ub(cr, cg, cb);
+  glBegin(GL_QUADS);
+  glTexCoord2f(0, 0);
+  glVertex2i(left, top);
+  glTexCoord2f(umax, 0);
+  glVertex2i(left + w, top);
+  glTexCoord2f(umax, vmax);
+  glVertex2i(left + w, top + h);
+  glTexCoord2f(0, vmax);
+  glVertex2i(left, top + h);
+  glEnd();
+  xtraverts += 4;
+
+  glDeleteTextures(1, &tex);
 }
 
 int text_width(char *str) {
@@ -138,38 +118,13 @@ void draw_text(char *str, int left, int top, int gl_num) {
   if (!font_inited)
     return;
 
-  char *render = str;
-  int cr = 255, cg = 255, cb = 255;
-  if (str[0] == '\f') {
-    render = str + 1;
-    cr = 64;
-    cg = 255;
-    cb = 128;
-  }
-
-  int w, h, pw, ph;
-  GLuint tex = lookup_or_create(render, w, h, pw, ph);
-  if (!tex)
-    return;
-
-  float umax = (float)w / (float)pw;
-  float vmax = (float)h / (float)ph;
-
-  glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-  glBlendFunc(GL_ONE, GL_ONE);
-  glBindTexture(GL_TEXTURE_2D, tex);
-  glColor3ub(cr, cg, cb);
-  glBegin(GL_QUADS);
-  glTexCoord2f(0, 0);
-  glVertex2i(left, top);
-  glTexCoord2f(umax, 0);
-  glVertex2i(left + w, top);
-  glTexCoord2f(umax, vmax);
-  glVertex2i(left + w, top + h);
-  glTexCoord2f(0, vmax);
-  glVertex2i(left, top + h);
-  glEnd();
-  xtraverts += 4;
+  SDL_Color white = {255, 255, 255, 255};
+  if (str[0] == '\f')
+    draw_texture(TTF_RenderUTF8_Blended(font, str + 1, white), left, top, 64,
+                 255, 128);
+  else
+    draw_texture(TTF_RenderUTF8_Blended(font, str, white), left, top, 255, 255,
+                 255);
 }
 
 void draw_envbox_aux(float s0, float t0, int x0, int y0, int z0, float s1,
