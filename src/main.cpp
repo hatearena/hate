@@ -323,8 +323,37 @@ int main(int argc, char **argv) {
 
       case SDL_KEYDOWN:
       case SDL_KEYUP:
-        keypress(event.key.keysym.sym, event.key.state == SDL_PRESSED, false,
-                 0);
+        if (editmode && event.key.state == SDL_PRESSED) {
+          bool handled = true;
+          switch (event.key.keysym.sym) {
+          case SDLK_INSERT:
+            execute("edittex 0 1");
+            break;
+          case SDLK_DELETE:
+            execute("edittex 0 -1");
+            break;
+          case SDLK_PAGEUP:
+            execute("edittex 2 1");
+            break;
+          case SDLK_PAGEDOWN:
+            execute("edittex 2 -1");
+            break;
+          case SDLK_HOME:
+            execute("edittex 1 1");
+            break;
+          case SDLK_END:
+            execute("edittex 1 -1");
+            break;
+          default:
+            handled = false;
+            break;
+          };
+          if (!handled)
+            keypress(event.key.keysym.sym, true, false, 0);
+        } else {
+          keypress(event.key.keysym.sym, event.key.state == SDL_PRESSED, false,
+                   0);
+        };
         break;
 
       case SDL_MOUSEMOTION:
