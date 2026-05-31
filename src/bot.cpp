@@ -5,7 +5,7 @@ extern bool los(float lx, float ly, float lz, float bx, float by, float bz,
 
 dvector bots;
 int numbots = 0;
-VAR(botdifficulty, 0, 4, 4);
+VAR(botdifficulty, -1, 4, 4);
 VAR(botamount, 1, 4, 16);
 
 static const char *botnames[] = {"Cerelo", "Diaso", "Ceria", "Deathly", "Ra",
@@ -151,25 +151,27 @@ static void botaction(dynent *m) {
     }
   }
 
-  loopv(players) {
-    dynent *o = players[i];
-    if (!o || o->state != CS_ALIVE)
-      continue;
-    vdist(dist, v, m->o, o->o);
-    if (dist < bestdist) {
-      bestdist = dist;
-      enemy = o;
+  if (botdifficulty >= 0) {
+    loopv(players) {
+      dynent *o = players[i];
+      if (!o || o->state != CS_ALIVE)
+        continue;
+      vdist(dist, v, m->o, o->o);
+      if (dist < bestdist) {
+        bestdist = dist;
+        enemy = o;
+      }
     }
-  }
 
-  loopv(bots) {
-    dynent *o = bots[i];
-    if (o == m || o->state != CS_ALIVE)
-      continue;
-    vdist(dist, v, m->o, o->o);
-    if (dist < bestdist) {
-      bestdist = dist;
-      enemy = o;
+    loopv(bots) {
+      dynent *o = bots[i];
+      if (o == m || o->state != CS_ALIVE)
+        continue;
+      vdist(dist, v, m->o, o->o);
+      if (dist < bestdist) {
+        bestdist = dist;
+        enemy = o;
+      }
     }
   }
 
@@ -254,18 +256,21 @@ static void botaction(dynent *m) {
     m->strafe = (rnd(3) - 1);
   }
 
-  int maxrange = 48 + botdifficulty * 20;
-  int reacttime = 200 - botdifficulty * 40;
-  if (reacttime < 50) reacttime = 50;
-  if (disttoenemy < maxrange && m->enemy->state == CS_ALIVE) {
-    int attacktime = lastmillis - m->lastaction;
-    if (attacktime > reacttime) {
-      vec tmp;
-      if (los(m->o.x, m->o.y, m->o.z - 0.2f, m->enemy->o.x, m->enemy->o.y,
-              m->enemy->o.z, tmp)) {
-        m->attacktarget = m->enemy->o;
-        m->attacking = true;
-        shoot(m, m->attacktarget);
+  if (botdifficulty >= 0) {
+    int maxrange = 48 + botdifficulty * 20;
+    int reacttime = 200 - botdifficulty * 40;
+    if (reacttime < 50)
+      reacttime = 50;
+    if (disttoenemy < maxrange && m->enemy->state == CS_ALIVE) {
+      int attacktime = lastmillis - m->lastaction;
+      if (attacktime > reacttime) {
+        vec tmp;
+        if (los(m->o.x, m->o.y, m->o.z - 0.2f, m->enemy->o.x, m->enemy->o.y,
+                m->enemy->o.z, tmp)) {
+          m->attacktarget = m->enemy->o;
+          m->attacking = true;
+          shoot(m, m->attacktarget);
+        }
       }
     }
   }
@@ -288,8 +293,8 @@ void botthink() {
       botaction(b);
     } else if (b->state == CS_DEAD && lastmillis - b->lastaction > 5000) {
       spawnplayer(b);
-      b->health = 50 + botdifficulty * 25;
-      b->armour = botdifficulty * 25;
+      b->health = max(50 + botdifficulty * 25, 1);
+      b->armour = max(botdifficulty * 25, 0);
       b->state = CS_ALIVE;
       b->monsterstate = M_HOME;
       b->enemy = player1;
@@ -349,9 +354,9 @@ static void spawnonebot() {
   b->move = 1;
   b->targetyaw = b->yaw;
   b->gunselect = GUN_SG + rnd(4);
-  b->maxspeed = 28.0f + botdifficulty * 4.0f;
-  b->health = 50 + botdifficulty * 25;
-  b->armour = botdifficulty * 25;
+  b->maxspeed = max(28.0f + botdifficulty * 4.0f, 16.0f);
+  b->health = max(50 + botdifficulty * 25, 1);
+  b->armour = max(botdifficulty * 25, 0);
   loopi(NUMGUNS) b->ammo[i] = 100;
   b->anger = 0;
   b->lastupdate = lastmillis;
