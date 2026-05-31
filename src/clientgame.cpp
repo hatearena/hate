@@ -40,6 +40,8 @@ void spawnstate(dynent *d) // reset player state not persistent accross spawns
   d->vel.x = d->vel.y = d->vel.z = 0;
   d->onfloor = false;
   d->timeinair = 0;
+  d->walljump = false;
+  d->walljumped = false;
   d->health = 100;
   d->armour = 50;
   d->armourtype = A_BLUE;

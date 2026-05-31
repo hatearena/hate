@@ -146,6 +146,8 @@ struct dynent // players & monsters
   dynent *enemy;        // monster wants to kill this entity
   float targetyaw;      // monster wants to look in this direction
   bool blocked, moving; // used by physics to signal ai
+  bool walljump, walljumped; // wall jump state
+  float wallnormal_x, wallnormal_y; // wall normal for wall jump push
   int trigger; // millis at which transition to another monsterstate takes place
   vec attacktarget; // delayed attacks
   int anger;        // how many times already hit by fellow monster

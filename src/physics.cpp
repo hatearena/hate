@@ -260,22 +260,33 @@ void moveplayer(dynent *pl, int moveres, bool local, int curtime) {
   pl->blocked = false;
   pl->moving = true;
 
-  // apply velocity with collision
-  if (pl->onfloor || water) {
+  if (pl->onfloor || water || (pl->walljump && !pl->onfloor)) {
     if (pl->jumpnext) {
       pl->jumpnext = false;
-      pl->vel.z = 1.7f; // physics impulse upwards
-      if (water) {
-        pl->vel.x /= 8;
-        pl->vel.y /= 8;
-      }; // dampen velocity change even harder, gives correct water feel
-      if (local)
-        playsoundc(S_JUMP);
-      else if (pl->monsterstate)
-        playsound(S_JUMP, &pl->o);
-    } else if (pl->timeinair > 800) // if we land after long time must have been
-                                    // a high jump, make thud sound
-    {
+      if (pl->walljump && !pl->onfloor && !water) {
+        pl->vel.z = 1.4f;
+        pl->vel.x = pl->wallnormal_x * 1.2f;
+        pl->vel.y = pl->wallnormal_y * 1.2f;
+        float strafex = pl->strafe * cos(rad(pl->yaw - 180));
+        float strafey = pl->strafe * sin(rad(pl->yaw - 180));
+        pl->vel.x += strafex * 0.6f;
+        pl->vel.y += strafey * 0.6f;
+        pl->walljump = false;
+        pl->walljumped = true;
+        if (local)
+          playsoundc(S_JUMP);
+      } else {
+        pl->vel.z = 1.7f;
+        if (water) {
+          pl->vel.x /= 8;
+          pl->vel.y /= 8;
+        };
+        if (local)
+          playsoundc(S_JUMP);
+        else if (pl->monsterstate)
+          playsound(S_JUMP, &pl->o);
+      }
+    } else if (pl->timeinair > 800) {
       if (local)
         playsoundc(S_LAND);
       else if (pl->monsterstate)
@@ -299,6 +310,9 @@ void moveplayer(dynent *pl, int moveres, bool local, int curtime) {
   const float rise =
       speed / moveres / 1.2f; // extra smoothness when lifting up stairs
 
+  bool wallcontact = false;
+  float wn_x = 0, wn_y = 0;
+
   loopi(moveres) // discrete steps collision detection & sliding
   {
     // try move forward
@@ -311,6 +325,11 @@ void moveplayer(dynent *pl, int moveres, bool local, int curtime) {
     pl->blocked = true;
     pl->o.x -= f * d.x;
     if (collide(pl, false, drop, rise)) {
+      if (!pl->onfloor) {
+        wallcontact = true;
+        wn_x = d.x > 0 ? -1.0f : (d.x < 0 ? 1.0f : 0);
+        wn_y = 0;
+      };
       d.x = 0;
       continue;
     };
@@ -318,6 +337,11 @@ void moveplayer(dynent *pl, int moveres, bool local, int curtime) {
     // still stuck, try x axis
     pl->o.y -= f * d.y;
     if (collide(pl, false, drop, rise)) {
+      if (!pl->onfloor) {
+        wallcontact = true;
+        wn_x = 0;
+        wn_y = d.y > 0 ? -1.0f : (d.y < 0 ? 1.0f : 0);
+      };
       d.y = 0;
       continue;
     };
@@ -327,6 +351,14 @@ void moveplayer(dynent *pl, int moveres, bool local, int curtime) {
     pl->o.x -= f * d.x;
     pl->o.y -= f * d.y;
     if (collide(pl, false, drop, rise)) {
+      if (!pl->onfloor) {
+        wallcontact = true;
+        float len = sqrtf(d.x * d.x + d.y * d.y);
+        if (len > 0.01f) {
+          wn_x = -d.x / len;
+          wn_y = -d.y / len;
+        };
+      };
       d.y = d.x = 0;
       continue;
     };
@@ -334,9 +366,22 @@ void moveplayer(dynent *pl, int moveres, bool local, int curtime) {
     break;
   };
 
+  if (pl->onfloor || water) {
+    pl->walljump = false;
+    pl->walljumped = false;
+  } else if (!pl->walljumped) {
+    pl->walljump = wallcontact;
+    if (wallcontact) {
+      pl->wallnormal_x = wn_x;
+      pl->wallnormal_y = wn_y;
+    };
+  };
+
   if (local) {
-    if (pl->onfloor && !water && pl->moving && (pl->move != 0 || pl->strafe != 0)) {
-      if (runchan < 0) runchan = playsoundloop(S_RUN);
+    if (pl->onfloor && !water && pl->moving &&
+        (pl->move != 0 || pl->strafe != 0)) {
+      if (runchan < 0)
+        runchan = playsoundloop(S_RUN);
     } else if (runchan >= 0) {
       stopchan(runchan);
       runchan = -1;
