@@ -36,6 +36,7 @@ int lasttype = 0, lasttex = 0;
 sqr rtex;
 
 VAR(editing, 0, 0, 1);
+VAR(noclip, 0, 0, 1);
 
 void toggleedit() {
   if (player1->state == CS_DEAD)
@@ -45,12 +46,14 @@ void toggleedit() {
   if (!(editmode = !editmode)) {
     settagareas();
     entinmap(player1);
+    noclip = 0;
   } else {
     resettagareas();
     player1->health = 100;
     if (m_classicsp)
       monsterclear();
     projreset();
+    noclip = 1;
   };
   keyrepeat(editmode);
   selset = false;
@@ -60,7 +63,10 @@ void toggleedit() {
 COMMANDN(edittoggle, toggleedit, ARG_NONE);
 
 bool allowedittoggle() {
-    return !multiplayer();
+    if (multiplayer()) return false;
+    extern int numbots;
+    if (numbots > 0) return false;
+    return true;
 };
 
 void correctsel() {

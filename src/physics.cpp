@@ -205,6 +205,29 @@ void physicsframe() // optimally schedule physics frames inside the graphics
 // multiplayer prediction) local is false for multiplayer prediction
 
 void moveplayer(dynent *pl, int moveres, bool local, int curtime) {
+  if (noclip) {
+    vec d;
+    d.x = (float)(pl->move * cos(rad(pl->yaw - 90)));
+    d.y = (float)(pl->move * sin(rad(pl->yaw - 90)));
+    d.z = (float)(pl->move * sin(rad(pl->pitch)));
+    d.x *= (float)cos(rad(pl->pitch));
+    d.y *= (float)cos(rad(pl->pitch));
+    d.x += (float)(pl->strafe * cos(rad(pl->yaw - 180)));
+    d.y += (float)(pl->strafe * sin(rad(pl->yaw - 180)));
+
+    const float speed = curtime / 1000.0f * pl->maxspeed;
+    vmul(d, speed);
+    pl->o.x += d.x;
+    pl->o.y += d.y;
+    pl->o.z += d.z;
+    pl->timeinair = 0;
+    pl->onfloor = false;
+    pl->moving = d.x != 0 || d.y != 0 || d.z != 0;
+    pl->outsidemap = false;
+    vmul(pl->vel, 0);
+    return;
+  };
+
   const bool water = hdr.waterlevel > pl->o.z - 0.5f;
 
   vec d; // vector of direction we ideally want to move in

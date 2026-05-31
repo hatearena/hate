@@ -367,6 +367,8 @@ void raydamage(dynent *o, vec &from, vec &to, dynent *d, int i) {
 };
 
 void shoot(dynent *d, vec &targ) {
+  if (editmode)
+    return;
   int attacktime = lastmillis - d->lastaction;
   if (attacktime < d->gunwait)
     return;

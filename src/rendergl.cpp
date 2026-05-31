@@ -903,7 +903,7 @@ void gl_drawframe(int w, int h, float curfps) {
 
   glDisable(GL_CULL_FACE);
 
-  if (!thirdperson)
+  if (!thirdperson && !editmode)
     drawhudgun(fovy, aspect, farplane);
 
   overbright(1);
@@ -917,14 +917,14 @@ void gl_drawframe(int w, int h, float curfps) {
   addgodrays(w, h);
   addlensflare(w, h);
 
+  glDisable(GL_FOG);
+
+  glDisable(GL_TEXTURE_2D);
+
   if (editmode) {
     extern void cursorupdate();
     cursorupdate();
   };
-
-  glDisable(GL_FOG);
-
-  glDisable(GL_TEXTURE_2D);
 
   gl_drawhud(w, h, (int)curfps, nquads, curvert, underwater);
 

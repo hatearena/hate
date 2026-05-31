@@ -289,6 +289,7 @@ extern dynent
     *player1; // special client ent that receives input and acts as camera
 extern dvector players; // all the other clients (in multiplayer)
 extern bool editmode;
+extern int noclip;
 extern vector<entity> ents; // map entities
 extern vec worldpos;        // current target of the crosshair in the world
 extern int lastmillis;      // last time
