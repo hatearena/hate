@@ -59,9 +59,12 @@ bool rendermenu() {
 
   if (vmenu == 0) {
     int numrows = m.items.length();
-    if (numrows < 1) return true;
+    if (numrows < 1)
+      return true;
     int numcols = 1;
-    for (char *p = m.name; *p; p++) if (*p == '\t') numcols++;
+    for (char *p = m.name; *p; p++)
+      if (*p == '\t')
+        numcols++;
 
     enum { MAXCOLS = 16, MAXROWS = 128 };
     string hdr[MAXCOLS];
@@ -75,11 +78,15 @@ bool rendermenu() {
       char *start = buf;
       loopi(ncols) {
         char *end = start;
-        while (*end && *end != '\t') end++;
+        while (*end && *end != '\t')
+          end++;
         char saved = *end;
         *end = '\0';
         strcpy_s(hdr[i], start);
-        if (!saved) { ncols = i + 1; break; };
+        if (!saved) {
+          ncols = i + 1;
+          break;
+        };
         start = end + 1;
       };
     };
@@ -90,11 +97,13 @@ bool rendermenu() {
       char *start = buf;
       loopj(ncols) {
         char *end = start;
-        while (*end && *end != '\t') end++;
+        while (*end && *end != '\t')
+          end++;
         char saved = *end;
         *end = '\0';
         strcpy_s(rows_text[i][j], start);
-        if (!saved) break;
+        if (!saved)
+          break;
         start = end + 1;
       };
     };
@@ -109,7 +118,8 @@ bool rendermenu() {
       colw[i] = text_width(hdr[i]);
       loopj(nrows) {
         int w = text_width(rows_text[j][i]);
-        if (w > colw[i]) colw[i] = w;
+        if (w > colw[i])
+          colw[i] = w;
       };
     };
 
@@ -204,7 +214,7 @@ bool rendermenu() {
     return true;
   };
 
-  sprintf_sd(title)(vmenu > 1 ? "[ %s ]" : "%s", m.name);
+  sprintf_sd(title)(vmenu > 1 ? "%s" : "%s", m.name);
   int mdisp = m.items.length();
   int w = 0;
   loopi(mdisp) {
