@@ -18,7 +18,8 @@ struct soundloc {
 } soundlocs[MAXCHAN];
 
 int soundchan[MAXCHAN];
-VAR(maxsamesound, 1, 2, 8);
+vector<int> soundmax;
+VAR(maxsamesound, 0, 0, 8);
 
 #ifdef USE_MIXER
 #include "SDL_mixer.h"
@@ -118,8 +119,15 @@ int registersound(char *name) {
   loopv(snames) if (strcmp(snames[i], name) == 0) return i;
   snames.add(newstring(name));
   samples.add(NULL);
+  soundmax.add(0);
   return samples.length() - 1;
 };
+
+void setsoundmax(int n, int max) {
+  if (n >= 0 && n < soundmax.length()) soundmax[n] = max;
+};
+
+COMMAND(setsoundmax, ARG_2INT);
 
 COMMAND(registersound, ARG_1EST);
 
@@ -207,16 +215,19 @@ void playsound(int n, vec *loc) {
   };
 
   {
-    int same = 0;
-    loopi(MAXCHAN) if (soundchan[i] == n) {
+    int limit = soundmax[n] > 0 ? soundmax[n] : maxsamesound;
+    if (limit > 0) {
+      int same = 0;
+      loopi(MAXCHAN) if (soundchan[i] == n) {
 #ifdef USE_MIXER
-      if (Mix_Playing(i))
+        if (Mix_Playing(i))
 #else
-      if (FSOUND_IsPlaying(i))
+        if (FSOUND_IsPlaying(i))
 #endif
-        same++;
+          same++;
+      };
+      if (same >= limit) return;
     };
-    if (same >= maxsamesound) return;
   };
 
   if (!samples[n]) {
