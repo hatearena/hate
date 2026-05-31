@@ -4,14 +4,14 @@ ENetHost *clienthost = NULL;
 int connecting = 0;
 int connattempts = 0;
 int disconnecting = 0;
-int clientnum = -1;   // our client id in the game
+int clientnum = -1;
 bool c2sinit = false; // whether we need to tell the other clients our stats
 
 int getclientnum() { return clientnum; };
 
 bool multiplayer() {
   if (clienthost)
-    conoutf("operation not available in multiplayer");
+    conoutf("Operation not available in multiplayer");
   return clienthost != NULL;
 };
 
@@ -53,10 +53,10 @@ void connects(char *servername) {
   disconnect(1); // reset state
   addserver(servername);
 
-  conoutf("attempting to connect to %s", servername);
+  conoutf("Attempting to connect to %s", servername);
   ENetAddress address = {ENET_HOST_ANY, CUBE_SERVER_PORT};
   if (enet_address_set_host(&address, servername) < 0) {
-    conoutf("could not resolve server %s", servername);
+    conoutf("Could not resolve server %s", servername);
     return;
   };
 
@@ -68,7 +68,7 @@ void connects(char *servername) {
     connecting = lastmillis;
     connattempts = 0;
   } else {
-    conoutf("could not connect to server");
+    conoutf("Could not connect to server");
     disconnect();
   };
 };
@@ -109,15 +109,15 @@ void disconnect(int onlyclean, int async) {
 
 void trydisconnect() {
   if (!clienthost) {
-    conoutf("not connected");
+    conoutf("Not connected");
     return;
   };
   if (connecting) {
-    conoutf("aborting connection attempt");
+    conoutf("Aborting connection attempt");
     disconnect();
     return;
   };
-  conoutf("attempting to disconnect...");
+  conoutf("Attempting to disconnect...");
   disconnect(0, !disconnecting);
 };
 
@@ -132,8 +132,6 @@ COMMAND(echo, ARG_VARI);
 COMMANDN(say, toserver, ARG_VARI);
 COMMANDN(connect, connects, ARG_1STR);
 COMMANDN(disconnect, trydisconnect, ARG_NONE);
-
-// collect c2s messages conveniently
 
 vector<ivector> messages;
 
@@ -166,8 +164,7 @@ void server_err() {
 
 int lastupdate = 0, lastping = 0;
 string toservermap;
-bool senditemstoserver =
-    false; // after a map change, since server doesn't have map data
+bool senditemstoserver = false;
 
 string clientpassword;
 void password(char *p) { strcpy_s(clientpassword, p); };
