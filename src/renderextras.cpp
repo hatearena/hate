@@ -388,6 +388,58 @@ void damageblend(int n) { dblend += n; };
 VAR(hidestats, 0, 0, 1);
 VARP(crosshairfx, 0, 1, 1);
 
+void roundedbox(int x1, int y1, int x2, int y2, int r) {
+    int segs = 6;
+    glBegin(GL_QUADS);
+    glVertex2i(x1+r, y1+r);
+    glVertex2i(x2-r, y1+r);
+    glVertex2i(x2-r, y2-r);
+    glVertex2i(x1+r, y2-r);
+    glEnd();
+    glBegin(GL_QUADS);
+    glVertex2i(x1+r, y1);
+    glVertex2i(x2-r, y1);
+    glVertex2i(x2-r, y1+r);
+    glVertex2i(x1+r, y1+r);
+    glEnd();
+    glBegin(GL_QUADS);
+    glVertex2i(x1+r, y2-r);
+    glVertex2i(x2-r, y2-r);
+    glVertex2i(x2-r, y2);
+    glVertex2i(x1+r, y2);
+    glEnd();
+    glBegin(GL_QUADS);
+    glVertex2i(x1, y1+r);
+    glVertex2i(x1+r, y1+r);
+    glVertex2i(x1+r, y2-r);
+    glVertex2i(x1, y2-r);
+    glEnd();
+    glBegin(GL_QUADS);
+    glVertex2i(x2-r, y1+r);
+    glVertex2i(x2, y1+r);
+    glVertex2i(x2, y2-r);
+    glVertex2i(x2-r, y2-r);
+    glEnd();
+    float step = 90.0f / segs;
+    for (int c = 0; c < 4; c++) {
+        float ax, ay;
+        float start;
+        switch (c) {
+            case 0: ax = x1+r; ay = y1+r; start = 180.0f; break;
+            case 1: ax = x2-r; ay = y1+r; start = 270.0f; break;
+            case 2: ax = x2-r; ay = y2-r; start = 0.0f;   break;
+            case 3: ax = x1+r; ay = y2-r; start = 90.0f;  break;
+        }
+        glBegin(GL_TRIANGLE_FAN);
+        glVertex2f(ax, ay);
+        for (int i = 0; i <= segs; i++) {
+            float a = (start + step * i) * M_PI / 180.0f;
+            glVertex2f(ax + r * cosf(a), ay + r * sinf(a));
+        }
+        glEnd();
+    }
+}
+
 void gl_drawhud(int w, int h, int curfps, int nquads, int curvert,
                 bool underwater) {
   readmatrices();
@@ -482,31 +534,16 @@ void gl_drawhud(int w, int h, int curfps, int nquads, int curvert,
     glVertex2i(VIRTW, VIRTH);
     glVertex2i(0, VIRTH);
     glEnd();
-    glBegin(GL_QUADS);
     glColor4ub(10, 10, 10, 130);
-    glVertex2i(20, 1580);
-    glVertex2i(225, 1580);
-    glVertex2i(225, 1750);
-    glVertex2i(20, 1750);
-    glEnd();
+    roundedbox(20, 1580, 225, 1750, 20);
 
     if (player1->armour) {
-      glBegin(GL_QUADS);
       glColor4ub(10, 10, 10, 130);
-      glVertex2i(230, 1580);
-      glVertex2i(434, 1580);
-      glVertex2i(434, 1750);
-      glVertex2i(230, 1750);
-      glEnd();
+      roundedbox(230, 1580, 434, 1750, 20);
     }
 
-    glBegin(GL_QUADS);
     glColor4ub(10, 10, 10, 130);
-    glVertex2i(VIRTW - 260, 1580);
-    glVertex2i(VIRTW - 30, 1580);
-    glVertex2i(VIRTW - 30, 1750);
-    glVertex2i(VIRTW - 260, 1750);
-    glEnd();
+    roundedbox(VIRTW - 260, 1580, VIRTW - 30, 1750, 20);
     glEnable(GL_TEXTURE_2D);
 
     glBlendFunc(GL_ONE, GL_ONE);
