@@ -4,7 +4,7 @@ CXXOPTFLAGS=-Wall -fsigned-char -fomit-frame-pointer -fpermissive -w \
 
 CXXFLAGS=$(CXXOPTFLAGS) `sdl2-config --cflags`
 
-CLIENT_LIBS=-lenet `sdl2-config --libs` -lSDL2_image -lSDL2_mixer -lz -lGL -lGLU -lX11
+CLIENT_LIBS=-lenet `sdl2-config --libs` -lSDL2_image -lSDL2_mixer -lSDL2_ttf -lz -lGL -lGLU -lX11
 CLIENT_OBJS= client.o clientextras.o clientgame.o clients2c.o command.o \
 			 console.o editing.o entities.o main.o menus.o monster.o physics.o \
 			 bot.o rendercubes.o renderextras.o rendergl.o rendermd2.o \

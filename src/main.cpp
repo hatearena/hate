@@ -10,6 +10,7 @@ void cleanup(char *msg) {
   cleangl();
   cleansound();
   cleanupserver();
+  TTF_Quit();
   SDL_ShowCursor(1);
   if (msg) {
 #ifdef WIN32
@@ -157,6 +158,10 @@ int main(int argc, char **argv) {
   if (SDL_Init(SDL_INIT_TIMER | SDL_INIT_VIDEO) < 0)
     fatal("Unable to initialize SDL");
 
+  log("ttf");
+  if (TTF_Init() < 0)
+    fatal("Unable to initialize SDL2_ttf");
+
   log("net");
   if (enet_initialize() < 0)
     fatal("Unable to initialize network module");
@@ -197,8 +202,7 @@ int main(int argc, char **argv) {
 
   log("basetex");
   int xs, ys;
-  if (!installtex(2, path(newstring("data/newchars.png")), xs, ys) ||
-      !installtex(3, path(newstring("data/martin/base.png")), xs, ys) ||
+  if (!installtex(3, path(newstring("data/martin/base.png")), xs, ys) ||
       !installtex(6, path(newstring("data/martin/ball1.png")), xs, ys) ||
       !installtex(7, path(newstring("data/martin/smoke.png")), xs, ys) ||
       !installtex(8, path(newstring("data/martin/ball2.png")), xs, ys) ||
@@ -208,6 +212,9 @@ int main(int argc, char **argv) {
       !installtex(1, path(newstring("data/crosshair.png")), xs, ys))
     fatal("could not find core textures (hint: run HATE from the parent of the "
           "bin directory)");
+
+  log("font");
+  init_font();
 
   log("sound");
 
