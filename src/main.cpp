@@ -40,6 +40,10 @@ void fatal(const char *s, const char *o) {
   cleanup(msg);
 };
 
+void keyrepeat(bool on) {
+  // SDL2 handles key repeat natively; this matches SDL 1.2 API
+};
+
 void *alloc(int s) {
   void *b = calloc(1, s);
   if (!b)
@@ -178,7 +182,7 @@ int main(int argc, char **argv) {
   initserver(dedicated, uprate, sdesc, ip, master, passwd, maxcl);
 
   log("world");
-  empty_world(7);
+  empty_world(7, true);
 
   log("video: sdl");
   if (SDL_InitSubSystem(SDL_INIT_VIDEO) < 0)

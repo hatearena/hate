@@ -65,6 +65,13 @@ extern void toserver(char *text);
 extern void addmsg(int rel, int num, int type, ...);
 extern bool multiplayer();
 extern bool allowedittoggle();
+extern bool noteditmode();
+extern void pruneundos(int maxremain);
+extern void toggleedit();
+extern void edittypexy(int type, block &sel);
+extern void cursorupdate();
+extern void settagareas();
+extern void resettagareas();
 extern void sendpackettoserv(void *packet);
 extern void gets2c();
 extern void c2sinfo(dynent *d);
@@ -101,7 +108,7 @@ extern void renderscores();
 
 // world
 extern void setupworld(int factor);
-extern void empty_world(int factor);
+extern void empty_world(int factor, bool force = true);
 extern void remip(block &b, int level = 0);
 extern void remipmore(block &b, int level = 0);
 extern int findentity(int type, int index = 0);

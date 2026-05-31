@@ -917,6 +917,11 @@ void gl_drawframe(int w, int h, float curfps) {
   addgodrays(w, h);
   addlensflare(w, h);
 
+  if (editmode) {
+    extern void cursorupdate();
+    cursorupdate();
+  };
+
   glDisable(GL_FOG);
 
   glDisable(GL_TEXTURE_2D);
