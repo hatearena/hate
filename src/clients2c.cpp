@@ -120,7 +120,7 @@ void localservertoclient(uchar *buf,
 
     case SV_TEXT:
       sgetstr();
-      conoutf("%s:\f %s", d->name, text);
+      conoutf("\f%s: %s", d->name, text);
       break;
 
     case SV_MAPCHANGE:

@@ -123,7 +123,7 @@ void trydisconnect() {
 
 string ctext;
 void toserver(char *text) {
-  conoutf("%s:\f %s", player1->name, text);
+  conoutf("\f%s: %s", player1->name, text);
   strn0cpy(ctext, text, 80);
 };
 void echo(char *text) { conoutf("%s", text); };
