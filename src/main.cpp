@@ -342,6 +342,9 @@ int main(int argc, char **argv) {
           case SDLK_END:
             execute("edittex 1 -1");
             break;
+          case SDLK_u:
+            execute("undo");
+            break;
           default:
             handled = false;
             break;

@@ -10,7 +10,7 @@ void line(int x1, int y1, float z1, int x2, int y2, float z2) {
 
 void linestyle(float width, int r, int g, int b) {
   glLineWidth(width);
-  glColor3ub(r, g, b);
+  glColor4ub(r, g, b, 128);
 };
 
 void box(block &b, float z1, float z2, float z3, float z4) {
