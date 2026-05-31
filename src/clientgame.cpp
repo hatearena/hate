@@ -366,7 +366,7 @@ void boostn(bool on) {
   if (player1->boostmillis > 0)
     return;
   float yawrad = rad(player1->yaw);
-  float strength = player1->onfloor ? 2.5f : 1.2f;
+  float strength = player1->onfloor ? 2.9f : 1.5f;
   player1->vel.x += sinf(yawrad) * strength;
   player1->vel.y += -cosf(yawrad) * strength;
   player1->boostmillis = 4000;
