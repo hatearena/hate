@@ -1,5 +1,7 @@
 #include "cube.h"
 
+static int runchan = -1;
+
 /// Collide monster with player.
 bool plcollide(dynent *d, dynent *o, float &headspace, float &hi, float &lo) {
   if (o->state != CS_ALIVE)
@@ -307,6 +309,15 @@ void moveplayer(dynent *pl, int moveres, bool local, int curtime) {
     };
     pl->o.z -= f * d.z;
     break;
+  };
+
+  if (local) {
+    if (pl->onfloor && !water && pl->moving && (pl->move != 0 || pl->strafe != 0)) {
+      if (runchan < 0) runchan = playsoundloop(S_RUN);
+    } else if (runchan >= 0) {
+      stopchan(runchan);
+      runchan = -1;
+    };
   };
 
   // detect wether player is outside map, used for skipping zbuffer clear mostly

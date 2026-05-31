@@ -178,6 +178,7 @@ enum
 	S_PIGR1, S_ICEBALL, S_SLIMEBALL,
 	S_JUMPPAD,
 	S_CSAW,
+	S_RUN,
 };
 
 // vertex array format

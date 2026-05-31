@@ -188,6 +188,8 @@ extern void physicsframe();
 // sound
 extern void playsound(int n, vec *loc = 0);
 extern void playsoundc(int n);
+extern int playsoundloop(int n, vec *loc = 0);
+extern void stopchan(int chan);
 extern void initsound();
 extern void cleansound();
 
