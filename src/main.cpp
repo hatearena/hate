@@ -14,7 +14,7 @@ void cleanup(char *msg) {
   SDL_ShowCursor(1);
   if (msg) {
 #ifdef WIN32
-    MessageBox(NULL, msg, "cube fatal error", MB_OK | MB_SYSTEMMODAL);
+    MessageBox(NULL, msg, "CE fatal error", MB_OK | MB_SYSTEMMODAL);
 #else
     printf("%s", msg);
 #endif
