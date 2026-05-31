@@ -180,7 +180,7 @@ void initclientnet() {
   toservermap[0] = 0;
   clientpassword[0] = 0;
   newname("Hater");
-  newteam("red");
+  newteam("RED");
 };
 
 void sendpackettoserv(void *packet) {
