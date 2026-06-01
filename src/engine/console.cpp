@@ -27,13 +27,10 @@ COMMANDN(conskip, setconskip, ARG_1INT);
 void conline(const char *sf, bool highlight) // add a line to the console buffer
 {
   cline cl;
-  cl.cref = conlines.length() > 100
-                ? conlines.pop().cref
-                : newstringbuf(""); // constrain the buffer size
-  cl.outtime = lastmillis;          // for how long to keep line on screen
+  cl.cref = conlines.length() > 100 ? conlines.pop().cref : newstringbuf("");
+  cl.outtime = lastmillis;
   conlines.insert(0, cl);
-  if (highlight) // show line in a different colour, for chat etc.
-  {
+  if (highlight) {
     cl.cref[0] = '\f';
     cl.cref[1] = 0;
     strcat_s(cl.cref, sf);
@@ -213,14 +210,13 @@ void keypress(int code, bool isdown, bool textinput, char text[32]) {
       dont_query_next_key = false;
     else {
       resetcomplete();
-      char buf[] = {text[0], 0}; // please forgive me, encoding gods
+      char buf[] = {text[0], 0};
       strcat_s(commandbuf, buf);
       return;
     }
   }
 
-  if (saycommandon) // keystrokes go to commandline
-  {
+  if (saycommandon) {
     if (isdown) {
       switch (code) {
       case SDLK_RETURN:
