@@ -1,5 +1,3 @@
-// protos for ALL external functions in cube...
-
 // command
 extern int variable(char *name, int min, int cur, int max, int *storage, void (*fun)(), bool persist);
 extern void setvar(char *name, int i);
@@ -264,6 +262,9 @@ extern void resetspawns();
 extern void setspawn(uint i, bool on);
 extern void teleport(int n, dynent *d);
 extern void baseammo(int gun);
+
+// menus
+extern void showentities();
 
 // rndmap
 extern void perlinarea(block &b, int scale, int seed, int psize);

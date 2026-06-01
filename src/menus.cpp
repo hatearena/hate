@@ -1,6 +1,7 @@
 #include "cube.h"
 
 extern int botdifficulty, botamount;
+extern char *entnames[];
 
 enum { ID_VAR, ID_COMMAND, ID_ALIAS };
 struct ident {
@@ -399,7 +400,54 @@ void showmapmodels() {
   menuset(mi);
 };
 
+void showentities() {
+  if (!editmode && multiplayer()) return;
+  if (menustack.empty() && vmenu > 0) menustack.add(vmenu);
+  string mname = "entitypreview";
+  int mi = -1;
+  loopv(menus) if (i > 1 && strcmp(menus[i].name, mname) == 0) { mi = i; break; };
+  if (mi < 0) { newmenu(mname); mi = menus.length() - 1; };
+  gmenu &m = menus[mi];
+  m.items.setsize(0);
+  m.menusel = 0;
+  m.menuselvis = 0.0f;
+  m.scrolloff = 0;
+  loopi(MAXENTTYPES) {
+    if (i == NOTUSED || i >= MAXENTTYPES) continue;
+    string buf;
+    const char *desc = "";
+    switch (i) {
+      case LIGHT:       desc = "radius"; break;
+      case PLAYERSTART: desc = "angle"; break;
+      case I_SHELLS:    desc = "ammo"; break;
+      case I_BULLETS:   desc = "ammo"; break;
+      case I_ROCKETS:   desc = "ammo"; break;
+      case I_ROUNDS:    desc = "ammo"; break;
+      case I_HEALTH:    desc = "health"; break;
+      case I_BOOST:     desc = "health"; break;
+      case I_GREENARMOUR: desc = "armour"; break;
+      case I_YELLOWARMOUR: desc = "armour"; break;
+      case I_QUAD:      desc = "powerup"; break;
+      case TELEPORT:    desc = "idx"; break;
+      case TELEDEST:    desc = "angle, idx"; break;
+      case MAPMODEL:    desc = "angle, idx"; break;
+      case MONSTER:     desc = "angle, type"; break;
+      case CARROT:      desc = "tag, type"; break;
+      case JUMPPAD:     desc = "zpush, ypush, xpush"; break;
+    };
+    sprintf_s(buf)("%d: %s (%s)", i, entnames[i], desc);
+    mitem &mi2 = m.items.add();
+    mi2.text = newstring(buf);
+    mi2.action = newstring(" ");
+    mi2.checkbox = false;
+    mi2.slider = false;
+  };
+  if (menustack.empty()) menustack.add(mi);
+  menuset(mi);
+};
+
 COMMAND(showmapmodels, ARG_NONE);
+COMMAND(showentities, ARG_NONE);
 COMMAND(menuitem, ARG_2STR);
 COMMANDN(menuitem_checkbox, menuitem_checkbox, ARG_2STR);
 COMMANDN(menuitem_slider, menuitem_slider, ARG_2STR);

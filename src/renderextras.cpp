@@ -580,10 +580,10 @@ void gl_drawhud(int w, int h, int curfps, int nquads, int curvert,
     glColor4ub(0, 0, 0, 127);
     roundedbox(sx, sy, sx + sw, sy + sh, sr);
     glEnable(GL_TEXTURE_2D);
-    draw_textf("FPS: %d", 3000, 100, 2, curfps);
-    draw_textf("QS: %d", 3000, 170, 2, nquads);
-    draw_textf("CTV: %d", 3000, 240, 2, curvert);
-    draw_textf("XVS: %d", 3000, 310, 2, xtraverts);
+    draw_textf("FPS: %d", 3005, 100, 2, curfps);
+    draw_textf("QS: %d", 3005, 170, 2, nquads);
+    draw_textf("CTV: %d", 3005, 240, 2, curvert);
+    draw_textf("XVS: %d", 3005, 310, 2, xtraverts);
   };
 
   glPopMatrix();
