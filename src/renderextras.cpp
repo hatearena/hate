@@ -622,10 +622,21 @@ void gl_drawhud(int w, int h, int curfps, int nquads, int curvert,
       roundedbox(bx + inner, by, bx + inner + (int)(bw * pct), by + bh, 12);
     };
     glEnable(GL_TEXTURE_2D);
-    glBlendFunc(GL_ONE, GL_ONE);
-    glColor4ub(255, 255, 255, 255);
     {
       int bx = player1->armour ? 440 : 230;
+      glBlendFunc(GL_ONE, GL_ONE);
+      glColor4ub(255, 255, 255, 255);
+      glBindTexture(GL_TEXTURE_2D, 10);
+      glBegin(GL_QUADS);
+      glTexCoord2f(0, 0);
+      glVertex2i(bx + 10, 1620);
+      glTexCoord2f(1, 0);
+      glVertex2i(bx + 74, 1620);
+      glTexCoord2f(1, 1);
+      glVertex2i(bx + 74, 1684);
+      glTexCoord2f(0, 1);
+      glVertex2i(bx + 10, 1684);
+      glEnd();
       int boostval =
           player1->boostmillis > 0
               ? (int)((1.0f - (float)player1->boostmillis / 4000.0f) * 100)

@@ -73,13 +73,16 @@ bool installtex(int tnum, char *texname, int &xs, int &ys, bool clamp) {
     conoutf("couldn't load texture %s", texname);
     return false;
   };
-  if (s->format->BitsPerPixel != 24) {
-    conoutf("texture must be 24bpp: %s", texname);
+  int bpp = s->format->BitsPerPixel;
+  GLenum fmt = bpp == 32 ? GL_RGBA : GL_RGB;
+  GLenum ifmt = bpp == 32 ? GL_RGBA : GL_RGB;
+  if (bpp != 24 && bpp != 32) {
+    conoutf("texture must be 24bpp or 32bpp: %s", texname);
     return false;
   };
 
   glBindTexture(GL_TEXTURE_2D, tnum);
-  glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+  glPixelStorei(GL_UNPACK_ALIGNMENT, bpp == 32 ? 4 : 1);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,
                   clamp ? GL_CLAMP_TO_EDGE : GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,
@@ -100,11 +103,11 @@ bool installtex(int tnum, char *texname, int &xs, int &ys, bool clamp) {
   void *scaledimg = s->pixels;
   if (xs != s->w) {
     conoutf("warning: quality loss: scaling %s", texname);
-    scaledimg = alloc(xs * ys * 3);
-    gluScaleImage(GL_RGB, s->w, s->h, GL_UNSIGNED_BYTE, s->pixels, xs, ys,
+    scaledimg = alloc(xs * ys * (bpp / 8));
+    gluScaleImage(fmt, s->w, s->h, GL_UNSIGNED_BYTE, s->pixels, xs, ys,
                   GL_UNSIGNED_BYTE, scaledimg);
   };
-  if (gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGB, xs, ys, GL_RGB, GL_UNSIGNED_BYTE,
+  if (gluBuild2DMipmaps(GL_TEXTURE_2D, ifmt, xs, ys, fmt, GL_UNSIGNED_BYTE,
                         scaledimg))
     fatal("could not build mipmaps");
   if (xs != s->w)

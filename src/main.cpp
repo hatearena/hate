@@ -245,6 +245,7 @@ int main(int argc, char **argv) {
       !installtex(1, path(newstring("data/crosshair.png")), xs, ys))
     fatal("Could not find core textures (hint: run HATE from the parent of the "
           "bin directory)");
+  installtex(10, path(newstring("data/boost.png")), xs, ys);
 
   log("font");
   init_font();
