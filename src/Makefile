@@ -1,4 +1,4 @@
-PLATFORM ?= linux
+PLATFORM ?= $(shell uname -s | tr '[:upper:]' '[:lower:]' | sed 's/darwin/macos/')
 
 ifeq ($(PLATFORM),macos)
     CXX = clang++
@@ -8,23 +8,23 @@ ifeq ($(PLATFORM),macos)
     CXXFLAGS_EXTRA = \
         -I$(BREW_PREFIX)/include
 
+    LDFLAGS_EXTRA = \
+        -L$(BREW_PREFIX)/lib
+
     CLIENT_LIBS = \
-        -L$(BREW_PREFIX)/lib \
+        $(LDFLAGS_EXTRA) \
         -lenet \
-        `sdl2-config --libs` \
-        -lSDL2_image \
-        -lSDL2_mixer \
-        -lSDL2_ttf \
         -lz \
+        `sdl2-config --libs` \
+        -lSDL2_image -lSDL2_mixer -lSDL2_ttf \
         -framework OpenGL \
         -framework Cocoa \
         -framework IOKit \
         -framework CoreVideo
 
     SERVER_LIBS = \
-        -L$(BREW_PREFIX)/lib \
+        $(LDFLAGS_EXTRA) \
         -lenet
-
 else
     CXX = g++
 
