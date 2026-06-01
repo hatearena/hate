@@ -86,16 +86,11 @@ void renderconsole() // render buffer taking into account time & scrolling
     int ypos = (FONTH / 4 * 5) * (nd - j - 1) + FONTH / 3 + yoff;
     int tw = text_width(refs[j].text);
     if (tw > 0 && alpha > 0) {
-      int pad = FONTH / 4;
+      int pad = FONTH / 8;
       glDisable(GL_TEXTURE_2D);
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
       glColor4ub(0, 0, 0, alpha / 2);
-      glBegin(GL_QUADS);
-      glVertex2i(xpos - pad, ypos - pad);
-      glVertex2i(xpos + tw + pad, ypos - pad);
-      glVertex2i(xpos + tw + pad, ypos + FONTH + pad);
-      glVertex2i(xpos - pad, ypos + FONTH + pad);
-      glEnd();
+      roundedbox(xpos - pad, ypos - pad, xpos + tw + pad, ypos + FONTH + pad / 2, 6);
       glEnable(GL_TEXTURE_2D);
     };
     draw_text(refs[j].text, xpos, ypos, 2, alpha);

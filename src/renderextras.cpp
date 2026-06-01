@@ -524,11 +524,12 @@ void gl_drawhud(int w, int h, int curfps, int nquads, int curvert,
       showbg = 127 - elapsed * 127 / 300;
     };
     if (showbg > 0) {
-      int tw = command ? text_width(command) + text_width("$ _") : text_width("$ _");
+      int tw =
+          command ? text_width(command) + text_width("$ _") : text_width("$ _");
       glDisable(GL_TEXTURE_2D);
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
       glColor4ub(0, 0, 0, showbg);
-      roundedbox(10, 1390, 30 + tw + 10, 1390 + FONTH + 10, 6);
+      roundedbox(10, 1388, 30 + tw + 10, 1420 + FONTH + 4, 6);
       glEnable(GL_TEXTURE_2D);
     };
     if (command)
