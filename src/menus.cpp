@@ -2,6 +2,8 @@
 
 extern int botdifficulty, botamount;
 extern char *entnames[];
+extern int timelimit;
+static int timelimitreg = variable("timelimit", 0, 10, 60, &timelimit, NULL, true);
 
 enum { ID_VAR, ID_COMMAND, ID_ALIAS };
 struct ident {

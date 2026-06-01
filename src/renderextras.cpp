@@ -1,5 +1,8 @@
 #include "cube.h"
 
+extern bool intermission;
+extern int intermissiontimer;
+
 void line(int x1, int y1, float z1, int x2, int y2, float z2) {
   glBegin(GL_LINE_STRIP);
   glVertex3f((float)x1, z1, (float)y1);
@@ -539,7 +542,14 @@ void gl_drawhud(int w, int h, int curfps, int nquads, int curvert,
   }
 
   renderscores();
-  if (!rendermenu()) {
+  if (intermission && intermissiontimer > 0) {
+    int secs = (intermissiontimer + 999) / 1000;
+    string buf;
+    sprintf_s(buf)("New map in: %d second%s", secs, secs == 1 ? "" : "s");
+    int tw = text_width(buf);
+    draw_text(buf, (VIRTW - tw) / 2, 600, 2);
+  };
+  if (!rendermenu() && !intermission) {
     glBlendFunc(GL_SRC_ALPHA, GL_SRC_ALPHA);
     glBindTexture(GL_TEXTURE_2D, 1);
     glBegin(GL_QUADS);
@@ -588,7 +598,7 @@ void gl_drawhud(int w, int h, int curfps, int nquads, int curvert,
 
   glPopMatrix();
 
-  if (player1->state == CS_ALIVE && !editmode) {
+  if (player1->state == CS_ALIVE && !editmode && !intermission) {
     glPushMatrix();
     glOrtho(0, VIRTW, VIRTH, 0, -1, 1);
     glDisable(GL_TEXTURE_2D);

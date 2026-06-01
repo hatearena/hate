@@ -40,6 +40,7 @@ void restoreserverstate(
 };
 
 int interm = 0, minremain = 0, mapend = 0;
+int timelimit = 10;
 bool mapreload = false;
 
 char *serverpassword = "";
@@ -230,7 +231,7 @@ void process(ENetPacket *packet, int sender) // sender may be -1
         return;
       mapreload = false;
       mode = reqmode;
-      minremain = mode & 1 ? 15 : 10;
+      minremain = timelimit ? timelimit : 10;
       mapend = lastsec + minremain * 60;
       interm = 0;
       strcpy_s(smapname, text);
@@ -354,7 +355,7 @@ client &addclient() {
 
 void checkintermission() {
   if (!minremain) {
-    interm = lastsec + 10;
+    interm = lastsec + 15;
     mapend = lastsec + 1000;
   };
   send2(true, -1, SV_TIMEUP, minremain--);
@@ -373,7 +374,8 @@ void resetserverifempty() {
   resetitems();
   mode = 0;
   mapreload = false;
-  minremain = 10;
+  lastsec = (int)time(NULL);
+  minremain = timelimit ? timelimit : 10;
   mapend = lastsec + minremain * 60;
   interm = 0;
 };
@@ -397,7 +399,7 @@ void serverslice(
 
   lastsec = seconds;
 
-  if ((mode > 1 || (mode == 0 && nonlocalclients)) &&
+  if (timelimit && mode != 1 &&
       seconds > mapend - minremain * 60)
     checkintermission();
   if (interm && seconds > interm) {

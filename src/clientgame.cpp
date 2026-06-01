@@ -7,6 +7,7 @@ void mode(int n) { addmsg(1, 2, SV_GAMEMODE, nextmode = n); };
 COMMAND(mode, ARG_1INT);
 
 bool intermission = false;
+int intermissiontimer = 0;
 
 dynent *player1 = newdynent(); // our client
 dvector players;               // other clients
@@ -264,6 +265,8 @@ void updateworld(int millis) // main game update loop
         moveplayer(player1, 20, true);
         checkitems();
       };
+      if (intermission && intermissiontimer > 0)
+        intermissiontimer -= curtime;
       if (player1->boostmillis > 0)
         player1->boostmillis = max(0, player1->boostmillis - curtime);
       c2sinfo(player1); // do this last, to reduce the effective frame lag
@@ -456,9 +459,9 @@ void selfdamage(int damage, int actor, dynent *act) {
 void timeupdate(int timeremain) {
   if (!timeremain) {
     intermission = true;
+    intermissiontimer = 15000;
     player1->attacking = false;
-    conoutf("Intermission:");
-    conoutf("Game ended.");
+    conoutf("Intermission: Time's up.");
     showscores(true);
   } else {
     conoutf("Time remaining: %d minutes", timeremain);
