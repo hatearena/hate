@@ -148,6 +148,7 @@ struct pool
 	void allocnext(size_t allocsize);
 };
 
+pool *gp();
 template <class T> struct vector
 {
 	T *buf;
@@ -271,7 +272,6 @@ template <class T> struct hashtable
 
 #define enumerate(ht,t,e,b) loopi(ht->size) for(ht->enumc = ht->table[i]; ht->enumc; ht->enumc = ht->enumc->next) { t e = &ht->enumc->data; b; }
 
-pool *gp();
 inline char *newstring(const char *s)        { return gp()->string(s);    };
 inline char *newstring(char *s, size_t l) { return gp()->string(s, l); };
 inline char *newstringbuf(char *s)     { return gp()->stringbuf(s); };
