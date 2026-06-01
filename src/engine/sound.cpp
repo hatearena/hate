@@ -1,9 +1,6 @@
 #include "../include/cube.h"
 
-// #ifndef WIN32    // NOTE: fmod not being supported for the moment as it does
-// not allow stereo pan/vol updating during playback
 #define USE_MIXER
-// #endif
 
 VARP(soundvol, 0, 255, 255);
 VARP(musicvol, 0, 128, 255);
