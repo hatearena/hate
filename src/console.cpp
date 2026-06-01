@@ -125,7 +125,7 @@ void bindkey(char *key, char *action) {
     strcpy_s(keyms[i].action, action);
     return;
   };
-  conoutf("unknown key \"%s\"", key);
+  conoutf("Unknown key: \"%s\"", key);
 };
 
 COMMANDN(bind, bindkey, ARG_2STR);
