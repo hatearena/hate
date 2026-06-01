@@ -392,7 +392,7 @@ void damageblend(int n) {
   lastdamage = lastmillis;
 };
 
-VAR(hidestats, 0, 0, 1);
+VAR(show_stats, 0, 1, 1);
 VARP(crosshairfx, 0, 1, 1);
 
 void roundedbox(int x1, int y1, int x2, int y2, int r) {
@@ -570,10 +570,16 @@ void gl_drawhud(int w, int h, int curfps, int nquads, int curvert,
   glOrtho(0, VIRTW * 4 / 3, VIRTH * 4 / 3, 0, -1, 1);
   renderconsole();
 
-  if (!hidestats) {
+  if (show_stats) {
     glPopMatrix();
     glPushMatrix();
     glOrtho(0, VIRTW * 3 / 2, VIRTH * 3 / 2, 0, -1, 1);
+    int sx = 2950, sy = 75, sw = 400, sh = 320, sr = 12;
+    glDisable(GL_TEXTURE_2D);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glColor4ub(0, 0, 0, 127);
+    roundedbox(sx, sy, sx + sw, sy + sh, sr);
+    glEnable(GL_TEXTURE_2D);
     draw_textf("FPS: %d", 3000, 100, 2, curfps);
     draw_textf("QS: %d", 3000, 170, 2, nquads);
     draw_textf("CTV: %d", 3000, 240, 2, curvert);
