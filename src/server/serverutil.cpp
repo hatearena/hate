@@ -40,12 +40,20 @@ void sendstring(char *t, uchar *&p) {
 };
 
 const char *modenames[] = {
+    "SP",
+    "DMSP",
     "ffa/default",
     "coopedit",
     "ffa/duel",
     "teamplay",
     "instagib",
     "instagib team",
+    "efficiency",
+    "efficiency team",
+    "insta arena",
+    "insta clan arena",
+    "tactics arena",
+    "tactics clan arena",
 };
 
 const char *modestr(int n) {
