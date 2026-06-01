@@ -8,8 +8,10 @@ int numbots = 0;
 VAR(botdifficulty, -1, 4, 4);
 VAR(botamount, 1, 4, 16);
 
-static const char *botnames[] = {"Cerelo", "Diaso", "Ceria", "Deathly", "Ra",
-                                 "Va",     "Never", "Abu",   "Re"};
+static const char *botnames[] = {
+    "Cerelo", "Diaso", "Ceria",  "Deathly", "Ra",     "Va",    "Never",
+    "Abu",    "Re",    "Why",    "Lucky",   "Lano",   "Cliff", "Cobra",
+    "Liner",  "Chiba", "Dragon", "Sabre",   "Koffman"};
 static const int numbotnames = sizeof(botnames) / sizeof(botnames[0]);
 
 static void genbotname(char *buf) {
@@ -382,13 +384,12 @@ void addbotcmd(int n) {
     conoutf("bots only work in multiplayer modes");
     return;
   }
-  if (n < 1) n = 1;
+  if (n < 1)
+    n = 1;
   loopi(n) spawnonebot();
 }
 
-void addbotspawn() {
-  addbotcmd(botamount);
-}
+void addbotspawn() { addbotcmd(botamount); }
 
 COMMANDN(addbot, addbotcmd, ARG_1INT);
 COMMANDN(addbotspawn, addbotspawn, ARG_NONE);
