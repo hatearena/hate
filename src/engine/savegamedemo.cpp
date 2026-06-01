@@ -1,4 +1,4 @@
-#include "cube.h"
+#include "../include/cube.h"
 
 extern int islittleendian;
 

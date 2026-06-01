@@ -1,4 +1,4 @@
-#include "cube.h"
+#include "../include/cube.h"
 
 ENetSocket mssock = ENET_SOCKET_NULL;
 

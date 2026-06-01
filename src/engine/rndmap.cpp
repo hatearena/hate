@@ -1,4 +1,4 @@
-#include "cube.h"
+#include "../include/cube.h"
 
 float noise(int x, int y, int seed) {
   int n = x + y * 57;

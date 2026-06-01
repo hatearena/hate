@@ -1,4 +1,4 @@
-#include "cube.h"
+#include "../include/cube.h"
 
 extern bool los(float lx, float ly, float lz, float bx, float by, float bz,
                 vec &v);

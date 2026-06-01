@@ -1,4 +1,4 @@
-#include "cube.h"
+#include "include/cube.h"
 
 SDL_Window *window = NULL;
 SDL_GLContext glcontext = NULL;
@@ -60,9 +60,9 @@ void setresolution() {
 };
 
 VARFP(fullscreen, 0, 0, 1, {
-      conoutf("Restart the game for fullscreen change to take effect");
-      writecfg();
-    });
+  conoutf("Restart the game for fullscreen change to take effect");
+  writecfg();
+});
 
 #if 0
 void screenshot()
@@ -210,7 +210,8 @@ int main(int argc, char **argv) {
         int v;
         if (sscanf(line, " fullscreen %d", &v) == 1 ||
             sscanf(line, "fullscreen %d", &v) == 1) {
-          if (v >= 0 && v <= 1) fullscreen = v;
+          if (v >= 0 && v <= 1)
+            fullscreen = v;
           break;
         }
       }
@@ -377,31 +378,36 @@ int main(int argc, char **argv) {
             execute("editheight $flrceil -1");
             break;
           case SDLK_x:
-            if ((event.key.keysym.mod & KMOD_CTRL) && (event.key.keysym.mod & KMOD_SHIFT))
+            if ((event.key.keysym.mod & KMOD_CTRL) &&
+                (event.key.keysym.mod & KMOD_SHIFT))
               execute("edittex 1 1");
             else
               handled = false;
             break;
           case SDLK_r:
-            if ((event.key.keysym.mod & KMOD_CTRL) && (event.key.keysym.mod & KMOD_SHIFT))
+            if ((event.key.keysym.mod & KMOD_CTRL) &&
+                (event.key.keysym.mod & KMOD_SHIFT))
               execute("edittex 2 1");
             else
               handled = false;
             break;
           case SDLK_g:
-            if ((event.key.keysym.mod & KMOD_CTRL) && (event.key.keysym.mod & KMOD_SHIFT))
+            if ((event.key.keysym.mod & KMOD_CTRL) &&
+                (event.key.keysym.mod & KMOD_SHIFT))
               execute("edittex 0 1");
             else
               handled = false;
             break;
           case SDLK_i:
-            if ((event.key.keysym.mod & KMOD_CTRL) && (event.key.keysym.mod & KMOD_SHIFT))
+            if ((event.key.keysym.mod & KMOD_CTRL) &&
+                (event.key.keysym.mod & KMOD_SHIFT))
               execute("eyedropper");
             else
               handled = false;
             break;
           case SDLK_o:
-            if ((event.key.keysym.mod & KMOD_CTRL) && (event.key.keysym.mod & KMOD_SHIFT))
+            if ((event.key.keysym.mod & KMOD_CTRL) &&
+                (event.key.keysym.mod & KMOD_SHIFT))
               execute("eyedropperpaste");
             else
               handled = false;

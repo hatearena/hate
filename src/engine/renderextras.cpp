@@ -1,4 +1,4 @@
-#include "cube.h"
+#include "../include/cube.h"
 
 extern bool intermission;
 extern int intermissiontimer;

@@ -1,4 +1,4 @@
-#include "cube.h"
+#include "../include/cube.h"
 
 ENetHost *clienthost = NULL;
 int connecting = 0;
@@ -137,9 +137,7 @@ void kickcmd(char *name) {
   sprintf_sd(buf)("/kick %s", name);
   strn0cpy(ctext, buf, 80);
 };
-void kickallcmd() {
-  strn0cpy(ctext, "/kick_all_bots", 80);
-};
+void kickallcmd() { strn0cpy(ctext, "/kick_all_bots", 80); };
 COMMANDN(kick, kickcmd, ARG_1STR);
 COMMANDN(kick_all_bots, kickallcmd, ARG_NONE);
 

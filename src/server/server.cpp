@@ -1,4 +1,4 @@
-#include "cube.h"
+#include "../include/cube.h"
 #include <cstdint>
 
 enum { ST_EMPTY, ST_LOCAL, ST_TCPIP };
@@ -187,7 +187,8 @@ void process(ENetPacket *packet, int sender) // sender may be -1
             return;
           }
           loopv(clients) {
-            if (clients[i].type != ST_EMPTY && strcmp(clients[i].name, name) == 0) {
+            if (clients[i].type != ST_EMPTY &&
+                strcmp(clients[i].name, name) == 0) {
               sprintf_sd(msg)("%s has been kicked.", name);
               disconnect_client(i, "kicked");
               sendservmsg(msg);
@@ -399,8 +400,7 @@ void serverslice(
 
   lastsec = seconds;
 
-  if (timelimit && mode != 1 &&
-      seconds > mapend - minremain * 60)
+  if (timelimit && mode != 1 && seconds > mapend - minremain * 60)
     checkintermission();
   if (interm && seconds > interm) {
     interm = 0;

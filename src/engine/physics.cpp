@@ -1,4 +1,4 @@
-#include "cube.h"
+#include "../include/cube.h"
 
 static int runchan = -1;
 

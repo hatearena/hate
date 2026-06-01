@@ -1,4 +1,4 @@
-#include "cube.h"
+#include "../include/cube.h"
 
 enum { ID_VAR, ID_COMMAND, ID_ALIAS };
 

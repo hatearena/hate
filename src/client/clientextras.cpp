@@ -1,4 +1,4 @@
-#include "cube.h"
+#include "../include/cube.h"
 #include <cstdint>
 
 //              D    D    D    D'   D    D    D    D'   A   A'  P   P'  I   I'

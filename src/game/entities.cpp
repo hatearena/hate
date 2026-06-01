@@ -1,4 +1,4 @@
-#include "cube.h"
+#include "../include/cube.h"
 
 vector<entity> ents;
 
@@ -138,24 +138,19 @@ void realpickup(int n, dynent *d) {
   };
 };
 
-// these functions are called when the client touches the item
-
 void additem(int i, int &v, int spawnsec) {
-  if (v < itemstats[ents[i].type - I_SHELLS].max) // don't pick up if not needed
-  {
-    addmsg(1, 3, SV_ITEMPICKUP, i,
-           m_classicsp ? 100000 : spawnsec); // first ask the server for an ack
-    ents[i].spawned = false; // even if someone else gets it first
+  if (v < itemstats[ents[i].type - I_SHELLS].max) {
+    addmsg(1, 3, SV_ITEMPICKUP, i, m_classicsp ? 100000 : spawnsec);
+    ents[i].spawned = false;
   };
 };
 
-void teleport(int n, dynent *d) // also used by monsters
-{
+void teleport(int n, dynent *d) {
   int e = -1, tag = ents[n].attr1, beenhere = -1;
   for (;;) {
     e = findentity(TELEDEST, e + 1);
     if (e == beenhere || e < 0) {
-      conoutf("no teleport destination for tag %d", tag);
+      conoutf("No teleport destination for tag %d", tag);
       return;
     };
     if (beenhere < 0)
@@ -177,7 +172,6 @@ void teleport(int n, dynent *d) // also used by monsters
 void pickup(int n, dynent *d) {
   int np = 1;
   loopv(players) if (players[i]) np++;
-  // spawn times are dependent on number of players
   if (np < 3)
     np = 4;
   else if (np > 4)

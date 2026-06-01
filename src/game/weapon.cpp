@@ -1,4 +1,4 @@
-#include "cube.h"
+#include "../include/cube.h"
 
 struct guninfo {
   short sound, attackdelay, damage, projspeed, part, kickamount;
@@ -93,7 +93,8 @@ void prevweapon() {
   }
 }
 
-void createrays(vec &from, vec &to, bool ads) // create random spread of rays for the shotgun
+void createrays(vec &from, vec &to,
+                bool ads) // create random spread of rays for the shotgun
 {
   vdist(dist, dvec, from, to);
   float s = ads ? SGSPREAD * 0.5f : SGSPREAD;

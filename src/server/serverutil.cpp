@@ -1,4 +1,4 @@
-#include "cube.h"
+#include "../include/cube.h"
 
 void putint(uchar *&p, int n) {
   if (n < 128 && n > -127) {

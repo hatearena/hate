@@ -1,4 +1,4 @@
-#include "cube.h"
+#include "../include/cube.h"
 
 static TTF_Font *font = NULL;
 static bool font_inited = false;

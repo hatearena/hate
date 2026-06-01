@@ -1,4 +1,4 @@
-#include "cube.h"
+#include "../include/cube.h"
 
 int nextmode = 0; // nextmode becomes gamemode after next map load
 VAR(gamemode, 1, 0, 0);

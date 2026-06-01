@@ -1,4 +1,4 @@
-#include "cube.h"
+#include "../include/cube.h"
 
 struct md2_header {
   int magic;

@@ -1,4 +1,4 @@
-#include "cube.h"
+#include "../include/cube.h"
 
 void backup(char *name, char *backupname) {
   remove(backupname);

@@ -1,4 +1,4 @@
-#include "cube.h"
+#include "../include/cube.h"
 
 dvector monsters;
 int nextmonster, spawnremain, numkilled, monstertotal, mtimestart;

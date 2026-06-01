@@ -1,4 +1,4 @@
-#include "cube.h"
+#include "../include/cube.h"
 
 extern char *entnames[]; // lookup from map entities above to strings
 

@@ -1,4 +1,4 @@
-#include "cube.h"
+#include "../include/cube.h"
 
 const int MAXPARTICLES = 10500;
 struct parttype {

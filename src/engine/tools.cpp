@@ -1,5 +1,4 @@
-#include "tools.h"
-#include <new>
+#include "../include/tools.h"
 
 pool::pool() {
   blocks = 0;
@@ -34,8 +33,7 @@ void pool::dealloc(void *p, size_t size) {
     free(p);
   } else {
     size = bucket(size);
-    if (size) // only needed for 0-size free, are there any?
-    {
+    if (size) {
       *((void **)p) = reuse[size];
       reuse[size] = p;
     };
@@ -66,7 +64,6 @@ void pool::allocnext(size_t allocsize) {
   left = allocsize;
 };
 
-
 char *pool::string(const char *s) { return string((char *)s, strlen(s)); }
 
 char *pool::string(char *s, size_t l) {
@@ -76,14 +73,10 @@ char *pool::string(char *s, size_t l) {
   return b;
 };
 
-pool *gp() // useful for global buffers that need to be initialisation order
-           // independant
-{
+pool *gp() {
   static pool *p = NULL;
   return p ? p : (p = new pool());
 };
-
-///////////////////////// misc tools ///////////////////////
 
 char *path(char *s) {
   for (char *t = s; t = strpbrk(t, "/\\"); *t++ = PATHDIV)
@@ -113,9 +106,7 @@ char *loadfile(char *fn, int *size) {
   return buf;
 };
 
-void endianswap(void *memory, int stride,
-                int length) // little indians as storage format
-{
+void endianswap(void *memory, int stride, int length) {
   if (*((char *)&stride))
     return;
   loop(w, length) loop(i, stride / 2) {

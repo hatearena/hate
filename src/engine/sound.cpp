@@ -1,4 +1,4 @@
-#include "cube.h"
+#include "../include/cube.h"
 
 // #ifndef WIN32    // NOTE: fmod not being supported for the moment as it does
 // not allow stereo pan/vol updating during playback

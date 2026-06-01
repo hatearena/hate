@@ -1,4 +1,4 @@
-#include "cube.h"
+#include "../include/cube.h"
 #include <SDL2/SDL_thread.h>
 
 struct resolverthread {

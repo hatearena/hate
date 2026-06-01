@@ -1,9 +1,10 @@
-#include "cube.h"
+#include "../include/cube.h"
 
 extern int botdifficulty, botamount;
 extern char *entnames[];
 extern int timelimit;
-static int timelimitreg = variable("timelimit", 0, 10, 60, &timelimit, NULL, true);
+static int timelimitreg =
+    variable("timelimit", 0, 10, 60, &timelimit, NULL, true);
 
 enum { ID_VAR, ID_COMMAND, ID_ALIAS };
 struct ident {
@@ -56,10 +57,14 @@ void showmenu(char *name) {
 
 int menucompare(mitem *a, mitem *b) {
   const char *pa = a->text, *pb = b->text;
-  while (*pa && *pa != '\t') pa++;
-  while (*pb && *pb != '\t') pb++;
-  if (*pa) pa++;
-  if (*pb) pb++;
+  while (*pa && *pa != '\t')
+    pa++;
+  while (*pb && *pb != '\t')
+    pb++;
+  if (*pa)
+    pa++;
+  if (*pb)
+    pb++;
   float x = atof(pa);
   float y = atof(pb);
   if (x > y)
@@ -264,14 +269,19 @@ bool rendermenu() {
   int tw = text_width(title);
   if (tw > w)
     w = tw;
-  if (w > VIRTW * 2 / 3) w = VIRTW * 2 / 3;
+  if (w > VIRTW * 2 / 3)
+    w = VIRTW * 2 / 3;
   int step = FONTH / 4 * 5;
   int pad = FONTH / 2 * 3;
   int maxvis = (VIRTH - 3 * step) / step;
-  if (maxvis < 1) maxvis = 1;
-  if (m.scrolloff > mdisp - maxvis) m.scrolloff = max(0, mdisp - maxvis);
-  if (m.menusel < m.scrolloff) m.menusel = m.scrolloff;
-  if (m.menusel >= m.scrolloff + maxvis) m.menusel = m.scrolloff + maxvis - 1;
+  if (maxvis < 1)
+    maxvis = 1;
+  if (m.scrolloff > mdisp - maxvis)
+    m.scrolloff = max(0, mdisp - maxvis);
+  if (m.menusel < m.scrolloff)
+    m.menusel = m.scrolloff;
+  if (m.menusel >= m.scrolloff + maxvis)
+    m.menusel = m.scrolloff + maxvis - 1;
   int vis = min(mdisp - m.scrolloff, maxvis);
   int h = (vis + 2) * step;
   int y = (VIRTH - h) / 2;
@@ -307,9 +317,11 @@ bool rendermenu() {
     if (m.items[idx].checkbox) {
       const char *action = m.items[idx].action;
       int check = 0;
-      if (!strncmp(action, "botdifficulty ", 14) && botdifficulty == atoi(action + 14))
+      if (!strncmp(action, "botdifficulty ", 14) &&
+          botdifficulty == atoi(action + 14))
         check = 1;
-      else if (!strncmp(action, "botamount ", 10) && botamount == atoi(action + 10))
+      else if (!strncmp(action, "botamount ", 10) &&
+               botamount == atoi(action + 10))
         check = 1;
       string buf;
       sprintf_s(buf)("[%c] %s", check ? 'X' : ' ', m.items[idx].text);
@@ -376,12 +388,20 @@ void menuitem_slider(char *text, char *varname) {
 };
 
 void showmapmodels() {
-  if (!editmode && multiplayer()) return;
-  if (menustack.empty() && vmenu > 0) menustack.add(vmenu);
+  if (!editmode && multiplayer())
+    return;
+  if (menustack.empty() && vmenu > 0)
+    menustack.add(vmenu);
   string mname = "mapmodelpreview";
   int mi = -1;
-  loopv(menus) if (i > 1 && strcmp(menus[i].name, mname) == 0) { mi = i; break; };
-  if (mi < 0) { newmenu(mname); mi = menus.length() - 1; };
+  loopv(menus) if (i > 1 && strcmp(menus[i].name, mname) == 0) {
+    mi = i;
+    break;
+  };
+  if (mi < 0) {
+    newmenu(mname);
+    mi = menus.length() - 1;
+  };
   gmenu &m = menus[mi];
   m.items.setsize(0);
   m.menusel = 0;
@@ -391,51 +411,96 @@ void showmapmodels() {
   loopi(n) {
     mapmodelinfo &mmi = getmminfo(i);
     string buf;
-    sprintf_s(buf)("%d: %s [r:%d h:%d z:%d]", i, mmi.name, mmi.rad, mmi.h, mmi.zoff);
+    sprintf_s(buf)("%d: %s [r:%d h:%d z:%d]", i, mmi.name, mmi.rad, mmi.h,
+                   mmi.zoff);
     mitem &mi2 = m.items.add();
     mi2.text = newstring(buf);
     mi2.action = newstring(" ");
     mi2.checkbox = false;
     mi2.slider = false;
   };
-  if (menustack.empty()) menustack.add(mi);
+  if (menustack.empty())
+    menustack.add(mi);
   menuset(mi);
 };
 
 void showentities() {
-  if (!editmode && multiplayer()) return;
-  if (menustack.empty() && vmenu > 0) menustack.add(vmenu);
+  if (!editmode && multiplayer())
+    return;
+  if (menustack.empty() && vmenu > 0)
+    menustack.add(vmenu);
   string mname = "entitypreview";
   int mi = -1;
-  loopv(menus) if (i > 1 && strcmp(menus[i].name, mname) == 0) { mi = i; break; };
-  if (mi < 0) { newmenu(mname); mi = menus.length() - 1; };
+  loopv(menus) if (i > 1 && strcmp(menus[i].name, mname) == 0) {
+    mi = i;
+    break;
+  };
+  if (mi < 0) {
+    newmenu(mname);
+    mi = menus.length() - 1;
+  };
   gmenu &m = menus[mi];
   m.items.setsize(0);
   m.menusel = 0;
   m.menuselvis = 0.0f;
   m.scrolloff = 0;
   loopi(MAXENTTYPES) {
-    if (i == NOTUSED || i >= MAXENTTYPES) continue;
+    if (i == NOTUSED || i >= MAXENTTYPES)
+      continue;
     string buf;
     const char *desc = "";
     switch (i) {
-      case LIGHT:       desc = "radius"; break;
-      case PLAYERSTART: desc = "angle"; break;
-      case I_SHELLS:    desc = "ammo"; break;
-      case I_BULLETS:   desc = "ammo"; break;
-      case I_ROCKETS:   desc = "ammo"; break;
-      case I_ROUNDS:    desc = "ammo"; break;
-      case I_HEALTH:    desc = "health"; break;
-      case I_BOOST:     desc = "health"; break;
-      case I_GREENARMOUR: desc = "armour"; break;
-      case I_YELLOWARMOUR: desc = "armour"; break;
-      case I_QUAD:      desc = "powerup"; break;
-      case TELEPORT:    desc = "idx"; break;
-      case TELEDEST:    desc = "angle, idx"; break;
-      case MAPMODEL:    desc = "angle, idx"; break;
-      case MONSTER:     desc = "angle, type"; break;
-      case CARROT:      desc = "tag, type"; break;
-      case JUMPPAD:     desc = "zpush, ypush, xpush"; break;
+    case LIGHT:
+      desc = "radius";
+      break;
+    case PLAYERSTART:
+      desc = "angle";
+      break;
+    case I_SHELLS:
+      desc = "ammo";
+      break;
+    case I_BULLETS:
+      desc = "ammo";
+      break;
+    case I_ROCKETS:
+      desc = "ammo";
+      break;
+    case I_ROUNDS:
+      desc = "ammo";
+      break;
+    case I_HEALTH:
+      desc = "health";
+      break;
+    case I_BOOST:
+      desc = "health";
+      break;
+    case I_GREENARMOUR:
+      desc = "armour";
+      break;
+    case I_YELLOWARMOUR:
+      desc = "armour";
+      break;
+    case I_QUAD:
+      desc = "powerup";
+      break;
+    case TELEPORT:
+      desc = "idx";
+      break;
+    case TELEDEST:
+      desc = "angle, idx";
+      break;
+    case MAPMODEL:
+      desc = "angle, idx";
+      break;
+    case MONSTER:
+      desc = "angle, type";
+      break;
+    case CARROT:
+      desc = "tag, type";
+      break;
+    case JUMPPAD:
+      desc = "zpush, ypush, xpush";
+      break;
     };
     sprintf_s(buf)("%d: %s (%s)", i, entnames[i], desc);
     mitem &mi2 = m.items.add();
@@ -444,7 +509,8 @@ void showentities() {
     mi2.checkbox = false;
     mi2.slider = false;
   };
-  if (menustack.empty()) menustack.add(mi);
+  if (menustack.empty())
+    menustack.add(mi);
   menuset(mi);
 };
 
@@ -476,7 +542,8 @@ bool menukey(int code, bool isdown) {
       ident *id = idents->access(mi.slidervar);
       if (id && id->type == ID_VAR && *id->storage > id->min) {
         (*id->storage)--;
-        if (id->fun) id->fun();
+        if (id->fun)
+          id->fun();
       };
       return true;
     } else if ((code == SDLK_RIGHT || code == -3) &&
@@ -485,20 +552,24 @@ bool menukey(int code, bool isdown) {
       ident *id = idents->access(mi.slidervar);
       if (id && id->type == ID_VAR && *id->storage < id->max) {
         (*id->storage)++;
-        if (id->fun) id->fun();
+        if (id->fun)
+          id->fun();
       };
       return true;
     };
     gmenu &gm = menus[vmenu];
     int n = gm.items.length();
     int maxvis = (VIRTH - 3 * (FONTH / 4 * 5)) / (FONTH / 4 * 5);
-    if (maxvis < 1) maxvis = 1;
+    if (maxvis < 1)
+      maxvis = 1;
     if (menusel < 0) {
       menusel = 0;
-      if (gm.scrolloff > 0) gm.scrolloff--;
+      if (gm.scrolloff > 0)
+        gm.scrolloff--;
     } else if (menusel >= n) {
       menusel = n - 1;
-      if (gm.scrolloff + maxvis < n) gm.scrolloff++;
+      if (gm.scrolloff + maxvis < n)
+        gm.scrolloff++;
     } else if (menusel < gm.scrolloff) {
       gm.scrolloff = menusel;
     } else if (menusel >= gm.scrolloff + maxvis) {

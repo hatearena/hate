@@ -1,4 +1,4 @@
-#include "cube.h"
+#include "../include/cube.h"
 
 #ifdef DARWIN
 #define GL_COMBINE_EXT GL_COMBINE_ARB
