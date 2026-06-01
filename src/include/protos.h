@@ -198,6 +198,7 @@ extern void preloadweaponsounds();
 extern void playsoundc(int n);
 extern int playsoundloop(int n, vec *loc = 0);
 extern void stopchan(int chan);
+extern void stopsounds();
 extern void initsound();
 extern void cleansound();
 

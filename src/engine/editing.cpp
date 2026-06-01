@@ -42,6 +42,7 @@ void toggleedit() {
     entinmap(player1);
     noclip = 0;
   } else {
+    stopsounds();
     resettagareas();
     player1->health = 100;
     if (m_classicsp)

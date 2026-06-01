@@ -189,6 +189,7 @@ void updatevol() {
 };
 
 void playsoundc(int n) {
+  if (editmode) return;
   addmsg(0, 2, SV_SOUND, n);
   playsound(n);
 };
@@ -199,6 +200,8 @@ void playsound(int n, vec *loc) {
   if (nosound)
     return;
   if (!soundvol)
+    return;
+  if (editmode)
     return;
   if (lastmillis == lastsoundmillis)
     soundsatonce++;
@@ -281,6 +284,8 @@ int playsoundloop(int n, vec *loc) {
     return -1;
   if (!soundvol)
     return -1;
+  if (editmode)
+    return -1;
   if (n < 0 || n >= samples.length()) {
     conoutf("unregistered sound: %d", n);
     if (n == 22018) {
@@ -333,6 +338,19 @@ int playsoundloop(int n, vec *loc) {
 #endif
   return chan;
 };
+
+void stopsounds() {
+    if (nosound) return;
+#ifdef USE_MIXER
+    Mix_HaltChannel(-1);
+#else
+    loopi(MAXCHAN) stopchan(i);
+#endif
+    loopi(MAXCHAN) {
+        soundlocs[i].inuse = false;
+        soundchan[i] = -1;
+    }
+}
 
 void stopchan(int chan) {
   if (chan < 0)

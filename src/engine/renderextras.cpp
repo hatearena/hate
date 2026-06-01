@@ -689,11 +689,11 @@ void gl_drawhud(int w, int h, int curfps, int nquads, int curvert,
     glColor4ub(255, 255, 255, 255);
     if (e >= 0) {
       entity &ent = ents[e];
-      draw_textf("[%s] pos:(%d,%d,%d)  a1:%d a2:%d a3:%d a4:%d", 30, 1690, 2,
+      draw_textf("[%s] pos:(%d,%d,%d)  a1:%d a2:%d a3:%d a4:%d", 30, 1670, 2,
                  entnames[ent.type], ent.x, ent.y, ent.z, ent.attr1, ent.attr2,
                  ent.attr3, ent.attr4);
     } else {
-      draw_text("[ ]", 30, 1690, 2);
+      draw_text("[ ]", 30, 1680, 2);
     }
     glPopMatrix();
   };
