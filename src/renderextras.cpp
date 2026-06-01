@@ -574,7 +574,7 @@ void gl_drawhud(int w, int h, int curfps, int nquads, int curvert,
     glPopMatrix();
     glPushMatrix();
     glOrtho(0, VIRTW * 3 / 2, VIRTH * 3 / 2, 0, -1, 1);
-    int sx = 2950, sy = 75, sw = 400, sh = 320, sr = 12;
+    int sx = 2980, sy = 79, sw = 400, sh = 325, sr = 12;
     glDisable(GL_TEXTURE_2D);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glColor4ub(0, 0, 0, 127);
