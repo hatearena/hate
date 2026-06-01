@@ -6,6 +6,28 @@
 #define GL_SOURCE0_RBG_EXT GL_SOURCE0_RGB_ARB
 #define GL_SOURCE1_RBG_EXT GL_SOURCE1_RGB_ARB
 #define GL_RGB_SCALE_EXT GL_RGB_SCALE_ARB
+
+#endif
+
+#ifdef __APPLE__
+#ifndef GL_COMBINE_EXT
+#define GL_COMBINE_EXT          GL_COMBINE
+#endif
+#ifndef GL_COMBINE_RGB_EXT
+#define GL_COMBINE_RGB_EXT      GL_COMBINE_RGB
+#endif
+#ifndef GL_SOURCE0_RGB_EXT
+#define GL_SOURCE0_RGB_EXT      GL_SOURCE0_RGB
+#endif
+#ifndef GL_SOURCE1_RGB_EXT
+#define GL_SOURCE1_RGB_EXT      GL_SOURCE1_RGB
+#endif
+#ifndef GL_PRIMARY_COLOR_EXT
+#define GL_PRIMARY_COLOR_EXT    GL_PRIMARY_COLOR
+#endif
+#ifndef GL_RGB_SCALE_EXT
+#define GL_RGB_SCALE_EXT        GL_RGB_SCALE
+#endif
 #endif
 
 extern int curvert;
