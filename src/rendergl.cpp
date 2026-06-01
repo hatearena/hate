@@ -68,7 +68,7 @@ void gl_init(int w, int h) {
     hasoverbright = true;
   else
     conoutf(
-        "WARNING: cannot use overbright lighting, using old lighting model!");
+        "Warning: Cannot use overbright lighting, using old lighting model");
 
   glGetIntegerv(GL_MAX_TEXTURE_SIZE, &glmaxtexsize);
 
