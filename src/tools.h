@@ -138,6 +138,7 @@ struct pool
 	void dealloc(void *p, size_t size);
 	void *realloc(void *p, size_t oldsize, size_t newsize);
 
+	char *string(const char *s);
 	char *string(char *s, size_t l);
 	char *string(char *s) { return string(s, strlen(s)); };
 	void deallocstr(char *s) { dealloc(s, strlen(s)+1); };
