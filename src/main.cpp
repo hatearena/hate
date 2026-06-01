@@ -45,7 +45,7 @@ void keyrepeat(bool on) {};
 void *alloc(int s) {
   void *b = calloc(1, s);
   if (!b)
-    fatal("out of memory.");
+    fatal("Out of memory.");
   return b;
 };
 
