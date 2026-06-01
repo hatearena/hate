@@ -35,8 +35,7 @@ void resetmovement(dynent *d) {
   d->move = 0;
 };
 
-void spawnstate(dynent *d) // reset player state not persistent accross spawns
-{
+void spawnstate(dynent *d) {
   resetmovement(d);
   d->vel.x = d->vel.y = d->vel.z = 0;
   d->onfloor = false;
