@@ -27,6 +27,7 @@ struct gmenu {
   vector<mitem> items;
   int mwidth;
   int menusel;
+  int scrolloff;
 };
 
 vector<gmenu> menus;
@@ -259,12 +260,19 @@ bool rendermenu() {
   int tw = text_width(title);
   if (tw > w)
     w = tw;
+  if (w > VIRTW * 2 / 3) w = VIRTW * 2 / 3;
   int step = FONTH / 4 * 5;
-  int h = (mdisp + 2) * step;
+  int pad = FONTH / 2 * 3;
+  int maxvis = (VIRTH - 3 * step) / step;
+  if (maxvis < 1) maxvis = 1;
+  if (m.scrolloff > mdisp - maxvis) m.scrolloff = max(0, mdisp - maxvis);
+  if (m.menusel < m.scrolloff) m.menusel = m.scrolloff;
+  if (m.menusel >= m.scrolloff + maxvis) m.menusel = m.scrolloff + maxvis - 1;
+  int vis = min(mdisp - m.scrolloff, maxvis);
+  int h = (vis + 2) * step;
   int y = (VIRTH - h) / 2;
   int x = (VIRTW - w) / 2;
   overlay(160);
-  int pad = FONTH / 2 * 3;
   {
     glDisable(GL_TEXTURE_2D);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -275,7 +283,7 @@ bool rendermenu() {
   draw_text(title, x, y, 2);
   y += FONTH * 2;
   if (vmenu) {
-    int bh = y + m.menusel * step;
+    int bh = y + (m.menusel - m.scrolloff) * step;
     glDisable(GL_TEXTURE_2D);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glBegin(GL_QUADS);
@@ -288,27 +296,32 @@ bool rendermenu() {
     glEnd();
     glEnable(GL_TEXTURE_2D);
   };
-  loopj(mdisp) {
-    if (m.items[j].checkbox) {
-      const char *action = m.items[j].action;
+  loopj(vis) {
+    int idx = m.scrolloff + j;
+    if (m.items[idx].checkbox) {
+      const char *action = m.items[idx].action;
       int check = 0;
       if (!strncmp(action, "botdifficulty ", 14) && botdifficulty == atoi(action + 14))
         check = 1;
       else if (!strncmp(action, "botamount ", 10) && botamount == atoi(action + 10))
         check = 1;
       string buf;
-      sprintf_s(buf)("[%c] %s", check ? 'X' : ' ', m.items[j].text);
+      sprintf_s(buf)("[%c] %s", check ? 'X' : ' ', m.items[idx].text);
       draw_text(buf, x, y, 2);
-    } else if (m.items[j].slider) {
-      int val = getvar(m.items[j].slidervar);
+    } else if (m.items[idx].slider) {
+      int val = getvar(m.items[idx].slidervar);
       string buf;
-      sprintf_s(buf)("%s: %d", m.items[j].text, val);
+      sprintf_s(buf)("%s: %d", m.items[idx].text, val);
       draw_text(buf, x, y, 2);
     } else {
-      draw_text(m.items[j].text, x, y, 2);
+      draw_text(m.items[idx].text, x, y, 2);
     };
     y += step;
   };
+  if (m.scrolloff > 0)
+    draw_text("/\\", x + w / 2 - 16, y - step, 2);
+  if (m.scrolloff + vis < mdisp)
+    draw_text("\\/", x + w / 2 - 16, y, 2);
   return true;
 };
 
@@ -316,6 +329,7 @@ void newmenu(const char *name) {
   gmenu &menu = menus.add();
   menu.name = newstring(name);
   menu.menusel = 0;
+  menu.scrolloff = 0;
 };
 
 void menumanual(int m, int n, char *text) {
@@ -354,6 +368,33 @@ void menuitem_slider(char *text, char *varname) {
   mi.slidervar = newstring(varname);
 };
 
+void showmapmodels() {
+  if (!editmode && multiplayer()) return;
+  if (menustack.empty() && vmenu > 0) menustack.add(vmenu);
+  string mname = "mapmodelpreview";
+  int mi = -1;
+  loopv(menus) if (i > 1 && strcmp(menus[i].name, mname) == 0) { mi = i; break; };
+  if (mi < 0) { newmenu(mname); mi = menus.length() - 1; };
+  gmenu &m = menus[mi];
+  m.items.setsize(0);
+  m.menusel = 0;
+  m.scrolloff = 0;
+  int n = nummapmodels();
+  loopi(n) {
+    mapmodelinfo &mmi = getmminfo(i);
+    string buf;
+    sprintf_s(buf)("%d: %s [r:%d h:%d z:%d]", i, mmi.name, mmi.rad, mmi.h, mmi.zoff);
+    mitem &mi2 = m.items.add();
+    mi2.text = newstring(buf);
+    mi2.action = newstring(" ");
+    mi2.checkbox = false;
+    mi2.slider = false;
+  };
+  if (menustack.empty()) menustack.add(mi);
+  menuset(mi);
+};
+
+COMMAND(showmapmodels, ARG_NONE);
 COMMAND(menuitem, ARG_2STR);
 COMMANDN(menuitem_checkbox, menuitem_checkbox, ARG_2STR);
 COMMANDN(menuitem_slider, menuitem_slider, ARG_2STR);
@@ -393,11 +434,21 @@ bool menukey(int code, bool isdown) {
       };
       return true;
     };
-    int n = menus[vmenu].items.length();
-    if (menusel < 0)
-      menusel = n - 1;
-    else if (menusel >= n)
+    gmenu &gm = menus[vmenu];
+    int n = gm.items.length();
+    int maxvis = (VIRTH - 3 * (FONTH / 4 * 5)) / (FONTH / 4 * 5);
+    if (maxvis < 1) maxvis = 1;
+    if (menusel < 0) {
       menusel = 0;
+      if (gm.scrolloff > 0) gm.scrolloff--;
+    } else if (menusel >= n) {
+      menusel = n - 1;
+      if (gm.scrolloff + maxvis < n) gm.scrolloff++;
+    } else if (menusel < gm.scrolloff) {
+      gm.scrolloff = menusel;
+    } else if (menusel >= gm.scrolloff + maxvis) {
+      gm.scrolloff = menusel - maxvis + 1;
+    };
     menus[vmenu].menusel = menusel;
   } else {
     if (code == SDLK_RETURN || code == -2) {

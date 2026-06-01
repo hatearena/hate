@@ -289,6 +289,8 @@ mapmodelinfo &getmminfo(int i) {
   return i < mapmodels.length() ? mapmodels[i]->mmi : dummy;
 };
 
+int nummapmodels() { return mapmodels.length(); };
+
 COMMAND(mapmodel, ARG_5STR);
 COMMAND(mapmodelreset, ARG_NONE);
 
