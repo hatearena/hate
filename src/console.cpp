@@ -86,7 +86,7 @@ void renderconsole() // render buffer taking into account time & scrolling
       yoff = (int)((1.0f - t) * 20);
     };
     int xpos = FONTH / 3;
-    int ypos = (FONTH / 4 * 5) * (nd - j - 1) + FONTH / 3 + yoff;
+    int ypos = (FONTH / 4 * 6) * (nd - j - 1) + FONTH / 3 + yoff;
     int tw = text_width(refs[j].text);
     if (tw > 0 && alpha > 0) {
       int pad = FONTH / 8;
