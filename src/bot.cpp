@@ -9,9 +9,9 @@ VAR(botdifficulty, -1, 4, 4);
 VAR(botamount, 1, 4, 16);
 
 static const char *botnames[] = {
-    "Cerelo", "Diaso", "Ceria",  "Deathly", "Ra",     "Va",    "Never",
-    "Abu",    "Re",    "Why",    "Lucky",   "Lano",   "Cliff", "Cobra",
-    "Liner",  "Chiba", "Dragon", "Sabre",   "Koffman"};
+    "Cerelo", "Diaso", "Ceria",  "Deathly", "Ra",      "Va",    "Never",
+    "Abu",    "Re",    "Why",    "Lucky",   "Lano",    "Cliff", "Cobra",
+    "Liner",  "Chiba", "Dragon", "Sabre",   "Koffman", "Stuff", "Bones"};
 static const int numbotnames = sizeof(botnames) / sizeof(botnames[0]);
 
 static void genbotname(char *buf) {
