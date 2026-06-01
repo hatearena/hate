@@ -63,7 +63,10 @@ void conoutf(const char *s, ...) {
 void renderconsole() // render buffer taking into account time & scrolling
 {
   int nd = 0;
-  struct { char *text; int age; } refs[ndraw];
+  struct {
+    char *text;
+    int age;
+  } refs[ndraw];
   loopv(conlines) if (conskip
                           ? i >= conskip - 1 || i >= conlines.length() - ndraw
                           : lastmillis - conlines[i].outtime < 20000) {
@@ -90,7 +93,8 @@ void renderconsole() // render buffer taking into account time & scrolling
       glDisable(GL_TEXTURE_2D);
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
       glColor4ub(0, 0, 0, alpha / 2);
-      roundedbox(xpos - pad, ypos - pad, xpos + tw + pad, ypos + FONTH + pad / 2, 6);
+      roundedbox(xpos - pad, ypos - pad, xpos + tw + pad,
+                 ypos + FONTH + pad + 7, 6);
       glEnable(GL_TEXTURE_2D);
     };
     draw_text(refs[j].text, xpos, ypos, 2, alpha);
@@ -132,10 +136,12 @@ void saycommand(char *init) // turns input to the command line on or off
 {
   if (init != NULL) {
     dont_query_next_key = true;
-    if (!saycommandon) saycommand_start = lastmillis;
+    if (!saycommandon)
+      saycommand_start = lastmillis;
     saycommandon = true;
   } else {
-    if (saycommandon) saycommand_end = lastmillis;
+    if (saycommandon)
+      saycommand_end = lastmillis;
     saycommandon = false;
     init = "";
   }
