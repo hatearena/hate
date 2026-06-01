@@ -370,6 +370,30 @@ int main(int argc, char **argv) {
           case SDLK_z:
             execute("delent");
             break;
+          case SDLK_LEFTBRACKET:
+            execute("editheight $flrceil 1");
+            break;
+          case SDLK_RIGHTBRACKET:
+            execute("editheight $flrceil -1");
+            break;
+          case SDLK_x:
+            if ((event.key.keysym.mod & KMOD_CTRL) && (event.key.keysym.mod & KMOD_SHIFT))
+              execute("edittex 0 1");
+            else
+              handled = false;
+            break;
+          case SDLK_r:
+            if ((event.key.keysym.mod & KMOD_CTRL) && (event.key.keysym.mod & KMOD_SHIFT))
+              execute("edittex 2 1");
+            else
+              handled = false;
+            break;
+          case SDLK_g:
+            if ((event.key.keysym.mod & KMOD_CTRL) && (event.key.keysym.mod & KMOD_SHIFT))
+              execute("edittex 1 1");
+            else
+              handled = false;
+            break;
           default:
             handled = false;
             break;
