@@ -1,6 +1,6 @@
 #include "../include/cube.h"
 
-int nextmode = 0; // nextmode becomes gamemode after next map load
+int nextmode = 0;
 VAR(gamemode, 1, 0, 0);
 
 void mode(int n) { addmsg(1, 2, SV_GAMEMODE, nextmode = n); };
