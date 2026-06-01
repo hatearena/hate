@@ -461,7 +461,7 @@ void timeupdate(int timeremain) {
     intermission = true;
     intermissiontimer = 15000;
     player1->attacking = false;
-    conoutf("Intermission: Time's up.");
+    conoutf("Intermission: Timelimit elapsed");
     showscores(true);
   } else {
     conoutf("Time remaining: %d minutes", timeremain);
