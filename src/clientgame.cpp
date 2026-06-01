@@ -462,6 +462,7 @@ void timeupdate(int timeremain) {
     intermissiontimer = 15000;
     player1->attacking = false;
     conoutf("Intermission: Timelimit elapsed");
+    conoutf("New map in 15 seconds");
     showscores(true);
   } else {
     conoutf("Time remaining: %d minutes", timeremain);

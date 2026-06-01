@@ -32,8 +32,6 @@
 
 extern int curvert;
 extern bool intermission;
-extern int intermissiontimer;
-extern dvector &getbots();
 
 bool hasoverbright = false;
 
@@ -275,40 +273,8 @@ VARFP(gamma, 30, 100, 300, {
   };
 });
 
-static void intermissionlook(float &yaw, float &pitch) {
-  float best = 1e9f;
-  float tx = player1->o.x, ty = player1->o.y, tz = player1->o.z;
-  loopv(players) {
-    dynent *e = players[i];
-    if (!e || e == player1) continue;
-    float dx = e->o.x - player1->o.x, dy = e->o.y - player1->o.y, dz = e->o.z - player1->o.z;
-    float dist = dx*dx + dy*dy + dz*dz;
-    if (dist < best) { best = dist; tx = e->o.x; ty = e->o.y; tz = e->o.z; };
-  };
-  dvector &bs = getbots();
-  loopv(bs) {
-    dynent *e = bs[i];
-    if (!e) continue;
-    float dx = e->o.x - player1->o.x, dy = e->o.y - player1->o.y, dz = e->o.z - player1->o.z;
-    float dist = dx*dx + dy*dy + dz*dz;
-    if (dist < best) { best = dist; tx = e->o.x; ty = e->o.y; tz = e->o.z; };
-  };
-  float dx = tx - player1->o.x, dy = ty - player1->o.y, dz = tz - player1->o.z - 40;
-  yaw = atan2(dx, -dy) * 180.0f / M_PI;
-  pitch = atan2(dz, sqrtf(dx*dx + dy*dy)) * 180.0f / M_PI;
-};
-
 void getcamerapos(float &vx, float &vy, float &vz) {
-  if (intermission) {
-    vx = player1->o.x;
-    vy = player1->o.y;
-    vz = player1->o.z + 40;
-    int sz = ssize;
-    if (vx < MINBORD) vx = MINBORD;
-    if (vx > sz - MINBORD) vx = sz - MINBORD;
-    if (vy < MINBORD) vy = MINBORD;
-    if (vy > sz - MINBORD) vy = sz - MINBORD;
-  } else if (thirdperson && player1->state == CS_ALIVE) {
+  if (thirdperson && player1->state == CS_ALIVE) {
     float dist = 10;
     float yawrad = rad(player1->yaw);
     vx = player1->o.x - dist * sinf(yawrad);
@@ -331,18 +297,6 @@ void getcamerapos(float &vx, float &vy, float &vz) {
 }
 
 void transplayer() {
-  if (intermission) {
-    float iyaw, ipitch;
-    intermissionlook(iyaw, ipitch);
-    glLoadIdentity();
-    glRotated(ipitch, -1.0, 0.0, 0.0);
-    glRotated(iyaw, 0.0, 1.0, 0.0);
-    float cam_x = player1->o.x;
-    float cam_y = player1->o.y;
-    glTranslated(-cam_x, -(player1->o.z + 40), -cam_y);
-    return;
-  };
-
   glLoadIdentity();
 
   glRotated(player1->roll, 0.0, 0.0, 1.0);
@@ -961,7 +915,7 @@ void gl_drawframe(int w, int h, float curfps) {
   xtraverts = 0;
 
   renderclients();
-  if (thirdperson || intermission)
+  if (thirdperson)
     renderclient(player1, isteam(player1->team, player1->team),
                  "monster/player", false, 1.25f);
   monsterrender();

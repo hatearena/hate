@@ -542,13 +542,6 @@ void gl_drawhud(int w, int h, int curfps, int nquads, int curvert,
   }
 
   renderscores();
-  if (intermission && intermissiontimer > 0) {
-    int secs = (intermissiontimer + 999) / 1000;
-    string buf;
-    sprintf_s(buf)("New map in: %d second%s", secs, secs == 1 ? "" : "s");
-    int tw = text_width(buf);
-    draw_text(buf, (VIRTW - tw) / 2, 600, 2);
-  };
   if (!rendermenu() && !intermission) {
     glBlendFunc(GL_SRC_ALPHA, GL_SRC_ALPHA);
     glBindTexture(GL_TEXTURE_2D, 1);
