@@ -13,6 +13,7 @@ int conskip = 0;
 
 bool saycommandon = false;
 int saycommand_start = 0;
+int saycommand_end = 0;
 string commandbuf;
 
 void setconskip(int n) {
@@ -74,11 +75,15 @@ void renderconsole() // render buffer taking into account time & scrolling
   };
   loopj(nd) {
     int alpha = 255;
+    int yoff = 0;
     int fade = 300;
-    if (refs[j].age < fade)
-      alpha = refs[j].age * 255 / fade;
+    if (refs[j].age < fade) {
+      float t = (float)refs[j].age / fade;
+      alpha = (int)(t * 255);
+      yoff = (int)((1.0f - t) * 20);
+    };
     draw_text(refs[j].text, FONTH / 3,
-              (FONTH / 4 * 5) * (nd - j - 1) + FONTH / 3, 2, alpha);
+              (FONTH / 4 * 5) * (nd - j - 1) + FONTH / 3 + yoff, 2, alpha);
   };
 };
 
@@ -120,6 +125,7 @@ void saycommand(char *init) // turns input to the command line on or off
     if (!saycommandon) saycommand_start = lastmillis;
     saycommandon = true;
   } else {
+    if (saycommandon) saycommand_end = lastmillis;
     saycommandon = false;
     init = "";
   }

@@ -511,23 +511,31 @@ void gl_drawhud(int w, int h, int curfps, int nquads, int curvert,
 
   char *command = getcurcommand();
   char *player = playerincrosshair();
-  if (command) {
+  {
     extern bool saycommandon;
     extern int saycommand_start;
-    int ca = 255;
+    extern int saycommand_end;
+    int showbg = 0;
     if (saycommandon) {
       int elapsed = lastmillis - saycommand_start;
-      ca = min(255, elapsed * 255 / 200);
+      showbg = elapsed < 200 ? elapsed * 127 / 200 : 127;
+    } else if (saycommand_end && lastmillis - saycommand_end < 300) {
+      int elapsed = lastmillis - saycommand_end;
+      showbg = 127 - elapsed * 127 / 300;
     };
-    int tw = text_width(command) + text_width("$ _");
-    glDisable(GL_TEXTURE_2D);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glColor4ub(0, 0, 0, ca / 2);
-    roundedbox(10, 1390, 30 + tw + 10, 1390 + FONTH + 10, 6);
-    glEnable(GL_TEXTURE_2D);
-    draw_textf("$ %s_", 20, 1400, 2, command);
-  } else if (player)
-    draw_text(player, 20, 1400, 2);
+    if (showbg > 0) {
+      int tw = command ? text_width(command) + text_width("$ _") : text_width("$ _");
+      glDisable(GL_TEXTURE_2D);
+      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+      glColor4ub(0, 0, 0, showbg);
+      roundedbox(10, 1390, 30 + tw + 10, 1390 + FONTH + 10, 6);
+      glEnable(GL_TEXTURE_2D);
+    };
+    if (command)
+      draw_textf("$ %s_", 20, 1400, 2, command);
+    else if (player)
+      draw_text(player, 20, 1400, 2);
+  }
 
   renderscores();
   if (!rendermenu()) {
