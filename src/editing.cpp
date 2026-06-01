@@ -275,7 +275,47 @@ void tofronttex() {
   };
 };
 
+void edittexxy(int type, int t, block &sel);
+
+int eyedroppermode = 0;
+int eyedroppertex[3] = {-1, -1, -1};
+
+void eyedropper() {
+  eyedroppermode = 1;
+  conoutf("Eyedropper mode activated.");
+};
+
+void eyedropperpaste() {
+  EDITSEL;
+  if (eyedroppertex[0] < 0 && eyedroppertex[1] < 0 && eyedroppertex[2] < 0) {
+    conoutf("No sampled texture to paste");
+    return;
+  };
+  int atype = lasttype == 3 ? 1 : lasttype;
+  int t = eyedroppertex[atype];
+  if (t < 0) {
+    conoutf("No sampled texture for this surface type");
+    return;
+  };
+  edittexxy(lasttype, t, sel);
+  addmsg(1, 7, SV_EDITT, sel.x, sel.y, sel.xs, sel.ys, lasttype, t);
+  conoutf("Eyedropped texture dumped.");
+};
+
+COMMAND(eyedropper, ARG_NONE);
+COMMAND(eyedropperpaste, ARG_NONE);
+
 void editdrag(bool isdown) {
+  if (eyedroppermode && isdown) {
+    if (!OUTBORD(cx, cy)) {
+      sqr *s = S(cx, cy);
+      eyedroppertex[0] = s->ftex;
+      eyedroppertex[1] = s->wtex;
+      eyedroppertex[2] = s->ctex;
+      eyedroppermode = 0;
+    };
+    return;
+  };
   if ((dragging = isdown) != 0) {
     lastx = cx;
     lasty = cy;
