@@ -27,6 +27,7 @@ struct gmenu {
   vector<mitem> items;
   int mwidth;
   int menusel;
+  float menuselvis;
   int scrolloff;
 };
 
@@ -283,7 +284,9 @@ bool rendermenu() {
   draw_text(title, x, y, 2);
   y += FONTH * 2;
   if (vmenu) {
-    int bh = y + (m.menusel - m.scrolloff) * step;
+    float target = (float)(m.menusel - m.scrolloff);
+    m.menuselvis += (target - m.menuselvis) * 0.2f;
+    int bh = y + (int)(m.menuselvis * step);
     glDisable(GL_TEXTURE_2D);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glBegin(GL_QUADS);
@@ -329,6 +332,7 @@ void newmenu(const char *name) {
   gmenu &menu = menus.add();
   menu.name = newstring(name);
   menu.menusel = 0;
+  menu.menuselvis = 0.0f;
   menu.scrolloff = 0;
 };
 
@@ -378,6 +382,7 @@ void showmapmodels() {
   gmenu &m = menus[mi];
   m.items.setsize(0);
   m.menusel = 0;
+  m.menuselvis = 0.0f;
   m.scrolloff = 0;
   int n = nummapmodels();
   loopi(n) {

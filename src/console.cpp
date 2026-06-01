@@ -82,8 +82,23 @@ void renderconsole() // render buffer taking into account time & scrolling
       alpha = (int)(t * 255);
       yoff = (int)((1.0f - t) * 20);
     };
-    draw_text(refs[j].text, FONTH / 3,
-              (FONTH / 4 * 5) * (nd - j - 1) + FONTH / 3 + yoff, 2, alpha);
+    int xpos = FONTH / 3;
+    int ypos = (FONTH / 4 * 5) * (nd - j - 1) + FONTH / 3 + yoff;
+    int tw = text_width(refs[j].text);
+    if (tw > 0 && alpha > 0) {
+      int pad = FONTH / 4;
+      glDisable(GL_TEXTURE_2D);
+      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+      glColor4ub(0, 0, 0, alpha / 2);
+      glBegin(GL_QUADS);
+      glVertex2i(xpos - pad, ypos - pad);
+      glVertex2i(xpos + tw + pad, ypos - pad);
+      glVertex2i(xpos + tw + pad, ypos + FONTH + pad);
+      glVertex2i(xpos - pad, ypos + FONTH + pad);
+      glEnd();
+      glEnable(GL_TEXTURE_2D);
+    };
+    draw_text(refs[j].text, xpos, ypos, 2, alpha);
   };
 };
 
