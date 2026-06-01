@@ -135,8 +135,6 @@ char msgsizelookup(int msg) {
   return -1;
 };
 
-// sending of maps between clients
-
 string copyname;
 int copysize;
 uchar *copydata = NULL;
@@ -174,17 +172,20 @@ ENetPacket *recvmap(int n) {
 void localservertoclient(uchar *buf, int len) {};
 void fatal(const char *s, const char *o) {
   cleanupserver();
-  printf("servererror: %s\n", s);
+  printf("ServerError: %s\n", s);
   exit(1);
 };
 void *alloc(int s) {
   void *b = calloc(1, s);
   if (!b)
-    fatal("no memory!");
+    fatal("No memory.");
   return b;
 };
 void botclear() {};
-dvector &getbots() { static dvector empty; return empty; };
+dvector &getbots() {
+  static dvector empty;
+  return empty;
+};
 int numbots = 0;
 
 int main(int argc, char *argv[]) {
@@ -214,7 +215,7 @@ int main(int argc, char *argv[]) {
         maxcl = atoi(a);
         break;
       default:
-        printf("WARNING: unknown commandline option\n");
+        printf("WARNING: Unknown commandline option\n");
       };
   };
 
