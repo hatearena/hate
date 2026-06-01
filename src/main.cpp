@@ -59,16 +59,9 @@ void setresolution() {
   }
 };
 
-VARFP(
-    fullscreen, 0, 0, 1, if (window) {
-      SDL_SetWindowFullscreen(window,
-                              fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0);
-      int w;
-      int h;
-      SDL_GetWindowSize(window, &w, &h);
-      scr_w = w;
-      scr_h = h;
-      gl_init(scr_w, scr_h);
+VARFP(fullscreen, 0, 0, 1, {
+      conoutf("Restart the game for fullscreen change to take effect");
+      writecfg();
     });
 
 #if 0
