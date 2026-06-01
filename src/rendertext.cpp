@@ -18,7 +18,7 @@ static int pot(int v) {
 }
 
 static void draw_texture(SDL_Surface *s, int left, int top, int cr, int cg,
-                         int cb, int ca = 255) {
+                         int cb, int ca) {
   if (!s)
     return;
   int w = s->w, h = s->h;
@@ -113,7 +113,7 @@ void draw_textf(char *fstr, int left, int top, int gl_num, ...) {
   draw_text(str, left, top, gl_num);
 }
 
-void draw_text(char *str, int left, int top, int gl_num, int alpha = 255) {
+void draw_text(char *str, int left, int top, int gl_num, int alpha) {
   (void)gl_num;
   if (!font_inited)
     return;
