@@ -12,4 +12,4 @@ content/config.cfg
 enet/*.a
 content/screenshots/*
 content/demos/*
-
+.vscode
