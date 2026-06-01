@@ -92,6 +92,7 @@ install_macos() {
     brew install \
         enet \
         sdl2 \
+        sdl2_ttf \
         sdl2_image \
         sdl2_mixer
 }
@@ -134,7 +135,11 @@ build_project() {
 
     cd "$ROOT"
 
-    make
+    if [ "$(uname -s)" = "Darwin" ]; then
+        make PLATFORM=macos
+    else
+        make
+    fi
 
     msg "Build complete"
 }

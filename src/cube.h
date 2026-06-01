@@ -425,13 +425,24 @@ enum // function signatures for script functions, see command.cpp
 
 #include <time.h>
 
+#ifdef __APPLE__
+#include <OpenGL/gl.h>
+#include <OpenGL/glu.h>
+#else
 #include <GL/gl.h>
 #include <GL/glext.h>
 #include <GL/glu.h>
+#endif
 
+#ifdef __APPLE__
+#include <SDL.h>
+#include <SDL_image.h>
+#include <SDL_ttf.h>
+#else
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
+#endif
 
 #include <enet/enet.h>
 
