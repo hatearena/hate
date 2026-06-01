@@ -268,6 +268,9 @@ int main(int argc, char **argv) {
           "bin directory)");
   installtex(10, path(newstring("data/boost.png")), xs, ys);
 
+  log("preload weapons");
+  preloadhudmodels();
+
   log("font");
   init_font();
 
@@ -283,6 +286,7 @@ int main(int argc, char **argv) {
   exec("data/keymap.cfg");
   exec("data/menus.cfg");
   exec("data/sounds.cfg");
+  preloadweaponsounds();
   exec("servers.cfg");
 
   if (!execfile("config.cfg")) {

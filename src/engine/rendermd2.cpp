@@ -294,6 +294,16 @@ int nummapmodels() { return mapmodels.length(); };
 COMMAND(mapmodel, ARG_5STR);
 COMMAND(mapmodelreset, ARG_NONE);
 
+void preloadhudmodels() {
+    char *names[] = {"hudguns/hate_csaw", "hudguns/hate_shotg",
+                     "hudguns/hate_rifle", "hudguns/hate_rocket",
+                     "hudguns/hate_rail"};
+    for (int i = 0; i < 5; i++) {
+        md2 *m = loadmodel(names[i]);
+        delayedload(m);
+    }
+}
+
 void rendermodel(char *mdl, int frame, int range, int tex, float rad, float x,
                  float y, float z, float yaw, float pitch, bool teammate,
                  float scale, float speed, int snap, int basetime) {

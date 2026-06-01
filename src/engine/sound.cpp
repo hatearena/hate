@@ -348,5 +348,25 @@ void stopchan(int chan) {
   }
 };
 
+void preloadweaponsounds() {
+    if (nosound) return;
+    int ids[] = {S_CSAW, S_SG, S_CG, S_RLFIRE, S_RIFLE, S_WEAPLOAD, S_NOAMMO};
+    loopi(sizeof(ids)/sizeof(ids[0])) {
+        int n = ids[i];
+        if (n < 0 || n >= samples.length()) continue;
+        if (!samples[n]) {
+            sprintf_sd(buf)("packages/sounds/%s.wav", snames[n]);
+#ifdef USE_MIXER
+            samples[n] = Mix_LoadWAV(path(buf));
+#else
+            samples[n] = FSOUND_Sample_Load(n, path(buf), FSOUND_LOOP_OFF, 0, 0);
+#endif
+            if (!samples[n]) {
+                conoutf("failed to preload sound: %s", buf);
+            }
+        }
+    }
+}
+
 void sound(int n) { playsound(n, NULL); };
 COMMAND(sound, ARG_1INT);
