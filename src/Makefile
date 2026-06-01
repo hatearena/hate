@@ -55,21 +55,57 @@ CXXOPTFLAGS = \
     -Wno-Unused-variable \
     -g
 
+%.o: %.cpp
+	$(CXX) $(CXXFLAGS) -Iinclude -c $< -o $@
+
 CXXFLAGS = \
     $(CXXOPTFLAGS) \
     $(CXXFLAGS_EXTRA) \
+    -Iinclude \
     `sdl2-config --cflags`
 
 CLIENT_OBJS = \
-    client.o clientextras.o clientgame.o clients2c.o command.o \
-    console.o editing.o entities.o main.o menus.o monster.o physics.o \
-    bot.o rendercubes.o renderextras.o rendergl.o rendermd2.o \
-    renderparticles.o rendertext.o rndmap.o savegamedemo.o server.o \
-    serverbrowser.o serverms.o serverutil.o sound.o tools.o weapon.o \
-    world.o worldio.o worldlight.o worldocull.o worldrender.o
+    client/client.o \
+    client/clientextras.o \
+    client/clientgame.o \
+    client/clients2c.o \
+    client/menus.o \
+    engine/command.o \
+    engine/console.o \
+    engine/editing.o \
+    game/entities.o \
+    main.o \
+    game/monster.o \
+    engine/physics.o \
+    game/bot.o \
+    engine/rendercubes.o \
+    engine/renderextras.o \
+    engine/rendergl.o \
+    engine/rendermd2.o \
+    engine/rendermd3.o \
+    engine/renderparticles.o \
+    engine/rendertext.o \
+    engine/rndmap.o \
+    engine/savegamedemo.o \
+    server/server.o \
+    engine/serverbrowser.o \
+    server/serverms.o \
+    server/serverutil.o \
+    engine/sound.o \
+    engine/tools.o \
+    game/weapon.o \
+    engine/world.o \
+    engine/worldio.o \
+    engine/worldlight.o \
+    engine/worldocull.o \
+    engine/worldrender.o
+
 
 SERVER_OBJS = \
-    standalone.o serverms.o server.o tools.o
+    standalone.o \
+    server/serverms.o \
+    server/server.o \
+    engine/tools.o
 
 default: all
 
@@ -81,11 +117,12 @@ all: client server
 clean:
 	-rm -f $(SERVER_OBJS) $(CLIENT_OBJS) hate_server hate_client
 
-standalone.o:
-	$(CXX) $(CXXFLAGS) -DSTANDALONE -o standalone.o -c serverutil.cpp
-
 client: $(CLIENT_OBJS)
 	$(CXX) $(CXXFLAGS) -o hate_client $(CLIENT_OBJS) $(CLIENT_LIBS)
 
 server: $(SERVER_OBJS)
 	$(CXX) $(CXXFLAGS) -o hate_server $(SERVER_OBJS) $(SERVER_LIBS)
+
+standalone.o:
+	$(CXX) $(CXXFLAGS) -DSTANDALONE -Iinclude \
+		-c server/serverutil.cpp -o standalone.o
