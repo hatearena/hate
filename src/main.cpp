@@ -202,6 +202,33 @@ int main(int argc, char **argv) {
       fclose(cfg);
     }
   }
+  {
+    FILE *cfg = fopen("config.cfg", "r");
+    if (cfg) {
+      char line[256];
+      while (fgets(line, sizeof(line), cfg)) {
+        int v;
+        if (sscanf(line, " fullscreen %d", &v) == 1 ||
+            sscanf(line, "fullscreen %d", &v) == 1) {
+          if (v >= 0 && v <= 1) fullscreen = v;
+          break;
+        }
+      }
+      fclose(cfg);
+    }
+  }
+  {
+    FILE *cfg = fopen("config.cfg", "r");
+    if (!cfg) {
+      SDL_DisplayMode mode;
+      if (SDL_GetCurrentDisplayMode(0, &mode) == 0) {
+        scr_w = mode.w;
+        scr_h = mode.h;
+      }
+    } else {
+      fclose(cfg);
+    }
+  }
   window = SDL_CreateWindow("HATE v0.0.1", SDL_WINDOWPOS_CENTERED,
                             SDL_WINDOWPOS_CENTERED, scr_w, scr_h,
                             SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
