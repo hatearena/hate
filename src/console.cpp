@@ -12,6 +12,7 @@ const int WORDWRAP = 80;
 int conskip = 0;
 
 bool saycommandon = false;
+int saycommand_start = 0;
 string commandbuf;
 
 void setconskip(int n) {
@@ -61,17 +62,23 @@ void conoutf(const char *s, ...) {
 void renderconsole() // render buffer taking into account time & scrolling
 {
   int nd = 0;
-  char *refs[ndraw];
+  struct { char *text; int age; } refs[ndraw];
   loopv(conlines) if (conskip
                           ? i >= conskip - 1 || i >= conlines.length() - ndraw
                           : lastmillis - conlines[i].outtime < 20000) {
-    refs[nd++] = conlines[i].cref;
+    refs[nd].text = conlines[i].cref;
+    refs[nd].age = lastmillis - conlines[i].outtime;
+    nd++;
     if (nd == ndraw)
       break;
   };
   loopj(nd) {
-    draw_text(refs[j], FONTH / 3, (FONTH / 4 * 5) * (nd - j - 1) + FONTH / 3,
-              2);
+    int alpha = 255;
+    int fade = 300;
+    if (refs[j].age < fade)
+      alpha = refs[j].age * 255 / fade;
+    draw_text(refs[j].text, FONTH / 3,
+              (FONTH / 4 * 5) * (nd - j - 1) + FONTH / 3, 2, alpha);
   };
 };
 
@@ -110,6 +117,7 @@ void saycommand(char *init) // turns input to the command line on or off
 {
   if (init != NULL) {
     dont_query_next_key = true;
+    if (!saycommandon) saycommand_start = lastmillis;
     saycommandon = true;
   } else {
     saycommandon = false;

@@ -139,7 +139,7 @@ extern void keyrepeat(bool on);
 
 // rendertext
 extern void init_font();
-extern void draw_text(char *str, int left, int top, int gl_num);
+extern void draw_text(char *str, int left, int top, int gl_num, int alpha = 255);
 extern void draw_textf(char *fstr, int left, int top, int gl_num, ...);
 extern int text_width(char *str);
 extern void draw_envbox(int t, int fogdist);

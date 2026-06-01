@@ -18,7 +18,7 @@ static int pot(int v) {
 }
 
 static void draw_texture(SDL_Surface *s, int left, int top, int cr, int cg,
-                         int cb) {
+                         int cb, int ca = 255) {
   if (!s)
     return;
   int w = s->w, h = s->h;
@@ -84,7 +84,7 @@ static void draw_texture(SDL_Surface *s, int left, int top, int cr, int cg,
   glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
   glBlendFunc(GL_ONE, GL_ONE);
   glBindTexture(GL_TEXTURE_2D, tex);
-  glColor3ub(cr, cg, cb);
+  glColor3ub(cr * ca / 255, cg * ca / 255, cb * ca / 255);
   glBegin(GL_QUADS);
   glTexCoord2f(0, 0);
   glVertex2i(left, top);
@@ -113,7 +113,7 @@ void draw_textf(char *fstr, int left, int top, int gl_num, ...) {
   draw_text(str, left, top, gl_num);
 }
 
-void draw_text(char *str, int left, int top, int gl_num) {
+void draw_text(char *str, int left, int top, int gl_num, int alpha = 255) {
   (void)gl_num;
   if (!font_inited)
     return;
@@ -128,10 +128,10 @@ void draw_text(char *str, int left, int top, int gl_num) {
   SDL_Color white = {255, 255, 255, 255};
   if (str[0] == '\f')
     draw_texture(TTF_RenderUTF8_Blended(font, filtered, white), left, top, 64,
-                 255, 128);
+                 255, 128, alpha);
   else
-    draw_texture(TTF_RenderUTF8_Blended(font, filtered, white), left, top, 255, 255,
-                 255);
+    draw_texture(TTF_RenderUTF8_Blended(font, filtered, white), left, top, 255,
+                 255, 255, alpha);
 }
 
 void draw_envbox_aux(float s0, float t0, int x0, int y0, int z0, float s1,
