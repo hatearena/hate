@@ -316,8 +316,6 @@ void botthink() {
         b->lastaction = lastmillis;
         continue;
       }
-      b->health = max(50 + botdifficulty * 25, 1);
-      b->armour = max(botdifficulty * 25, 0);
       b->state = CS_ALIVE;
       b->monsterstate = M_HOME;
       b->enemy = player1;
@@ -427,8 +425,6 @@ static void spawnonebot() {
   b->targetyaw = b->yaw;
   b->gunselect = GUN_SG + rnd(4);
   b->maxspeed = max(28.0f + botdifficulty * 4.0f, 16.0f);
-  b->health = max(50 + botdifficulty * 25, 1);
-  b->armour = max(botdifficulty * 25, 0);
   loopi(NUMGUNS) b->ammo[i] = 100;
   b->anger = 0;
   b->lastupdate = lastmillis;
