@@ -5,6 +5,7 @@ content/servers.cfg
 *.BAK
 *config.cfg
 *.o
+*.exe
 bin_unix
 content/config.cfg
 */hate_client
