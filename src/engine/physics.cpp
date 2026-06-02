@@ -78,7 +78,7 @@ bool collide(dynent *d, bool spawn, float drop, float rise) {
   const int x2 = fast_f2nat(fx2);
   const int y2 = fast_f2nat(fy2);
   float hi = 127, lo = -128;
-  float minfloor = (d->monsterstate && !spawn && d->health > 100)
+  float minfloor = (d->monsterstate && !spawn && d->health > 100 && d->mtype >= 0)
                        ? d->o.z - d->eyeheight - 4.5f
                        : -1000.0f;
 

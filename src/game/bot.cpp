@@ -150,8 +150,11 @@ static void normalise(dynent *m, float angle) {
 
 static void botaction(dynent *m) {
   if (botoutside(m)) {
+    m->vel.x = m->vel.y = m->vel.z = 0;
+    m->timeinair = 0;
     if (!findbotspawn(m))
       entinmap(m);
+    moveplayer(m, 20, true);
     return;
   }
   dynent *enemy = NULL;
@@ -387,12 +390,24 @@ static bool findbotspawn(dynent *b) {
 }
 
 static bool botoutside(dynent *b) {
-  int ix = (int)b->o.x, iy = (int)b->o.y;
-  if (OUTBORD(ix, iy)) return true;
-  sqr *s = S(ix, iy);
-  if (SOLID(s)) return true;
-  return b->o.z < s->floor - (s->type == FHF ? s->vdelta / 4 : 0) ||
-         b->o.z > s->ceil + (s->type == CHF ? s->vdelta / 4 : 0);
+  const float fx1 = b->o.x - b->radius;
+  const float fy1 = b->o.y - b->radius;
+  const float fx2 = b->o.x + b->radius;
+  const float fy2 = b->o.y + b->radius;
+  const int x1 = fast_f2nat(fx1);
+  const int y1 = fast_f2nat(fy1);
+  const int x2 = fast_f2nat(fx2);
+  const int y2 = fast_f2nat(fy2);
+  for (int x = x1; x <= x2; x++)
+    for (int y = y1; y <= y2; y++) {
+      if (OUTBORD(x, y)) return true;
+      sqr *s = S(x, y);
+      if (SOLID(s)) return true;
+      if (b->o.z < s->floor - (s->type == FHF ? s->vdelta / 4 : 0) ||
+          b->o.z > s->ceil + (s->type == CHF ? s->vdelta / 4 : 0))
+        return true;
+    }
+  return false;
 }
 
 static void spawnonebot() {
