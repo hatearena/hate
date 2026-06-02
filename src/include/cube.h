@@ -398,8 +398,6 @@ enum // function signatures for script functions, see command.cpp
   ARG_VARI
 };
 
-// nasty macros for registering script functions, abuses globals to avoid
-// excessive infrastructure
 #define COMMANDN(name, fun, nargs)                                             \
   static bool __dummy_##fun = addcommand(#name, (void (*)())fun, nargs)
 #define COMMAND(name, nargs) COMMANDN(name, name, nargs)
