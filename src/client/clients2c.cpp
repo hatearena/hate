@@ -62,7 +62,7 @@ void localservertoclient(uchar *buf,
       cn = getint(p);
       int prot = getint(p);
       if (prot != PROTOCOL_VERSION) {
-        conoutf("you are using a different game protocol (you: %d, server: %d)",
+        conoutf("You are using a different game protocol (you: %d, server: %d)",
                 PROTOCOL_VERSION, prot);
         disconnect();
         return;
@@ -75,12 +75,12 @@ void localservertoclient(uchar *buf,
             getclientmap()); // we are the first client on this server, set map
       sgetstr();
       if (text[0] && strcmp(text, clientpassword)) {
-        conoutf("you need to set the correct password to join this server!");
+        conoutf("You need to set the correct password to join this server.");
         disconnect();
         return;
       };
       if (getint(p) == 1) {
-        conoutf("server is FULL, disconnecting..");
+        conoutf("Server is FULL, disconnecting.");
       };
       break;
     };
@@ -160,7 +160,7 @@ void localservertoclient(uchar *buf,
       } else // new client
       {
         c2sinit = false; // send new players my info again
-        conoutf("connected: %s", text);
+        conoutf("Connected: %s", text);
       };
       strcpy_s(d->name, text);
       sgetstr();
@@ -173,7 +173,7 @@ void localservertoclient(uchar *buf,
       cn = getint(p);
       if (!(d = getclient(cn)))
         break;
-      conoutf("player %s disconnected",
+      conoutf("Player %s disconnected",
               d->name[0] ? d->name : "[incompatible client]");
       zapdynent(players[cn]);
       break;
@@ -214,10 +214,10 @@ void localservertoclient(uchar *buf,
         int frags;
         if (isteam(player1->team, d->team)) {
           frags = -1;
-          conoutf("you fragged a teammate (%s)", d->name);
+          conoutf("You fragged a teammate (%s)", d->name);
         } else {
           frags = 1;
-          conoutf("you fragged %s", d->name);
+          conoutf("You fragged %s", d->name);
         };
         addmsg(1, 2, SV_FRAGS, player1->frags += frags);
       } else {
@@ -282,7 +282,7 @@ void localservertoclient(uchar *buf,
 
     case SV_RECVMAP: {
       sgetstr();
-      conoutf("received map \"%s\" from server, reloading..", text);
+      conoutf("Received map \"%s\" from server, reloading..", text);
       int mapsize = getint(p);
       writemap(text, mapsize, p);
       p += mapsize;
