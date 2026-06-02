@@ -327,8 +327,10 @@ void updateworld(int millis) // main game update loop
     };
     otherplayers();
     if (!demoplayback) {
-      monsterthink();
-      botthink();
+      if (!intermission) {
+        monsterthink();
+        botthink();
+      }
       if (spectator) {
         if (speclook) {
           moveplayer(player1, 20, true);
