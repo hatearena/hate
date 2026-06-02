@@ -417,14 +417,23 @@ int main(int argc, char **argv) {
                 (event.key.keysym.mod & KMOD_SHIFT))
               execute("edittex 0 1");
             else
-              handled = false;
+              execute("solid 1");
+            break;
+          case SDLK_h:
+            execute("heightfield 0");
             break;
           case SDLK_i:
             if ((event.key.keysym.mod & KMOD_CTRL) &&
                 (event.key.keysym.mod & KMOD_SHIFT))
               execute("eyedropper");
             else
-              handled = false;
+              execute("heightfield 1");
+            break;
+          case SDLK_8:
+            execute("vdelta 1");
+            break;
+          case SDLK_9:
+            execute("vdelta -1");
             break;
           case SDLK_o:
             if ((event.key.keysym.mod & KMOD_CTRL) &&
@@ -477,7 +486,12 @@ int main(int argc, char **argv) {
       case SDL_MOUSEWHEEL:
         if (editmode) {
           const Uint8 *k = SDL_GetKeyboardState(NULL);
-          if (k[SDL_SCANCODE_X]) {
+          if (k[SDL_SCANCODE_Q]) {
+            if (event.wheel.y > 0)
+              execute("vdelta 1");
+            else if (event.wheel.y < 0)
+              execute("vdelta -1");
+          } else if (k[SDL_SCANCODE_X]) {
             if (event.wheel.y > 0)
               execute("edittex 1 1");
             else if (event.wheel.y < 0)
