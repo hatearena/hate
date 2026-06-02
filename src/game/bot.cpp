@@ -355,7 +355,12 @@ void botpain(dynent *m, int damage, dynent *d) {
     } else if (d->monsterstate && d->mtype == -1) {
       d->frags++;
     }
-    conoutf("%s fragged %s", d->name, m->name);
+    if (d == m) {
+      m->suicides++;
+      conoutf("%s suicided", m->name);
+    } else {
+      conoutf("%s fragged %s", d->name, m->name);
+    }
   } else {
     playsound(S_PAIN1 + rnd(5), &m->o);
   }
