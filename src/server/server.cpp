@@ -144,12 +144,12 @@ bool vote(char *map, int reqmode, int sender) {
   };
   if (yes == 1 && no == 0)
     return true; // single player
-  sprintf_sd(msg)("%s suggests %s on map %s (set map to vote)",
+  sprintf_sd(msg)("%s started a vote for %s on map %s (set map to vote)",
                   clients[sender].name, modestr(reqmode), map);
   sendservmsg(msg);
   if (yes / (float)(yes + no) <= 0.5f)
     return false;
-  sendservmsg("vote passed");
+  sendservmsg("Vote passed");
   resetvotes();
   return true;
 };
