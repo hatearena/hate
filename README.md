@@ -1,6 +1,6 @@
 This repo contains the source code for HATE, a free and open source multiplayer FPS.
 
-It is based off of the original Cube engine.
+It is based on the original Cube engine.
 
 - [Site](https://hate-arena.pages.dev)
 - [Itch.io](https://endseven.itch.io/hate)
