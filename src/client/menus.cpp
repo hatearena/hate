@@ -24,7 +24,12 @@ struct mitem {
   bool checkbox;
   bool slider;
   char *slidervar;
+  bool textinput;
 };
+
+bool menutextinput = false;
+char menutextbuf[260] = "";
+char *menutextcmd = NULL;
 
 struct gmenu {
   char *name;
@@ -331,6 +336,13 @@ bool rendermenu() {
       string buf;
       sprintf_s(buf)("%s: %d", m.items[idx].text, val);
       draw_text(buf, x, y, 2);
+    } else if (m.items[idx].textinput) {
+      string buf;
+      if (menutextinput && idx == m.menusel)
+        sprintf_s(buf)("%s: %s_", m.items[idx].text, menutextbuf);
+      else
+        sprintf_s(buf)("%s: %s", m.items[idx].text, player1->name);
+      draw_text(buf, x, y, 2);
     } else {
       draw_text(m.items[idx].text, x, y, 2);
     };
@@ -366,6 +378,7 @@ void menuitem(char *text, char *action) {
   mi.action = action[0] ? newstring(action) : mi.text;
   mi.checkbox = false;
   mi.slider = false;
+  mi.textinput = false;
 };
 
 void menuitem_checkbox(char *text, char *action) {
@@ -375,6 +388,7 @@ void menuitem_checkbox(char *text, char *action) {
   mi.action = action[0] ? newstring(action) : mi.text;
   mi.checkbox = true;
   mi.slider = false;
+  mi.textinput = false;
 };
 
 void menuitem_slider(char *text, char *varname) {
@@ -384,7 +398,18 @@ void menuitem_slider(char *text, char *varname) {
   mi.action = newstring(varname);
   mi.checkbox = false;
   mi.slider = true;
+  mi.textinput = false;
   mi.slidervar = newstring(varname);
+};
+
+void menuitem_text(char *text, char *cmd) {
+  gmenu &menu = menus.last();
+  mitem &mi = menu.items.add();
+  mi.text = newstring(text);
+  mi.action = newstring(cmd);
+  mi.checkbox = false;
+  mi.slider = false;
+  mi.textinput = true;
 };
 
 void showmapmodels() {
@@ -521,6 +546,7 @@ COMMANDN(menuitem_checkbox, menuitem_checkbox, ARG_2STR);
 COMMANDN(menuitem_slider, menuitem_slider, ARG_2STR);
 COMMAND(showmenu, ARG_1STR);
 COMMAND(newmenu, ARG_1STR);
+COMMANDN(menuitem_text, menuitem_text, ARG_2STR);
 
 bool menukey(int code, bool isdown) {
   if (vmenu <= 0)
@@ -578,16 +604,24 @@ bool menukey(int code, bool isdown) {
     menus[vmenu].menusel = menusel;
   } else {
     if (code == SDLK_RETURN || code == -2) {
-      char *action = menus[vmenu].items[menusel].action;
-      if (vmenu == 1)
-        connects(getservername(menusel));
-      if (menus[vmenu].items[menusel].checkbox ||
-          menus[vmenu].items[menusel].slider) {
-        execute(action, true);
+      if (menus[vmenu].items[menusel].textinput) {
+        if (!menutextinput) {
+          menutextinput = true;
+          strcpy_s(menutextbuf, player1->name);
+          menutextcmd = menus[vmenu].items[menusel].action;
+        };
       } else {
-        menustack.add(vmenu);
-        menuset(-1);
-        execute(action, true);
+        char *action = menus[vmenu].items[menusel].action;
+        if (vmenu == 1)
+          connects(getservername(menusel));
+        if (menus[vmenu].items[menusel].checkbox ||
+            menus[vmenu].items[menusel].slider) {
+          execute(action, true);
+        } else {
+          menustack.add(vmenu);
+          menuset(-1);
+          execute(action, true);
+        };
       };
     };
   };

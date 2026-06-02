@@ -204,6 +204,10 @@ void history(int n) {
 
 COMMAND(history, ARG_1INT);
 
+extern bool menutextinput;
+extern char menutextbuf[];
+extern char *menutextcmd;
+
 void keypress(int code, bool isdown, bool textinput, char text[32]) {
   if (textinput && saycommandon) {
     if (dont_query_next_key)
@@ -214,6 +218,45 @@ void keypress(int code, bool isdown, bool textinput, char text[32]) {
       strcat_s(commandbuf, buf);
       return;
     }
+  }
+
+  if (textinput && menutextinput) {
+    if (strlen(menutextbuf) < 16) {
+      char buf[] = {text[0], 0};
+      strcat_s(menutextbuf, buf);
+    }
+    return;
+  }
+
+  if (menutextinput) {
+    if (isdown) {
+      switch (code) {
+      case SDLK_ESCAPE:
+        menutextinput = false;
+        break;
+      case SDLK_BACKSPACE: {
+        for (int i = 0; menutextbuf[i]; i++)
+          if (!menutextbuf[i + 1])
+            menutextbuf[i] = 0;
+        break;
+      }
+      };
+    } else {
+      switch (code) {
+      case SDLK_RETURN:
+      case -2: {
+        if (menutextbuf[0]) {
+          string cmd;
+          sprintf_s(cmd)("%s \"%s\"", menutextcmd, menutextbuf);
+          execute(cmd, true);
+          conoutf("Name changed to \"%s\"", menutextbuf);
+        }
+        menutextinput = false;
+        break;
+      }
+      };
+    };
+    return;
   }
 
   if (saycommandon) {

@@ -27,6 +27,7 @@ extern void menumanual(int m, int n, char *text);
 extern void sortmenu(int start, int num);
 extern bool menukey(int code, bool isdown);
 extern void newmenu(const char *name);
+extern void menuitem_text(char *text, char *varname);
 
 // serverbrowser
 extern void addserver(char *servername);
