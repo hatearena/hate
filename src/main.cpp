@@ -65,32 +65,31 @@ VARFP(fullscreen, 0, 0, 1, {
   writecfg();
 });
 
-void screenshot()
-{
+void screenshot() {
   SDL_Surface *image;
   SDL_Surface *temp;
   int idx;
-  if (image = SDL_CreateRGBSurface(SDL_SWSURFACE, scr_w, scr_h, 24, 0x0000FF, 0x00FF00, 0xFF0000, 0))
-  {
-    if (temp = SDL_CreateRGBSurface(SDL_SWSURFACE, scr_w, scr_h, 24, 0x0000FF, 0x00FF00, 0xFF0000, 0))
-    {
+  if (image = SDL_CreateRGBSurface(SDL_SWSURFACE, scr_w, scr_h, 24, 0x0000FF,
+                                   0x00FF00, 0xFF0000, 0)) {
+    if (temp = SDL_CreateRGBSurface(SDL_SWSURFACE, scr_w, scr_h, 24, 0x0000FF,
+                                    0x00FF00, 0xFF0000, 0)) {
       glReadPixels(0, 0, scr_w, scr_h, GL_RGB, GL_UNSIGNED_BYTE, image->pixels);
-      for (idx = 0; idx < scr_h; idx++)
-      {
+      for (idx = 0; idx < scr_h; idx++) {
         char *dest = (char *)temp->pixels + 3 * scr_w * idx;
-        memcpy(dest, (char *)image->pixels + 3 * scr_w * (scr_h - 1 - idx), 3 * scr_w);
+        memcpy(dest, (char *)image->pixels + 3 * scr_w * (scr_h - 1 - idx),
+               3 * scr_w);
         endianswap(dest, 3, scr_w);
       };
       char *home = getenv("HOME");
-      if (home)
-      {
+      if (home) {
         sprintf_sd(hatedir)("%s/.hate", home);
         path(hatedir);
         mkdir(hatedir, 0755);
         sprintf_sd(dir)("%s/.hate/screenshots", home);
         path(dir);
         mkdir(dir, 0755);
-        sprintf_sd(buf)("%s/.hate/screenshots/screenshot_%d.png", home, lastmillis);
+        sprintf_sd(buf)("%s/.hate/screenshots/screenshot_%d.png", home,
+                        lastmillis);
         path(buf);
         if (IMG_SavePNG(temp, buf) == 0)
           conoutf("Screenshot saved: %s", buf);
@@ -217,7 +216,8 @@ int main(int argc, char **argv) {
   }
   {
     FILE *cfg = fopen("config.cfg", "r");
-    if (!cfg) cfg = fopen("data/default.cfg", "r");
+    if (!cfg)
+      cfg = fopen("data/default.cfg", "r");
     if (cfg) {
       char line[256];
       while (fgets(line, sizeof(line), cfg)) {
@@ -244,7 +244,7 @@ int main(int argc, char **argv) {
       fclose(cfg);
     }
   }
-  window = SDL_CreateWindow("HATE v0.0.1", SDL_WINDOWPOS_CENTERED,
+  window = SDL_CreateWindow("HATE v0.0.2", SDL_WINDOWPOS_CENTERED,
                             SDL_WINDOWPOS_CENTERED, scr_w, scr_h,
                             SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
   if (window == NULL)

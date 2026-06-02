@@ -498,7 +498,7 @@ void initserver(bool dedicated, int uprate, char *sdesc, char *ip, char *master,
   serverpassword = passwd;
   maxclients = maxcl;
 
-  // Originally: wouter.fov120.com, replaced with stub temporarily for v0.0.1
+  // Originally: wouter.fov120.com, replaced with stub temporarily for v0.0.2
   // release
   servermsinit(master ? master : "stub.com/cube/masterserver/", sdesc,
                dedicated);
