@@ -111,6 +111,7 @@ default: all
 
 all: client server
 	cp hate_client ../content && \
+	cp hate_server ../content && \
 	cd ../content && \
 	./hate_client
 
