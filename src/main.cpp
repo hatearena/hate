@@ -84,10 +84,20 @@ void screenshot() {
       if (home) {
         sprintf_sd(hatedir)("%s/.hate", home);
         path(hatedir);
-        mkdir(hatedir, 0755);
+        #ifdef _WIN32
+          mkdir(hatedir);
+        #else
+          mkdir(hatedir, 0755);
+        #endif
+        
         sprintf_sd(dir)("%s/.hate/screenshots", home);
         path(dir);
-        mkdir(dir, 0755);
+        #ifdef _WIN32
+          mkdir(dir);
+        #else
+          mkdir(dir, 0755);
+        #endif
+        
         sprintf_sd(buf)("%s/.hate/screenshots/screenshot_%d.png", home,
                         lastmillis);
         path(buf);
