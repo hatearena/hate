@@ -205,7 +205,7 @@ void physicsframe() // optimally schedule physics frames inside the graphics
 // multiplayer prediction) local is false for multiplayer prediction
 
 void moveplayer(dynent *pl, int moveres, bool local, int curtime) {
-  if (noclip) {
+  if (pl == player1 && noclip) {
     vec d;
     d.x = (float)(pl->move * cos(rad(pl->yaw - 90)));
     d.y = (float)(pl->move * sin(rad(pl->yaw - 90)));
