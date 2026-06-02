@@ -523,7 +523,6 @@ void gl_drawhud(int w, int h, int curfps, int nquads, int curvert,
   glEnable(GL_TEXTURE_2D);
 
   char *command = getcurcommand();
-  char *player = playerincrosshair();
   {
     extern bool saycommandon;
     extern int saycommand_start;
@@ -547,8 +546,6 @@ void gl_drawhud(int w, int h, int curfps, int nquads, int curvert,
     };
     if (command)
       draw_textf("$ %s_", 20, 1400, 2, command);
-    else if (player)
-      draw_text(player, 20, 1400, 2);
   }
 
   renderscores();
