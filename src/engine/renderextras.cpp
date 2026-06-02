@@ -1,4 +1,5 @@
 #include "../include/cube.h"
+#include "../include/protos.h"
 
 extern bool intermission;
 extern int intermissiontimer;
@@ -478,11 +479,11 @@ void gl_drawhud(int w, int h, int curfps, int nquads, int curvert,
   glDepthMask(GL_FALSE);
 
   if (spectator) {
+    glEnable(GL_TEXTURE_2D);
     dynent *t = getspectarget();
     if (t && t->name[0]) {
       glColor4ub(255, 255, 255, 255);
-      int tw = text_width(t->name) * 2;
-      draw_text(t->name, (VIRTW - tw) / 2, 60, 2);
+      draw_text(t->name, (VIRTW - text_width(t->name)) / 2, 60, 2);
     }
   }
 

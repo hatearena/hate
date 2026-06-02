@@ -409,7 +409,11 @@ dir(left, strafe, 1, k_left, k_right);
 dir(right, strafe, -1, k_right, k_left);
 
 void attack(bool on) {
-  if (spectator || intermission)
+  if (spectator) {
+    if (on) spectate_next();
+    return;
+  }
+  if (intermission)
     return;
   else if (player1->attacking = on)
     respawn();
