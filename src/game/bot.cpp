@@ -356,6 +356,7 @@ void botpain(dynent *m, int damage, dynent *d) {
     if (d == player1) {
       player1->frags++;
       addmsg(1, 2, SV_FRAGS, player1->frags);
+      playsoundmax(S_KILL);
     } else if (d->monsterstate && d->mtype == -1) {
       d->frags++;
     }

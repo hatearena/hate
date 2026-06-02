@@ -201,11 +201,13 @@ extern bool collide(dynent *d, bool spawn, float drop, float rise);
 extern void entinmap(dynent *d);
 extern void setentphysics(int mml, int mmr);
 extern void physicsframe();
+extern void stoprunsound();
 
 // sound
 extern void playsound(int n, vec *loc = 0);
 extern void preloadweaponsounds();
 extern void playsoundc(int n);
+extern void playsoundmax(int n);
 extern int playsoundloop(int n, vec *loc = 0);
 extern void stopchan(int chan);
 extern void stopsounds();

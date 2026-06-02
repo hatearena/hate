@@ -2,6 +2,13 @@
 
 static int runchan = -1;
 
+void stoprunsound() {
+  if (runchan >= 0) {
+    stopchan(runchan);
+    runchan = -1;
+  }
+}
+
 /// Collide monster with player.
 bool plcollide(dynent *d, dynent *o, float &headspace, float &hi, float &lo) {
   if (o->state != CS_ALIVE)

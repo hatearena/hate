@@ -194,6 +194,9 @@ void hit(int target, int damage, dynent *d, dynent *at) {
   };
   particle_splash(3, damage, 1000, d->o);
   demodamage(damage, d->o);
+  if (at == player1 && d != player1) {
+    playsoundc(S_HIT);
+  };
 };
 
 const float RL_RADIUS = 5;

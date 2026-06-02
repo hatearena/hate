@@ -304,6 +304,7 @@ void monsterpain(dynent *m, int damage, dynent *d) {
     numkilled++;
     player1->frags = numkilled;
     playsound(monstertypes[m->mtype].diesound, &m->o);
+    playsoundmax(S_KILL);
     int remain = monstertotal - numkilled;
     if (remain > 0 && remain <= 5)
       conoutf("only %d monster(s) remaining", remain);

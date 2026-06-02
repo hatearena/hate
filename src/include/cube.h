@@ -269,6 +269,8 @@ enum {
   S_CSAW,
   S_RUN,
   S_BOOST,
+  S_HIT = 55,
+  S_KILL = 56,
 };
 
 // vertex array format

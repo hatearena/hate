@@ -194,6 +194,24 @@ void playsoundc(int n) {
   playsound(n);
 };
 
+void playsoundmax(int n) {
+  if (nosound) return;
+  if (editmode) return;
+  if (n < 0 || n >= samples.length()) return;
+  if (!samples[n]) {
+    sprintf_sd(buf)("packages/sounds/%s.wav", snames[n]);
+    samples[n] = Mix_LoadWAV(path(buf));
+    if (!samples[n]) {
+      conoutf("failed to load sample: %s", buf);
+      return;
+    }
+  }
+  int chan = Mix_PlayChannel(-1, samples[n], 0);
+  if (chan < 0) return;
+  soundchan[chan] = n;
+  Mix_Volume(chan, MIX_MAX_VOLUME);
+};
+
 int soundsatonce = 0, lastsoundmillis = 0;
 
 void playsound(int n, vec *loc) {

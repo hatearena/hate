@@ -1,3 +1,4 @@
+content/servers.cfg
 *.tar.gz
 *.DS_Store
 *_orig.cpp
