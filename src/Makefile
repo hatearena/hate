@@ -10,103 +10,100 @@ endif
 
 ifeq ($(PLATFORM),windows)
 
-CXX := g++
+	CXX := g++
 
-MSYS2_PREFIX := $(shell cygpath -u "$$MINGW_PREFIX" 2>/dev/null)
+	MSYS2_PREFIX := $(shell cygpath -u "$$MINGW_PREFIX" 2>/dev/null)
 
-ifeq ($(MSYS2_PREFIX),)
-    $(error MSYS2 MinGW64 environment not detected. Run this inside mingw64.exe)
-endif
+	ifeq ($(MSYS2_PREFIX),)
+	    $(error MSYS2 MinGW64 environment not detected. Run this inside mingw64.exe)
+	endif
 
-MSYS2_PREFIX_WIN := $(shell cygpath -m "$$MINGW_PREFIX")
+	MSYS2_PREFIX_WIN := $(shell cygpath -m "$$MINGW_PREFIX")
 
-CLIENT_BIN = hate_client.exe
-SERVER_BIN = hate_server.exe
+	CLIENT_BIN = hate_client.exe
+	SERVER_BIN = hate_server.exe
 
-CXXFLAGS_EXTRA = \
-    -I$(MSYS2_PREFIX_WIN)/include \
-    -I$(MSYS2_PREFIX_WIN)/include/SDL2
+	CXXFLAGS_EXTRA = \
+	    -I$(MSYS2_PREFIX_WIN)/include \
+	    -I$(MSYS2_PREFIX_WIN)/include/SDL2
 
-CLIENT_LIBS = \
-    -L$(MSYS2_PREFIX_WIN)/lib \
-    -lmingw32 \
-    -lSDL2main \
-    -lSDL2 \
-    -lSDL2_image \
-    -lSDL2_mixer \
-    -lSDL2_ttf \
-    -lenet \
-    -lz \
-    -lopengl32 \
-    -lglu32 \
-    -lws2_32 \
-    -lwinmm
+	CLIENT_LIBS = \
+		-mconsole \
+	    -L$(MSYS2_PREFIX_WIN)/lib \
+	    -lSDL2 \
+	    -lSDL2_image \
+	    -lSDL2_mixer \
+	    -lSDL2_ttf \
+	    -lenet \
+	    -lz \
+	    -lopengl32 \
+	    -lglu32 \
+	    -lws2_32 \
+	    -lwinmm
 
-SERVER_LIBS = \
-    -L$(MSYS2_PREFIX_WIN)/lib \
-    -lenet \
-    -lws2_32
-
-endif
-
-ifeq ($(PLATFORM),macos)
-
-    CXX = clang++
-
-    BREW_PREFIX := $(shell brew --prefix)
-
-    CLIENT_BIN = hate_client
-    SERVER_BIN = hate_server
-
-    CXXFLAGS_EXTRA = \
-        -I$(BREW_PREFIX)/include
-
-    SDL_CFLAGS := $(shell sdl2-config --cflags)
-    SDL_LIBS := $(shell sdl2-config --libs)
-
-    CLIENT_LIBS = \
-        -L$(BREW_PREFIX)/lib \
-        -lenet \
-        -lz \
-        $(SDL_LIBS) \
-        -lSDL2_image \
-        -lSDL2_mixer \
-        -lSDL2_ttf \
-        -framework OpenGL \
-        -framework Cocoa \
-        -framework IOKit \
-        -framework CoreVideo
-
-    SERVER_LIBS = \
-        -L$(BREW_PREFIX)/lib \
-        -lenet
+	SERVER_LIBS = \
+	    -L$(MSYS2_PREFIX_WIN)/lib \
+	    -mconsole \
+	    -lenet \
+	    -lws2_32
 
 else
+    ifeq ($(PLATFORM),macos)
+        CXX = clang++
 
-    CXX = g++
+        BREW_PREFIX := $(shell brew --prefix)
 
-    CLIENT_BIN = hate_client
-    SERVER_BIN = hate_server
+        CLIENT_BIN = hate_client
+        SERVER_BIN = hate_server
 
-    SDL_CFLAGS := $(shell sdl2-config --cflags)
-    SDL_LIBS := $(shell sdl2-config --libs)
+        CXXFLAGS_EXTRA = \
+            -I$(BREW_PREFIX)/include
 
-    CXXFLAGS_EXTRA =
+        SDL_CFLAGS := $(shell sdl2-config --cflags)
+        SDL_LIBS := $(shell sdl2-config --libs)
 
-    CLIENT_LIBS = \
-        -lenet \
-        $(SDL_LIBS) \
-        -lSDL2_image \
-        -lSDL2_mixer \
-        -lSDL2_ttf \
-        -lz \
-        -lGL \
-        -lGLU \
-        -lX11
+        CLIENT_LIBS = \
+            -L$(BREW_PREFIX)/lib \
+            -lenet \
+            -lz \
+            $(SDL_LIBS) \
+            -lSDL2_image \
+            -lSDL2_mixer \
+            -lSDL2_ttf \
+            -framework OpenGL \
+            -framework Cocoa \
+            -framework IOKit \
+            -framework CoreVideo
 
-    SERVER_LIBS = \
-        -lenet
+        SERVER_LIBS = \
+            -L$(BREW_PREFIX)/lib \
+            -lenet
+    else
 
+        CXX = g++
+
+        CLIENT_BIN = hate_client
+        SERVER_BIN = hate_server
+
+        SDL_CFLAGS := $(shell sdl2-config --cflags)
+        SDL_LIBS := $(shell sdl2-config --libs)
+
+        CXXFLAGS_EXTRA =
+
+        CLIENT_LIBS = \
+            -lenet \
+            $(SDL_LIBS) \
+            -lSDL2_image \
+            -lSDL2_mixer \
+            -lSDL2_ttf \
+            -lz \
+            -lGL \
+            -lGLU \
+            -lX11
+
+        SERVER_LIBS = \
+            -lenet
+    endif
 endif
 
 CXXOPTFLAGS = \
@@ -171,9 +168,9 @@ default: all
 
 all: client server
 ifeq ($(PLATFORM),windows)
-	copy /Y $(CLIENT_BIN) ..\content
-	copy /Y $(SERVER_BIN) ..\content
-	cd ..\content && $(CLIENT_BIN)
+	cp $(CLIENT_BIN) ../content
+	cp $(SERVER_BIN) ../content
+	cd ../content && ./$(CLIENT_BIN)
 else
 	cp $(CLIENT_BIN) ../content
 	cp $(SERVER_BIN) ../content
@@ -192,6 +189,7 @@ server: $(SERVER_OBJS)
 standalone.o:
 	$(CXX) $(CXXFLAGS) \
 		-DSTANDALONE \
+        -DSDL_MAIN_HANDLED \
 		-Iinclude \
 		-c server/serverutil.cpp \
 		-o standalone.o

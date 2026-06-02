@@ -1,3 +1,4 @@
+#define SDL_MAIN_HANDLED
 #include "include/cube.h"
 #include <sys/stat.h>
 
