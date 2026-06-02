@@ -95,6 +95,7 @@ extern void startmap(char *name);
 extern void changemap(const char *name);
 extern void initclient();
 extern void spawnplayer(dynent *d);
+extern void spawnstate(dynent *d);
 extern void selfdamage(int damage, int actor, dynent *act);
 extern dynent *newdynent();
 extern char *getclientmap();

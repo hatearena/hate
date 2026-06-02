@@ -7,6 +7,7 @@ dvector bots;
 int numbots = 0;
 VAR(botdifficulty, -1, 4, 4);
 VAR(botamount, 1, 4, 16);
+static int botspawncycle = -1;
 
 static const char *botnames[] = {
     "Cerelo", "Diaso", "Ceria",  "Deathly", "Ra",      "Va",    "Never",
@@ -134,7 +135,11 @@ void botclear() {
   bots.setsize(0);
   numbots = 0;
   lastammorefill = 0;
+  botspawncycle = -1;
 }
+
+static bool botoutside(dynent *b);
+static bool findbotspawn(dynent *b);
 
 static void normalise(dynent *m, float angle) {
   while (m->yaw < angle - 180.0f)
@@ -144,6 +149,11 @@ static void normalise(dynent *m, float angle) {
 }
 
 static void botaction(dynent *m) {
+  if (botoutside(m)) {
+    m->state = CS_DEAD;
+    m->lastaction = lastmillis;
+    return;
+  }
   dynent *enemy = NULL;
   float bestdist = 1e10f;
 
@@ -279,7 +289,7 @@ static void botaction(dynent *m) {
     }
   }
 
-  moveplayer(m, 1, false);
+  moveplayer(m, 20, true);
 }
 
 void botthink() {
@@ -296,7 +306,12 @@ void botthink() {
       }
       botaction(b);
     } else if (b->state == CS_DEAD && lastmillis - b->lastaction > 5000) {
-      spawnplayer(b);
+      spawnstate(b);
+      if (!findbotspawn(b)) {
+        b->state = CS_DEAD;
+        b->lastaction = lastmillis;
+        continue;
+      }
       b->health = max(50 + botdifficulty * 25, 1);
       b->armour = max(botdifficulty * 25, 0);
       b->state = CS_ALIVE;
@@ -348,9 +363,36 @@ void botpain(dynent *m, int damage, dynent *d) {
 
 extern bool isdedicated;
 
+static bool findbotspawn(dynent *b) {
+  int e = findentity(PLAYERSTART, botspawncycle + 1);
+  if (e < 0) e = findentity(PLAYERSTART, 0);
+  if (e >= 0) {
+    botspawncycle = e;
+    b->o.x = ents[e].x;
+    b->o.y = ents[e].y;
+    b->o.z = ents[e].z;
+    b->yaw = ents[e].attr1;
+    b->pitch = 0;
+    b->roll = 0;
+    entinmap(b);
+    return true;
+  }
+  return false;
+}
+
+static bool botoutside(dynent *b) {
+  int ix = (int)b->o.x, iy = (int)b->o.y;
+  if (OUTBORD(ix, iy)) return true;
+  sqr *s = S(ix, iy);
+  if (SOLID(s)) return true;
+  return b->o.z < s->floor - (s->type == FHF ? s->vdelta / 4 : 0) ||
+         b->o.z > s->ceil + (s->type == CHF ? s->vdelta / 4 : 0);
+}
+
 static void spawnonebot() {
   dynent *b = newdynent();
   spawnplayer(b);
+  if (!findbotspawn(b)) return;
   b->monsterstate = M_HOME;
   b->mtype = -1;
   b->enemy = player1;
