@@ -69,6 +69,10 @@ void togglespeclook() {
 }
 
 void togglespectate() {
+    if (!spectator && editmode) {
+        conoutf("Exit edit mode first, then go to spectator mode.");
+        return;
+    }
     spectator = !spectator;
     if (spectator) {
         player1->state = CS_SPECTATOR;

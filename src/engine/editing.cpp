@@ -1,4 +1,5 @@
 #include "../include/cube.h"
+#include "../include/protos.h"
 
 bool editmode = false;
 
@@ -35,6 +36,10 @@ VAR(noclip, 0, 0, 1);
 void toggleedit() {
   if (player1->state == CS_DEAD)
     return;
+  if (!editmode && spectator) {
+    conoutf("Exit spectator mode first, then go to edit mode.");
+    return;
+  }
   if (!editmode && !allowedittoggle())
     return;
   if (!(editmode = !editmode)) {
