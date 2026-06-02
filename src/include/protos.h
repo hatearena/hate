@@ -66,6 +66,7 @@ extern bool allowedittoggle();
 extern bool noteditmode();
 extern void pruneundos(int maxremain);
 extern void toggleedit();
+extern void togglescreenshotmode();
 extern void edittypexy(int type, block &sel);
 extern void cursorupdate();
 extern void settagareas();

@@ -73,6 +73,10 @@ void togglespectate() {
         conoutf("Exit edit mode first, then go to spectator mode.");
         return;
     }
+    if (screenshotmode) {
+        conoutf("Exit screenshot mode first, then go to spectator mode.");
+        return;
+    }
     spectator = !spectator;
     if (spectator) {
         player1->state = CS_SPECTATOR;

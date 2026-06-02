@@ -948,7 +948,7 @@ void gl_drawframe(int w, int h, float curfps) {
 
   glDisable(GL_CULL_FACE);
 
-  if (!thirdperson && !editmode && !intermission && !spectator)
+  if (!thirdperson && !editmode && !intermission && !spectator && !screenshotmode)
     drawhudgun(fovy, aspect, farplane);
 
   overbright(1);

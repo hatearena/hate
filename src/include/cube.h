@@ -294,6 +294,7 @@ extern dynent
 extern dvector players; // all the other clients (in multiplayer)
 extern bool editmode;
 extern int noclip;
+extern int screenshotmode;
 extern vector<entity> ents; // map entities
 extern vec worldpos;        // current target of the crosshair in the world
 extern int lastmillis;      // last time

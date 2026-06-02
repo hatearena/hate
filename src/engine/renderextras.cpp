@@ -478,7 +478,7 @@ void gl_drawhud(int w, int h, int curfps, int nquads, int curvert,
   glEnable(GL_BLEND);
   glDepthMask(GL_FALSE);
 
-  if (spectator) {
+  if (spectator && !screenshotmode) {
     glEnable(GL_TEXTURE_2D);
     dynent *t = getspectarget();
     if (t && t->name[0]) {
@@ -552,7 +552,7 @@ void gl_drawhud(int w, int h, int curfps, int nquads, int curvert,
   }
 
   renderscores();
-  if (!rendermenu() && !intermission) {
+  if (!rendermenu() && !intermission && !screenshotmode) {
     glBlendFunc(GL_SRC_ALPHA, GL_SRC_ALPHA);
     glBindTexture(GL_TEXTURE_2D, 1);
     glBegin(GL_QUADS);
@@ -601,7 +601,7 @@ void gl_drawhud(int w, int h, int curfps, int nquads, int curvert,
 
   glPopMatrix();
 
-  if (player1->state == CS_ALIVE && !editmode && !intermission) {
+  if (player1->state == CS_ALIVE && !editmode && !intermission && !screenshotmode) {
     glPushMatrix();
     glOrtho(0, VIRTW, VIRTH, 0, -1, 1);
     glDisable(GL_TEXTURE_2D);
@@ -687,7 +687,7 @@ void gl_drawhud(int w, int h, int curfps, int nquads, int curvert,
     glPopMatrix();
   };
 
-  if (editmode) {
+  if (editmode && !screenshotmode) {
     extern int closestent();
     int e = closestent();
     glPushMatrix();

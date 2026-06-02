@@ -32,10 +32,15 @@ sqr rtex;
 
 VAR(editing, 0, 0, 1);
 VAR(noclip, 0, 0, 1);
+VAR(screenshotmode, 0, 0, 1);
 
 void toggleedit() {
   if (player1->state == CS_DEAD)
     return;
+  if (screenshotmode) {
+    conoutf("Exit screenshot mode first, then go to edit mode.");
+    return;
+  }
   if (!editmode && spectator) {
     conoutf("Exit spectator mode first, then go to edit mode.");
     return;
@@ -59,6 +64,23 @@ void toggleedit() {
   selset = false;
   editing = editmode;
 };
+
+void togglescreenshotmode() {
+  if (player1->state == CS_DEAD)
+    return;
+  if (!screenshotmode && editmode) {
+    conoutf("Exit edit mode first, then go to screenshot mode.");
+    return;
+  }
+  if (!screenshotmode && spectator) {
+    conoutf("Exit spectator mode first, then go to screenshot mode.");
+    return;
+  }
+  screenshotmode = !screenshotmode;
+  noclip = screenshotmode ? 1 : 0;
+};
+
+COMMANDN(screenshotmodetoggle, togglescreenshotmode, ARG_NONE);
 
 COMMANDN(edittoggle, toggleedit, ARG_NONE);
 

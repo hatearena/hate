@@ -1,4 +1,5 @@
 #include "include/cube.h"
+#include <sys/stat.h>
 
 SDL_Window *window = NULL;
 SDL_GLContext glcontext = NULL;
@@ -64,32 +65,44 @@ VARFP(fullscreen, 0, 0, 1, {
   writecfg();
 });
 
-#if 0
 void screenshot()
 {
-	SDL_Surface *image;
-	SDL_Surface *temp;
-	int idx;
-	if(image = SDL_CreateRGBSurface(SDL_SWSURFACE, scr_w, scr_h, 24, 0x0000FF, 0x00FF00, 0xFF0000, 0))
-	{
-		if(temp  = SDL_CreateRGBSurface(SDL_SWSURFACE, scr_w, scr_h, 24, 0x0000FF, 0x00FF00, 0xFF0000, 0))
-		{
-			glReadPixels(0, 0, scr_w, scr_h, GL_RGB, GL_UNSIGNED_BYTE, image->pixels);
-			for (idx = 0; idx<scr_h; idx++)
-			{
-				char *dest = (char *)temp->pixels+3*scr_w*idx;
-				memcpy(dest, (char *)image->pixels+3*scr_w*(scr_h-1-idx), 3*scr_w);
-				endianswap(dest, 3, scr_w);
-			};
-			sprintf_sd(buf)("screenshots/screenshot_%d.bmp", lastmillis);
-			SDL_SaveBMP(temp, path(buf));
-			SDL_FreeSurface(temp);
-		};
-		SDL_FreeSurface(image);
-	};
+  SDL_Surface *image;
+  SDL_Surface *temp;
+  int idx;
+  if (image = SDL_CreateRGBSurface(SDL_SWSURFACE, scr_w, scr_h, 24, 0x0000FF, 0x00FF00, 0xFF0000, 0))
+  {
+    if (temp = SDL_CreateRGBSurface(SDL_SWSURFACE, scr_w, scr_h, 24, 0x0000FF, 0x00FF00, 0xFF0000, 0))
+    {
+      glReadPixels(0, 0, scr_w, scr_h, GL_RGB, GL_UNSIGNED_BYTE, image->pixels);
+      for (idx = 0; idx < scr_h; idx++)
+      {
+        char *dest = (char *)temp->pixels + 3 * scr_w * idx;
+        memcpy(dest, (char *)image->pixels + 3 * scr_w * (scr_h - 1 - idx), 3 * scr_w);
+        endianswap(dest, 3, scr_w);
+      };
+      char *home = getenv("HOME");
+      if (home)
+      {
+        sprintf_sd(hatedir)("%s/.hate", home);
+        path(hatedir);
+        mkdir(hatedir, 0755);
+        sprintf_sd(dir)("%s/.hate/screenshots", home);
+        path(dir);
+        mkdir(dir, 0755);
+        sprintf_sd(buf)("%s/.hate/screenshots/screenshot_%d.png", home, lastmillis);
+        path(buf);
+        if (IMG_SavePNG(temp, buf) == 0)
+          conoutf("Screenshot saved: %s", buf);
+        else
+          conoutf("Screenshot failed: %s", IMG_GetError());
+      };
+      SDL_FreeSurface(temp);
+    };
+    SDL_FreeSurface(image);
+  };
 };
 COMMAND(screenshot, ARG_NONE);
-#endif
 
 void var_gamespeed();
 static int gamespeed = variable((char *)"gamespeed", 10, 100, 1000, &gamespeed,
@@ -425,6 +438,10 @@ int main(int argc, char **argv) {
           };
           if (!handled)
             keypress(event.key.keysym.sym, true, false, 0);
+        } else if (event.key.keysym.sym == SDLK_s &&
+                   (event.key.keysym.mod & KMOD_CTRL) &&
+                   event.key.state == SDL_PRESSED) {
+          screenshot();
         } else if (event.key.keysym.sym == SDLK_LSHIFT) {
           extern void boostn(bool);
           boostn(event.key.state == SDL_PRESSED);
