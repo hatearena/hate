@@ -477,6 +477,15 @@ void gl_drawhud(int w, int h, int curfps, int nquads, int curvert,
   glEnable(GL_BLEND);
   glDepthMask(GL_FALSE);
 
+  if (spectator) {
+    dynent *t = getspectarget();
+    if (t && t->name[0]) {
+      glColor4ub(255, 255, 255, 255);
+      int tw = text_width(t->name) * 2;
+      draw_text(t->name, (VIRTW - tw) / 2, 60, 2);
+    }
+  }
+
   if (dblend) {
     int since = lastmillis - lastdamage;
     float alpha = 0.0f;

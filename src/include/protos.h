@@ -82,6 +82,13 @@ extern void writeclientinfo(FILE *f);
 
 // clientgame
 extern int thirdperson;
+extern bool spectator;
+extern bool speclook;
+extern dynent *getspectarget();
+extern void spectate_next();
+extern void spectate_prev();
+extern void togglespectate();
+extern void togglespeclook();
 extern void mousemove(int dx, int dy);
 extern void updateworld(int millis);
 extern void startmap(char *name);

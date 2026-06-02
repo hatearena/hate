@@ -9,6 +9,7 @@ int range[] = {6, 6, 8, 28, 1, 1, 1, 1, 8, 19, 4, 18, 40, 1, 6, 15, 1, 1, 1, 1};
 
 void renderclient(dynent *d, bool team, char *mdlname, bool hellpig,
                   float scale) {
+  if (d->state == CS_SPECTATOR) return;
   int n = 3;
   float speed = 100.0f;
   float mz = d->o.z - d->eyeheight + 1.55f * scale;

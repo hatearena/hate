@@ -274,6 +274,15 @@ VARFP(gamma, 30, 100, 300, {
 });
 
 void getcamerapos(float &vx, float &vy, float &vz) {
+  if (spectator && !speclook) {
+    dynent *t = getspectarget();
+    if (t) {
+      vx = t->o.x;
+      vy = t->o.y;
+      vz = t->o.z + t->eyeheight;
+      return;
+    }
+  }
   if (thirdperson && player1->state == CS_ALIVE) {
     float dist = 10;
     float yawrad = rad(player1->yaw);
@@ -297,6 +306,17 @@ void getcamerapos(float &vx, float &vy, float &vz) {
 }
 
 void transplayer() {
+  if (spectator && !speclook) {
+    dynent *t = getspectarget();
+    if (t) {
+      glLoadIdentity();
+      glRotated(t->roll, 0.0, 0.0, 1.0);
+      glRotated(t->pitch, -1.0, 0.0, 0.0);
+      glRotated(t->yaw, 0.0, 1.0, 0.0);
+      glTranslated(-t->o.x, -t->o.z - t->eyeheight, -t->o.y);
+      return;
+    }
+  }
   glLoadIdentity();
 
   glRotated(player1->roll, 0.0, 0.0, 1.0);
@@ -836,7 +856,7 @@ void drawhudgun(float fovy, float aspect, int farplane) {
 void gl_drawframe(int w, int h, float curfps) {
   float hf = hdr.waterlevel - 0.3f;
   float afov = (float)fov;
-  if (player1->gunselect != GUN_CSAW) {
+  if (!spectator && player1->gunselect != GUN_CSAW) {
     int elapsed = lastmillis - player1->adstime;
     if (elapsed < 200) {
       float t = (float)elapsed / 200.0f;
@@ -915,7 +935,7 @@ void gl_drawframe(int w, int h, float curfps) {
   xtraverts = 0;
 
   renderclients();
-  if (thirdperson)
+  if (thirdperson && !spectator)
     renderclient(player1, isteam(player1->team, player1->team),
                  "monster/player", false, 1.25f);
   monsterrender();
@@ -928,7 +948,7 @@ void gl_drawframe(int w, int h, float curfps) {
 
   glDisable(GL_CULL_FACE);
 
-  if (!thirdperson && !editmode && !intermission)
+  if (!thirdperson && !editmode && !intermission && !spectator)
     drawhudgun(fovy, aspect, farplane);
 
   overbright(1);

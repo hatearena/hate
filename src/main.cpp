@@ -294,6 +294,9 @@ int main(int argc, char **argv) {
     writecfg();
   }
 
+  execute("bind F3 togglespectate");
+  execute("bind J togglespeclook");
+
   log("localconnect");
   localconnect();
   changemap("flux");
@@ -468,6 +471,11 @@ int main(int argc, char **argv) {
             else if (event.wheel.y < 0)
               execute("editheight $flrceil -1");
           };
+        } else if (spectator) {
+          if (event.wheel.y > 0)
+            spectate_prev();
+          else if (event.wheel.y < 0)
+            spectate_next();
         } else {
           if (event.wheel.y > 0)
             prevweapon();

@@ -17,6 +17,74 @@ VARP(sensitivityscale, 1, 1, 10000);
 VARP(invmouse, 0, 0, 1);
 VARP(thirdperson, 0, 0, 1);
 
+bool spectator = false;
+int spectarget = 0;
+bool speclook = false;
+
+dynent *getspectarget() {
+    int idx = 0;
+    loopv(players) if (players[i] && players[i]->state == CS_ALIVE) {
+        if (idx == spectarget) return players[i];
+        idx++;
+    }
+    dvector &bv = getbots();
+    loopv(bv) if (bv[i]->state == CS_ALIVE) {
+        if (idx == spectarget) return bv[i];
+        idx++;
+    }
+    return NULL;
+}
+
+static int countspectargets() {
+    int total = 0;
+    loopv(players) if (players[i] && players[i]->state == CS_ALIVE) total++;
+    loopv(getbots()) if (getbots()[i]->state == CS_ALIVE) total++;
+    return total;
+}
+
+void spectate_next() {
+    int total = countspectargets();
+    if (total <= 0) { spectarget = 0; return; }
+    spectarget = (spectarget + 1) % total;
+}
+
+void spectate_prev() {
+    int total = countspectargets();
+    if (total <= 0) { spectarget = 0; return; }
+    spectarget = (spectarget - 1 + total) % total;
+}
+
+void togglespeclook() {
+    if (!spectator) return;
+    speclook = !speclook;
+    noclip = speclook ? 1 : 0;
+    if (speclook) {
+        dynent *t = getspectarget();
+        if (t) {
+            player1->o = t->o;
+            player1->yaw = t->yaw;
+            player1->pitch = t->pitch;
+        }
+    }
+}
+
+void togglespectate() {
+    spectator = !spectator;
+    if (spectator) {
+        player1->state = CS_SPECTATOR;
+        player1->move = player1->strafe = 0;
+        player1->attacking = false;
+        noclip = 0;
+        speclook = false;
+        spectarget = 0;
+        if (!getspectarget()) { spectarget = 0; }
+    } else {
+        speclook = false;
+        noclip = 0;
+        spawnplayer(player1);
+    }
+}
+
 int lastmillis = 0;
 int curtime = 10;
 string clientmap;
@@ -244,7 +312,7 @@ void updateworld(int millis) // main game update loop
           worldpos.y = from.y - 1000 * cosf(yawrad) * cp;
           worldpos.z = from.z + 1000 * sinf(pitchrad);
         }
-        shoot(player1, worldpos); // only shoot when connected to server
+        if (!spectator) shoot(player1, worldpos); // only shoot when connected to server
       }
       gets2c(); // do this first, so we have most accurate information when our
                 // player moves
@@ -253,7 +321,14 @@ void updateworld(int millis) // main game update loop
     if (!demoplayback) {
       monsterthink();
       botthink();
-      if (player1->state == CS_DEAD) {
+      if (spectator) {
+        if (speclook) {
+          moveplayer(player1, 20, true);
+        } else {
+          player1->move = player1->strafe = 0;
+          if (!getspectarget()) spectate_next();
+        }
+      } else if (player1->state == CS_DEAD) {
         if (lastmillis - player1->lastaction < 2000) {
           player1->move = player1->strafe = 0;
           moveplayer(player1, 10, false);
@@ -330,13 +405,15 @@ dir(left, strafe, 1, k_left, k_right);
 dir(right, strafe, -1, k_right, k_left);
 
 void attack(bool on) {
-  if (intermission)
+  if (spectator || intermission)
     return;
   else if (player1->attacking = on)
     respawn();
 };
 
 void jumpn(bool on) {
+  if (spectator || intermission)
+    return;
   if (!intermission && (player1->jumpnext = on))
     respawn();
 };
@@ -391,7 +468,9 @@ void fixplayer1range() {
 };
 
 void mousemove(int dx, int dy) {
-  if (player1->state == CS_DEAD || intermission)
+  if (!spectator && (player1->state == CS_DEAD || intermission))
+    return;
+  if (spectator && !speclook)
     return;
   const float SENSF = 33.0f; // try match quake sens
   player1->yaw += (dx / SENSF) * (sensitivity / (float)sensitivityscale);
@@ -517,5 +596,10 @@ void startmap(char *name) // called just after a map load
 
 void toggletp() { thirdperson = !thirdperson; };
 COMMAND(toggletp, ARG_NONE);
+
+COMMAND(togglespectate, ARG_NONE);
+COMMAND(togglespeclook, ARG_NONE);
+COMMAND(spectate_next, ARG_NONE);
+COMMAND(spectate_prev, ARG_NONE);
 
 COMMANDN(map, changemap, ARG_1STR);
