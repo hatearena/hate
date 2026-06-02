@@ -460,7 +460,7 @@ void serverslice(
     case ENET_EVENT_TYPE_DISCONNECT:
       if ((intptr_t)event.peer->data < 0)
         break;
-      printf("disconnected client (%s)\n",
+      printf("Disconnected client (%s)\n",
              clients[(intptr_t)event.peer->data].hostname);
       clients[(intptr_t)event.peer->data].type = ST_EMPTY;
       send2(true, -1, SV_CDIS, (intptr_t)event.peer->data);
@@ -469,7 +469,7 @@ void serverslice(
     };
 
     if (numplayers > maxclients) {
-      disconnect_client(lastconnect, "maxclients reached");
+      disconnect_client(lastconnect, "Max no. of clients reached");
     };
   };
 #ifndef WIN32
@@ -497,10 +497,13 @@ void initserver(bool dedicated, int uprate, char *sdesc, char *ip, char *master,
                 char *passwd, int maxcl) {
   serverpassword = passwd;
   maxclients = maxcl;
-  servermsinit(master ? master : "wouter.fov120.com/cube/masterserver/", sdesc,
+
+  // Originally: wouter.fov120.com, replaced with stub temporarily for v0.0.1
+  // release
+  servermsinit(master ? master : "stub.com/cube/masterserver/", sdesc,
                dedicated);
 
-  if (isdedicated = dedicated) {
+  if ((isdedicated = dedicated)) {
     ENetAddress address = {ENET_HOST_ANY, CUBE_SERVER_PORT};
     if (*ip && enet_address_set_host(&address, ip) < 0)
       printf("WARNING: server ip not resolved");
@@ -512,13 +515,12 @@ void initserver(bool dedicated, int uprate, char *sdesc, char *ip, char *master,
 
   resetserverifempty();
 
-  if (isdedicated) // do not return, this becomes main loop
-  {
+  if (isdedicated) {
 #ifdef WIN32
     SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS);
 #endif
     printf(
-        "dedicated server started, waiting for clients...\nCtrl-C to exit\n\n");
+        "Dedicated server started, waiting for clients...\nCtrl-C to exit\n\n");
     atexit(cleanupserver);
     atexit(enet_deinitialize);
     for (;;)
