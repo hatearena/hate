@@ -150,8 +150,8 @@ static void normalise(dynent *m, float angle) {
 
 static void botaction(dynent *m) {
   if (botoutside(m)) {
-    m->state = CS_DEAD;
-    m->lastaction = lastmillis;
+    if (!findbotspawn(m))
+      entinmap(m);
     return;
   }
   dynent *enemy = NULL;
