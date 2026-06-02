@@ -217,6 +217,7 @@ int main(int argc, char **argv) {
   }
   {
     FILE *cfg = fopen("config.cfg", "r");
+    if (!cfg) cfg = fopen("data/default.cfg", "r");
     if (cfg) {
       char line[256];
       while (fgets(line, sizeof(line), cfg)) {
