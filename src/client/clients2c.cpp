@@ -218,7 +218,7 @@ void localservertoclient(uchar *buf,
         } else {
           frags = 1;
           conoutf("You fragged %s", d->name);
-          playsoundmax(S_KILL);
+          playsound(S_KILL);
         };
         addmsg(1, 2, SV_FRAGS, player1->frags += frags);
       } else {

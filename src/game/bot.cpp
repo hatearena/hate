@@ -356,7 +356,7 @@ void botpain(dynent *m, int damage, dynent *d) {
     if (d == player1) {
       player1->frags++;
       addmsg(1, 2, SV_FRAGS, player1->frags);
-      playsoundmax(S_KILL);
+      playsound(S_KILL);
     } else if (d->monsterstate && d->mtype == -1) {
       d->frags++;
     }
@@ -375,7 +375,8 @@ extern bool isdedicated;
 
 static bool findbotspawn(dynent *b) {
   int e = findentity(PLAYERSTART, botspawncycle + 1);
-  if (e < 0) e = findentity(PLAYERSTART, 0);
+  if (e < 0)
+    e = findentity(PLAYERSTART, 0);
   if (e >= 0) {
     botspawncycle = e;
     b->o.x = ents[e].x;
@@ -401,9 +402,11 @@ static bool botoutside(dynent *b) {
   const int y2 = fast_f2nat(fy2);
   for (int x = x1; x <= x2; x++)
     for (int y = y1; y <= y2; y++) {
-      if (OUTBORD(x, y)) return true;
+      if (OUTBORD(x, y))
+        return true;
       sqr *s = S(x, y);
-      if (SOLID(s)) return true;
+      if (SOLID(s))
+        return true;
       if (b->o.z < s->floor - (s->type == FHF ? s->vdelta / 4 : 0) ||
           b->o.z > s->ceil + (s->type == CHF ? s->vdelta / 4 : 0))
         return true;
@@ -414,7 +417,8 @@ static bool botoutside(dynent *b) {
 static void spawnonebot() {
   dynent *b = newdynent();
   spawnplayer(b);
-  if (!findbotspawn(b)) return;
+  if (!findbotspawn(b))
+    return;
   b->monsterstate = M_HOME;
   b->mtype = -1;
   b->enemy = player1;
