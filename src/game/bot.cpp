@@ -192,6 +192,7 @@ static void botaction(dynent *m) {
   if (!enemy) {
     m->move = 0;
     m->strafe = 0;
+    moveplayer(m, 20, true);
     return;
   }
   m->enemy = enemy;
