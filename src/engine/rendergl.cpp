@@ -935,7 +935,7 @@ void gl_drawframe(int w, int h, float curfps) {
   xtraverts = 0;
 
   renderclients();
-  if (thirdperson && !spectator)
+  if (thirdperson && !spectator && !screenshotmode)
     renderclient(player1, isteam(player1->team, player1->team),
                  "monster/player", false, 1.25f);
   monsterrender();

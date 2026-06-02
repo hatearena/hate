@@ -157,7 +157,7 @@ static void botaction(dynent *m) {
   dynent *enemy = NULL;
   float bestdist = 1e10f;
 
-  if (player1->state == CS_ALIVE) {
+  if (player1->state == CS_ALIVE && !screenshotmode) {
     vdist(dist, v, m->o, player1->o);
     if (dist < bestdist) {
       bestdist = dist;

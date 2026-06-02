@@ -320,7 +320,7 @@ void updateworld(int millis) // main game update loop
           worldpos.y = from.y - 1000 * cosf(yawrad) * cp;
           worldpos.z = from.z + 1000 * sinf(pitchrad);
         }
-        if (!spectator) shoot(player1, worldpos); // only shoot when connected to server
+        if (!spectator && !screenshotmode) shoot(player1, worldpos); // only shoot when connected to server
       }
       gets2c(); // do this first, so we have most accurate information when our
                 // player moves
@@ -492,7 +492,7 @@ void mousemove(int dx, int dy) {
 };
 
 void selfdamage(int damage, int actor, dynent *act) {
-  if (player1->state != CS_ALIVE || intermission)
+  if (player1->state != CS_ALIVE || intermission || screenshotmode)
     return;
   damageblend(damage);
   demoblend(damage);
@@ -606,7 +606,13 @@ void startmap(char *name) // called just after a map load
   conoutf("Gamemode: %s", modestr(gamemode));
 };
 
-void toggletp() { thirdperson = !thirdperson; };
+void toggletp() {
+  if (screenshotmode) {
+    conoutf("Cannot toggle third person in screenshot mode.");
+    return;
+  }
+  thirdperson = !thirdperson;
+};
 COMMAND(toggletp, ARG_NONE);
 
 COMMAND(togglespectate, ARG_NONE);
