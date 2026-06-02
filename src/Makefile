@@ -1,38 +1,101 @@
-PLATFORM ?= $(shell uname -s | tr '[:upper:]' '[:lower:]' | sed 's/darwin/macos/')
+UNAME_S := $(shell uname -s 2>/dev/null)
+
+ifeq ($(OS),Windows_NT)
+    PLATFORM := windows
+else ifeq ($(UNAME_S),Darwin)
+    PLATFORM := macos
+else
+    PLATFORM := linux
+endif
+
+ifeq ($(PLATFORM),windows)
+
+CXX := g++
+
+MSYS2_PREFIX := $(shell cygpath -u "$$MINGW_PREFIX" 2>/dev/null)
+
+ifeq ($(MSYS2_PREFIX),)
+    $(error MSYS2 MinGW64 environment not detected. Run this inside mingw64.exe)
+endif
+
+MSYS2_PREFIX_WIN := $(shell cygpath -m "$$MINGW_PREFIX")
+
+CLIENT_BIN = hate_client.exe
+SERVER_BIN = hate_server.exe
+
+CXXFLAGS_EXTRA = \
+    -I$(MSYS2_PREFIX_WIN)/include \
+    -I$(MSYS2_PREFIX_WIN)/include/SDL2
+
+CLIENT_LIBS = \
+    -L$(MSYS2_PREFIX_WIN)/lib \
+    -lmingw32 \
+    -lSDL2main \
+    -lSDL2 \
+    -lSDL2_image \
+    -lSDL2_mixer \
+    -lSDL2_ttf \
+    -lenet \
+    -lz \
+    -lopengl32 \
+    -lglu32 \
+    -lws2_32 \
+    -lwinmm
+
+SERVER_LIBS = \
+    -L$(MSYS2_PREFIX_WIN)/lib \
+    -lenet \
+    -lws2_32
+
+endif
 
 ifeq ($(PLATFORM),macos)
+
     CXX = clang++
 
     BREW_PREFIX := $(shell brew --prefix)
 
+    CLIENT_BIN = hate_client
+    SERVER_BIN = hate_server
+
     CXXFLAGS_EXTRA = \
         -I$(BREW_PREFIX)/include
 
-    LDFLAGS_EXTRA = \
-        -L$(BREW_PREFIX)/lib
+    SDL_CFLAGS := $(shell sdl2-config --cflags)
+    SDL_LIBS := $(shell sdl2-config --libs)
 
     CLIENT_LIBS = \
-        $(LDFLAGS_EXTRA) \
+        -L$(BREW_PREFIX)/lib \
         -lenet \
         -lz \
-        `sdl2-config --libs` \
-        -lSDL2_image -lSDL2_mixer -lSDL2_ttf \
+        $(SDL_LIBS) \
+        -lSDL2_image \
+        -lSDL2_mixer \
+        -lSDL2_ttf \
         -framework OpenGL \
         -framework Cocoa \
         -framework IOKit \
         -framework CoreVideo
 
     SERVER_LIBS = \
-        $(LDFLAGS_EXTRA) \
+        -L$(BREW_PREFIX)/lib \
         -lenet
+
 else
+
     CXX = g++
+
+    CLIENT_BIN = hate_client
+    SERVER_BIN = hate_server
+
+    SDL_CFLAGS := $(shell sdl2-config --cflags)
+    SDL_LIBS := $(shell sdl2-config --libs)
 
     CXXFLAGS_EXTRA =
 
     CLIENT_LIBS = \
         -lenet \
-        `sdl2-config --libs` \
+        $(SDL_LIBS) \
         -lSDL2_image \
         -lSDL2_mixer \
         -lSDL2_ttf \
@@ -43,6 +106,7 @@ else
 
     SERVER_LIBS = \
         -lenet
+
 endif
 
 CXXOPTFLAGS = \
@@ -51,18 +115,15 @@ CXXOPTFLAGS = \
     -fomit-frame-pointer \
     -fpermissive \
     -w \
-    -Wno-Write-strings \
-    -Wno-Unused-variable \
+    -Wno-write-strings \
+    -Wno-unused-variable \
     -g
-
-%.o: %.cpp
-	$(CXX) $(CXXFLAGS) -Iinclude -c $< -o $@
 
 CXXFLAGS = \
     $(CXXOPTFLAGS) \
     $(CXXFLAGS_EXTRA) \
-    -Iinclude \
-    `sdl2-config --cflags`
+    $(SDL_CFLAGS) \
+    -Iinclude
 
 CLIENT_OBJS = \
     client/client.o \
@@ -100,7 +161,6 @@ CLIENT_OBJS = \
     engine/worldocull.o \
     engine/worldrender.o
 
-
 SERVER_OBJS = \
     standalone.o \
     server/serverms.o \
@@ -110,20 +170,34 @@ SERVER_OBJS = \
 default: all
 
 all: client server
-	cp hate_client ../content && \
-	cp hate_server ../content && \
-	cd ../content && \
-	./hate_client
+ifeq ($(PLATFORM),windows)
+	copy /Y $(CLIENT_BIN) ..\content
+	copy /Y $(SERVER_BIN) ..\content
+	cd ..\content && $(CLIENT_BIN)
+else
+	cp $(CLIENT_BIN) ../content
+	cp $(SERVER_BIN) ../content
+	cd ../content && ./$(CLIENT_BIN)
+endif
 
-clean:
-	-rm -f $(SERVER_OBJS) $(CLIENT_OBJS) hate_server hate_client
+%.o: %.cpp
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 client: $(CLIENT_OBJS)
-	$(CXX) $(CXXFLAGS) -o hate_client $(CLIENT_OBJS) $(CLIENT_LIBS)
+	$(CXX) $(CXXFLAGS) -o $(CLIENT_BIN) $(CLIENT_OBJS) $(CLIENT_LIBS)
 
 server: $(SERVER_OBJS)
-	$(CXX) $(CXXFLAGS) -o hate_server $(SERVER_OBJS) $(SERVER_LIBS)
+	$(CXX) $(CXXFLAGS) -o $(SERVER_BIN) $(SERVER_OBJS) $(SERVER_LIBS)
 
 standalone.o:
-	$(CXX) $(CXXFLAGS) -DSTANDALONE -Iinclude \
-		-c server/serverutil.cpp -o standalone.o
+	$(CXX) $(CXXFLAGS) \
+		-DSTANDALONE \
+		-Iinclude \
+		-c server/serverutil.cpp \
+		-o standalone.o
+
+clean:
+	-rm -f $(SERVER_OBJS)
+	-rm -f $(CLIENT_OBJS)
+	-rm -f $(CLIENT_BIN)
+	-rm -f $(SERVER_BIN)
