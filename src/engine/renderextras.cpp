@@ -396,7 +396,7 @@ void damageblend(int n) {
   lastdamage = lastmillis;
 };
 
-VAR(show_stats, 0, 1, 1);
+VARP(show_stats, 0, 1, 1);
 VARP(crosshairfx, 0, 1, 1);
 
 void roundedbox(int x1, int y1, int x2, int y2, int r) {
