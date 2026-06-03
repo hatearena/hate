@@ -88,25 +88,31 @@ void sortmenu(int start, int num) {
 void refreshservers();
 
 static void drawscoretable(int x0, int &y0, int tablew, int nrows, int ncols,
-    int *colw, int *colx, string *hdr, string (*rows)[16], int rowstart,
-    int rowstep, int border, int colpad, int gap, bool is_blue) {
-  if (nrows <= 0) return;
+                           int *colw, int *colx, string *hdr,
+                           string (*rows)[16], int rowstart, int rowstep,
+                           int border, int colpad, int gap, bool is_blue) {
+  if (nrows <= 0)
+    return;
   int total = 0;
   loopi(nrows) total += atoi(rows[rowstart + i][2]);
   int y = y0;
   int tableh = (nrows + 2) * rowstep + border * 2;
   glDisable(GL_TEXTURE_2D);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  if (is_blue) glColor4ub(15, 15, 50, 217);
-  else glColor4ub(50, 15, 15, 217);
+  if (is_blue)
+    glColor4ub(15, 15, 50, 217);
+  else
+    glColor4ub(50, 15, 15, 217);
   roundedbox(x0, y, x0 + tablew, y + tableh, FONTH / 2);
   glEnable(GL_TEXTURE_2D);
   int headery = y + border;
   int sep_y = headery + rowstep;
   glDisable(GL_TEXTURE_2D);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  if (is_blue) glColor3ub(45, 45, 85);
-  else glColor3ub(85, 50, 50);
+  if (is_blue)
+    glColor3ub(45, 45, 85);
+  else
+    glColor3ub(85, 50, 50);
   glBegin(GL_QUADS);
   glVertex2i(x0 + border, headery);
   glVertex2i(x0 + tablew - border, headery);
@@ -116,8 +122,10 @@ static void drawscoretable(int x0, int &y0, int tablew, int nrows, int ncols,
   glEnable(GL_TEXTURE_2D);
   loopi(ncols) draw_text(hdr[i], colx[i], headery, 2);
   glDisable(GL_TEXTURE_2D);
-  if (is_blue) glColor3ub(90, 90, 140);
-  else glColor3ub(140, 90, 90);
+  if (is_blue)
+    glColor3ub(90, 90, 140);
+  else
+    glColor3ub(140, 90, 90);
   glBegin(GL_LINES);
   glVertex2i(x0 + border, sep_y);
   glVertex2i(x0 + tablew - border, sep_y);
@@ -128,8 +136,10 @@ static void drawscoretable(int x0, int &y0, int tablew, int nrows, int ncols,
     if (i % 2 == 1) {
       glDisable(GL_TEXTURE_2D);
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-      if (is_blue) glColor4ub(30, 30, 60, 100);
-      else glColor4ub(60, 35, 35, 100);
+      if (is_blue)
+        glColor4ub(30, 30, 60, 100);
+      else
+        glColor4ub(60, 35, 35, 100);
       glBegin(GL_QUADS);
       glVertex2i(x0 + border, datay);
       glVertex2i(x0 + tablew - border, datay);
@@ -140,8 +150,10 @@ static void drawscoretable(int x0, int &y0, int tablew, int nrows, int ncols,
     };
     loopj(ncols) draw_text(rows[rowstart + i][j], colx[j], datay, 2);
     glDisable(GL_TEXTURE_2D);
-    if (is_blue) glColor4ub(55, 55, 85, 120);
-    else glColor4ub(85, 55, 55, 120);
+    if (is_blue)
+      glColor4ub(55, 55, 85, 120);
+    else
+      glColor4ub(85, 55, 55, 120);
     glBegin(GL_LINES);
     glVertex2i(x0 + border, datay + rowstep);
     glVertex2i(x0 + tablew - border, datay + rowstep);
@@ -150,8 +162,10 @@ static void drawscoretable(int x0, int &y0, int tablew, int nrows, int ncols,
     datay += rowstep;
   };
   glDisable(GL_TEXTURE_2D);
-  if (is_blue) glColor4ub(65, 65, 100, 150);
-  else glColor4ub(100, 65, 65, 150);
+  if (is_blue)
+    glColor4ub(65, 65, 100, 150);
+  else
+    glColor4ub(100, 65, 65, 150);
   glBegin(GL_LINES);
   int cx = x0 + border;
   loopi(ncols - 1) {
@@ -161,8 +175,10 @@ static void drawscoretable(int x0, int &y0, int tablew, int nrows, int ncols,
     cx += gap / 2;
   };
   glEnd();
-  if (is_blue) glColor3ub(75, 75, 120);
-  else glColor3ub(120, 75, 75);
+  if (is_blue)
+    glColor3ub(75, 75, 120);
+  else
+    glColor3ub(120, 75, 75);
   glBegin(GL_LINE_LOOP);
   glVertex2i(x0 + border, y + border);
   glVertex2i(x0 + tablew - border, y + border);
@@ -173,8 +189,10 @@ static void drawscoretable(int x0, int &y0, int tablew, int nrows, int ncols,
   if (nrows % 2 == 1) {
     glDisable(GL_TEXTURE_2D);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    if (is_blue) glColor4ub(30, 30, 60, 100);
-    else glColor4ub(60, 35, 35, 100);
+    if (is_blue)
+      glColor4ub(30, 30, 60, 100);
+    else
+      glColor4ub(60, 35, 35, 100);
     glBegin(GL_QUADS);
     glVertex2i(x0 + border, datay);
     glVertex2i(x0 + tablew - border, datay);
@@ -185,10 +203,12 @@ static void drawscoretable(int x0, int &y0, int tablew, int nrows, int ncols,
   };
   draw_text("Total", colx[0], datay, 2);
   sprintf_sd(totalstr)("%d", total);
-  draw_text(totalstr, colx[2], datay, 2);
+  draw_text(totalstr, colx[2] + 30, datay, 2);
   glDisable(GL_TEXTURE_2D);
-  if (is_blue) glColor4ub(55, 55, 85, 120);
-  else glColor4ub(85, 55, 55, 120);
+  if (is_blue)
+    glColor4ub(55, 55, 85, 120);
+  else
+    glColor4ub(85, 55, 55, 120);
   glBegin(GL_LINES);
   glVertex2i(x0 + border, datay + rowstep);
   glVertex2i(x0 + tablew - border, datay + rowstep);
@@ -295,13 +315,13 @@ bool rendermenu() {
       int y = (VIRTH - totalh) / 2;
       overlay(160);
       if (nblue > 0) {
-        drawscoretable(x0, y, tablew, nblue, ncols, colw, colx, hdr,
-                       rows_text, 0, rowstep, border, colpad, gap, true);
+        drawscoretable(x0, y, tablew, nblue, ncols, colw, colx, hdr, rows_text,
+                       0, rowstep, border, colpad, gap, true);
         y += gap;
       };
       if (nred > 0) {
-        drawscoretable(x0, y, tablew, nred, ncols, colw, colx, hdr,
-                       rows_text, split, rowstep, border, colpad, gap, false);
+        drawscoretable(x0, y, tablew, nred, ncols, colw, colx, hdr, rows_text,
+                       split, rowstep, border, colpad, gap, false);
       };
       return true;
     };
@@ -309,8 +329,8 @@ bool rendermenu() {
     int tableh = (nrows + 2) * rowstep + border * 2;
     int y0 = (VIRTH - tableh) / 2;
     overlay(160);
-    drawscoretable(x0, y0, tablew, nrows, ncols, colw, colx, hdr,
-                   rows_text, 0, rowstep, border, colpad, gap, false);
+    drawscoretable(x0, y0, tablew, nrows, ncols, colw, colx, hdr, rows_text, 0,
+                   rowstep, border, colpad, gap, false);
     return true;
   };
 
