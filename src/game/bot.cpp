@@ -209,7 +209,7 @@ static void botaction(dynent *m) {
 
   vdist(disttoenemy, vectoenemy, m->o, m->enemy->o);
 
-  if (m_noitemsrail) {
+  if (m_noitems && m_noitemsrail) {
     m->gunselect = GUN_RIFLE;
   } else if (disttoenemy < 8.0f) {
     if (m->gunselect != GUN_CSAW)
@@ -247,7 +247,7 @@ static void botaction(dynent *m) {
         180;
 
     float aimspread = (4 - botdifficulty) * 6.0f;
-    if (m_noitemsrail) aimspread += 10.0f;
+    if (m_noitems && m_noitemsrail) aimspread += 10.0f;
     if (aimspread > 0) {
       enemyyaw += (rnd(101) - 50) / 100.0f * aimspread;
     }
@@ -261,7 +261,7 @@ static void botaction(dynent *m) {
 
     normalise(m, m->targetyaw);
     float turnrate = curtime * (0.15f + botdifficulty * 0.05f);
-    if (m_noitemsrail) turnrate *= 0.4f;
+    if (m_noitems && m_noitemsrail) turnrate *= 0.4f;
     float yawdiff = m->targetyaw - m->yaw;
     if (fabs(yawdiff) < turnrate)
       m->yaw = m->targetyaw;
