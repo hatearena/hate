@@ -65,9 +65,14 @@ extern int democlientnum;
 
 void renderclients() {
   dynent *d;
-  loopv(players) if ((d = players[i]) && (!demoplayback || i != democlientnum))
-      renderclient(d, isteam(player1->team, d->team), "monster/player", false,
-                   1.25f);
+  loopv(players) if ((d = players[i]) && (!demoplayback || i != democlientnum)) {
+      const char *mdl = "monster/player";
+      if (m_teammode) {
+          if (d->team[0] && !strcmp(d->team, "BLUE")) mdl = "monster/blueplayer";
+          else mdl = "monster/redplayer";
+      }
+      renderclient(d, isteam(player1->team, d->team), mdl, false, 1.25f);
+  }
 };
 
 bool scoreson = false;
@@ -90,11 +95,13 @@ void renderscore(dynent *d) {
   sprintf_sd(name)("%s [Dead]", d->name);
   float kd = d->deaths > 0 ? (float)d->frags / d->deaths : (float)d->frags;
   sprintf_sd(kdbuf)("%.2f", kd);
-  sprintf_s(scorelines.add().s)("%s\t%s\t%s\t%s\t%s\t%s\t%s",
+  sprintf_s(scorelines.add().s)("%s\t%s\t%s\t%s\t%s\t%s",
                                 d->state == CS_DEAD ? name : d->name, kdbuf,
-                                fbuf, dbuf, sbuf, pbuf, d->team);
+                                fbuf, dbuf, sbuf, pbuf);
   menumanual(0, scorelines.length() - 1, scorelines.last().s);
 };
+
+int teamscore_split = 0;
 
 const int maxteams = 4;
 char *teamname[maxteams];
@@ -119,12 +126,33 @@ void renderscores() {
   if (!scoreson)
     return;
   scorelines.setsize(0);
-  if (!demoplayback)
-    renderscore(player1);
-  loopv(players) if (players[i]) renderscore(players[i]);
-  dvector &bs = getbots();
-  loopv(bs) if (bs[i]) renderscore(bs[i]);
-  sortmenu(0, scorelines.length());
+  if (m_teammode) {
+    vector<dynent *> blue, red;
+#define addtoteam(d) do { \
+      dynent *e = (d); \
+      if (e && e->state != CS_SPECTATOR) { \
+        if (e->team[0] && !strcmp(e->team, "BLUE")) blue.add(e); \
+        else red.add(e); \
+      } \
+    } while(0)
+    if (!demoplayback) addtoteam(player1);
+    loopv(players) addtoteam(players[i]);
+    dvector &bs = getbots();
+    loopv(bs) addtoteam(bs[i]);
+#undef addtoteam
+    loopv(blue) renderscore(blue[i]);
+    if (blue.length()) sortmenu(0, scorelines.length());
+    loopv(red) renderscore(red[i]);
+    if (red.length()) sortmenu(scorelines.length() - red.length(), red.length());
+    teamscore_split = blue.length();
+  } else {
+    teamscore_split = 0;
+    if (!demoplayback) renderscore(player1);
+    loopv(players) if (players[i]) renderscore(players[i]);
+    dvector &bs = getbots();
+    loopv(bs) if (bs[i]) renderscore(bs[i]);
+    sortmenu(0, scorelines.length());
+  };
   if (m_teammode) {
     teamsused = 0;
     loopv(players) addteamscore(players[i]);

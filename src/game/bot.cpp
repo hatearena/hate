@@ -161,10 +161,13 @@ static void botaction(dynent *m) {
   float bestdist = 1e10f;
 
   if (player1->state == CS_ALIVE && !screenshotmode) {
-    vdist(dist, v, m->o, player1->o);
-    if (dist < bestdist) {
-      bestdist = dist;
-      enemy = player1;
+    if (!m_teammode || !player1->team[0] || !m->team[0] ||
+        strcmp(m->team, player1->team)) {
+      vdist(dist, v, m->o, player1->o);
+      if (dist < bestdist) {
+        bestdist = dist;
+        enemy = player1;
+      }
     }
   }
 
@@ -172,6 +175,8 @@ static void botaction(dynent *m) {
     loopv(players) {
       dynent *o = players[i];
       if (!o || o->state != CS_ALIVE)
+        continue;
+      if (m_teammode && o->team[0] && m->team[0] && !strcmp(m->team, o->team))
         continue;
       vdist(dist, v, m->o, o->o);
       if (dist < bestdist) {
@@ -183,6 +188,8 @@ static void botaction(dynent *m) {
     loopv(bots) {
       dynent *o = bots[i];
       if (o == m || o->state != CS_ALIVE)
+        continue;
+      if (m_teammode && o->team[0] && m->team[0] && !strcmp(m->team, o->team))
         continue;
       vdist(dist, v, m->o, o->o);
       if (dist < bestdist) {
@@ -333,7 +340,15 @@ void botrender() {
       continue;
     float saved = bots[i]->maxspeed;
     bots[i]->maxspeed = 20.0f;
-    renderclient(bots[i], false, "monster/player", false, 1.25f);
+    const char *mdl = "monster/player";
+    if (m_teammode) {
+      if (bots[i]->team[0] && !strcmp(bots[i]->team, "BLUE"))
+        mdl = "monster/blueplayer";
+      else
+        mdl = "monster/redplayer";
+    }
+    renderclient(bots[i], isteam(player1->team, bots[i]->team), mdl, false,
+                 1.25f);
     bots[i]->maxspeed = saved;
   }
 }
@@ -412,9 +427,42 @@ static bool botoutside(dynent *b) {
   return false;
 }
 
+static void autoteambot(dynent *d) {
+  if (!m_teammode)
+    return;
+  int red = 0, blue = 0;
+  if (player1 && player1 != d) {
+    if (!strcmp(player1->team, "RED"))
+      red++;
+    else if (!strcmp(player1->team, "BLUE"))
+      blue++;
+  }
+  loopv(players) {
+    dynent *o = players[i];
+    if (o && o != d) {
+      if (!strcmp(o->team, "RED"))
+        red++;
+      else if (!strcmp(o->team, "BLUE"))
+        blue++;
+    }
+  }
+  dvector &bv = getbots();
+  loopv(bv) {
+    dynent *b = bv[i];
+    if (b && b != d) {
+      if (!strcmp(b->team, "RED"))
+        red++;
+      else if (!strcmp(b->team, "BLUE"))
+        blue++;
+    }
+  }
+  strn0cpy(d->team, red <= blue ? "RED" : "BLUE", 5);
+}
+
 static void spawnonebot() {
   dynent *b = newdynent();
   spawnplayer(b);
+  autoteambot(b);
   if (!findbotspawn(b))
     return;
   b->monsterstate = M_HOME;

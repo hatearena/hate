@@ -3,6 +3,7 @@
 extern int botdifficulty, botamount;
 extern char *entnames[];
 extern int timelimit;
+extern int teamscore_split;
 static int timelimitreg =
     variable("timelimit", 0, 10, 60, &timelimit, NULL, true);
 
@@ -86,6 +87,84 @@ void sortmenu(int start, int num) {
 
 void refreshservers();
 
+static void drawscoretable(int x0, int &y0, int tablew, int nrows, int ncols,
+    int *colw, int *colx, string *hdr, string (*rows)[16], int rowstart,
+    int rowstep, int border, int colpad, int gap) {
+  if (nrows <= 0) return;
+  int y = y0;
+  int tableh = (nrows + 1) * rowstep + border * 2;
+  overlay(160);
+  glDisable(GL_TEXTURE_2D);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  glColor4ub(50, 15, 15, 217);
+  roundedbox(x0, y, x0 + tablew, y + tableh, FONTH / 2);
+  glEnable(GL_TEXTURE_2D);
+  int headery = y + border;
+  int sep_y = headery + rowstep;
+  glDisable(GL_TEXTURE_2D);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  glColor3ub(85, 50, 50);
+  glBegin(GL_QUADS);
+  glVertex2i(x0 + border, headery);
+  glVertex2i(x0 + tablew - border, headery);
+  glVertex2i(x0 + tablew - border, sep_y);
+  glVertex2i(x0 + border, sep_y);
+  glEnd();
+  glEnable(GL_TEXTURE_2D);
+  loopi(ncols) draw_text(hdr[i], colx[i], headery, 2);
+  glDisable(GL_TEXTURE_2D);
+  glColor3ub(140, 90, 90);
+  glBegin(GL_LINES);
+  glVertex2i(x0 + border, sep_y);
+  glVertex2i(x0 + tablew - border, sep_y);
+  glEnd();
+  glEnable(GL_TEXTURE_2D);
+  int datay = sep_y + 1;
+  loopi(nrows) {
+    if (i % 2 == 1) {
+      glDisable(GL_TEXTURE_2D);
+      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+      glColor4ub(60, 35, 35, 100);
+      glBegin(GL_QUADS);
+      glVertex2i(x0 + border, datay);
+      glVertex2i(x0 + tablew - border, datay);
+      glVertex2i(x0 + tablew - border, datay + rowstep);
+      glVertex2i(x0 + border, datay + rowstep);
+      glEnd();
+      glEnable(GL_TEXTURE_2D);
+    };
+    loopj(ncols) draw_text(rows[rowstart + i][j], colx[j], datay, 2);
+    glDisable(GL_TEXTURE_2D);
+    glColor4ub(85, 55, 55, 120);
+    glBegin(GL_LINES);
+    glVertex2i(x0 + border, datay + rowstep);
+    glVertex2i(x0 + tablew - border, datay + rowstep);
+    glEnd();
+    glEnable(GL_TEXTURE_2D);
+    datay += rowstep;
+  };
+  glDisable(GL_TEXTURE_2D);
+  glColor4ub(100, 65, 65, 150);
+  glBegin(GL_LINES);
+  int cx = x0 + border;
+  loopi(ncols - 1) {
+    cx += colw[i] + 2 * colpad + gap / 2;
+    glVertex2i(cx, y + border + 1);
+    glVertex2i(cx, y + tableh - border - 1);
+    cx += gap / 2;
+  };
+  glEnd();
+  glColor3ub(120, 75, 75);
+  glBegin(GL_LINE_LOOP);
+  glVertex2i(x0 + border, y + border);
+  glVertex2i(x0 + tablew - border, y + border);
+  glVertex2i(x0 + tablew - border, y + tableh - border);
+  glVertex2i(x0 + border, y + tableh - border);
+  glEnd();
+  glEnable(GL_TEXTURE_2D);
+  y0 = y + tableh;
+}
+
 bool rendermenu() {
   if (vmenu < 0) {
     menustack.setsize(0);
@@ -165,9 +244,7 @@ bool rendermenu() {
     loopi(ncols) tablew += colw[i] + 2 * colpad;
     tablew += (ncols - 1) * gap;
 
-    int tableh = (nrows + 1) * rowstep + border * 2;
     int x0 = (VIRTW - tablew) / 2;
-    int y0 = (VIRTH - tableh) / 2;
 
     int colx[MAXCOLS];
     int cx = x0 + border;
@@ -176,85 +253,39 @@ bool rendermenu() {
       cx += colw[i] + 2 * colpad + gap;
     };
 
-    overlay(160);
-    {
-      glDisable(GL_TEXTURE_2D);
-      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-      glColor4ub(50, 15, 15, 217);
-      roundedbox(x0, y0, x0 + tablew, y0 + tableh, FONTH / 2);
-      glEnable(GL_TEXTURE_2D);
-    }
-
-    int headery = y0 + border;
-    int sep_y = headery + rowstep;
-
-    glDisable(GL_TEXTURE_2D);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glColor3ub(85, 50, 50);
-    glBegin(GL_QUADS);
-    glVertex2i(x0 + border, headery);
-    glVertex2i(x0 + tablew - border, headery);
-    glVertex2i(x0 + tablew - border, sep_y);
-    glVertex2i(x0 + border, sep_y);
-    glEnd();
-    glEnable(GL_TEXTURE_2D);
-
-    loopi(ncols) draw_text(hdr[i], colx[i], headery, 2);
-
-    glDisable(GL_TEXTURE_2D);
-    glColor3ub(140, 90, 90);
-    glBegin(GL_LINES);
-    glVertex2i(x0 + border, sep_y);
-    glVertex2i(x0 + tablew - border, sep_y);
-    glEnd();
-    glEnable(GL_TEXTURE_2D);
-
-    int datay = sep_y + 1;
-    loopi(nrows) {
-      if (i % 2 == 1) {
-        glDisable(GL_TEXTURE_2D);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        glColor4ub(60, 35, 35, 100);
-        glBegin(GL_QUADS);
-        glVertex2i(x0 + border, datay);
-        glVertex2i(x0 + tablew - border, datay);
-        glVertex2i(x0 + tablew - border, datay + rowstep);
-        glVertex2i(x0 + border, datay + rowstep);
-        glEnd();
-        glEnable(GL_TEXTURE_2D);
+    if (m_teammode) {
+      int split = min(teamscore_split, nrows);
+      int nblue = split;
+      int nred = max(nrows - split - 2, 0);
+      int blueh = nblue > 0 ? (nblue + 1) * rowstep + border * 2 : 0;
+      int redh = nred > 0 ? (nred + 1) * rowstep + border * 2 : 0;
+      int scoreh = nrows >= 2 ? rowstep + border : 0;
+      int totalh = max(blueh + redh + scoreh + gap * 2, 1);
+      int y = (VIRTH - totalh) / 2;
+      if (nblue > 0) {
+        drawscoretable(x0, y, tablew, nblue, ncols, colw, colx, hdr,
+                       rows_text, 0, rowstep, border, colpad, gap);
+        y += blueh + gap;
       };
-      loopj(ncols) draw_text(rows_text[i][j], colx[j], datay, 2);
-
-      glDisable(GL_TEXTURE_2D);
-      glColor4ub(85, 55, 55, 120);
-      glBegin(GL_LINES);
-      glVertex2i(x0 + border, datay + rowstep);
-      glVertex2i(x0 + tablew - border, datay + rowstep);
-      glEnd();
-      glEnable(GL_TEXTURE_2D);
-      datay += rowstep;
+      if (nred > 0) {
+        drawscoretable(x0, y, tablew, nred, ncols, colw, colx, hdr,
+                       rows_text, split, rowstep, border, colpad, gap);
+        y += redh + gap;
+      };
+      if (nrows >= 2 && nrows <= MAXROWS) {
+        const char *scorestr = rows_text[nrows - 1][0];
+        if (scorestr[0]) {
+          int sw = text_width(scorestr);
+          draw_text(scorestr, (VIRTW - sw) / 2, y + border / 2, 2);
+        };
+      };
+      return true;
     };
 
-    glDisable(GL_TEXTURE_2D);
-    glColor4ub(100, 65, 65, 150);
-    glBegin(GL_LINES);
-    cx = x0 + border;
-    loopi(ncols - 1) {
-      cx += colw[i] + 2 * colpad + gap / 2;
-      glVertex2i(cx, y0 + border + 1);
-      glVertex2i(cx, y0 + tableh - border - 1);
-      cx += gap / 2;
-    };
-    glEnd();
-
-    glColor3ub(120, 75, 75);
-    glBegin(GL_LINE_LOOP);
-    glVertex2i(x0 + border, y0 + border);
-    glVertex2i(x0 + tablew - border, y0 + border);
-    glVertex2i(x0 + tablew - border, y0 + tableh - border);
-    glVertex2i(x0 + border, y0 + tableh - border);
-    glEnd();
-    glEnable(GL_TEXTURE_2D);
+    int tableh = (nrows + 1) * rowstep + border * 2;
+    int y0 = (VIRTH - tableh) / 2;
+    drawscoretable(x0, y0, tablew, nrows, ncols, colw, colx, hdr,
+                   rows_text, 0, rowstep, border, colpad, gap);
     return true;
   };
 

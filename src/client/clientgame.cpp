@@ -380,8 +380,34 @@ void entinmap(dynent *d) // brute force but effective way to find a free spawn
 int spawncycle = -1;
 int fixspawn = 2;
 
+static void autoteamplayer(dynent *d) {
+  if (!m_teammode) return;
+  int red = 0, blue = 0;
+  if (player1 && player1 != d) {
+    if (!strcmp(player1->team, "RED")) red++;
+    else if (!strcmp(player1->team, "BLUE")) blue++;
+  }
+  loopv(players) {
+    dynent *o = players[i];
+    if (o && o != d) {
+      if (!strcmp(o->team, "RED")) red++;
+      else if (!strcmp(o->team, "BLUE")) blue++;
+    }
+  }
+  dvector &bv = getbots();
+  loopv(bv) {
+    dynent *b = bv[i];
+    if (b && b != d) {
+      if (!strcmp(b->team, "RED")) red++;
+      else if (!strcmp(b->team, "BLUE")) blue++;
+    }
+  }
+  strn0cpy(d->team, red <= blue ? "RED" : "BLUE", 5);
+}
+
 void spawnplayer(dynent *d) // place at random spawn. also used by monsters!
 {
+  autoteamplayer(d);
   int r = fixspawn-- > 0 ? 4 : rnd(10) + 1;
   loopi(r) spawncycle = findentity(PLAYERSTART, spawncycle + 1);
   if (spawncycle != -1) {

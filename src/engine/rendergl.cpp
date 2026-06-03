@@ -935,9 +935,15 @@ void gl_drawframe(int w, int h, float curfps) {
   xtraverts = 0;
 
   renderclients();
-  if (thirdperson && !spectator && !screenshotmode)
+  if (thirdperson && !spectator && !screenshotmode) {
+    const char *mdl = "monster/player";
+    if (m_teammode) {
+        if (player1->team[0] && !strcmp(player1->team, "BLUE")) mdl = "monster/blueplayer";
+        else mdl = "monster/redplayer";
+    }
     renderclient(player1, isteam(player1->team, player1->team),
-                 "monster/player", false, 1.25f);
+                 mdl, false, 1.25f);
+  }
   monsterrender();
   botrender();
 

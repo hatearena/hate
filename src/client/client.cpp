@@ -38,8 +38,15 @@ void newname(const char *name) {
   strn0cpy(player1->name, name, 16);
 };
 void newteam(const char *name) {
+  string buf;
+  strn0cpy(buf, name, 5);
+  for (char *p = buf; *p; p++) if (*p >= 'a' && *p <= 'z') *p += 'A' - 'a';
+  if (strcmp(buf, "RED") && strcmp(buf, "BLUE")) {
+    conoutf("Team must be RED or BLUE");
+    return;
+  }
   c2sinit = false;
-  strn0cpy(player1->team, name, 5);
+  strn0cpy(player1->team, buf, 5);
 };
 
 COMMANDN(team, newteam, ARG_1STR);

@@ -45,7 +45,7 @@ const char *modenames[] = {
     "ffa/default",
     "coopedit",
     "ffa/duel",
-    "teamplay",
+    "tdm",
     "instagib",
     "instagib team",
     "efficiency",
