@@ -445,6 +445,7 @@ void spawnplayer(dynent *d) // place at random spawn. also used by monsters!
   entinmap(d);
   spawnstate(d);
   d->state = CS_ALIVE;
+  particle_splash(0, 20, 500, d->o);
 };
 
 // movement input code
