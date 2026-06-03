@@ -170,9 +170,30 @@ static void drawscoretable(int x0, int &y0, int tablew, int nrows, int ncols,
   glVertex2i(x0 + border, y + tableh - border);
   glEnd();
   glEnable(GL_TEXTURE_2D);
-  sprintf_sd(totalstr)("Total: %d", total);
-  int tw = text_width(totalstr);
-  draw_text(totalstr, x0 + tablew - border - colpad - tw, datay + rowstep / 4, 2);
+  if (nrows % 2 == 1) {
+    glDisable(GL_TEXTURE_2D);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    if (is_blue) glColor4ub(30, 30, 60, 100);
+    else glColor4ub(60, 35, 35, 100);
+    glBegin(GL_QUADS);
+    glVertex2i(x0 + border, datay);
+    glVertex2i(x0 + tablew - border, datay);
+    glVertex2i(x0 + tablew - border, datay + rowstep);
+    glVertex2i(x0 + border, datay + rowstep);
+    glEnd();
+    glEnable(GL_TEXTURE_2D);
+  };
+  draw_text("Total", colx[0], datay, 2);
+  sprintf_sd(totalstr)("%d", total);
+  draw_text(totalstr, colx[2], datay, 2);
+  glDisable(GL_TEXTURE_2D);
+  if (is_blue) glColor4ub(55, 55, 85, 120);
+  else glColor4ub(85, 55, 55, 120);
+  glBegin(GL_LINES);
+  glVertex2i(x0 + border, datay + rowstep);
+  glVertex2i(x0 + tablew - border, datay + rowstep);
+  glEnd();
+  glEnable(GL_TEXTURE_2D);
   y0 = y + tableh;
 }
 
@@ -276,7 +297,7 @@ bool rendermenu() {
       if (nblue > 0) {
         drawscoretable(x0, y, tablew, nblue, ncols, colw, colx, hdr,
                        rows_text, 0, rowstep, border, colpad, gap, true);
-        y += blueh + gap;
+        y += gap;
       };
       if (nred > 0) {
         drawscoretable(x0, y, tablew, nred, ncols, colw, colx, hdr,
