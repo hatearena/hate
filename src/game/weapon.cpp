@@ -405,7 +405,7 @@ void shoot(dynent *d, vec &targ) {
     d->lastattackgun = -1;
     return;
   };
-  if (d->gunselect)
+  if (d->gunselect && !(m_noitemsrail && d->gunselect == GUN_RIFLE))
     d->ammo[d->gunselect]--;
   vec from = d->o;
   vec to = targ;

@@ -22,75 +22,86 @@ int spectarget = 0;
 bool speclook = false;
 
 dynent *getspectarget() {
-    int idx = 0;
-    loopv(players) if (players[i] && players[i]->state == CS_ALIVE) {
-        if (idx == spectarget) return players[i];
-        idx++;
-    }
-    dvector &bv = getbots();
-    loopv(bv) if (bv[i]->state == CS_ALIVE) {
-        if (idx == spectarget) return bv[i];
-        idx++;
-    }
-    return NULL;
+  int idx = 0;
+  loopv(players) if (players[i] && players[i]->state == CS_ALIVE) {
+    if (idx == spectarget)
+      return players[i];
+    idx++;
+  }
+  dvector &bv = getbots();
+  loopv(bv) if (bv[i]->state == CS_ALIVE) {
+    if (idx == spectarget)
+      return bv[i];
+    idx++;
+  }
+  return NULL;
 }
 
 static int countspectargets() {
-    int total = 0;
-    loopv(players) if (players[i] && players[i]->state == CS_ALIVE) total++;
-    loopv(getbots()) if (getbots()[i]->state == CS_ALIVE) total++;
-    return total;
+  int total = 0;
+  loopv(players) if (players[i] && players[i]->state == CS_ALIVE) total++;
+  loopv(getbots()) if (getbots()[i]->state == CS_ALIVE) total++;
+  return total;
 }
 
 void spectate_next() {
-    int total = countspectargets();
-    if (total <= 0) { spectarget = 0; return; }
-    spectarget = (spectarget + 1) % total;
+  int total = countspectargets();
+  if (total <= 0) {
+    spectarget = 0;
+    return;
+  }
+  spectarget = (spectarget + 1) % total;
 }
 
 void spectate_prev() {
-    int total = countspectargets();
-    if (total <= 0) { spectarget = 0; return; }
-    spectarget = (spectarget - 1 + total) % total;
+  int total = countspectargets();
+  if (total <= 0) {
+    spectarget = 0;
+    return;
+  }
+  spectarget = (spectarget - 1 + total) % total;
 }
 
 void togglespeclook() {
-    if (!spectator) return;
-    speclook = !speclook;
-    noclip = speclook ? 1 : 0;
-    if (speclook) {
-        dynent *t = getspectarget();
-        if (t) {
-            player1->o = t->o;
-            player1->yaw = t->yaw;
-            player1->pitch = t->pitch;
-        }
+  if (!spectator)
+    return;
+  speclook = !speclook;
+  noclip = speclook ? 1 : 0;
+  if (speclook) {
+    dynent *t = getspectarget();
+    if (t) {
+      player1->o = t->o;
+      player1->yaw = t->yaw;
+      player1->pitch = t->pitch;
     }
+  }
 }
 
 void togglespectate() {
-    if (!spectator && editmode) {
-        conoutf("Exit edit mode first, then go to spectator mode.");
-        return;
+  if (!spectator && editmode) {
+    conoutf("Exit edit mode first, then go to spectator mode.");
+    return;
+  }
+  if (screenshotmode) {
+    conoutf("Exit screenshot mode first, then go to spectator mode.");
+    return;
+  }
+  spectator = !spectator;
+  if (spectator) {
+    player1->state = CS_SPECTATOR;
+    player1->move = player1->strafe = 0;
+    player1->attacking = false;
+    noclip = 0;
+    speclook = false;
+    spectarget = 0;
+    if (!getspectarget()) {
+      spectarget = 0;
     }
-    if (screenshotmode) {
-        conoutf("Exit screenshot mode first, then go to spectator mode.");
-        return;
-    }
-    spectator = !spectator;
-    if (spectator) {
-        player1->state = CS_SPECTATOR;
-        player1->move = player1->strafe = 0;
-        player1->attacking = false;
-        noclip = 0;
-        speclook = false;
-        spectarget = 0;
-        if (!getspectarget()) { spectarget = 0; }
-    } else {
-        speclook = false;
-        noclip = 0;
-        spawnplayer(player1);
-    }
+  } else {
+    speclook = false;
+    noclip = 0;
+    spawnplayer(player1);
+  }
 }
 
 int lastmillis = 0;
@@ -135,7 +146,8 @@ void spawnstate(dynent *d) {
     d->armour = 0;
     if (m_noitemsrail) {
       d->health = 1;
-      d->ammo[GUN_RIFLE] = 100;
+      d->ammo[GUN_CSAW] = 0;
+      d->ammo[GUN_RIFLE] = 999;
     } else {
       if (gamemode == 12) {
         d->gunselect = GUN_CSAW;
@@ -320,7 +332,8 @@ void updateworld(int millis) // main game update loop
           worldpos.y = from.y - 1000 * cosf(yawrad) * cp;
           worldpos.z = from.z + 1000 * sinf(pitchrad);
         }
-        if (!spectator && !screenshotmode) shoot(player1, worldpos); // only shoot when connected to server
+        if (!spectator && !screenshotmode)
+          shoot(player1, worldpos); // only shoot when connected to server
       }
       gets2c(); // do this first, so we have most accurate information when our
                 // player moves
@@ -336,7 +349,8 @@ void updateworld(int millis) // main game update loop
           moveplayer(player1, 20, true);
         } else {
           player1->move = player1->strafe = 0;
-          if (!getspectarget()) spectate_next();
+          if (!getspectarget())
+            spectate_next();
         }
       } else if (player1->state == CS_DEAD) {
         if (lastmillis - player1->lastaction < 2000) {
@@ -381,25 +395,32 @@ int spawncycle = -1;
 int fixspawn = 2;
 
 static void autoteamplayer(dynent *d) {
-  if (!m_teammode) return;
+  if (!m_teammode)
+    return;
   int red = 0, blue = 0;
   if (player1 && player1 != d) {
-    if (!strcmp(player1->team, "RED")) red++;
-    else if (!strcmp(player1->team, "BLUE")) blue++;
+    if (!strcmp(player1->team, "RED"))
+      red++;
+    else if (!strcmp(player1->team, "BLUE"))
+      blue++;
   }
   loopv(players) {
     dynent *o = players[i];
     if (o && o != d) {
-      if (!strcmp(o->team, "RED")) red++;
-      else if (!strcmp(o->team, "BLUE")) blue++;
+      if (!strcmp(o->team, "RED"))
+        red++;
+      else if (!strcmp(o->team, "BLUE"))
+        blue++;
     }
   }
   dvector &bv = getbots();
   loopv(bv) {
     dynent *b = bv[i];
     if (b && b != d) {
-      if (!strcmp(b->team, "RED")) red++;
-      else if (!strcmp(b->team, "BLUE")) blue++;
+      if (!strcmp(b->team, "RED"))
+        red++;
+      else if (!strcmp(b->team, "BLUE"))
+        blue++;
     }
   }
   strn0cpy(d->team, red <= blue ? "RED" : "BLUE", 5);
@@ -442,7 +463,8 @@ dir(right, strafe, -1, k_right, k_left);
 
 void attack(bool on) {
   if (spectator) {
-    if (on) spectate_next();
+    if (on)
+      spectate_next();
     return;
   }
   if (intermission)

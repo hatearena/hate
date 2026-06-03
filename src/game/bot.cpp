@@ -209,7 +209,9 @@ static void botaction(dynent *m) {
 
   vdist(disttoenemy, vectoenemy, m->o, m->enemy->o);
 
-  if (disttoenemy < 8.0f) {
+  if (m_noitemsrail) {
+    m->gunselect = GUN_RIFLE;
+  } else if (disttoenemy < 8.0f) {
     if (m->gunselect != GUN_CSAW)
       m->gunselect = GUN_CSAW;
   } else if (!m->ammo[m->gunselect]) {
