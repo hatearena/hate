@@ -512,6 +512,7 @@ void archvertex(int span, int vert, int delta) {
 
 void arch(int sidedelta, int _a) {
   EDITSELMP;
+  int oldxs = sel.xs, oldys = sel.ys;
   sel.xs++;
   sel.ys++;
   if (sel.xs > MAXARCHVERT)
@@ -524,6 +525,8 @@ void arch(int sidedelta, int _a) {
                             : (archverts[sel.ys - 1][y] +
                                (x == 0 || x == sel.xs - 1 ? sidedelta : 0)));
   remipmore(sel);
+  sel.xs = oldxs;
+  sel.ys = oldys;
 };
 
 void slope(int xd, int yd) {
@@ -533,10 +536,13 @@ void slope(int xd, int yd) {
     off -= xd * sel.xs;
   if (yd < 0)
     off -= yd * sel.ys;
+  int oldxs = sel.xs, oldys = sel.ys;
   sel.xs++;
   sel.ys++;
   loopselxy(s->vdelta = xd * x + yd * y + off);
   remipmore(sel);
+  sel.xs = oldxs;
+  sel.ys = oldys;
 };
 
 void perlin(int scale, int seed, int psize) {
