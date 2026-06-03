@@ -152,7 +152,7 @@ void spawnstate(dynent *d) {
       if (gamemode == 12) {
         d->gunselect = GUN_CSAW;
         return;
-      }; // eihrul's secret "instafist" mode
+      };
       d->health = 256;
       if (m_tarena) {
         int gun1 = rnd(4) + 1;
