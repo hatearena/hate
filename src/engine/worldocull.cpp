@@ -16,10 +16,20 @@ void computeraytable(float vx, float vy) {
 
   odist = getvar("fog") * 1.5f;
 
-  float apitch = (float)fabs(player1->pitch);
+  float spectyaw = player1->yaw;
+  float spectpitch = player1->pitch;
+  if (spectator && !speclook) {
+    dynent *t = getspectarget();
+    if (t) {
+      spectyaw = t->yaw;
+      spectpitch = t->pitch;
+    }
+  }
+
+  float apitch = (float)fabs(spectpitch);
   float af = getvar("fov") / 2 + apitch / 1.5f + 3;
-  float byaw = (player1->yaw - 90 + af) / 360 * PI2;
-  float syaw = (player1->yaw - 90 - af) / 360 * PI2;
+  float byaw = (spectyaw - 90 + af) / 360 * PI2;
+  float syaw = (spectyaw - 90 - af) / 360 * PI2;
 
   loopi(NUMRAYS) {
     float angle = i * PI2 / NUMRAYS;

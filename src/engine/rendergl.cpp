@@ -875,7 +875,34 @@ void gl_drawframe(int w, int h, float curfps) {
   };
   float fovy = afov * h / w;
   float aspect = w / (float)h;
-  bool underwater = player1->o.z < hf;
+
+  float vx, vy, vz;
+  getcamerapos(vx, vy, vz);
+
+  float camyaw, campitch;
+  if (spectator && !speclook) {
+    dynent *t = getspectarget();
+    if (t) {
+      camyaw = t->yaw;
+      campitch = t->pitch;
+    } else {
+      camyaw = player1->yaw;
+      campitch = player1->pitch;
+    }
+  } else {
+    camyaw = player1->yaw;
+    campitch = player1->pitch;
+  }
+
+  bool underwater = vz < hf;
+
+  bool cam_outside = vx < 0 || vx >= ssize || vy < 0 || vy >= ssize;
+  if (!cam_outside) {
+    sqr *s = S((int)vx, (int)vy);
+    cam_outside = SOLID(s) ||
+      vz < s->floor - (s->type == FHF ? s->vdelta / 4.0f : 0) ||
+      vz > s->ceil + (s->type == CHF ? s->vdelta / 4.0f : 0);
+  }
 
   glFogi(GL_FOG_START, (fog + 64) / 8);
   glFogi(GL_FOG_END, fog);
@@ -892,7 +919,7 @@ void gl_drawframe(int w, int h, float curfps) {
     glFogi(GL_FOG_END, (fog + 96) / 8);
   };
 
-  glClear((player1->outsidemap ? GL_COLOR_BUFFER_BIT : 0) |
+  glClear((cam_outside ? GL_COLOR_BUFFER_BIT : 0) |
           GL_DEPTH_BUFFER_BIT);
 
   glMatrixMode(GL_PROJECTION);
@@ -913,9 +940,7 @@ void gl_drawframe(int w, int h, float curfps) {
   curvert = 0;
   strips.setsize(0);
 
-  float vx, vy, vz;
-  getcamerapos(vx, vy, vz);
-  render_world(vx, vy, vz, (int)player1->yaw, (int)player1->pitch, afov, w, h);
+  render_world(vx, vy, vz, (int)camyaw, (int)campitch, afov, w, h);
   finishstrips();
 
   setupworld();
@@ -923,8 +948,8 @@ void gl_drawframe(int w, int h, float curfps) {
   renderstripssky();
 
   glLoadIdentity();
-  glRotated(player1->pitch, -1.0, 0.0, 0.0);
-  glRotated(player1->yaw, 0.0, 1.0, 0.0);
+  glRotated(campitch, -1.0, 0.0, 0.0);
+  glRotated(camyaw, 0.0, 1.0, 0.0);
   glRotated(90.0, 1.0, 0.0, 0.0);
   glColor3f(1.0f, 1.0f, 1.0f);
   glDisable(GL_FOG);
