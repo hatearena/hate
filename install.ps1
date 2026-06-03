@@ -1,7 +1,7 @@
 $ErrorActionPreference = "Stop"
 
-$msys2 = (Get-Command msys2 -ErrorAction Stop).Source
-$mingwShim = (Get-Command mingw -ErrorAction Stop).Source
+$msys2 = "$(Split-Path -Path (Get-Command msys2 -ErrorAction Stop).Source)\usr\bin\bash"
+$mingwShim = (Get-Command mingw64 -ErrorAction Stop).Source
 
 Write-Host "Installing dependencies..."
 $deps = @(
@@ -26,7 +26,7 @@ $msysPath = $srcDir.Replace('\','/')
 $msysPath = $msysPath -replace '^([A-Za-z]):','/$1'
 
 Write-Host "Building..."
-& $mingwShim -lc "cd '$msysPath' && make"
+& $mingwShim bash -lc "cd '$msysPath' && make"
 if ($LASTEXITCODE -ne 0) {
     throw "Build failed"
 }
