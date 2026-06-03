@@ -18,10 +18,11 @@ static int pot(int v) {
 }
 
 static void draw_texture(SDL_Surface *s, int left, int top, int cr, int cg,
-                         int cb, int ca) {
+                         int cb, int ca, float scale = 1.0f) {
   if (!s)
     return;
   int w = s->w, h = s->h;
+  int sw = (int)(w * scale), sh = (int)(h * scale);
   int pw = pot(w), ph = pot(h);
 
   SDL_Surface *conv =
@@ -89,11 +90,11 @@ static void draw_texture(SDL_Surface *s, int left, int top, int cr, int cg,
   glTexCoord2f(0, 0);
   glVertex2i(left, top);
   glTexCoord2f(umax, 0);
-  glVertex2i(left + w, top);
+  glVertex2i(left + sw, top);
   glTexCoord2f(umax, vmax);
-  glVertex2i(left + w, top + h);
+  glVertex2i(left + sw, top + sh);
   glTexCoord2f(0, vmax);
-  glVertex2i(left, top + h);
+  glVertex2i(left, top + sh);
   glEnd();
   xtraverts += 4;
 
@@ -113,7 +114,7 @@ void draw_textf(char *fstr, int left, int top, int gl_num, ...) {
   draw_text(str, left, top, gl_num);
 }
 
-void draw_text(char *str, int left, int top, int gl_num, int alpha) {
+void draw_text(char *str, int left, int top, int gl_num, int alpha, float scale) {
   (void)gl_num;
   if (!font_inited)
     return;
@@ -128,10 +129,10 @@ void draw_text(char *str, int left, int top, int gl_num, int alpha) {
   SDL_Color white = {255, 255, 255, 255};
   if (str[0] == '\f')
     draw_texture(TTF_RenderUTF8_Blended(font, filtered, white), left, top, 64,
-                 255, 128, alpha);
+                 255, 128, alpha, scale);
   else
     draw_texture(TTF_RenderUTF8_Blended(font, filtered, white), left, top, 255,
-                 255, 255, alpha);
+                 255, 255, alpha, scale);
 }
 
 void draw_envbox_aux(float s0, float t0, int x0, int y0, int z0, float s1,

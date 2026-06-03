@@ -90,7 +90,8 @@ void refreshservers();
 static void drawscoretable(int x0, int &y0, int tablew, int nrows, int ncols,
                            int *colw, int *colx, string *hdr,
                            string (*rows)[16], int rowstart, int rowstep,
-                           int border, int colpad, int gap, bool is_blue) {
+                           int border, int colpad, int gap, bool is_blue,
+                           float fscale = 0.85f) {
   if (nrows <= 0)
     return;
   int total = 0;
@@ -120,7 +121,7 @@ static void drawscoretable(int x0, int &y0, int tablew, int nrows, int ncols,
   glVertex2i(x0 + border, sep_y);
   glEnd();
   glEnable(GL_TEXTURE_2D);
-  loopi(ncols) draw_text(hdr[i], colx[i], headery, 2);
+  loopi(ncols) draw_text(hdr[i], colx[i], headery, 2, 255, fscale);
   glDisable(GL_TEXTURE_2D);
   if (is_blue)
     glColor3ub(90, 90, 140);
@@ -148,7 +149,7 @@ static void drawscoretable(int x0, int &y0, int tablew, int nrows, int ncols,
       glEnd();
       glEnable(GL_TEXTURE_2D);
     };
-    loopj(ncols) draw_text(rows[rowstart + i][j], colx[j], datay, 2);
+    loopj(ncols) draw_text(rows[rowstart + i][j], colx[j], datay, 2, 255, fscale);
     glDisable(GL_TEXTURE_2D);
     if (is_blue)
       glColor4ub(55, 55, 85, 120);
@@ -201,9 +202,9 @@ static void drawscoretable(int x0, int &y0, int tablew, int nrows, int ncols,
     glEnd();
     glEnable(GL_TEXTURE_2D);
   };
-  draw_text("Total", colx[0], datay, 2);
+  draw_text("Total", colx[0], datay, 2, 255, fscale);
   sprintf_sd(totalstr)("%d", total);
-  draw_text(totalstr, colx[2] + 30, datay, 2);
+  draw_text(totalstr, colx[2] + 30, datay, 2, 255, fscale);
   glDisable(GL_TEXTURE_2D);
   if (is_blue)
     glColor4ub(55, 55, 85, 120);
@@ -277,10 +278,18 @@ bool rendermenu() {
       };
     };
 
-    int colpad = FONTH / 3;
-    int gap = FONTH / 4;
-    int rowstep = FONTH / 4 * 5;
-    int border = FONTH / 2;
+    float sc = 0.85f;
+    int colpad = (int)(FONTH / 3 * sc);
+    int gap = (int)(FONTH / 4 * sc);
+    int rowstep = (int)(FONTH / 4 * 5 * sc);
+    int border = (int)(FONTH / 2 * sc);
+
+    int availh = VIRTH - 3 * rowstep;
+    int maxvis = availh / rowstep;
+    if (maxvis < 1) maxvis = 1;
+    if (scoreboard_scroll > max(0, nrows - maxvis))
+      scoreboard_scroll = max(0, nrows - maxvis);
+    if (scoreboard_scroll < 0) scoreboard_scroll = 0;
 
     int colw[MAXCOLS];
     loopi(ncols) {
@@ -307,8 +316,12 @@ bool rendermenu() {
 
     if (m_teammode) {
       int split = min(teamscore_split, nrows);
-      int nblue = split;
-      int nred = max(nrows - split - 2, 0);
+      int nblue = min(split - scoreboard_scroll, maxvis);
+      if (nblue < 0) nblue = 0;
+      int nblue_start = min(scoreboard_scroll, split);
+      int nred_start = split;
+      int nred = min(nrows - nred_start, maxvis - nblue);
+      if (nred < 0) nred = 0;
       int blueh = nblue > 0 ? (nblue + 2) * rowstep + border * 2 : 0;
       int redh = nred > 0 ? (nred + 2) * rowstep + border * 2 : 0;
       int totalh = max(blueh + redh + gap, 1);
@@ -316,21 +329,21 @@ bool rendermenu() {
       overlay(160);
       if (nblue > 0) {
         drawscoretable(x0, y, tablew, nblue, ncols, colw, colx, hdr, rows_text,
-                       0, rowstep, border, colpad, gap, true);
+                       nblue_start, rowstep, border, colpad, gap, true);
         y += gap;
       };
       if (nred > 0) {
         drawscoretable(x0, y, tablew, nred, ncols, colw, colx, hdr, rows_text,
-                       split, rowstep, border, colpad, gap, false);
+                       nred_start, rowstep, border, colpad, gap, false);
       };
       return true;
     };
 
-    int tableh = (nrows + 2) * rowstep + border * 2;
+    int tableh = (min(nrows, maxvis) + 2) * rowstep + border * 2;
     int y0 = (VIRTH - tableh) / 2;
     overlay(160);
-    drawscoretable(x0, y0, tablew, nrows, ncols, colw, colx, hdr, rows_text, 0,
-                   rowstep, border, colpad, gap, false);
+    drawscoretable(x0, y0, tablew, min(nrows, maxvis), ncols, colw, colx, hdr,
+                   rows_text, scoreboard_scroll, rowstep, border, colpad, gap, false);
     return true;
   };
 

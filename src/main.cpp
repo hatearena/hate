@@ -514,6 +514,12 @@ int main(int argc, char **argv) {
             else if (event.wheel.y < 0)
               execute("editheight $flrceil -1");
           };
+        } else if (scoreson) {
+          const Uint8 *k = SDL_GetKeyboardState(NULL);
+          if (k[SDL_SCANCODE_LSHIFT] || k[SDL_SCANCODE_RSHIFT]) {
+            if (event.wheel.y < 0) scoreboard_scroll++;
+            else if (event.wheel.y > 0 && scoreboard_scroll > 0) scoreboard_scroll--;
+          };
         } else if (spectator) {
           if (event.wheel.y > 0)
             spectate_prev();

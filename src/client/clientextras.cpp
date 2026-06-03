@@ -81,9 +81,12 @@ void renderclients() {
 
 bool scoreson = false;
 
+int scoreboard_scroll = 0;
+
 void showscores(bool on) {
   scoreson = on;
   menuset(((int)on) - 1);
+  if (on) scoreboard_scroll = 0;
 };
 
 struct sline {
