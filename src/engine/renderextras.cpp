@@ -549,7 +549,7 @@ void gl_drawhud(int w, int h, int curfps, int nquads, int curvert,
   }
 
   renderscores();
-  if (!rendermenu() && !intermission && !screenshotmode) {
+  if (!rendermenu() && !intermission && !screenshotmode && !editmode) {
     glBlendFunc(GL_SRC_ALPHA, GL_SRC_ALPHA);
     glBindTexture(GL_TEXTURE_2D, 1);
     glBegin(GL_QUADS);
@@ -599,6 +599,7 @@ void gl_drawhud(int w, int h, int curfps, int nquads, int curvert,
   glPopMatrix();
 
   {
+    if (editmode) goto skiphud;
     dynent *d = player1;
     if (spectator && !speclook) {
       dynent *t = getspectarget();
