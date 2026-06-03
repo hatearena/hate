@@ -9,7 +9,8 @@ int range[] = {6, 6, 8, 28, 1, 1, 1, 1, 8, 19, 4, 18, 40, 1, 6, 15, 1, 1, 1, 1};
 
 void renderclient(dynent *d, bool team, char *mdlname, bool hellpig,
                   float scale) {
-  if (d->state == CS_SPECTATOR) return;
+  if (d->state == CS_SPECTATOR)
+    return;
   int n = 3;
   float speed = 100.0f;
   float mz = d->o.z - d->eyeheight + 1.55f * scale;
@@ -48,7 +49,7 @@ void renderclient(dynent *d, bool team, char *mdlname, bool hellpig,
     n = 18;
   } else {
     n = 14;
-    speed = 2400 / d->maxspeed * scale;
+    speed = 5000 / d->maxspeed * scale;
     if (hellpig)
       speed = 300 / d->maxspeed;
   };
@@ -65,13 +66,16 @@ extern int democlientnum;
 
 void renderclients() {
   dynent *d;
-  loopv(players) if ((d = players[i]) && (!demoplayback || i != democlientnum)) {
-      const char *mdl = "monster/player";
-      if (m_teammode) {
-          if (d->team[0] && !strcmp(d->team, "BLUE")) mdl = "monster/blueplayer";
-          else mdl = "monster/redplayer";
-      }
-      renderclient(d, isteam(player1->team, d->team), mdl, false, 1.25f);
+  loopv(players) if ((d = players[i]) &&
+                     (!demoplayback || i != democlientnum)) {
+    const char *mdl = "monster/player";
+    if (m_teammode) {
+      if (d->team[0] && !strcmp(d->team, "BLUE"))
+        mdl = "monster/blueplayer";
+      else
+        mdl = "monster/redplayer";
+    }
+    renderclient(d, isteam(player1->team, d->team), mdl, false, 1.25f);
   }
 };
 
@@ -128,26 +132,33 @@ void renderscores() {
   scorelines.setsize(0);
   if (m_teammode) {
     vector<dynent *> blue, red;
-#define addtoteam(d) do { \
-      dynent *e = (d); \
-      if (e && e->state != CS_SPECTATOR) { \
-        if (e->team[0] && !strcmp(e->team, "BLUE")) blue.add(e); \
-        else red.add(e); \
-      } \
-    } while(0)
-    if (!demoplayback) addtoteam(player1);
+#define addtoteam(d)                                                           \
+  do {                                                                         \
+    dynent *e = (d);                                                           \
+    if (e && e->state != CS_SPECTATOR) {                                       \
+      if (e->team[0] && !strcmp(e->team, "BLUE"))                              \
+        blue.add(e);                                                           \
+      else                                                                     \
+        red.add(e);                                                            \
+    }                                                                          \
+  } while (0)
+    if (!demoplayback)
+      addtoteam(player1);
     loopv(players) addtoteam(players[i]);
     dvector &bs = getbots();
     loopv(bs) addtoteam(bs[i]);
 #undef addtoteam
     loopv(blue) renderscore(blue[i]);
-    if (blue.length()) sortmenu(0, scorelines.length());
+    if (blue.length())
+      sortmenu(0, scorelines.length());
     loopv(red) renderscore(red[i]);
-    if (red.length()) sortmenu(scorelines.length() - red.length(), red.length());
+    if (red.length())
+      sortmenu(scorelines.length() - red.length(), red.length());
     teamscore_split = blue.length();
   } else {
     teamscore_split = 0;
-    if (!demoplayback) renderscore(player1);
+    if (!demoplayback)
+      renderscore(player1);
     loopv(players) if (players[i]) renderscore(players[i]);
     dvector &bs = getbots();
     loopv(bs) if (bs[i]) renderscore(bs[i]);
