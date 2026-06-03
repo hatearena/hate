@@ -13,6 +13,8 @@ vec sg[SGRAYS];
 int gunswitchtime = 0;
 int gunidletime = 0;
 
+VARP(autoswitch, 0, 1, 1);
+
 guninfo guns[NUMGUNS] = {
     {S_CSAW, 150, 20, 0, 0, 3, "chainsaw"},
     {S_SG, 1000, 10, 0, 0, 20, "shotgun"},
@@ -382,8 +384,22 @@ void shoot(dynent *d, vec &targ) {
   d->lastaction = lastmillis;
   d->lastattackgun = d->gunselect;
   if (!d->ammo[d->gunselect]) {
-    playsoundc(S_NOAMMO);
-    d->gunwait = 250;
+    if (autoswitch) {
+      int s = d->gunselect;
+      for (int i = 1; i <= 4; i++) {
+        if (d->ammo[i]) { s = i; break; }
+      }
+      if (s == d->gunselect) s = GUN_CSAW;
+      if (s != d->gunselect) {
+        d->gunselect = s;
+        playsoundc(S_WEAPLOAD);
+        gunswitchtime = lastmillis;
+      }
+      d->gunwait = guns[d->gunselect].attackdelay;
+    } else {
+      playsoundc(S_NOAMMO);
+      d->gunwait = 250;
+    }
     d->lastattackgun = -1;
     return;
   };
