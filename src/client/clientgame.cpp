@@ -664,8 +664,8 @@ void toggletp() {
   }
   thirdperson = !thirdperson;
 };
-COMMAND(toggletp, ARG_NONE);
 
+COMMAND(toggletp, ARG_NONE);
 COMMAND(togglespectate, ARG_NONE);
 COMMAND(togglespeclook, ARG_NONE);
 COMMAND(spectate_next, ARG_NONE);
