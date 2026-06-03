@@ -801,8 +801,15 @@ void drawhudmodel(int start, int end, float speed, int base) {
               player1->yaw + 90, player1->pitch, false, scale, speed, 0, base);
 };
 
+dynent *specplayer() {
+  if (spectator && !speclook)
+    return getspectarget();
+  return player1;
+}
+
 void drawhudgun(float fovy, float aspect, int farplane) {
-  if (!hudgun /*|| !player1->gunselect*/)
+  dynent *d = specplayer();
+  if (!hudgun || !d)
     return;
 
   glEnable(GL_CULL_FACE);
@@ -813,33 +820,33 @@ void drawhudgun(float fovy, float aspect, int farplane) {
   glMatrixMode(GL_MODELVIEW);
 
   // glClear(GL_DEPTH_BUFFER_BIT);
-  int rtime = reloadtime(player1->gunselect);
-  if (player1->lastaction && player1->lastattackgun == player1->gunselect &&
-      lastmillis - player1->lastaction < rtime) {
-    if (player1->gunselect == GUN_RIFLE)
-      drawhudmodel(7, 18, rtime / 16.0f, player1->lastaction);
-    else if (player1->gunselect == GUN_SG) {
-      int sgtime = lastmillis - player1->lastaction;
+  int rtime = reloadtime(d->gunselect);
+  if (d->lastaction && d->lastattackgun == d->gunselect &&
+      lastmillis - d->lastaction < rtime) {
+    if (d->gunselect == GUN_RIFLE)
+      drawhudmodel(7, 18, rtime / 16.0f, d->lastaction);
+    else if (d->gunselect == GUN_SG) {
+      int sgtime = lastmillis - d->lastaction;
       if (sgtime < 900)
-        drawhudmodel(9, 11, 100.0f, player1->lastaction);
+        drawhudmodel(9, 11, 100.0f, d->lastaction);
       else
         drawhudmodel(19, 1, 100, 0);
-    } else if (player1->gunselect == GUN_CSAW)
-      drawhudmodel(2, 3, rtime / 3.0f, player1->lastaction);
+    } else if (d->gunselect == GUN_CSAW)
+      drawhudmodel(2, 3, rtime / 3.0f, d->lastaction);
     else
-      drawhudmodel(7, 18, rtime / 18.0f, player1->lastaction);
+      drawhudmodel(7, 18, rtime / 18.0f, d->lastaction);
   } else {
-    if (player1->gunselect == GUN_RIFLE && player1->lastaction &&
-        player1->lastattackgun == player1->gunselect)
+    if (d->gunselect == GUN_RIFLE && d->lastaction &&
+        d->lastattackgun == d->gunselect)
       gunidletime = lastmillis;
     else
       gunidletime = 0;
 
-    if (player1->gunselect == GUN_RIFLE)
+    if (d->gunselect == GUN_RIFLE)
       drawhudmodel(25, 1, 100, 0);
-    else if (player1->gunselect == GUN_SG)
+    else if (d->gunselect == GUN_SG)
       drawhudmodel(19, 1, 100, 0);
-    else if (player1->gunselect == GUN_CSAW)
+    else if (d->gunselect == GUN_CSAW)
       drawhudmodel(1, 1, 100, 0);
     else
       drawhudmodel(6, 1, 100, 0);
@@ -954,7 +961,7 @@ void gl_drawframe(int w, int h, float curfps) {
 
   glDisable(GL_CULL_FACE);
 
-  if (!thirdperson && !editmode && !intermission && !spectator && !screenshotmode)
+  if (!thirdperson && !editmode && !intermission && !screenshotmode && !(spectator && speclook))
     drawhudgun(fovy, aspect, farplane);
 
   overbright(1);

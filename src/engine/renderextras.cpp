@@ -478,7 +478,7 @@ void gl_drawhud(int w, int h, int curfps, int nquads, int curvert,
   glEnable(GL_BLEND);
   glDepthMask(GL_FALSE);
 
-  if (spectator && !screenshotmode) {
+  if (spectator && !speclook && !screenshotmode) {
     glEnable(GL_TEXTURE_2D);
     dynent *t = getspectarget();
     if (t && t->name[0]) {
@@ -598,7 +598,14 @@ void gl_drawhud(int w, int h, int curfps, int nquads, int curvert,
 
   glPopMatrix();
 
-  if (player1->state == CS_ALIVE && !editmode && !intermission && !screenshotmode) {
+  {
+    dynent *d = player1;
+    if (spectator && !speclook) {
+      dynent *t = getspectarget();
+      if (t) d = t;
+      else goto skiphud;
+    };
+    if (d->state != CS_ALIVE) goto skiphud;
     glPushMatrix();
     glOrtho(0, VIRTW, VIRTH, 0, -1, 1);
     glDisable(GL_TEXTURE_2D);
@@ -614,7 +621,7 @@ void gl_drawhud(int w, int h, int curfps, int nquads, int curvert,
     glColor4ub(10, 10, 10, 130);
     roundedbox(20, 1580, 225, 1750, 20);
 
-    if (player1->armour) {
+    if (d->armour) {
       glColor4ub(10, 10, 10, 130);
       roundedbox(230, 1580, 434, 1750, 20);
     }
@@ -627,41 +634,41 @@ void gl_drawhud(int w, int h, int curfps, int nquads, int curvert,
     glColor4ub(255, 255, 255, 255);
     drawicon(128, 128, 30, 1620, 64);
     glColor4ub(10, 10, 10, 130);
-    draw_textf("%d", 105, 1660, 2, player1->health);
+    draw_textf("%d", 105, 1660, 2, d->health);
 
-    if (player1->armour) {
-      drawicon((float)(player1->armourtype * 64), 0, 240, 1620, 64);
-      draw_textf("%d", 315, 1660, 2, player1->armour);
+    if (d->armour) {
+      drawicon((float)(d->armourtype * 64), 0, 240, 1620, 64);
+      draw_textf("%d", 315, 1660, 2, d->armour);
     }
 
-    int g = player1->gunselect;
+    int g = d->gunselect;
     int r = 64;
     if (g > 2) {
       g -= 3;
       r = 128;
     };
     drawicon((float)(g * 64), (float)r, VIRTW - 250, 1620, 64);
-    draw_textf("%d", VIRTW - 170, 1660, 2, player1->ammo[player1->gunselect]);
+    draw_textf("%d", VIRTW - 170, 1660, 2, d->ammo[d->gunselect]);
 
     glDisable(GL_TEXTURE_2D);
     {
-      int bx = player1->armour ? 440 : 230;
+      int bx = d->armour ? 440 : 230;
       glColor4ub(10, 10, 10, 130);
       roundedbox(bx, 1580, bx + 205, 1750, 20);
       int inner = 6;
       int bw = 205 - inner * 2;
       int bh = 1750 - 1580 - inner * 2;
       int by = 1580 + inner;
-      float pct = player1->boostmillis > 0
-                      ? 1.0f - (float)player1->boostmillis / 4000.0f
+      float pct = d->boostmillis > 0
+                      ? 1.0f - (float)d->boostmillis / 4000.0f
                       : 1.0f;
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-      glColor4ub(180, 180, 180, player1->boostmillis > 0 ? 20 : 54);
+      glColor4ub(180, 180, 180, d->boostmillis > 0 ? 20 : 54);
       roundedbox(bx + inner, by, bx + inner + (int)(bw * pct), by + bh, 12);
     };
     glEnable(GL_TEXTURE_2D);
     {
-      int bx = player1->armour ? 440 : 230;
+      int bx = d->armour ? 440 : 230;
       glBlendFunc(GL_ONE, GL_ONE);
       glColor4ub(255, 255, 255, 255);
       glBindTexture(GL_TEXTURE_2D, 10);
@@ -676,13 +683,14 @@ void gl_drawhud(int w, int h, int curfps, int nquads, int curvert,
       glVertex2i(bx + 10, 1684);
       glEnd();
       int boostval =
-          player1->boostmillis > 0
-              ? (int)((1.0f - (float)player1->boostmillis / 4000.0f) * 100)
+          d->boostmillis > 0
+              ? (int)((1.0f - (float)d->boostmillis / 4000.0f) * 100)
               : 100;
       draw_textf("%d", bx + 85, 1660, 2, boostval);
     };
     glPopMatrix();
   };
+  skiphud:
 
   if (editmode && !screenshotmode) {
     extern int closestent();

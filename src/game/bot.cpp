@@ -236,31 +236,40 @@ static void botaction(dynent *m) {
       m->gunselect = GUN_RIFLE;
   }
 
-  float enemyyaw =
-      -(float)atan2(m->enemy->o.x - m->o.x, m->enemy->o.y - m->o.y) / PI * 180 +
-      180;
+  vec tmp;
+  bool haslos = los(m->o.x, m->o.y, m->o.z - 0.2f, m->enemy->o.x, m->enemy->o.y,
+                    m->enemy->o.z, tmp);
 
-  float aimspread = (4 - botdifficulty) * 6.0f;
-  if (aimspread > 0) {
-    enemyyaw += (rnd(101) - 50) / 100.0f * aimspread;
-  }
-  m->targetyaw = enemyyaw;
+  if (haslos) {
+    float enemyyaw =
+        -(float)atan2(m->enemy->o.x - m->o.x, m->enemy->o.y - m->o.y) / PI *
+            180 +
+        180;
 
-  float enemypitch = atan2(m->enemy->o.z - m->o.z, disttoenemy) * 180 / PI;
-  if (aimspread > 0) {
-    enemypitch += (rnd(101) - 50) / 100.0f * aimspread * 0.5f;
-  }
-  m->pitch = enemypitch;
+    float aimspread = (4 - botdifficulty) * 6.0f;
+    if (m_noitemsrail) aimspread += 10.0f;
+    if (aimspread > 0) {
+      enemyyaw += (rnd(101) - 50) / 100.0f * aimspread;
+    }
+    m->targetyaw = enemyyaw;
 
-  normalise(m, m->targetyaw);
-  float turnrate = curtime * (0.15f + botdifficulty * 0.05f);
-  float yawdiff = m->targetyaw - m->yaw;
-  if (fabs(yawdiff) < turnrate)
-    m->yaw = m->targetyaw;
-  else if (yawdiff > 0)
-    m->yaw += turnrate;
-  else
-    m->yaw -= turnrate;
+    float enemypitch = atan2(m->enemy->o.z - m->o.z, disttoenemy) * 180 / PI;
+    if (aimspread > 0) {
+      enemypitch += (rnd(101) - 50) / 100.0f * aimspread * 0.5f;
+    }
+    m->pitch = enemypitch;
+
+    normalise(m, m->targetyaw);
+    float turnrate = curtime * (0.15f + botdifficulty * 0.05f);
+    if (m_noitemsrail) turnrate *= 0.4f;
+    float yawdiff = m->targetyaw - m->yaw;
+    if (fabs(yawdiff) < turnrate)
+      m->yaw = m->targetyaw;
+    else if (yawdiff > 0)
+      m->yaw += turnrate;
+    else
+      m->yaw -= turnrate;
+  };
 
   if (m->blocked) {
     m->blocked = false;
