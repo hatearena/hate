@@ -458,6 +458,10 @@ void menumanual(int m, int n, char *text) {
   mitem &mitem = menus[m].items.add();
   mitem.text = text;
   mitem.action = (char *)"";
+  mitem.checkbox = false;
+  mitem.slider = false;
+  mitem.slidervar = NULL;
+  mitem.textinput = false;
 }
 
 void menuitem(char *text, char *action) {
