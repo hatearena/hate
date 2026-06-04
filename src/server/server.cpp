@@ -348,11 +348,19 @@ void process(ENetPacket *packet, int sender) {
       sgetstr();
       if (text[0] == '/') {
         if (strcmp(text + 1, "kick_all_bots") == 0) {
+          if (!clients[sender].rcon) {
+            sendservmsg("You are not authorized.");
+            return;
+          };
           extern void botclear();
           botclear();
           sendservmsg("All bots have been kicked.");
           return;
         } else if (strcmp(text + 1, "list") == 0) {
+          if (!clients[sender].rcon) {
+            sendservmsg("You are not authorized.");
+            return;
+          };
           string msg;
           int n = 0;
           loopv(clients) if (clients[i].type != ST_EMPTY) {
@@ -370,7 +378,7 @@ void process(ENetPacket *packet, int sender) {
             clients[sender].rcon = true;
             sendservmsg("Authenticated as administrator.");
           } else {
-            sendservmsg("Invalid rcon password.");
+            sendservmsg("Invalid RCON password.");
           };
           return;
         } else if (strncmp(text + 1, "ban ", 4) == 0) {
@@ -393,6 +401,10 @@ void process(ENetPacket *packet, int sender) {
           sendservmsg(msg);
           return;
         } else if (strncmp(text + 1, "kick ", 5) == 0) {
+          if (!clients[sender].rcon) {
+            sendservmsg("You are not authorized.");
+            return;
+          };
           char *target = text + 6;
           if (!target[0]) {
             sendservmsg("Usage: /kick <name or uuid>");

@@ -150,6 +150,19 @@ void kickallcmd() { strn0cpy(ctext, "/kick_all_bots", 80); };
 COMMANDN(kick, kickcmd, ARG_1STR);
 COMMANDN(kick_all_bots, kickallcmd, ARG_NONE);
 
+void rconcmd(char *pass) {
+  sprintf_sd(buf)("/rcon %s", pass);
+  strn0cpy(ctext, buf, 80);
+};
+void bancmd(char *uuid) {
+  sprintf_sd(buf)("/ban %s", uuid);
+  strn0cpy(ctext, buf, 80);
+};
+void listcmd() { strn0cpy(ctext, "/list", 80); };
+COMMANDN(rcon, rconcmd, ARG_1STR);
+COMMANDN(ban, bancmd, ARG_1STR);
+COMMANDN(list, listcmd, ARG_NONE);
+
 vector<ivector> messages;
 
 void addmsg(int rel, int num, int type, ...) {
