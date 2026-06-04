@@ -55,7 +55,7 @@ uchar *stripheader(uchar *b) {
   return s ? (uchar *)s : b;
 };
 
-ENetAddress masterserver = {ENET_HOST_ANY, 80};
+ENetAddress masterserver = {ENET_HOST_ANY, 28780};
 int updmaster = 0;
 string masterbase;
 string masterpath;
@@ -71,7 +71,7 @@ void updatemasterserver(int seconds) {
     masterrep[0] = 0;
     masterb.data = masterrep;
     masterb.dataLength = MAXTRANS - 1;
-    updmaster = seconds + 60 * 60;
+    updmaster = seconds + 60;
   };
 };
 
