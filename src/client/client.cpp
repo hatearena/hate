@@ -40,7 +40,9 @@ void newname(const char *name) {
 void newteam(const char *name) {
   string buf;
   strn0cpy(buf, name, 5);
-  for (char *p = buf; *p; p++) if (*p >= 'a' && *p <= 'z') *p += 'A' - 'a';
+  for (char *p = buf; *p; p++)
+    if (*p >= 'a' && *p <= 'z')
+      *p += 'A' - 'a';
   if (strcmp(buf, "RED") && strcmp(buf, "BLUE")) {
     conoutf("Team must be RED or BLUE");
     return;
@@ -96,7 +98,7 @@ void disconnect(int onlyclean, int async) {
   };
 
   if (clienthost && !connecting)
-    conoutf("disconnected");
+    conoutf("Disconnected from server");
   clienthost = NULL;
   connecting = 0;
   connattempts = 0;

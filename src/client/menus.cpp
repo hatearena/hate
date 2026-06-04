@@ -45,6 +45,10 @@ vector<gmenu> menus;
 
 int vmenu = -1;
 
+enum { SMAX = 128 };
+int servermap[SMAX];
+int servercount = 0;
+
 ivector menustack;
 
 void menuset(int menu) {
@@ -239,34 +243,37 @@ bool rendermenu() {
     extern vector<serverinfo> servers;
 
     gmenu &m = menus[1];
-    int nrows = servers.length();
 
     enum { NCOLS = 5, MAXROWS = 128 };
     char *headers[] = {"Ping", "Players", "Map", "Mode", "Server"};
     string rows_text[MAXROWS][NCOLS];
-    int ndisp = max(min(nrows, MAXROWS), 1);
+    int ndisp = 0;
+    servercount = 0;
 
-    if (nrows < 1) {
+    loopi(min(servers.length(), MAXROWS)) {
+      serverinfo &si = servers[i];
+      if (si.ping == 9999) continue;
+      servermap[servercount++] = i;
+      sprintf_s(rows_text[ndisp][0])("%d", si.ping);
+      sprintf_s(rows_text[ndisp][1])("%d", si.numplayers);
+      strcpy_s(rows_text[ndisp][2], si.map[0] ? si.map : "?");
+      strcpy_s(rows_text[ndisp][3], modestr(si.mode));
+      if (si.sdesc[0])
+        sprintf_s(rows_text[ndisp][4])("%s %s", si.name, si.sdesc);
+      else
+        strcpy_s(rows_text[ndisp][4], si.name);
+      ndisp++;
+    };
+
+    if (ndisp < 1) {
+      servercount = 0;
+      ndisp = 1;
       strcpy_s(rows_text[0][0], "-");
       strcpy_s(rows_text[0][1], "-");
       strcpy_s(rows_text[0][2], "-");
       strcpy_s(rows_text[0][3], "-");
       strcpy_s(rows_text[0][4], "(No servers available)");
-    } else
-      loopi(ndisp) {
-        serverinfo &si = servers[i];
-        sprintf_s(rows_text[i][0])(si.ping == 9999   ? "?"
-                                   : si.ping == 9998 ? "XXX"
-                                                     : "%d",
-                                   si.ping);
-        sprintf_s(rows_text[i][1])("%d", si.numplayers);
-        strcpy_s(rows_text[i][2], si.map[0] ? si.map : "?");
-        strcpy_s(rows_text[i][3], modestr(si.mode));
-        if (si.sdesc[0])
-          sprintf_s(rows_text[i][4])("%s %s", si.name, si.sdesc);
-        else
-          strcpy_s(rows_text[i][4], si.name);
-      };
+    };
 
     float sc = 0.85f;
     int colpad = (int)(FONTH / 3 * sc);
@@ -844,7 +851,7 @@ bool menukey(int code, bool isdown) {
       return true;
     };
     gmenu &gm = menus[vmenu];
-    int n = gm.items.length();
+    int n = vmenu == 1 ? max(servercount, 1) : gm.items.length();
     int maxvis = (VIRTH - 3 * (FONTH / 4 * 5)) / (FONTH / 4 * 5);
     if (maxvis < 1)
       maxvis = 1;
@@ -872,8 +879,8 @@ bool menukey(int code, bool isdown) {
         };
       } else {
         char *action = menus[vmenu].items[menusel].action;
-        if (vmenu == 1 && menus[vmenu].items.length() > 0)
-          connects(getservername(menusel));
+        if (vmenu == 1 && servercount > 0 && menusel < servercount)
+          connects(getservername(servermap[menusel]));
         if (menus[vmenu].items[menusel].checkbox ||
             menus[vmenu].items[menusel].slider) {
           execute(action, true);

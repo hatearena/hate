@@ -247,7 +247,8 @@ static void botaction(dynent *m) {
         180;
 
     float aimspread = (4 - botdifficulty) * 6.0f;
-    if (m_noitems && m_noitemsrail) aimspread += 10.0f;
+    if (m_noitems && m_noitemsrail)
+      aimspread += 10.0f;
     if (aimspread > 0) {
       enemyyaw += (rnd(101) - 50) / 100.0f * aimspread;
     }
@@ -261,7 +262,8 @@ static void botaction(dynent *m) {
 
     normalise(m, m->targetyaw);
     float turnrate = curtime * (0.15f + botdifficulty * 0.05f);
-    if (m_noitems && m_noitemsrail) turnrate *= 0.4f;
+    if (m_noitems && m_noitemsrail)
+      turnrate *= 0.4f;
     float yawdiff = m->targetyaw - m->yaw;
     if (fabs(yawdiff) < turnrate)
       m->yaw = m->targetyaw;
@@ -498,15 +500,15 @@ static void spawnonebot() {
 
 void addbotcmd(int n) {
   if (isdedicated) {
-    conoutf("bots not supported on dedicated servers");
+    conoutf("Bots not supported on dedicated servers");
     return;
   }
   if (multiplayer()) {
-    conoutf("only the server admin can spawn bots");
+    conoutf("Only the server admin can spawn bots");
     return;
   }
   if (gamemode < 0) {
-    conoutf("bots only work in multiplayer modes");
+    conoutf("Bots only work in multiplayer modes");
     return;
   }
   if (n < 1)
