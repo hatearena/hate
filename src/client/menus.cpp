@@ -344,18 +344,23 @@ bool rendermenu() {
 
     float target = (float)(m.menusel - m.scrolloff);
     m.menuselvis += (target - m.menuselvis) * 0.2f;
-    int bh = sepy + (int)(m.menuselvis * rowstep);
+    int bh = sepy + rowstep + (int)(m.menuselvis * rowstep);
 
     glDisable(GL_TEXTURE_2D);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glBegin(GL_QUADS);
-    glColor4ub(200, 50, 50, 217);
-    glVertex2i(x0 + border, bh);
-    glVertex2i(x0 + tablew - border, bh);
-    glColor4ub(150, 30, 30, 217);
-    glVertex2i(x0 + tablew - border, bh + rowstep);
-    glVertex2i(x0 + border, bh + rowstep);
-    glEnd();
+
+    if (m.menusel >= 0) {
+      glLineWidth(3);
+      glColor4ub(255, 30, 30, 220);
+      glBegin(GL_LINE_LOOP);
+      glVertex2i(x0 + border + 1, bh);
+      glVertex2i(x0 + tablew - border - 1, bh);
+      glVertex2i(x0 + tablew - border - 1, bh + rowstep);
+      glVertex2i(x0 + border + 1, bh + rowstep);
+      glEnd();
+      glLineWidth(1);
+    };
+
     glEnable(GL_TEXTURE_2D);
 
     loopi(vis) {
