@@ -28,7 +28,6 @@ vector<server_entity> sents;
 
 bool notgotitems = true;
 int mode = 0;
-
 string rconpass;
 vector<char *> blacklist;
 bool allowvotes = true;
@@ -54,7 +53,6 @@ void restoreserverstate(vector<entity> &ents) {
 int interm = 0, minremain = 0, mapend = 0;
 int timelimit = 10;
 bool mapreload = false;
-
 char *serverpassword = "";
 
 bool isdedicated;
