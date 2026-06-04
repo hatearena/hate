@@ -149,7 +149,8 @@ static void drawscoretable(int x0, int &y0, int tablew, int nrows, int ncols,
       glEnd();
       glEnable(GL_TEXTURE_2D);
     };
-    loopj(ncols) draw_text(rows[rowstart + i][j], colx[j], datay, 2, 255, fscale);
+    loopj(ncols)
+        draw_text(rows[rowstart + i][j], colx[j], datay, 2, 255, fscale);
     glDisable(GL_TEXTURE_2D);
     if (is_blue)
       glColor4ub(55, 55, 85, 120);
@@ -225,6 +226,167 @@ bool rendermenu() {
   };
   if (vmenu == 1)
     refreshservers();
+
+  if (vmenu == 1) {
+    struct serverinfo {
+      string name;
+      string full;
+      string map;
+      string sdesc;
+      int mode, numplayers, ping, protocol, minremain;
+      ENetAddress address;
+    };
+    extern vector<serverinfo> servers;
+
+    gmenu &m = menus[1];
+    int nrows = servers.length();
+
+    enum { NCOLS = 5, MAXROWS = 128 };
+    char *headers[] = {"Ping", "Players", "Map", "Mode", "Server"};
+    string rows_text[MAXROWS][NCOLS];
+    int ndisp = max(min(nrows, MAXROWS), 1);
+
+    if (nrows < 1) {
+      strcpy_s(rows_text[0][0], "-");
+      strcpy_s(rows_text[0][1], "-");
+      strcpy_s(rows_text[0][2], "-");
+      strcpy_s(rows_text[0][3], "-");
+      strcpy_s(rows_text[0][4], "(No servers available)");
+    } else
+      loopi(ndisp) {
+        serverinfo &si = servers[i];
+        sprintf_s(rows_text[i][0])(si.ping == 9999   ? "?"
+                                   : si.ping == 9998 ? "XXX"
+                                                     : "%d",
+                                   si.ping);
+        sprintf_s(rows_text[i][1])("%d", si.numplayers);
+        strcpy_s(rows_text[i][2], si.map[0] ? si.map : "?");
+        strcpy_s(rows_text[i][3], modestr(si.mode));
+        if (si.sdesc[0])
+          sprintf_s(rows_text[i][4])("%s %s", si.name, si.sdesc);
+        else
+          strcpy_s(rows_text[i][4], si.name);
+      };
+
+    float sc = 0.85f;
+    int colpad = (int)(FONTH / 3 * sc);
+    int gap = (int)(FONTH / 4 * sc);
+    int rowstep = (int)(FONTH / 4 * 5 * sc);
+    int border = (int)(FONTH / 2 * sc);
+
+    int colw[NCOLS];
+    loopi(NCOLS) {
+      colw[i] = text_width(headers[i]);
+      loopj(ndisp) {
+        int w = text_width(rows_text[j][i]);
+        if (w > colw[i])
+          colw[i] = w;
+      };
+    };
+
+    int tablew = border * 2;
+    loopi(NCOLS) tablew += colw[i] + 2 * colpad;
+    tablew += (NCOLS - 1) * gap;
+
+    int maxvis = (VIRTH - 3 * rowstep) / rowstep;
+    if (maxvis < 1)
+      maxvis = 1;
+    if (m.menusel < 0)
+      m.menusel = 0;
+    if (m.menusel >= ndisp)
+      m.menusel = ndisp - 1;
+    if (m.menusel < m.scrolloff)
+      m.scrolloff = m.menusel;
+    if (m.menusel >= m.scrolloff + maxvis)
+      m.scrolloff = m.menusel - maxvis + 1;
+    if (m.scrolloff > max(0, ndisp - maxvis))
+      m.scrolloff = max(0, ndisp - maxvis);
+    int vis = min(ndisp - m.scrolloff, maxvis);
+
+    int tableh = (vis + 2) * rowstep + border * 2;
+    int x0 = (VIRTW - tablew) / 2;
+    int y0 = (VIRTH - tableh) / 2;
+
+    overlay(160);
+    glDisable(GL_TEXTURE_2D);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glColor4ub(50, 15, 15, 217);
+    roundedbox(x0, y0, x0 + tablew, y0 + tableh, FONTH / 2);
+    glEnable(GL_TEXTURE_2D);
+
+    int colx[NCOLS];
+    int cx = x0 + border;
+    loopi(NCOLS) {
+      colx[i] = cx + colpad;
+      cx += colw[i] + 2 * colpad + gap;
+    };
+
+    int headery = y0 + border;
+    int sepy = headery + rowstep;
+    glDisable(GL_TEXTURE_2D);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glColor4ub(60, 35, 35, 180);
+    glBegin(GL_QUADS);
+    glVertex2i(x0 + border, headery);
+    glVertex2i(x0 + tablew - border, headery);
+    glVertex2i(x0 + tablew - border, sepy);
+    glVertex2i(x0 + border, sepy);
+    glEnd();
+    glEnable(GL_TEXTURE_2D);
+    loopi(NCOLS) draw_text(headers[i], colx[i], headery, 2, 255, sc);
+
+    float target = (float)(m.menusel - m.scrolloff);
+    m.menuselvis += (target - m.menuselvis) * 0.2f;
+    int bh = sepy + (int)(m.menuselvis * rowstep);
+
+    glDisable(GL_TEXTURE_2D);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glBegin(GL_QUADS);
+    glColor4ub(200, 50, 50, 217);
+    glVertex2i(x0 + border, bh);
+    glVertex2i(x0 + tablew - border, bh);
+    glColor4ub(150, 30, 30, 217);
+    glVertex2i(x0 + tablew - border, bh + rowstep);
+    glVertex2i(x0 + border, bh + rowstep);
+    glEnd();
+    glEnable(GL_TEXTURE_2D);
+
+    loopi(vis) {
+      int idx = m.scrolloff + i;
+      int dy = sepy + (i + 1) * rowstep;
+
+      if (i % 2 == 1) {
+        glDisable(GL_TEXTURE_2D);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glColor4ub(60, 35, 35, 100);
+        glBegin(GL_QUADS);
+        glVertex2i(x0 + border, dy);
+        glVertex2i(x0 + tablew - border, dy);
+        glVertex2i(x0 + tablew - border, dy + rowstep);
+        glVertex2i(x0 + border, dy + rowstep);
+        glEnd();
+        glEnable(GL_TEXTURE_2D);
+      };
+
+      loopj(NCOLS) draw_text(rows_text[idx][j], colx[j], dy, 2, 255, sc);
+
+      glDisable(GL_TEXTURE_2D);
+      glColor4ub(85, 55, 55, 120);
+      glBegin(GL_LINES);
+      glVertex2i(x0 + border, dy + rowstep);
+      glVertex2i(x0 + tablew - border, dy + rowstep);
+      glEnd();
+      glEnable(GL_TEXTURE_2D);
+    };
+
+    if (m.scrolloff > 0)
+      draw_text("/\\", x0 + tablew / 2 - 16, y0 + tableh - rowstep, 2);
+    if (m.scrolloff + vis < ndisp)
+      draw_text("\\/", x0 + tablew / 2 - 16, y0 + tableh, 2);
+
+    return true;
+  };
+
   gmenu &m = menus[vmenu];
 
   if (vmenu == 0) {
@@ -286,10 +448,12 @@ bool rendermenu() {
 
     int availh = VIRTH - 3 * rowstep;
     int maxvis = availh / rowstep;
-    if (maxvis < 1) maxvis = 1;
+    if (maxvis < 1)
+      maxvis = 1;
     if (scoreboard_scroll > max(0, nrows - maxvis))
       scoreboard_scroll = max(0, nrows - maxvis);
-    if (scoreboard_scroll < 0) scoreboard_scroll = 0;
+    if (scoreboard_scroll < 0)
+      scoreboard_scroll = 0;
 
     int colw[MAXCOLS];
     loopi(ncols) {
@@ -317,11 +481,13 @@ bool rendermenu() {
     if (m_teammode) {
       int split = min(teamscore_split, nrows);
       int nblue = min(split - scoreboard_scroll, maxvis);
-      if (nblue < 0) nblue = 0;
+      if (nblue < 0)
+        nblue = 0;
       int nblue_start = min(scoreboard_scroll, split);
       int nred_start = split;
       int nred = min(nrows - nred_start, maxvis - nblue);
-      if (nred < 0) nred = 0;
+      if (nred < 0)
+        nred = 0;
       int blueh = nblue > 0 ? (nblue + 2) * rowstep + border * 2 : 0;
       int redh = nred > 0 ? (nred + 2) * rowstep + border * 2 : 0;
       int totalh = max(blueh + redh + gap, 1);
@@ -343,7 +509,8 @@ bool rendermenu() {
     int y0 = (VIRTH - tableh) / 2;
     overlay(160);
     drawscoretable(x0, y0, tablew, min(nrows, maxvis), ncols, colw, colx, hdr,
-                   rows_text, scoreboard_scroll, rowstep, border, colpad, gap, false);
+                   rows_text, scoreboard_scroll, rowstep, border, colpad, gap,
+                   false);
     return true;
   };
 
@@ -705,7 +872,7 @@ bool menukey(int code, bool isdown) {
         };
       } else {
         char *action = menus[vmenu].items[menusel].action;
-        if (vmenu == 1)
+        if (vmenu == 1 && menus[vmenu].items.length() > 0)
           connects(getservername(menusel));
         if (menus[vmenu].items[menusel].checkbox ||
             menus[vmenu].items[menusel].slider) {
