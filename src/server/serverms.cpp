@@ -142,5 +142,7 @@ void servermsinit(const char *master, char *sdesc, bool listen) {
     pongsock = enet_socket_create(ENET_SOCKET_TYPE_DATAGRAM);
     if (pongsock == ENET_SOCKET_NULL)
       fatal("could not create server info socket\n");
+    if (enet_socket_bind(pongsock, &address) < 0)
+      fatal("could not bind server info socket\n");
   };
 };
