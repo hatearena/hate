@@ -244,8 +244,8 @@ bool rendermenu() {
 
     gmenu &m = menus[1];
 
-    enum { NCOLS = 5, MAXROWS = 128 };
-    char *headers[] = {"Ping", "Players", "Map", "Mode", "Server"};
+    enum { NCOLS = 6, MAXROWS = 128 };
+    char *headers[] = {"Ping", "Players", "Map", "Mode", "IP", "Server"};
     string rows_text[MAXROWS][NCOLS];
     int ndisp = 0;
     servercount = 0;
@@ -258,10 +258,8 @@ bool rendermenu() {
       sprintf_s(rows_text[ndisp][1])("%d", si.numplayers);
       strcpy_s(rows_text[ndisp][2], si.map[0] ? si.map : "?");
       strcpy_s(rows_text[ndisp][3], modestr(si.mode));
-      if (si.sdesc[0])
-        sprintf_s(rows_text[ndisp][4])("%s %s", si.name, si.sdesc);
-      else
-        strcpy_s(rows_text[ndisp][4], si.name);
+      strcpy_s(rows_text[ndisp][4], si.name);
+      strcpy_s(rows_text[ndisp][5], si.sdesc[0] ? si.sdesc : "-");
       ndisp++;
     };
 
@@ -272,7 +270,8 @@ bool rendermenu() {
       strcpy_s(rows_text[0][1], "-");
       strcpy_s(rows_text[0][2], "-");
       strcpy_s(rows_text[0][3], "-");
-      strcpy_s(rows_text[0][4], "(No servers available)");
+      strcpy_s(rows_text[0][4], "-");
+      strcpy_s(rows_text[0][5], "(No servers available)");
     };
 
     float sc = 0.85f;

@@ -15,7 +15,6 @@ struct client {
 };
 
 vector<client> clients;
-
 int maxclients = 8;
 string smapname;
 
@@ -25,7 +24,6 @@ struct server_entity {
 };
 
 vector<server_entity> sents;
-
 bool notgotitems = true;
 int mode = 0;
 string rconpass;
@@ -54,6 +52,7 @@ int interm = 0, minremain = 0, mapend = 0;
 int timelimit = 10;
 bool mapreload = false;
 char *serverpassword = "";
+string servername;
 
 bool isdedicated;
 ENetHost *serverhost = NULL;
@@ -124,6 +123,7 @@ void loadserverconf() {
     f = fopen("serverconf.cfg", "w");
     if (!f)
       return;
+    fprintf(f, "name \"HATE Server\"\n");
     fprintf(f, "timelimit 10\n");
     fprintf(f, "maxplayers 16\n");
     fprintf(f, "allowvotes 1\n");
@@ -202,6 +202,8 @@ void loadserverconf() {
       strcpy_s(logfile_str, vbuf);
     else if (strcmp(key, "gamemode") == 0)
       cfg_gamemode = atoi(vbuf);
+    else if (strcmp(key, "name") == 0)
+      strcpy_s(servername, vbuf);
     else if (strcmp(key, "maprotation") == 0) {
       char temp[_MAXDEFSTR];
       strcpy_s(temp, vbuf);
@@ -753,6 +755,8 @@ void initserver(bool dedicated, int uprate, char *sdesc, char *ip, char *master,
   serverpassword = passwd;
   maxclients = maxcl;
 
+  if (servername[0])
+    sdesc = servername;
   servermsinit(master ? master : "localhost/", sdesc, dedicated);
 
   if ((isdedicated = dedicated)) {
