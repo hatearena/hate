@@ -193,6 +193,15 @@ int main(int argc, char *argv[]) {
   char *sdesc = "", *ip = "", *master = NULL, *passwd = "";
 
   for (int i = 1; i < argc; i++) {
+    if (strcmp(argv[i], "--gen-rcon") == 0) {
+      srand(time(NULL));
+      const char *chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+      char pass[17];
+      for (int j = 0; j < 16; j++) pass[j] = chars[rand() % 62];
+      pass[16] = 0;
+      printf("Generated RCON password: %s\n", pass);
+      return 0;
+    }
     char *a = &argv[i][2];
     if (argv[i][0] == '-')
       switch (argv[i][1]) {
