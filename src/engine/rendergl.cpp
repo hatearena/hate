@@ -819,7 +819,6 @@ void drawhudgun(float fovy, float aspect, int farplane) {
   gluPerspective(fovy, aspect, 0.3f, farplane);
   glMatrixMode(GL_MODELVIEW);
 
-  // glClear(GL_DEPTH_BUFFER_BIT);
   int rtime = reloadtime(d->gunselect);
   if (d->lastaction && d->lastattackgun == d->gunselect &&
       lastmillis - d->lastaction < rtime) {
