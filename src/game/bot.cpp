@@ -365,8 +365,8 @@ void botrender() {
     float saved = bots[i]->maxspeed;
     bots[i]->maxspeed = 20.0f;
     const char *mdl = "monster/player";
-    if (m_teammode) {
-      if (bots[i]->team[0] && !strcmp(bots[i]->team, "BLUE"))
+    if (m_teammode || m_infected) {
+      if (bots[i]->team[0] && !strcmp(bots[i]->team, m_infected ? "RES" : "BLUE"))
         mdl = "monster/blueplayer";
       else
         mdl = "monster/redplayer";
