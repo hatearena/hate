@@ -168,24 +168,6 @@ void renderscores() {
     loopv(bs) if (bs[i]) renderscore(bs[i]);
     sortmenu(0, scorelines.length());
   };
-  if (m_teammode) {
-    teamsused = 0;
-    loopv(players) addteamscore(players[i]);
-    if (!demoplayback)
-      addteamscore(player1);
-    teamscores[0] = 0;
-    loopj(teamsused) {
-      const char *tname = teamname[j];
-      if (m_infected) {
-        if (!strcmp(tname, "RES")) tname = "RESISTANCE";
-        else if (!strcmp(tname, "INFD")) tname = "INFECTED";
-      };
-      sprintf_sd(sc)("[ %s: %d ]", tname, teamscore[j]);
-      strcat_s(teamscores, sc);
-    };
-    menumanual(0, scorelines.length(), "");
-    menumanual(0, scorelines.length() + 1, teamscores);
-  };
 };
 
 // sendmap/getmap commands, should be replaced by more intuitive map downloading
