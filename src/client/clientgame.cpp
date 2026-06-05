@@ -322,19 +322,23 @@ void updateworld(int millis) // main game update loop
     if (m_arena)
       arenarespawn();
     if (m_infected && !intermission) {
-      int infected = 0, resistance = 0;
-      if (player1->state != CS_DEAD) {
-        if (!strcmp(player1->team, "INFD")) infected++;
-        else resistance++;
-      };
-      loopv(players) if (players[i] && players[i]->state != CS_DEAD) {
-        if (!strcmp(players[i]->team, "INFD")) infected++;
-        else resistance++;
+      int infected = 0, resistance = 0, infecteddead = 0;
+      if (!strcmp(player1->team, "INFD")) {
+        if (player1->state != CS_DEAD) infected++;
+        else infecteddead++;
+      } else if (player1->state != CS_DEAD) resistance++;
+      loopv(players) if (players[i]) {
+        if (!strcmp(players[i]->team, "INFD")) {
+          if (players[i]->state != CS_DEAD) infected++;
+          else infecteddead++;
+        } else if (players[i]->state != CS_DEAD) resistance++;
       };
       dvector &bv = getbots();
-      loopv(bv) if (bv[i] && bv[i]->state != CS_DEAD) {
-        if (!strcmp(bv[i]->team, "INFD")) infected++;
-        else resistance++;
+      loopv(bv) if (bv[i]) {
+        if (!strcmp(bv[i]->team, "INFD")) {
+          if (bv[i]->state != CS_DEAD) infected++;
+          else infecteddead++;
+        } else if (bv[i]->state != CS_DEAD) resistance++;
       };
       if (infected + resistance >= 2 && infected > 0 && resistance == 0) {
         intermission = true;
@@ -345,7 +349,7 @@ void updateworld(int millis) // main game update loop
         conoutf("Intermission: Infection contained");
         conoutf("New map in 15 seconds");
         showscores(true);
-      } else if (infected == 0 && resistance >= 1) {
+      } else if (infected == 0 && infecteddead == 0 && resistance >= 1) {
         if (resistance >= 2 || (infected_picktime && lastmillis > infected_picktime)) {
           infected_picktime = 0;
           int pick = rnd(resistance);
