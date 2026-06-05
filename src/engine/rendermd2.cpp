@@ -42,7 +42,7 @@ struct md2 {
   bool load(char *filename);
   void render(vec &light, int numFrame, int range, float x, float y, float z,
               float yaw, float pitch, float scale, float speed, int snap,
-              int basetime);
+              int basetime, float glow = 0);
   void scale(int frame, float scale, int sn);
 
   md2()
@@ -147,7 +147,7 @@ void md2::scale(int frame, float scale, int sn) {
 
 void md2::render(vec &light, int frame, int range, float x, float y, float z,
                  float yaw, float pitch, float sc, float speed, int snap,
-                 int basetime) {
+                 int basetime, float glow) {
 
   if (speed <= 0.0f)
     speed = 100.0f;
@@ -167,7 +167,10 @@ void md2::render(vec &light, int frame, int range, float x, float y, float z,
   glRotatef(yaw + 180, 0, -1, 0);
   glRotatef(pitch, 0, 0, 1);
 
-  glColor3fv((float *)&light);
+  if (glow > 0)
+    glColor4f(light.x, light.y, light.z, glow);
+  else
+    glColor3fv((float *)&light);
 
   if (displaylist && frame == 0 && range == 1) {
     glCallList(displaylist);
@@ -306,7 +309,8 @@ void preloadhudmodels() {
 
 void rendermodel(char *mdl, int frame, int range, int tex, float rad, float x,
                  float y, float z, float yaw, float pitch, bool teammate,
-                 float scale, float speed, int snap, int basetime) {
+                 float scale, float speed, int snap, int basetime,
+                 float glow) {
   md2 *m = loadmodel(mdl);
 
   if (isoccluded(player1->o.x, player1->o.y, x - rad, z - rad, rad * 2))
@@ -331,6 +335,11 @@ void rendermodel(char *mdl, int frame, int range, int tex, float rad, float x,
     light.z = s->b / ll + of;
   };
 
+  float minbright = 0.5f;
+  light.x = max(light.x, minbright);
+  light.y = max(light.y, minbright);
+  light.z = max(light.z, minbright);
+
   if (teammate) {
     light.x *= 0.6f;
     light.y *= 0.7f;
@@ -339,4 +348,23 @@ void rendermodel(char *mdl, int frame, int range, int tex, float rad, float x,
 
   m->render(light, frame, range, x, y, z, yaw, pitch, scale, speed, snap,
             basetime);
+
+  if (glow > 0) {
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+    glDepthMask(GL_FALSE);
+
+    vec glowlight = {1.2f, 1.2f, 1.2f};
+    if (teammate) {
+      glowlight.x *= 0.6f;
+      glowlight.y *= 0.7f;
+      glowlight.z *= 1.2f;
+    }
+
+    m->render(glowlight, frame, range, x, y, z, yaw, pitch, scale * 1.05f,
+              speed, snap, basetime, glow);
+
+    glDepthMask(GL_TRUE);
+    glDisable(GL_BLEND);
+  }
 };

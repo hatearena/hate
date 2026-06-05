@@ -59,7 +59,8 @@ void renderclient(dynent *d, bool team, char *mdlname, bool hellpig,
     mz -= 1.9f;
   };
   rendermodel(mdlname, frame[n], range[n], 0, 1.5f, d->o.x, mz, d->o.y,
-              d->yaw + 90, d->pitch / 2, team, scale, speed, 0, basetime);
+              d->yaw + 90, d->pitch / 2, team, scale, speed, 0, basetime,
+              0.25f);
 };
 
 extern int democlientnum;
