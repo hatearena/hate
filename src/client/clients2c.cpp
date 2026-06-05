@@ -219,7 +219,12 @@ void localservertoclient(uchar *buf,
         };
       };
       if (actor == cn) {
-        conoutf("%s suicided", d->name);
+        if (m_infected && d->team[0] && strcmp(d->team, "INFD")) {
+          strn0cpy(d->team, "INFD", 5);
+          conoutf("%s suicided and became infected.", d->name);
+        } else {
+          conoutf("%s suicided", d->name);
+        };
         d->suicides++;
       } else if (actor == clientnum) {
         int frags;

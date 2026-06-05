@@ -404,8 +404,13 @@ void botpain(dynent *m, int damage, dynent *d) {
       d->frags++;
     }
     if (d == m) {
+      if (m_infected && m->team[0] && strcmp(m->team, "INFD")) {
+        strn0cpy(m->team, "INFD", 5);
+        conoutf("%s suicided and became infected.", m->name);
+      } else {
+        conoutf("%s suicided", m->name);
+      };
       m->suicides++;
-      conoutf("%s suicided", m->name);
     } else {
       conoutf("%s fragged %s", d->name, m->name);
     }

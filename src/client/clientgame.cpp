@@ -690,7 +690,14 @@ void selfdamage(int damage, int actor, dynent *act) {
         act->frags++;
     } else if (actor == -1) {
       actor = getclientnum();
-      conoutf("You suicided.");
+      if (m_infected && strcmp(player1->team, "INFD")) {
+        conoutf("You suicided and became infected.");
+        strn0cpy(player1->team, "INFD", 5);
+        extern bool c2sinit;
+        c2sinit = false;
+      } else {
+        conoutf("You suicided.");
+      };
       addmsg(1, 2, SV_FRAGS, --player1->frags);
       player1->suicides++;
     } else {
