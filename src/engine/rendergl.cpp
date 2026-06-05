@@ -756,9 +756,9 @@ VARP(hudgun, 0, 1, 1);
 VARP(viewbob, 0, 1, 1);
 VARP(viewbobamp, 0, 10, 50);
 
-char *hudgunnames[] = {"hudguns/hate_csaw", "hudguns/hate_shotg",
+char *hudgunnames[] = {"hudguns/hate_csaw",  "hudguns/hate_shotg",
                        "hudguns/hate_rifle", "hudguns/hate_rocket",
-                       "hudguns/hate_rail", "hudguns/hate_nailgun"};
+                       "hudguns/hate_rail",  "hudguns/hate_nailgun"};
 
 void drawhudmodel(int start, int end, float speed, int base) {
   float bx = 0, bz = 0;
@@ -863,6 +863,7 @@ void drawhudgun(float fovy, float aspect, int farplane) {
 
   glDisable(GL_CULL_FACE);
 };
+
 void gl_drawframe(int w, int h, float curfps) {
   float hf = hdr.waterlevel - 0.3f;
   float afov = (float)fov;
