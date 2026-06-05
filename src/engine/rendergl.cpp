@@ -973,8 +973,8 @@ void gl_drawframe(int w, int h, float curfps) {
   renderclients();
   if (thirdperson && !spectator && !screenshotmode) {
     const char *mdl = "monster/player";
-    if (m_teammode) {
-      if (player1->team[0] && !strcmp(player1->team, "BLUE"))
+    if (m_teammode || m_infected) {
+      if (player1->team[0] && !strcmp(player1->team, m_infected ? "RES" : "BLUE"))
         mdl = "monster/blueplayer";
       else
         mdl = "monster/redplayer";
