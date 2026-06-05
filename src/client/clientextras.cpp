@@ -7,7 +7,7 @@ int frame[] = {178, 184, 190, 137, 183, 189, 197, 164, 46, 51,
                54,  32,  0,   0,   40,  1,   162, 162, 67, 168};
 int range[] = {6, 6, 8, 28, 1, 1, 1, 1, 8, 19, 4, 18, 40, 1, 6, 15, 1, 1, 1, 1};
 
-void renderclient(dynent *d, bool team, char *mdlname, bool hellpig,
+void renderclient(dynent *d, bool team, const char *mdlname, bool hellpig,
                   float scale) {
   if (d->state == CS_SPECTATOR)
     return;

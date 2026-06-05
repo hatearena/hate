@@ -110,7 +110,7 @@ extern void fixplayer1range();
 
 // clientextras
 extern void renderclients();
-extern void renderclient(dynent *d, bool team, char *mdlname, bool hellpig, float scale);
+extern void renderclient(dynent *d, bool team, const char *mdlname, bool hellpig, float scale);
 extern bool scoreson;
 void showscores(bool on);
 extern void renderscores();
@@ -218,7 +218,7 @@ extern void cleansound();
 
 // rendermd2
 extern void preloadhudmodels();
-extern void rendermodel(char *mdl, int frame, int range, int tex, float rad, float x, float y, float z, float yaw, float pitch, bool teammate, float scale, float speed, int snap = 0, int basetime = 0, float glow = 0);
+extern void rendermodel(const char *mdl, int frame, int range, int tex, float rad, float x, float y, float z, float yaw, float pitch, bool teammate, float scale, float speed, int snap = 0, int basetime = 0, float glow = 0);
 extern mapmodelinfo &getmminfo(int i);
 extern int nummapmodels();
 

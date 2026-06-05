@@ -292,6 +292,7 @@ int main(int argc, char **argv) {
     fatal("Could not find core textures (hint: run HATE from the parent of the "
           "bin directory)");
   installtex(10, path(newstring("data/boost.png")), xs, ys);
+  installtex(11, path(newstring("data/nailgun.png")), xs, ys);
 
   log("preload weapons");
   preloadhudmodels();

@@ -1,5 +1,4 @@
 #include "../include/cube.h"
-#include "../include/protos.h"
 
 extern bool intermission;
 extern int intermissiontimer;
@@ -642,16 +641,27 @@ void gl_drawhud(int w, int h, int curfps, int nquads, int curvert,
       draw_textf("%d", 315, 1660, 2, d->armour);
     }
 
-    int g = d->gunselect;
-    int r = 64;
-    if (g > 4) {
-      g -= 5;
-      r = 192;
-    } else if (g > 2) {
-      g -= 3;
-      r = 128;
-    };
-    drawicon((float)(g * 64), (float)r, VIRTW - 250, 1620, 64);
+    if (d->gunselect == GUN_NAILGUN) {
+      glBindTexture(GL_TEXTURE_2D, 11);
+      glBegin(GL_QUADS);
+      glTexCoord2f(0, 0); glVertex2i(VIRTW - 250, 1620);
+      glTexCoord2f(1, 0); glVertex2i(VIRTW - 250 + 64, 1620);
+      glTexCoord2f(1, 1); glVertex2i(VIRTW - 250 + 64, 1620 + 64);
+      glTexCoord2f(0, 1); glVertex2i(VIRTW - 250, 1620 + 64);
+      glEnd();
+      xtraverts += 4;
+    } else {
+      int g = d->gunselect;
+      int r = 64;
+      if (g > 4) {
+        g -= 5;
+        r = 192;
+      } else if (g > 2) {
+        g -= 3;
+        r = 128;
+      };
+      drawicon((float)(g * 64), (float)r, VIRTW - 250, 1620, 64);
+    }
     draw_textf("%d", VIRTW - 170, 1660, 2, d->ammo[d->gunselect]);
 
     glDisable(GL_TEXTURE_2D);

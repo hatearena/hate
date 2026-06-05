@@ -21,7 +21,7 @@ guninfo guns[NUMGUNS] = {
     {S_CG, 100, 30, 0, 0, 7, "chaingun"},
     {S_RLFIRE, 800, 120, 80, 0, 10, "rocketlauncher"},
     {S_RIFLE, 1500, 100, 0, 0, 30, "rifle"},
-    {S_NAILGUN, 150, 25, 0, 0, 5, "nailgun"},
+    {S_NAILGUN, 100, 25, 0, 0, 5, "nailgun"},
     {S_FLAUNCH, 200, 20, 50, 4, 1, "fireball"},
     {S_ICEBALL, 200, 40, 30, 6, 1, "iceball"},
     {S_SLIMEBALL, 200, 30, 160, 7, 1, "slimeball"},

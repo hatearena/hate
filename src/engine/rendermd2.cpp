@@ -263,10 +263,10 @@ void delayedload(md2 *m) {
 
 int modelnum = 0;
 
-md2 *loadmodel(char *name) {
+md2 *loadmodel(const char *name) {
   if (!mdllookup)
     mdllookup = new hashtable<md2 *>;
-  md2 **mm = mdllookup->access(name);
+  md2 **mm = mdllookup->access((char *)name);
   if (mm)
     return *mm;
   md2 *m = new md2();
@@ -307,7 +307,7 @@ void preloadhudmodels() {
     }
 }
 
-void rendermodel(char *mdl, int frame, int range, int tex, float rad, float x,
+void rendermodel(const char *mdl, int frame, int range, int tex, float rad, float x,
                  float y, float z, float yaw, float pitch, bool teammate,
                  float scale, float speed, int snap, int basetime,
                  float glow) {
