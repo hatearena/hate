@@ -379,7 +379,8 @@ void botrender() {
     bots[i]->maxspeed = 20.0f;
     const char *mdl = "monster/player";
     if (m_teammode || m_infected) {
-      if (bots[i]->team[0] && !strcmp(bots[i]->team, m_infected ? "RES" : "BLUE"))
+      if (bots[i]->team[0] &&
+          !strcmp(bots[i]->team, m_infected ? "RES" : "BLUE"))
         mdl = "monster/blueplayer";
       else
         mdl = "monster/redplayer";
@@ -541,7 +542,6 @@ static void spawnonebot() {
   genbotname(b->name);
   bots.add(b);
   conoutf("%s spawned.", b->name);
-
 }
 
 void addbotcmd(int n) {
