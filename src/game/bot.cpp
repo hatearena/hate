@@ -202,7 +202,7 @@ static void botaction(dynent *m) {
   }
 
   if (!enemy) {
-    if (lastmillis - m->lastmove > 3000 + rnd(3000)) {
+    if (lastmillis - m->lastmove > 3000 + rnd(4500)) {
       m->targetyaw = (float)(rnd(360));
       m->lastmove = lastmillis;
     };
