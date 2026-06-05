@@ -84,6 +84,7 @@ extern void writeclientinfo(FILE *f);
 
 // clientgame
 extern int thirdperson;
+extern void infected_checkpick();
 extern bool spectator;
 extern bool speclook;
 extern dynent *getspectarget();

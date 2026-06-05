@@ -5,8 +5,10 @@ extern bool los(float lx, float ly, float lz, float bx, float by, float bz,
 
 dvector bots;
 int numbots = 0;
+
 VAR(botdifficulty, -1, 4, 4);
 VAR(botamount, 1, 4, 16);
+
 static int botspawncycle = -1;
 
 static const char *botnames[] = {
@@ -209,7 +211,9 @@ static void botaction(dynent *m) {
 
   vdist(disttoenemy, vectoenemy, m->o, m->enemy->o);
 
-  if (m_noitems && m_noitemsrail) {
+  if (m_infected && m->team[0] && !strcmp(m->team, "INFECTED")) {
+    m->gunselect = GUN_CSAW;
+  } else if (m_noitems && m_noitemsrail) {
     m->gunselect = GUN_RIFLE;
   } else if (disttoenemy < 8.0f) {
     if (m->gunselect != GUN_CSAW)
@@ -325,7 +329,9 @@ void botthink() {
   loopv(bots) {
     dynent *b = bots[i];
     if (b->state == CS_ALIVE) {
-      if (lastmillis - lastammorefill > 15000) {
+      if (m_infected && b->team[0] && !strcmp(b->team, "INFECTED")) {
+        // whatever
+      } else if (lastmillis - lastammorefill > 15000) {
         lastammorefill = lastmillis;
         b->ammo[GUN_SG] = max(b->ammo[GUN_SG], 10);
         b->ammo[GUN_NAILGUN] = max(b->ammo[GUN_NAILGUN], 40);
@@ -379,6 +385,11 @@ void botpain(dynent *m, int damage, dynent *d) {
     m->enemy = d;
 
   if ((m->health -= damage) <= 0) {
+    if (m_infected && d && m->team[0] && d->team[0] &&
+        strcmp(m->team, "INFECTED") != 0 && !strcmp(d->team, "INFECTED")) {
+      strn0cpy(m->team, "INFECTED", 5);
+      conoutf("%s has been infected", m->name);
+    };
     m->state = CS_DEAD;
     m->lastaction = lastmillis;
     m->attacking = false;
@@ -449,6 +460,21 @@ static bool botoutside(dynent *b) {
 static void autoteambot(dynent *d) {
   if (!m_teammode)
     return;
+  if (m_infected) {
+    if (!d->team[0]) {
+      bool hasinfected = false;
+      if (player1 && player1 != d && !strcmp(player1->team, "INFECTED"))
+        hasinfected = true;
+      loopv(players) if (players[i] && players[i] != d &&
+                         !strcmp(players[i]->team, "INFECTED")) hasinfected =
+          true;
+      dvector &bv = getbots();
+      loopv(bv) if (bv[i] && bv[i] != d && !strcmp(bv[i]->team, "INFECTED"))
+          hasinfected = true;
+      strn0cpy(d->team, hasinfected ? "RESISTANCE" : "INFECTED", 5);
+    }
+    return;
+  }
   int red = 0, blue = 0;
   if (player1 && player1 != d) {
     if (!strcmp(player1->team, "RED"))
@@ -490,9 +516,15 @@ static void spawnonebot() {
   b->lastmove = 0;
   b->move = 1;
   b->targetyaw = b->yaw;
-  b->gunselect = GUN_SG + rnd(5);
+  if (m_infected && b->team[0] && !strcmp(b->team, "INFECTED")) {
+    b->gunselect = GUN_CSAW;
+    loopi(NUMGUNS) b->ammo[i] = 0;
+    b->ammo[GUN_CSAW] = 1;
+  } else {
+    b->gunselect = GUN_SG + rnd(5);
+    loopi(NUMGUNS) b->ammo[i] = 100;
+  };
   b->maxspeed = max(28.0f + botdifficulty * 4.0f, 16.0f);
-  loopi(NUMGUNS) b->ammo[i] = 100;
   b->anger = 0;
   b->lastupdate = lastmillis;
   b->state = CS_ALIVE;
@@ -502,6 +534,10 @@ static void spawnonebot() {
   genbotname(b->name);
   bots.add(b);
   conoutf("%s spawned.", b->name);
+  if (m_infected) {
+    extern void infected_checkpick();
+    infected_checkpick();
+  };
 }
 
 void addbotcmd(int n) {

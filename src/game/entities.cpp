@@ -175,6 +175,14 @@ void teleport(int n, dynent *d) {
 };
 
 void pickup(int n, dynent *d) {
+  if (m_infected && d->team[0] && !strcmp(d->team, "INFECTED")) {
+    if (ents[n].type == I_HEALTH || ents[n].type == I_BOOST) {
+      int np = 1;
+      loopv(players) if (players[i]) np++;
+      additem(n, d->health, ents[n].type == I_BOOST ? 60 : np * 5);
+    };
+    return;
+  };
   int np = 1;
   loopv(players) if (players[i]) np++;
   if (np < 3)

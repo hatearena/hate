@@ -54,10 +54,11 @@ const char *modenames[] = {
     "insta clan arena",
     "tactics arena",
     "tactics clan arena",
+    "infected",
 };
 
 const char *modestr(int n) {
-  return (n >= -2 && n < 12) ? modenames[n + 2] : "unknown";
+  return (n >= -2 && n < 13) ? modenames[n + 2] : "unknown";
 };
 
 char msgsizesl[] = // size inclusive message token, 0 for variable or

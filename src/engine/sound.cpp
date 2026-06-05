@@ -15,8 +15,20 @@ struct soundloc {
 } soundlocs[MAXCHAN];
 
 int soundchan[MAXCHAN];
+int chanprio[MAXCHAN];
 vector<int> soundmax;
 VAR(maxsamesound, 0, 0, 8);
+
+static bool isgunshot(int n) {
+    switch (n) {
+        case S_RIFLE: case S_SG: case S_CG: case S_RLFIRE:
+        case S_NAILGUN: case S_CSAW: case S_FLAUNCH:
+        case S_ICEBALL: case S_SLIMEBALL:
+            return true;
+        default:
+            return false;
+    }
+}
 
 #ifdef USE_MIXER
 #include "SDL_mixer.h"
@@ -54,7 +66,7 @@ VAR(soundbufferlen, 128, 1024, 4096);
 
 void initsound() {
   memset(soundlocs, 0, sizeof(soundloc) * MAXCHAN);
-  loopi(MAXCHAN) soundchan[i] = -1;
+  loopi(MAXCHAN) { soundchan[i] = -1; chanprio[i] = 0; }
 #ifdef USE_MIXER
   if (Mix_OpenAudio(SOUNDFREQ, MIX_DEFAULT_FORMAT, 2, soundbufferlen) < 0) {
     conoutf("sound init failed (SDL_mixer): %s", (size_t)Mix_GetError());
@@ -281,14 +293,33 @@ void playsound(int n, vec *loc) {
     };
   };
 
+  int prio;
+  if (!loc) {
+    prio = 3;
+  } else if (isgunshot(n)) {
+    prio = 2;
+  } else {
+    prio = 1;
+  };
+
 #ifdef USE_MIXER
   int chan = Mix_PlayChannel(-1, samples[n], 0);
+  if (chan < 0 && prio > 1) {
+    int worst = 0;
+    loopi(MAXCHAN) if (chanprio[i] < chanprio[worst]) worst = i;
+    if (chanprio[worst] < prio) {
+      stopchan(worst);
+      chan = worst;
+      Mix_PlayChannel(chan, samples[n], 0);
+    };
+  };
 #else
   int chan = FSOUND_PlaySoundEx(FSOUND_FREE, samples[n], NULL, true);
 #endif
   if (chan < 0)
     return;
   soundchan[chan] = n;
+  chanprio[chan] = prio;
   if (loc)
     newsoundloc(chan, loc);
   updatechanvol(chan, loc);
@@ -367,6 +398,7 @@ void stopsounds() {
     loopi(MAXCHAN) {
         soundlocs[i].inuse = false;
         soundchan[i] = -1;
+        chanprio[i] = 0;
     }
 }
 
@@ -381,6 +413,7 @@ void stopchan(int chan) {
   if (chan < MAXCHAN) {
     soundlocs[chan].inuse = false;
     soundchan[chan] = -1;
+    chanprio[chan] = 0;
   }
 };
 

@@ -43,7 +43,12 @@ void newteam(const char *name) {
   for (char *p = buf; *p; p++)
     if (*p >= 'a' && *p <= 'z')
       *p += 'A' - 'a';
-  if (strcmp(buf, "RED") && strcmp(buf, "BLUE")) {
+  if (m_infected) {
+    if (strcmp(buf, "INFECTED") && strcmp(buf, "RESISTANCE")) {
+      conoutf("Team must be INFECTED or RESISTANCE");
+      return;
+    }
+  } else if (strcmp(buf, "RED") && strcmp(buf, "BLUE")) {
     conoutf("Team must be RED or BLUE");
     return;
   }
