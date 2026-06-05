@@ -489,7 +489,7 @@ bool rendermenu() {
       cx += colw[i] + 2 * colpad + gap;
     };
 
-    if (m_teammode) {
+    if (m_teammode || m_infected) {
       int split = min(teamscore_split, nrows);
       int nblue = min(split - scoreboard_scroll, maxvis);
       if (nblue < 0)

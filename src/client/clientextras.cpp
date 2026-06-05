@@ -134,7 +134,7 @@ void renderscores() {
   if (!scoreson)
     return;
   scorelines.setsize(0);
-  if (m_teammode) {
+  if (m_teammode || m_infected) {
     vector<dynent *> blue, red;
 #define addtoteam(d)                                                           \
   do {                                                                         \

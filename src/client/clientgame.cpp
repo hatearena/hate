@@ -346,31 +346,40 @@ void updateworld(int millis) // main game update loop
         conoutf("New map in 15 seconds");
         showscores(true);
       } else if (infected == 0 && resistance >= 1) {
-        if (resistance >= 2) {
+        if (resistance >= 2 || (infected_picktime && lastmillis > infected_picktime)) {
           infected_picktime = 0;
+          int pick = rnd(resistance);
           if (player1->state != CS_DEAD && strcmp(player1->team, "INFD")) {
-            strn0cpy(player1->team, "INFD", 5);
-            extern bool c2sinit;
-            c2sinit = false;
-            conoutf("You are the infected.");
-            spawnstate(player1);
-            particle_splash(0, 20, 500, player1->o);
-          } else loopv(players) if (players[i] && players[i]->state != CS_DEAD && strcmp(players[i]->team, "INFD")) {
-            strn0cpy(players[i]->team, "INFD", 5);
-            conoutf("%s is the infected.", players[i]->name);
-            spawnstate(players[i]);
-            break;
+            if (pick == 0) {
+              strn0cpy(player1->team, "INFD", 5);
+              extern bool c2sinit;
+              c2sinit = false;
+              conoutf("You are the infected.");
+              spawnstate(player1);
+              particle_splash(0, 20, 500, player1->o);
+              goto infected_done;
+            };
+            pick--;
           };
-        } else if (infected_picktime && lastmillis > infected_picktime) {
-          infected_picktime = 0;
-          if (player1->state != CS_DEAD && strcmp(player1->team, "INFD")) {
-            strn0cpy(player1->team, "INFD", 5);
-            extern bool c2sinit;
-            c2sinit = false;
-            conoutf("You are the infected.");
-            spawnstate(player1);
-            particle_splash(0, 20, 500, player1->o);
+          loopv(players) if (players[i] && players[i]->state != CS_DEAD && strcmp(players[i]->team, "INFD")) {
+            if (pick == 0) {
+              strn0cpy(players[i]->team, "INFD", 5);
+              conoutf("%s is the infected.", players[i]->name);
+              spawnstate(players[i]);
+              goto infected_done;
+            };
+            pick--;
           };
+          loopv(bv) if (bv[i] && bv[i]->state != CS_DEAD && strcmp(bv[i]->team, "INFD")) {
+            if (pick == 0) {
+              strn0cpy(bv[i]->team, "INFD", 5);
+              conoutf("%s is the infected.", bv[i]->name);
+              spawnstate(bv[i]);
+              goto infected_done;
+            };
+            pick--;
+          };
+          infected_done: ;
         } else if (!infected_picktime) {
           infected_picktime = lastmillis + 15000;
         };
