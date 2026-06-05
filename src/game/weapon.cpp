@@ -187,7 +187,7 @@ void newprojectile(vec &from, vec &to, float speed, bool local, dynent *owner,
 };
 
 void hit(int target, int damage, dynent *d, dynent *at) {
-  if (m_teammode && at && d != at && at->team[0] && d->team[0] && !strcmp(at->team, d->team))
+  if ((m_teammode || m_infected) && at && d != at && at->team[0] && d->team[0] && !strcmp(at->team, d->team))
     return;
   if (d == player1)
     selfdamage(damage, at == player1 ? -1 : -2, at);
