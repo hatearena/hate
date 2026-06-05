@@ -207,15 +207,15 @@ void localservertoclient(uchar *buf,
 
     case SV_DIED: {
       int actor = getint(p);
-      if (m_infected && d->team[0] && strcmp(d->team, "INFECTED") != 0) {
+      if (m_infected && d->team[0] && strcmp(d->team, "INFD") != 0) {
         dynent *killer = NULL;
         if (actor == clientnum)
           killer = player1;
         else
           killer = getclient(actor);
-        if (killer && killer->team[0] && !strcmp(killer->team, "INFECTED")) {
+        if (killer && killer->team[0] && !strcmp(killer->team, "INFD")) {
           conoutf("%s has been infected", d->name);
-          strn0cpy(d->team, "INFECTED", 5);
+          strn0cpy(d->team, "INFD", 5);
         };
       };
       if (actor == cn) {

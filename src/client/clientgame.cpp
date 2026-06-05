@@ -324,51 +324,47 @@ void updateworld(int millis) // main game update loop
     if (m_infected && !intermission) {
       int infected = 0, resistance = 0;
       if (player1->state != CS_DEAD) {
-        if (!strcmp(player1->team, "INFECTED")) infected++;
+        if (!strcmp(player1->team, "INFD")) infected++;
         else resistance++;
       };
       loopv(players) if (players[i] && players[i]->state != CS_DEAD) {
-        if (!strcmp(players[i]->team, "INFECTED")) infected++;
+        if (!strcmp(players[i]->team, "INFD")) infected++;
         else resistance++;
       };
       dvector &bv = getbots();
       loopv(bv) if (bv[i] && bv[i]->state != CS_DEAD) {
-        if (!strcmp(bv[i]->team, "INFECTED")) infected++;
+        if (!strcmp(bv[i]->team, "INFD")) infected++;
         else resistance++;
       };
-      if (infected > 0 && resistance <= 1) {
+      if (infected + resistance >= 2 && infected > 0 && resistance == 0) {
         intermission = true;
         intermissiontimer = 15000;
         player1->attacking = false;
         stoprunsound();
-        if (resistance == 1) {
-          conoutf("The Resistance prevails. One remains.");
-        } else {
-          conoutf("Everyone is infected.");
-        };
+        conoutf("Everyone is infected.");
         conoutf("Intermission: Infection contained");
         conoutf("New map in 15 seconds");
         showscores(true);
       } else if (infected == 0 && resistance >= 1) {
         if (resistance >= 2) {
           infected_picktime = 0;
-          if (player1->state != CS_DEAD && strcmp(player1->team, "INFECTED")) {
-            strn0cpy(player1->team, "INFECTED", 5);
+          if (player1->state != CS_DEAD && strcmp(player1->team, "INFD")) {
+            strn0cpy(player1->team, "INFD", 5);
             extern bool c2sinit;
             c2sinit = false;
             conoutf("You are the infected.");
             spawnstate(player1);
             particle_splash(0, 20, 500, player1->o);
-          } else loopv(players) if (players[i] && players[i]->state != CS_DEAD && strcmp(players[i]->team, "INFECTED")) {
-            strn0cpy(players[i]->team, "INFECTED", 5);
+          } else loopv(players) if (players[i] && players[i]->state != CS_DEAD && strcmp(players[i]->team, "INFD")) {
+            strn0cpy(players[i]->team, "INFD", 5);
             conoutf("%s is the infected.", players[i]->name);
             spawnstate(players[i]);
             break;
           };
         } else if (infected_picktime && lastmillis > infected_picktime) {
           infected_picktime = 0;
-          if (player1->state != CS_DEAD && strcmp(player1->team, "INFECTED")) {
-            strn0cpy(player1->team, "INFECTED", 5);
+          if (player1->state != CS_DEAD && strcmp(player1->team, "INFD")) {
+            strn0cpy(player1->team, "INFD", 5);
             extern bool c2sinit;
             c2sinit = false;
             conoutf("You are the infected.");
@@ -461,18 +457,18 @@ void infected_checkpick() {
   if (intermission) return;
   infected_picktime = 0;
   int total = 0;
-  if (player1->state != CS_DEAD && strcmp(player1->team, "INFECTED"))
+  if (player1->state != CS_DEAD && strcmp(player1->team, "INFD"))
     total++;
   loopv(players) if (players[i] && players[i]->state != CS_DEAD &&
-                     strcmp(players[i]->team, "INFECTED")) total++;
+                     strcmp(players[i]->team, "INFD")) total++;
   dvector &bv = getbots();
   loopv(bv) if (bv[i] && bv[i]->state != CS_DEAD &&
-                strcmp(bv[i]->team, "INFECTED")) total++;
+                strcmp(bv[i]->team, "INFD")) total++;
   if (total < 1) return;
   int pick = rnd(total);
-  if (player1->state != CS_DEAD && strcmp(player1->team, "INFECTED")) {
+  if (player1->state != CS_DEAD && strcmp(player1->team, "INFD")) {
     if (pick == 0) {
-      strn0cpy(player1->team, "INFECTED", 5);
+      strn0cpy(player1->team, "INFD", 5);
       extern bool c2sinit;
       c2sinit = false;
       conoutf("You are the infected.");
@@ -482,9 +478,9 @@ void infected_checkpick() {
     pick--;
   };
   loopv(players) if (players[i] && players[i]->state != CS_DEAD &&
-                     strcmp(players[i]->team, "INFECTED")) {
+                     strcmp(players[i]->team, "INFD")) {
     if (pick == 0) {
-      strn0cpy(players[i]->team, "INFECTED", 5);
+      strn0cpy(players[i]->team, "INFD", 5);
       conoutf("%s is the infected.", players[i]->name);
       spawnstate(players[i]);
       return;
@@ -492,9 +488,9 @@ void infected_checkpick() {
     pick--;
   };
   loopv(bv) if (bv[i] && bv[i]->state != CS_DEAD &&
-                strcmp(bv[i]->team, "INFECTED")) {
+                strcmp(bv[i]->team, "INFD")) {
     if (pick == 0) {
-      strn0cpy(bv[i]->team, "INFECTED", 5);
+      strn0cpy(bv[i]->team, "INFD", 5);
       conoutf("%s is the infected.", bv[i]->name);
       spawnstate(bv[i]);
       return;
@@ -507,7 +503,7 @@ static void autoteamplayer(dynent *d) {
   if (!m_teammode)
     return;
   if (m_infected) {
-    if (!d->team[0]) strn0cpy(d->team, "RESISTANCE", 5);
+    strn0cpy(d->team, "RES", 5);
     return;
   }
   int red = 0, blue = 0;
@@ -694,11 +690,11 @@ void selfdamage(int damage, int actor, dynent *act) {
         };
       };
     };
-    if (m_infected && strcmp(player1->team, "INFECTED") == 0) {
+    if (m_infected && strcmp(player1->team, "INFD") == 0) {
       conoutf("You were fragged by a teammate.");
-    } else if (m_infected && act && !strcmp(act->team, "INFECTED")) {
+    } else if (m_infected && act && !strcmp(act->team, "INFD")) {
       conoutf("You have been infected.");
-      strn0cpy(player1->team, "INFECTED", 5);
+      strn0cpy(player1->team, "INFD", 5);
       extern bool c2sinit;
       c2sinit = false;
     };

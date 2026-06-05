@@ -44,7 +44,7 @@ void newteam(const char *name) {
     if (*p >= 'a' && *p <= 'z')
       *p += 'A' - 'a';
   if (m_infected) {
-    if (strcmp(buf, "INFECTED") && strcmp(buf, "RESISTANCE")) {
+    if (strcmp(buf, "INFD") && strcmp(buf, "RES")) {
       conoutf("Team must be INFECTED or RESISTANCE");
       return;
     }

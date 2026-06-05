@@ -211,7 +211,7 @@ static void botaction(dynent *m) {
 
   vdist(disttoenemy, vectoenemy, m->o, m->enemy->o);
 
-  if (m_infected && m->team[0] && !strcmp(m->team, "INFECTED")) {
+  if (m_infected && m->team[0] && !strcmp(m->team, "INFD")) {
     m->gunselect = GUN_CSAW;
   } else if (m_noitems && m_noitemsrail) {
     m->gunselect = GUN_RIFLE;
@@ -329,7 +329,7 @@ void botthink() {
   loopv(bots) {
     dynent *b = bots[i];
     if (b->state == CS_ALIVE) {
-      if (m_infected && b->team[0] && !strcmp(b->team, "INFECTED")) {
+      if (m_infected && b->team[0] && !strcmp(b->team, "INFD")) {
         // whatever
       } else if (lastmillis - lastammorefill > 15000) {
         lastammorefill = lastmillis;
@@ -386,8 +386,8 @@ void botpain(dynent *m, int damage, dynent *d) {
 
   if ((m->health -= damage) <= 0) {
     if (m_infected && d && m->team[0] && d->team[0] &&
-        strcmp(m->team, "INFECTED") != 0 && !strcmp(d->team, "INFECTED")) {
-      strn0cpy(m->team, "INFECTED", 5);
+        strcmp(m->team, "INFD") != 0 && !strcmp(d->team, "INFD")) {
+      strn0cpy(m->team, "INFD", 5);
       conoutf("%s has been infected", m->name);
     };
     m->state = CS_DEAD;
@@ -461,18 +461,7 @@ static void autoteambot(dynent *d) {
   if (!m_teammode)
     return;
   if (m_infected) {
-    if (!d->team[0]) {
-      bool hasinfected = false;
-      if (player1 && player1 != d && !strcmp(player1->team, "INFECTED"))
-        hasinfected = true;
-      loopv(players) if (players[i] && players[i] != d &&
-                         !strcmp(players[i]->team, "INFECTED")) hasinfected =
-          true;
-      dvector &bv = getbots();
-      loopv(bv) if (bv[i] && bv[i] != d && !strcmp(bv[i]->team, "INFECTED"))
-          hasinfected = true;
-      strn0cpy(d->team, hasinfected ? "RESISTANCE" : "INFECTED", 5);
-    }
+    strn0cpy(d->team, "RES", 5);
     return;
   }
   int red = 0, blue = 0;
@@ -516,7 +505,7 @@ static void spawnonebot() {
   b->lastmove = 0;
   b->move = 1;
   b->targetyaw = b->yaw;
-  if (m_infected && b->team[0] && !strcmp(b->team, "INFECTED")) {
+  if (m_infected && b->team[0] && !strcmp(b->team, "INFD")) {
     b->gunselect = GUN_CSAW;
     loopi(NUMGUNS) b->ammo[i] = 0;
     b->ammo[GUN_CSAW] = 1;
@@ -534,10 +523,7 @@ static void spawnonebot() {
   genbotname(b->name);
   bots.add(b);
   conoutf("%s spawned.", b->name);
-  if (m_infected) {
-    extern void infected_checkpick();
-    infected_checkpick();
-  };
+
 }
 
 void addbotcmd(int n) {

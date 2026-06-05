@@ -103,6 +103,11 @@ void radditem(int i, int &v) {
 };
 
 void realpickup(int n, dynent *d) {
+  if (m_infected && d->team[0] && !strcmp(d->team, "INFD")) {
+    if (ents[n].type == I_HEALTH) { radditem(n, d->health); }
+    else if (ents[n].type == I_BOOST) { radditem(n, d->health); };
+    return;
+  };
   switch (ents[n].type) {
   case I_SHELLS:
     radditem(n, d->ammo[1]);
@@ -175,7 +180,7 @@ void teleport(int n, dynent *d) {
 };
 
 void pickup(int n, dynent *d) {
-  if (m_infected && d->team[0] && !strcmp(d->team, "INFECTED")) {
+  if (m_infected && d->team[0] && !strcmp(d->team, "INFD")) {
     if (ents[n].type == I_HEALTH || ents[n].type == I_BOOST) {
       int np = 1;
       loopv(players) if (players[i]) np++;

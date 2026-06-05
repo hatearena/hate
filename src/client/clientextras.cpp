@@ -140,7 +140,7 @@ void renderscores() {
   do {                                                                         \
     dynent *e = (d);                                                           \
     if (e && e->state != CS_SPECTATOR) {                                       \
-      if (e->team[0] && !strcmp(e->team, "BLUE"))                              \
+      if (e->team[0] && !strcmp(e->team, m_infected ? "RES" : "BLUE"))         \
         blue.add(e);                                                           \
       else                                                                     \
         red.add(e);                                                            \
@@ -175,7 +175,12 @@ void renderscores() {
       addteamscore(player1);
     teamscores[0] = 0;
     loopj(teamsused) {
-      sprintf_sd(sc)("[ %s: %d ]", teamname[j], teamscore[j]);
+      const char *tname = teamname[j];
+      if (m_infected) {
+        if (!strcmp(tname, "RES")) tname = "RESISTANCE";
+        else if (!strcmp(tname, "INFD")) tname = "INFECTED";
+      };
+      sprintf_sd(sc)("[ %s: %d ]", tname, teamscore[j]);
       strcat_s(teamscores, sc);
     };
     menumanual(0, scorelines.length(), "");
