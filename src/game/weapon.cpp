@@ -21,6 +21,7 @@ guninfo guns[NUMGUNS] = {
     {S_CG, 100, 30, 0, 0, 7, "chaingun"},
     {S_RLFIRE, 800, 120, 80, 0, 10, "rocketlauncher"},
     {S_RIFLE, 1500, 100, 0, 0, 30, "rifle"},
+    {S_NAILGUN, 150, 25, 0, 0, 5, "nailgun"},
     {S_FLAUNCH, 200, 20, 50, 4, 1, "fireball"},
     {S_ICEBALL, 200, 40, 30, 6, 1, "iceball"},
     {S_SLIMEBALL, 200, 30, 160, 7, 1, "slimeball"},
@@ -46,6 +47,8 @@ void selectgun(int a, int b, int c) {
     s = GUN_SG;
   else if (s != GUN_RIFLE && player1->ammo[GUN_RIFLE])
     s = GUN_RIFLE;
+  else if (s != GUN_NAILGUN && player1->ammo[GUN_NAILGUN])
+    s = GUN_NAILGUN;
   else
     s = GUN_CSAW;
   if (s != player1->gunselect) {
@@ -67,8 +70,8 @@ COMMAND(weapon, ARG_3STR);
 
 void nextweapon() {
   int s = player1->gunselect;
-  for (int i = 1; i <= 4; i++) {
-    int g = (s + i) % 5;
+  for (int i = 1; i <= 5; i++) {
+    int g = (s + i) % 6;
     if (player1->ammo[g]) {
       if (g != player1->gunselect) {
         player1->gunselect = g;
@@ -82,8 +85,8 @@ void nextweapon() {
 
 void prevweapon() {
   int s = player1->gunselect;
-  for (int i = 1; i <= 4; i++) {
-    int g = (s - i + 5) % 5;
+  for (int i = 1; i <= 5; i++) {
+    int g = (s - i + 6) % 6;
     if (player1->ammo[g]) {
       if (g != player1->gunselect) {
         player1->gunselect = g;
@@ -326,6 +329,11 @@ void shootv(int gun, vec &from, vec &to, dynent *d,
     break;
   };
 
+  case GUN_NAILGUN:
+    particle_splash(0, 60, 250, to);
+    particle_splash(1, 15, 350, to);
+    break;
+
   case GUN_CG:
     particle_splash(0, 150, 350, to);
     particle_splash(1, 30, 500, to);
@@ -388,7 +396,7 @@ void shoot(dynent *d, vec &targ) {
   if (!d->ammo[d->gunselect]) {
     if (autoswitch) {
       int s = d->gunselect;
-      for (int i = 1; i <= 4; i++) {
+      for (int i = 1; i <= 5; i++) {
         if (d->ammo[i]) { s = i; break; }
       }
       if (s == d->gunselect) s = GUN_CSAW;
@@ -416,7 +424,7 @@ void shoot(dynent *d, vec &targ) {
   vec kickback = unitv;
   vmul(kickback, guns[d->gunselect].kickamount * -0.01f);
   vadd(d->vel, kickback);
-  if ((d->gunselect == GUN_SG || d->gunselect == GUN_RIFLE) && d->pitch < -20.0f && d->onfloor)
+  if ((d->gunselect == GUN_SG || d->gunselect == GUN_RIFLE || d->gunselect == GUN_NAILGUN) && d->pitch < -20.0f && d->onfloor)
     d->vel.z += -d->pitch / 90.0f * 3.0f;
   if (d->pitch < 80.0f)
     d->pitch += guns[d->gunselect].kickamount * 0.05f;

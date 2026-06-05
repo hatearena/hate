@@ -219,6 +219,8 @@ static void botaction(dynent *m) {
       m->gunselect = GUN_RL;
     else if (m->ammo[GUN_CG])
       m->gunselect = GUN_CG;
+    else if (m->ammo[GUN_NAILGUN])
+      m->gunselect = GUN_NAILGUN;
     else if (m->ammo[GUN_SG])
       m->gunselect = GUN_SG;
     else if (m->ammo[GUN_RIFLE])
@@ -230,6 +232,8 @@ static void botaction(dynent *m) {
       m->gunselect = GUN_RL;
     else if (m->ammo[GUN_CG])
       m->gunselect = GUN_CG;
+    else if (m->ammo[GUN_NAILGUN])
+      m->gunselect = GUN_NAILGUN;
     else if (m->ammo[GUN_SG])
       m->gunselect = GUN_SG;
     else if (m->ammo[GUN_RIFLE])
@@ -324,6 +328,7 @@ void botthink() {
       if (lastmillis - lastammorefill > 15000) {
         lastammorefill = lastmillis;
         b->ammo[GUN_SG] = max(b->ammo[GUN_SG], 10);
+        b->ammo[GUN_NAILGUN] = max(b->ammo[GUN_NAILGUN], 40);
         b->ammo[GUN_CG] = max(b->ammo[GUN_CG], 40);
         b->ammo[GUN_RL] = max(b->ammo[GUN_RL], 8);
         b->ammo[GUN_RIFLE] = max(b->ammo[GUN_RIFLE], 8);
@@ -484,7 +489,7 @@ static void spawnonebot() {
   b->lastmove = 0;
   b->move = 1;
   b->targetyaw = b->yaw;
-  b->gunselect = GUN_SG + rnd(4);
+  b->gunselect = GUN_SG + rnd(5);
   b->maxspeed = max(28.0f + botdifficulty * 4.0f, 16.0f);
   loopi(NUMGUNS) b->ammo[i] = 100;
   b->anger = 0;

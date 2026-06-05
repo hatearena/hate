@@ -386,7 +386,7 @@ void stopchan(int chan) {
 
 void preloadweaponsounds() {
     if (nosound) return;
-    int ids[] = {S_CSAW, S_SG, S_CG, S_RLFIRE, S_RIFLE, S_WEAPLOAD, S_NOAMMO};
+    int ids[] = {S_CSAW, S_SG, S_CG, S_RLFIRE, S_RIFLE, S_NAILGUN, S_WEAPLOAD, S_NOAMMO};
     loopi(sizeof(ids)/sizeof(ids[0])) {
         int n = ids[i];
         if (n < 0 || n >= samples.length()) continue;

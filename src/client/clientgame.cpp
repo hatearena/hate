@@ -141,6 +141,7 @@ void spawnstate(dynent *d) {
   gunswitchtime = 0;
   loopi(NUMGUNS) d->ammo[i] = 0;
   d->ammo[GUN_CSAW] = 1;
+  d->ammo[GUN_NAILGUN] = 20;
   if (m_noitems) {
     d->gunselect = GUN_RIFLE;
     d->armour = 0;
@@ -155,10 +156,10 @@ void spawnstate(dynent *d) {
       };
       d->health = 256;
       if (m_tarena) {
-        int gun1 = rnd(4) + 1;
+        int gun1 = rnd(5) + 1;
         baseammo(d->gunselect = gun1);
         for (;;) {
-          int gun2 = rnd(4) + 1;
+          int gun2 = rnd(5) + 1;
           if (gun1 != gun2) {
             baseammo(gun2);
             break;
@@ -169,7 +170,7 @@ void spawnstate(dynent *d) {
         d->ammo[GUN_RIFLE] = 100;
       } else // efficiency
       {
-        loopi(4) baseammo(i + 1);
+        loopi(5) baseammo(i + 1);
         d->gunselect = GUN_CG;
       };
       d->ammo[GUN_CG] /= 2;

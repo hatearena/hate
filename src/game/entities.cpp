@@ -3,8 +3,8 @@
 vector<entity> ents;
 
 char *entmdlnames[] = {
-    "shells", "bullets",  "rockets",  "rrounds", "health",
-    "boost",  "g_armour", "y_armour", "quad",    "teleporter",
+    "shells", "bullets",  "rockets",  "rrounds", "nails",
+    "health", "boost",  "g_armour", "y_armour", "quad",    "teleporter",
 };
 
 int triggertime = 0;
@@ -44,10 +44,11 @@ void renderentities() {
                      f + 0.8f + (rnd(11) - 5) * 0.08f};
           vec vel = {(rnd(21) - 10) * 0.6f, (rnd(21) - 10) * 0.6f,
                      3.0f + rnd(8) * 0.5f};
-          static const uchar glowcols[9][3] = {
+          static const uchar glowcols[10][3] = {
               {160, 130, 60}, {130, 130, 70}, {160, 100, 50},
-              {80, 140, 180}, {160, 80, 80},  {80, 160, 80},
-              {80, 150, 80},  {160, 150, 60}, {160, 80, 160},
+              {80, 140, 180}, {120, 120, 200}, {160, 80, 80},
+              {80, 160, 80},  {80, 150, 80},   {160, 150, 60},
+              {160, 80, 160},
           };
           newparticlecol(
               pos, vel, rnd(300) + 400, 9, glowcols[e.type - I_SHELLS][0],
@@ -85,8 +86,9 @@ struct itemstat {
   int add, max, sound;
 } itemstats[] = {
     10,  50,  S_ITEMAMMO,   20,  100, S_ITEMAMMO,   5,     25,    S_ITEMAMMO,
-    5,   25,  S_ITEMAMMO,   25,  100, S_ITEMHEALTH, 50,    200,   S_ITEMHEALTH,
-    100, 100, S_ITEMARMOUR, 150, 150, S_ITEMARMOUR, 20000, 30000, S_ITEMPUP,
+    5,   25,  S_ITEMAMMO,   15,  75,  S_ITEMAMMO,   25,  100, S_ITEMHEALTH,
+    50,  200, S_ITEMHEALTH, 100, 100, S_ITEMARMOUR, 150, 150, S_ITEMARMOUR,
+    20000, 30000, S_ITEMPUP,
 };
 
 void baseammo(int gun) { player1->ammo[gun] = itemstats[gun - 1].add * 2; };
@@ -113,6 +115,9 @@ void realpickup(int n, dynent *d) {
     break;
   case I_ROUNDS:
     radditem(n, d->ammo[4]);
+    break;
+  case I_NAILS:
+    radditem(n, d->ammo[5]);
     break;
   case I_HEALTH:
     radditem(n, d->health);
@@ -192,6 +197,9 @@ void pickup(int n, dynent *d) {
     break;
   case I_ROUNDS:
     additem(n, d->ammo[4], ammo);
+    break;
+  case I_NAILS:
+    additem(n, d->ammo[5], ammo);
     break;
   case I_HEALTH:
     additem(n, d->health, np * 5);

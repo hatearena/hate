@@ -644,7 +644,10 @@ void gl_drawhud(int w, int h, int curfps, int nquads, int curvert,
 
     int g = d->gunselect;
     int r = 64;
-    if (g > 2) {
+    if (g > 4) {
+      g -= 5;
+      r = 192;
+    } else if (g > 2) {
       g -= 3;
       r = 128;
     };
