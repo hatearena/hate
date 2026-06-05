@@ -233,6 +233,7 @@ void localservertoclient(uchar *buf,
       };
       d->deaths++;
       playsound(S_DIE1 + rnd(2), &d->o);
+      playsound(S_DEAD, &d->o);
       d->lifesequence++;
       break;
     };

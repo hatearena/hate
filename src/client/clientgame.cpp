@@ -591,6 +591,7 @@ void selfdamage(int damage, int actor, dynent *act) {
     player1->pitch = 0;
     player1->roll = 60;
     playsound(S_DIE1 + rnd(2));
+    playsound(S_DEAD);
     spawnstate(player1);
     player1->lastaction = lastmillis;
   } else {

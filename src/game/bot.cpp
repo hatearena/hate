@@ -383,6 +383,7 @@ void botpain(dynent *m, int damage, dynent *d) {
     m->lastaction = lastmillis;
     m->attacking = false;
     m->deaths++;
+    playsound(S_DEAD, &m->o);
     spawngibs(m->o, 4);
     if (d == player1) {
       player1->frags++;
