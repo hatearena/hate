@@ -16,7 +16,8 @@ static const char *botnames[] = {
     "Abu",    "Re",    "Why",    "Lucky",   "Lano",    "Cliff",  "Cobra",
     "Liner",  "Chiba", "Dragon", "Sabre",   "Koffman", "Stuff",  "Bones",
     "Xor",    "Snuff", "Sniff",  "Pain",    "Time",    "Fake",   "Headup",
-    "MX",     "Moon",  "Wine",   "Tux",     "Crash",   "Threed", "Backlotter"};
+    "MX",     "Moon",  "Wine",   "Tux",     "Crash",   "Threed", "Backlotter",
+    "Risco",  "Disco", "Cheque", "Will",    "Who",     "Cares",  "Anyway"};
 
 static const int numbotnames = sizeof(botnames) / sizeof(botnames[0]);
 
