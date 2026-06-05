@@ -743,6 +743,7 @@ void localdisconnect() {
 void localconnect() {
   client &c = addclient();
   c.type = ST_LOCAL;
+  c.rcon = true;
   strcpy_s(c.hostname, "local");
   send_welcome(&c - &clients[0]);
 };
