@@ -202,7 +202,20 @@ static void botaction(dynent *m) {
   }
 
   if (!enemy) {
-    m->move = 0;
+    if (lastmillis - m->lastmove > 3000 + rnd(3000)) {
+      m->targetyaw = (float)(rnd(360));
+      m->lastmove = lastmillis;
+    };
+    normalise(m, m->targetyaw);
+    float turnrate = curtime * 0.5f;
+    float yawdiff = m->targetyaw - m->yaw;
+    if (fabs(yawdiff) < turnrate)
+      m->yaw = m->targetyaw;
+    else if (yawdiff > 0)
+      m->yaw += turnrate;
+    else
+      m->yaw -= turnrate;
+    m->move = 1;
     m->strafe = 0;
     moveplayer(m, 20, true);
     return;
