@@ -804,7 +804,7 @@ void drawhudmodel(int start, int end, float speed, int base) {
 
   if (player1->gunselect == GUN_RIFLE) {
     float yaw_rad = player1->yaw * (PI / 180.0f);
-    float right = 0.5f;
+    float right = 0.3f;
     float fwd = -0.2f;
     px += cosf(yaw_rad) * right - sinf(yaw_rad) * fwd;
     pz += sinf(yaw_rad) * right + cosf(yaw_rad) * fwd;
