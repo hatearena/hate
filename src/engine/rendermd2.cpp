@@ -308,7 +308,7 @@ void preloadhudmodels() {
      * Will probably expand on this to use more guns in MD3 format and
      * eventually phase out the MD2 renderer
      */
-    if (i == 2)
+    if (i == 1 || i == 2)
       continue;
     md2 *m = loadmodel(names[i]);
     delayedload(m);
