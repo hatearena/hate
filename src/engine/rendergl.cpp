@@ -93,14 +93,14 @@ void cleangl() {
 bool installtex(int tnum, char *texname, int &xs, int &ys, bool clamp) {
   SDL_Surface *s = IMG_Load(texname);
   if (!s) {
-    conoutf("couldn't load texture %s", texname);
+    conoutf("Couldn't load texture %s", texname);
     return false;
   };
   int bpp = s->format->BitsPerPixel;
   GLenum fmt = bpp == 32 ? GL_RGBA : GL_RGB;
   GLenum ifmt = bpp == 32 ? GL_RGBA : GL_RGB;
   if (bpp != 24 && bpp != 32) {
-    conoutf("texture must be 24bpp or 32bpp: %s", texname);
+    conoutf("Texture must be 24bpp or 32bpp: %s", texname);
     return false;
   };
 
@@ -978,7 +978,8 @@ void gl_drawframe(int w, int h, float curfps) {
   if (thirdperson && !spectator && !screenshotmode) {
     const char *mdl = "monster/player";
     if (m_teammode || m_infected) {
-      if (player1->team[0] && !strcmp(player1->team, m_infected ? "RES" : "BLUE"))
+      if (player1->team[0] &&
+          !strcmp(player1->team, m_infected ? "RES" : "BLUE"))
         mdl = "monster/blueplayer";
       else
         mdl = "monster/redplayer";
