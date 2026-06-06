@@ -799,11 +799,13 @@ void drawhudmodel(int start, int end, float speed, int base) {
   if (player1->gunselect == GUN_CG) {
     rendermodel_md3(hudgunnames[player1->gunselect], start, end, 0, 1.0f,
                     player1->o.x + bx, player1->o.z + bz, player1->o.y,
-                    player1->yaw + 90, player1->pitch, false, scale, speed, 0, base);
+                    player1->yaw + 90, player1->pitch, false, scale, speed, 0,
+                    base);
   } else {
     rendermodel(hudgunnames[player1->gunselect], start, end, 0, 1.0f,
                 player1->o.x + bx, player1->o.z + bz, player1->o.y,
-                player1->yaw + 90, player1->pitch, false, scale, speed, 0, base);
+                player1->yaw + 90, player1->pitch, false, scale, speed, 0,
+                base);
   }
 };
 
@@ -832,11 +834,10 @@ void drawhudgun(float fovy, float aspect, int farplane) {
     else if (d->gunselect == GUN_SG) {
       int sgtime = lastmillis - d->lastaction;
       if (sgtime < 900)
-        drawhudmodel(9, 11, 100.0f, d->lastaction);
+        drawhudmodel(0, 7, 128.6f, d->lastaction);
       else
-        drawhudmodel(19, 1, 100, 0);
-    }
-    else if (d->gunselect == GUN_CSAW)
+        drawhudmodel(0, 1, 100, 0);
+    } else if (d->gunselect == GUN_CSAW)
       drawhudmodel(2, 3, rtime / 3.0f, d->lastaction);
     else if (d->gunselect == GUN_NAILGUN)
       drawhudmodel(1, 7, rtime / 4.0f, d->lastaction);
@@ -856,7 +857,7 @@ void drawhudgun(float fovy, float aspect, int farplane) {
     if (d->gunselect == GUN_RIFLE)
       drawhudmodel(25, 1, 100, 0);
     else if (d->gunselect == GUN_SG)
-      drawhudmodel(19, 1, 100, 0);
+      drawhudmodel(0, 1, 100, 0);
     else if (d->gunselect == GUN_NAILGUN)
       drawhudmodel(0, 1, 100, 0);
     else if (d->gunselect == GUN_CG)
