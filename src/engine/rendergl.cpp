@@ -813,7 +813,6 @@ void drawhudgun(float fovy, float aspect, int farplane) {
     return;
 
   glEnable(GL_CULL_FACE);
-
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
   gluPerspective(fovy, aspect, 0.3f, farplane);
