@@ -796,9 +796,22 @@ void drawhudmodel(int start, int end, float speed, int base) {
     };
   }
 
+  float px = player1->o.x + bx;
+  float py = player1->o.z + bz;
+  float pz = player1->o.y;
+  float pyaw = player1->yaw + 90;
+  float ppitch = player1->pitch;
+
+  if (player1->gunselect == GUN_RIFLE) {
+    float yaw_rad = player1->yaw * (PI / 180.0f);
+    float right = 0.5f;
+    float fwd = -0.2f;
+    px += cosf(yaw_rad) * right - sinf(yaw_rad) * fwd;
+    pz += sinf(yaw_rad) * right + cosf(yaw_rad) * fwd;
+  }
+
   rendermodel(hudgunnames[player1->gunselect], start, end, 0, 1.0f,
-              player1->o.x + bx, player1->o.z + bz, player1->o.y,
-              player1->yaw + 90, player1->pitch, false, scale, speed, 0, base);
+              px, py, pz, pyaw, ppitch, false, scale, speed, 0, base);
 };
 
 dynent *specplayer() {
@@ -822,7 +835,7 @@ void drawhudgun(float fovy, float aspect, int farplane) {
   if (d->lastaction && d->lastattackgun == d->gunselect &&
       lastmillis - d->lastaction < rtime) {
     if (d->gunselect == GUN_RIFLE)
-      drawhudmodel(7, 18, rtime / 16.0f, d->lastaction);
+      drawhudmodel(1, 6, rtime / 6.0f, d->lastaction);
     else if (d->gunselect == GUN_SG) {
       int sgtime = lastmillis - d->lastaction;
       if (sgtime < 900)
@@ -847,7 +860,7 @@ void drawhudgun(float fovy, float aspect, int farplane) {
       gunidletime = 0;
 
     if (d->gunselect == GUN_RIFLE)
-      drawhudmodel(25, 1, 100, 0);
+      drawhudmodel(0, 1, 100, 0);
     else if (d->gunselect == GUN_SG)
       drawhudmodel(0, 1, 100, 0);
     else if (d->gunselect == GUN_NAILGUN)
