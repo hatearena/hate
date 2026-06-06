@@ -298,19 +298,19 @@ COMMAND(mapmodel, ARG_5STR);
 COMMAND(mapmodelreset, ARG_NONE);
 
 void preloadhudmodels() {
-    char *names[] = {"hudguns/hate_csaw", "hudguns/hate_shotg",
-                     "hudguns/hate_rifle", "hudguns/hate_rocket",
-                     "hudguns/hate_rail", "hudguns/hate_nailgun"};
-    for (int i = 0; i < 6; i++) {
-        md2 *m = loadmodel(names[i]);
-        delayedload(m);
-    }
+  char *names[] = {"hudguns/hate_csaw",  "hudguns/hate_shotg",
+                   "hudguns/hate_rifle", "hudguns/hate_rocket",
+                   "hudguns/hate_rail",  "hudguns/hate_nailgun"};
+  for (int i = 0; i < 6; i++) {
+    md2 *m = loadmodel(names[i]);
+    delayedload(m);
+  }
 }
 
-void rendermodel(const char *mdl, int frame, int range, int tex, float rad, float x,
-                 float y, float z, float yaw, float pitch, bool teammate,
-                 float scale, float speed, int snap, int basetime,
-                 float glow) {
+void rendermodel(const char *mdl, int frame, int range, int tex, float rad,
+                 float x, float y, float z, float yaw, float pitch,
+                 bool teammate, float scale, float speed, int snap,
+                 int basetime, float glow) {
   md2 *m = loadmodel(mdl);
 
   if (isoccluded(player1->o.x, player1->o.y, x - rad, z - rad, rad * 2))
