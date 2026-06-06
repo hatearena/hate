@@ -424,7 +424,7 @@ void shoot(dynent *d, vec &targ) {
   vec kickback = unitv;
   vmul(kickback, guns[d->gunselect].kickamount * -0.01f);
   vadd(d->vel, kickback);
-  if ((d->gunselect == GUN_SG || d->gunselect == GUN_RIFLE) && d->pitch < -20.0f && d->onfloor)
+  if ((d->gunselect == GUN_SG || d->gunselect == GUN_RIFLE) && d->pitch < -20.0f && d->onfloor && dist < 4.0f)
     d->vel.z += -d->pitch / 90.0f * 3.0f;
   if (d->pitch < 80.0f)
     d->pitch += guns[d->gunselect].kickamount * 0.05f;

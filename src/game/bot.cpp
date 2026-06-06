@@ -298,14 +298,8 @@ static void botaction(dynent *m) {
 
   if (m->blocked) {
     m->blocked = false;
-    if (m->gunselect == GUN_CSAW) {
-      m->jumpnext = false;
-    } else if (!rnd(3) && lastmillis - m->lastmove > 1500) {
-      m->jumpnext = true;
-      m->lastmove = lastmillis;
-    } else {
-      m->targetyaw += 90 + rnd(180);
-    }
+    m->jumpnext = true;
+    m->targetyaw += 90 + rnd(180);
   }
 
   m->move = 1;
