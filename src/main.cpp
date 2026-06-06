@@ -296,6 +296,7 @@ int main(int argc, char **argv) {
 
   log("preload weapons");
   preloadhudmodels();
+  preloadhudmodel_md3();
 
   log("font");
   init_font();

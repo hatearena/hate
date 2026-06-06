@@ -796,9 +796,15 @@ void drawhudmodel(int start, int end, float speed, int base) {
     };
   }
 
-  rendermodel(hudgunnames[player1->gunselect], start, end, 0, 1.0f,
-              player1->o.x + bx, player1->o.z + bz, player1->o.y,
-              player1->yaw + 90, player1->pitch, false, scale, speed, 0, base);
+  if (player1->gunselect == GUN_CG) {
+    rendermodel_md3(hudgunnames[player1->gunselect], start, end, 0, 1.0f,
+                    player1->o.x + bx, player1->o.z + bz, player1->o.y,
+                    player1->yaw + 90, player1->pitch, false, scale, speed, 0, base);
+  } else {
+    rendermodel(hudgunnames[player1->gunselect], start, end, 0, 1.0f,
+                player1->o.x + bx, player1->o.z + bz, player1->o.y,
+                player1->yaw + 90, player1->pitch, false, scale, speed, 0, base);
+  }
 };
 
 dynent *specplayer() {

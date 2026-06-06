@@ -235,7 +235,7 @@ template <class T> struct hashtable
 		this->size = 1<<10;
 		this->parent = gp();
 		numelems = 0;
-		table = (chain **)parent->alloc(size*sizeof(T));
+		table = (chain **)parent->alloc(size*sizeof(chain *));
 		for(int i = 0; i<size; i++) table[i] = NULL;
 	};
 
