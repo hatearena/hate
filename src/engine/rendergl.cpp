@@ -756,9 +756,9 @@ VARP(hudgun, 0, 1, 1);
 VARP(viewbob, 0, 1, 1);
 VARP(viewbobamp, 0, 10, 50);
 
-char *hudgunnames[] = {"hudguns/hate_csaw",  "hudguns/hate_shotg",
+char *hudgunnames[] = {"hudguns/hate_csaw", "hudguns/hate_shotg",
                        "hudguns/hate_cgun", "hudguns/hate_rocket",
-                       "hudguns/hate_rail",  "hudguns/hate_nailgun"};
+                       "hudguns/hate_rail", "hudguns/hate_nailgun"};
 
 void drawhudmodel(int start, int end, float speed, int base) {
   float bx = 0, bz = 0;
@@ -810,8 +810,8 @@ void drawhudmodel(int start, int end, float speed, int base) {
     pz += sinf(yaw_rad) * right + cosf(yaw_rad) * fwd;
   }
 
-  rendermodel(hudgunnames[player1->gunselect], start, end, 0, 1.0f,
-              px, py, pz, pyaw, ppitch, false, scale, speed, 0, base);
+  rendermodel(hudgunnames[player1->gunselect], start, end, 0, 1.0f, px, py, pz,
+              pyaw, ppitch, false, scale, speed, 0, base);
 };
 
 dynent *specplayer() {
@@ -834,9 +834,13 @@ void drawhudgun(float fovy, float aspect, int farplane) {
   int rtime = reloadtime(d->gunselect);
   if (d->lastaction && d->lastattackgun == d->gunselect &&
       lastmillis - d->lastaction < rtime) {
-    if (d->gunselect == GUN_RIFLE)
-      drawhudmodel(1, 6, rtime / 6.0f, d->lastaction);
-    else if (d->gunselect == GUN_SG) {
+    if (d->gunselect == GUN_RIFLE) {
+      int sgtime = lastmillis - d->lastaction;
+      if (sgtime < 1050)
+        drawhudmodel(0, 7, 150.0f, d->lastaction);
+      else
+        drawhudmodel(0, 1, 200, 0);
+    } else if (d->gunselect == GUN_SG) {
       int sgtime = lastmillis - d->lastaction;
       if (sgtime < 900)
         drawhudmodel(0, 7, 128.6f, d->lastaction);
