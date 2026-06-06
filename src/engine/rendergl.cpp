@@ -757,7 +757,7 @@ VARP(viewbob, 0, 1, 1);
 VARP(viewbobamp, 0, 10, 50);
 
 char *hudgunnames[] = {"hudguns/hate_csaw",  "hudguns/hate_shotg",
-                       "hudguns/hate_rifle", "hudguns/hate_rocket",
+                       "hudguns/hate_cgun", "hudguns/hate_rocket",
                        "hudguns/hate_rail",  "hudguns/hate_nailgun"};
 
 void drawhudmodel(int start, int end, float speed, int base) {
@@ -796,17 +796,9 @@ void drawhudmodel(int start, int end, float speed, int base) {
     };
   }
 
-  if (player1->gunselect == GUN_CG) {
-    rendermodel_md3(hudgunnames[player1->gunselect], start, end, 0, 1.0f,
-                    player1->o.x + bx, player1->o.z + bz, player1->o.y,
-                    player1->yaw + 90, player1->pitch, false, scale, speed, 0,
-                    base);
-  } else {
-    rendermodel(hudgunnames[player1->gunselect], start, end, 0, 1.0f,
-                player1->o.x + bx, player1->o.z + bz, player1->o.y,
-                player1->yaw + 90, player1->pitch, false, scale, speed, 0,
-                base);
-  }
+  rendermodel(hudgunnames[player1->gunselect], start, end, 0, 1.0f,
+              player1->o.x + bx, player1->o.z + bz, player1->o.y,
+              player1->yaw + 90, player1->pitch, false, scale, speed, 0, base);
 };
 
 dynent *specplayer() {
@@ -842,7 +834,7 @@ void drawhudgun(float fovy, float aspect, int farplane) {
     else if (d->gunselect == GUN_NAILGUN)
       drawhudmodel(1, 7, rtime / 4.0f, d->lastaction);
     else if (d->gunselect == GUN_CG)
-      drawhudmodel(7, 7, rtime / 7.0f, d->lastaction);
+      drawhudmodel(1, 8, rtime / 8.0f, d->lastaction);
     else if (d->gunselect == GUN_RL)
       drawhudmodel(1, 6, 170, d->lastaction);
     else
@@ -861,7 +853,7 @@ void drawhudgun(float fovy, float aspect, int farplane) {
     else if (d->gunselect == GUN_NAILGUN)
       drawhudmodel(0, 1, 100, 0);
     else if (d->gunselect == GUN_CG)
-      drawhudmodel(7, 1, 100, 0);
+      drawhudmodel(0, 1, 100, 0);
     else if (d->gunselect == GUN_CSAW)
       drawhudmodel(1, 1, 100, 0);
     else

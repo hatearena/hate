@@ -299,17 +299,10 @@ COMMAND(mapmodelreset, ARG_NONE);
 
 void preloadhudmodels() {
   char *names[] = {"hudguns/hate_csaw",  "hudguns/hate_shotg",
-                   "hudguns/hate_rifle", "hudguns/hate_rocket",
+                   "hudguns/hate_cgun", "hudguns/hate_rocket",
                    "hudguns/hate_rail",  "hudguns/hate_nailgun"};
 
   for (int i = 0; i < 6; i++) {
-    /**
-     * This is because GUN_CG uses MD3
-     * Will probably expand on this to use more guns in MD3 format and
-     * eventually phase out the MD2 renderer
-     */
-    if (i == 2)
-      continue;
     md2 *m = loadmodel(names[i]);
     delayedload(m);
   }
