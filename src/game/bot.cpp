@@ -299,7 +299,7 @@ static void botaction(dynent *m) {
   if (m->blocked) {
     m->blocked = false;
     m->jumpnext = true;
-    m->targetyaw += 90 + rnd(180);
+    m->targetyaw += rnd(2) ? 90 : -90;
   }
 
   m->move = 1;
