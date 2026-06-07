@@ -567,14 +567,6 @@ void gl_drawhud(int w, int h, int curfps, int nquads, int curvert,
     curLen += (targetLen - curLen) * decay;
 
     glColor4ub(crosshair_r, crosshair_g, crosshair_b, crosshair_a);
-    if (crosshairfx) {
-      if (player1->gunwait && !player1->ammo[player1->gunselect])
-        glColor4ub(128, 128, 128, crosshair_a);
-      else if (player1->health <= 25)
-        glColor4ub(255, 0, 0, crosshair_a);
-      else if (player1->health <= 50)
-        glColor4ub(255, 128, 0, crosshair_a);
-    };
 
     glBegin(GL_QUADS);
     glVertex2f(cx - thick / 2, cy - curGap - curLen);
