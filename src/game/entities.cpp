@@ -7,7 +7,7 @@ char *entmdlnames[] = {
     "boost",  "g_armour", "y_armour", "quad",    "teleporter",
 };
 float entzoffsets[] = {
-    -0.4f, -0.3f, 0.2f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+    -0.4f, -0.3f, -0.05f, 1.0f, -0.25f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
 };
 
 int triggertime = 0;
