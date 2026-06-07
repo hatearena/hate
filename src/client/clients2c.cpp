@@ -115,8 +115,16 @@ void localservertoclient(uchar *buf,
     };
 
     case SV_SOUND:
-      playsound(getint(p), &d->o);
+    {
+      int sound = getint(p);
+      if (sound == S_JUMP) {
+        static int lastjump = 0;
+        if (lastmillis - lastjump < 400) break;
+        lastjump = lastmillis;
+      }
+      playsound(sound, &d->o);
       break;
+    }
 
     case SV_TEXT:
       sgetstr();
