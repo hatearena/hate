@@ -550,28 +550,63 @@ void gl_drawhud(int w, int h, int curfps, int nquads, int curvert,
 
   renderscores();
   if (!rendermenu() && !intermission && !screenshotmode && !editmode && !spectator) {
-    glBlendFunc(GL_SRC_ALPHA, GL_SRC_ALPHA);
-    glBindTexture(GL_TEXTURE_2D, 1);
-    glBegin(GL_QUADS);
-    glColor3ub(255, 255, 255);
+    glDisable(GL_TEXTURE_2D);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    float cx = VIRTW / 2.0f, cy = VIRTH / 2.0f;
+    float thick = 3.0f;
+
+    bool moving = player1->move || player1->strafe || player1->attacking
+        || (player1->vel.x * player1->vel.x
+          + player1->vel.y * player1->vel.y
+          + player1->vel.z * player1->vel.z) > 1.0f;
+
+    float targetGap = moving ? crosshairsize * 0.4f : 2.0f;
+    float targetLen = moving ? crosshairsize * 1.3f : crosshairsize * 0.9f;
+
+    static float curGap = 2.0f, curLen = crosshairsize * 0.9f;
+    float decay = curtime * 0.008f;
+    if (decay > 1.0f) decay = 1.0f;
+    curGap += (targetGap - curGap) * decay;
+    curLen += (targetLen - curLen) * decay;
+
+    bool gunAvailable = player1->ammo[player1->gunselect] > 0
+        && (!player1->gunwait || player1->attacking);
+    int alpha = gunAvailable ? 255 : 128;
+
+    glColor4ub(255, 255, 255, alpha);
     if (crosshairfx) {
-      if (player1->gunwait)
-        glColor3ub(128, 128, 128);
+      if (!gunAvailable)
+        glColor4ub(128, 128, 128, alpha);
       else if (player1->health <= 25)
-        glColor3ub(255, 0, 0);
+        glColor4ub(255, 0, 0, alpha);
       else if (player1->health <= 50)
-        glColor3ub(255, 128, 0);
+        glColor4ub(255, 128, 0, alpha);
     };
-    float chsize = (float)crosshairsize;
-    glTexCoord2d(0.0, 0.0);
-    glVertex2f(VIRTW / 2 - chsize, VIRTH / 2 - chsize);
-    glTexCoord2d(1.0, 0.0);
-    glVertex2f(VIRTW / 2 + chsize, VIRTH / 2 - chsize);
-    glTexCoord2d(1.0, 1.0);
-    glVertex2f(VIRTW / 2 + chsize, VIRTH / 2 + chsize);
-    glTexCoord2d(0.0, 1.0);
-    glVertex2f(VIRTW / 2 - chsize, VIRTH / 2 + chsize);
+
+    glBegin(GL_QUADS);
+    glVertex2f(cx - thick / 2, cy - curGap - curLen);
+    glVertex2f(cx + thick / 2, cy - curGap - curLen);
+    glVertex2f(cx + thick / 2, cy - curGap);
+    glVertex2f(cx - thick / 2, cy - curGap);
+
+    glVertex2f(cx - thick / 2, cy + curGap);
+    glVertex2f(cx + thick / 2, cy + curGap);
+    glVertex2f(cx + thick / 2, cy + curGap + curLen);
+    glVertex2f(cx - thick / 2, cy + curGap + curLen);
+
+    glVertex2f(cx - curGap - curLen, cy - thick / 2);
+    glVertex2f(cx - curGap, cy - thick / 2);
+    glVertex2f(cx - curGap, cy + thick / 2);
+    glVertex2f(cx - curGap - curLen, cy + thick / 2);
+
+    glVertex2f(cx + curGap, cy - thick / 2);
+    glVertex2f(cx + curGap + curLen, cy - thick / 2);
+    glVertex2f(cx + curGap + curLen, cy + thick / 2);
+    glVertex2f(cx + curGap, cy + thick / 2);
     glEnd();
+
+    glEnable(GL_TEXTURE_2D);
   };
 
   glPopMatrix();
