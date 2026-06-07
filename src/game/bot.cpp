@@ -269,9 +269,9 @@ static void botaction(dynent *m) {
             180 +
         180;
 
-    float aimspread = (4 - botdifficulty) * 6.0f;
+    float aimspread = (4 - botdifficulty) * 12.0f;
     if (m_noitems && m_noitemsrail)
-      aimspread += 10.0f;
+      aimspread += 20.0f;
     if (aimspread > 0) {
       enemyyaw += (rnd(101) - 50) / 100.0f * aimspread;
     }
@@ -286,7 +286,7 @@ static void botaction(dynent *m) {
     normalise(m, m->targetyaw);
     float turnrate = curtime * (0.15f + botdifficulty * 0.05f);
     if (m_noitems && m_noitemsrail)
-      turnrate *= 0.4f;
+      turnrate *= 0.3f;
     float yawdiff = m->targetyaw - m->yaw;
     if (fabs(yawdiff) < turnrate)
       m->yaw = m->targetyaw;

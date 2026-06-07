@@ -732,7 +732,11 @@ void selfdamage(int damage, int actor, dynent *act) {
     spawnstate(player1);
     player1->lastaction = lastmillis;
   } else {
-    playsound(S_PAIN6);
+    static int lastpain = 0;
+    if (lastmillis - lastpain >= 3000) {
+      playsound(S_PAIN6);
+      lastpain = lastmillis;
+    };
   };
 };
 
