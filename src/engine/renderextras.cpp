@@ -291,12 +291,30 @@ void renderspheres(int time) {
 };
 
 char *entnames[] = {
-    "none?",      "light",       "playerstart", "shells",
-    "bullets",    "rockets",     "riflerounds", "nails",
-    "health",     "healthboost", "greenarmour", "yellowarmour",
-    "quaddamage", "teleport",    "teledest",    "mapmodel",
-    "monster",    "trigger",     "jumppad",     "?",
-    "?",          "?",           "?",           "?",
+    "none?",
+    "light",
+    "playerstart",
+    "shells",
+    "bullets",
+    "rockets",
+    "riflerounds",
+    "nails",
+    "energy",
+    "health",
+    "healthboost",
+    "greenarmour",
+    "yellowarmour",
+    "quaddamage",
+    "teleport",
+    "teledest",
+    "mapmodel",
+    "monster",
+    "trigger",
+    "jumppad",
+    "?",
+    "?",
+    "?",
+    "?",
 };
 
 void loadsky(char *basename) {
@@ -396,10 +414,10 @@ VARP(crosshair_g, 0, 255, 255);
 VARP(crosshair_b, 0, 255, 255);
 VARP(crosshair_a, 0, 255, 255);
 void crosshair(int r, int g, int b, int a) {
-    setvar("crosshair_r", r);
-    setvar("crosshair_g", g);
-    setvar("crosshair_b", b);
-    setvar("crosshair_a", a);
+  setvar("crosshair_r", r);
+  setvar("crosshair_g", g);
+  setvar("crosshair_b", b);
+  setvar("crosshair_a", a);
 };
 COMMAND(crosshair, ARG_4INT);
 
@@ -561,10 +579,11 @@ void gl_drawhud(int w, int h, int curfps, int nquads, int curvert,
     float cx = VIRTW / 2.0f, cy = VIRTH / 2.0f;
     float thick = 3.0f;
 
-    bool moving = !player1->ads && (player1->move || player1->strafe || player1->attacking
-        || (player1->vel.x * player1->vel.x
-          + player1->vel.y * player1->vel.y
-          + player1->vel.z * player1->vel.z) > 1.0f);
+    bool moving =
+        !player1->ads &&
+        (player1->move || player1->strafe || player1->attacking ||
+         (player1->vel.x * player1->vel.x + player1->vel.y * player1->vel.y +
+          player1->vel.z * player1->vel.z) > 1.0f);
 
     float targetGap = moving ? crosshairsize * 0.4f : 2.0f;
     float targetLen = moving ? crosshairsize * 1.3f : crosshairsize * 0.9f;
