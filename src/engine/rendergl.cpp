@@ -842,7 +842,7 @@ void drawhudgun(float fovy, float aspect, int farplane) {
         drawhudmodel(0, 1, 200, 0);
     } else if (d->gunselect == GUN_SG) {
       int sgtime = lastmillis - d->lastaction;
-      if (sgtime < 900)
+      if (sgtime < 840)
         drawhudmodel(11, 11, 100.0f, d->lastaction);
       else
         drawhudmodel(19, 1, 100, 0);
