@@ -363,12 +363,26 @@ int renderwater(float hf) {
   glDisable(GL_BLEND);
   glDepthMask(GL_TRUE);
 
+  if (wx1 >= 0) {
+    int area = (wx2 - wx1) * (wy2 - wy1);
+    int nb = 1 + area / 2000;
+    if (nb > 5)
+      nb = 5;
+    loopi(nb) {
+      float bx = wx1 + (float)(rnd(wx2 - wx1)) + (float)rnd(100) / 100.0f;
+      float by = wy1 + (float)(rnd(wy2 - wy1)) + (float)rnd(100) / 100.0f;
+      vec bo = {bx, by, hf};
+      vec bd = {(float)(rnd(21) - 10), (float)(rnd(21) - 10),
+                (float)(rnd(8) + 2)};
+      newparticlecol(bo, bd, rnd(600) + 600, 10, (uchar)(rnd(40) + 100),
+                     (uchar)(rnd(30) + 190), 255);
+    };
+  };
+
   return nquads;
 };
 
-void addwaterquad(int x, int y,
-                  int size) // update bounding rect that contains water
-{
+void addwaterquad(int x, int y, int size) {
   int x2 = x + size;
   int y2 = y + size;
   if (wx1 < 0) {

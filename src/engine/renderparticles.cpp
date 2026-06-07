@@ -7,17 +7,20 @@ struct parttype {
   float sz;
 };
 static parttype parttypes[] = {
-    {0.7f, 0.6f, 0.3f, 2, 3, 0.06f},  // 0: yellow sparks
-    {0.5f, 0.5f, 0.5f, 20, 7, 0.15f}, // 1: grey small smoke
-    {0.2f, 0.2f, 1.0f, 20, 3, 0.08f}, // 2: blue edit entities
-    {1.0f, 0.1f, 0.1f, 1, 7, 0.06f},  // 3: red blood
-    {1.0f, 0.8f, 0.8f, 20, 6, 1.2f},  // 4: yellow fireball1
-    {0.5f, 0.5f, 0.5f, 20, 7, 0.6f},  // 5: grey big smoke
-    {1.0f, 1.0f, 1.0f, 20, 8, 1.2f},  // 6: white fireball2
-    {1.0f, 1.0f, 1.0f, 20, 9, 1.2f},  // 7: white fireball3
-    {1.0f, 0.1f, 0.1f, 0, 7, 0.2f},   // 8: red demotrack
-    {1.0f, 1.0f, 1.0f, 0, 7, 0.05f},  // 9: white pickup glow
+    {0.7f, 0.6f, 0.3f, 2, 3, 0.06f},  // 0:  yellow sparks
+    {0.5f, 0.5f, 0.5f, 20, 7, 0.15f}, // 1:  grey small smoke
+    {0.2f, 0.2f, 1.0f, 20, 3, 0.08f}, // 2:  blue edit entities
+    {1.0f, 0.1f, 0.1f, 1, 7, 0.06f},  // 3:  red blood
+    {1.0f, 0.8f, 0.8f, 20, 6, 1.2f},  // 4:  yellow fireball1
+    {0.5f, 0.5f, 0.5f, 20, 7, 0.6f},  // 5:  grey big smoke
+    {1.0f, 1.0f, 1.0f, 20, 8, 1.2f},  // 6:  white fireball2
+    {1.0f, 1.0f, 1.0f, 20, 9, 1.2f},  // 7:  white fireball3
+    {1.0f, 0.1f, 0.1f, 0, 7, 0.2f},   // 8:  red demotrack
+    {1.0f, 1.0f, 1.0f, 0, 7, 0.05f},  // 9:  white pickup glow
+    {0.4f, 0.8f, 1.0f, 0, 6, 0.06f},  // 10: water bubble
+    {1.0f, 1.0f, 1.0f, 20, 7, 0.04f}, // 11: water mist
 };
+
 struct particle {
   vec o, d;
   int fade, type;
@@ -25,6 +28,7 @@ struct particle {
   uchar cr, cg, cb;
   particle *next;
 };
+
 particle particles[MAXPARTICLES], *parlist = NULL, *parempty = NULL;
 bool parinit = false;
 
@@ -91,8 +95,19 @@ void render_particles(int time) {
     glBindTexture(GL_TEXTURE_2D, pt->tex);
     glBegin(GL_QUADS);
 
-    glColor3d(p->cr / 255.0f, p->cg / 255.0f, p->cb / 255.0f);
-    float sz = pt->sz * particlesize / 100.0f;
+    float mul = 1.0f, sscale = 1.0f;
+    if (p->type == 10) {
+      float total = (float)(p->fade + (lastmillis - p->millis));
+      float t = total > 0 ? (float)(lastmillis - p->millis) / total : 0.0f;
+      if (t < 0.2f)
+        mul = t / 0.2f;
+      else if (t > 0.6f)
+        mul = 1.0f - (t - 0.6f) / 0.4f;
+      if (t > 0.5f)
+        sscale = 1.0f + ((t - 0.5f) / 0.5f) * 0.3f;
+    };
+    glColor3d(p->cr / 255.0f * mul, p->cg / 255.0f * mul, p->cb / 255.0f * mul);
+    float sz = pt->sz * particlesize / 100.0f * sscale;
     // perf varray?
     glTexCoord2f(0.0, 1.0);
     glVertex3d(p->o.x + (-right.x + up.x) * sz, p->o.z + (-right.y + up.y) * sz,
