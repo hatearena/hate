@@ -275,6 +275,7 @@ enum {
   S_KILL = 56,
   S_NAILGUN = 57,
   S_DEAD = 58,
+  S_RUN_STOP = 59,
 };
 
 // vertex array format

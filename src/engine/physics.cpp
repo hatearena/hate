@@ -1,6 +1,7 @@
 #include "../include/cube.h"
 
 static int runchan = -1;
+static bool runstop = false;
 
 void stoprunsound() {
   if (runchan >= 0) {
@@ -393,11 +394,17 @@ void moveplayer(dynent *pl, int moveres, bool local, int curtime) {
   if (local) {
     if (pl->onfloor && !water && pl->moving &&
         (pl->move != 0 || pl->strafe != 0)) {
-      if (runchan < 0)
+      if (runchan < 0) {
         runchan = playsoundloop(S_RUN);
+        runstop = false;
+      }
     } else if (runchan >= 0) {
       stopchan(runchan);
       runchan = -1;
+      if (!runstop && pl->onfloor && !water) {
+        playsound(S_RUN_STOP);
+        runstop = true;
+      }
     };
   };
 
