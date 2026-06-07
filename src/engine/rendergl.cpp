@@ -842,10 +842,10 @@ void drawhudgun(float fovy, float aspect, int farplane) {
         drawhudmodel(0, 1, 200, 0);
     } else if (d->gunselect == GUN_SG) {
       int sgtime = lastmillis - d->lastaction;
-      if (sgtime < 900)
-        drawhudmodel(9, 11, 100.0f, d->lastaction);
+      if (sgtime < 690)
+        drawhudmodel(0, 7, 100.0f, d->lastaction);
       else
-        drawhudmodel(19, 1, 100, 0);
+        drawhudmodel(0, 1, 100, 0);
     } else if (d->gunselect == GUN_CSAW)
       drawhudmodel(2, 3, rtime / 3.0f, d->lastaction);
     else if (d->gunselect == GUN_NAILGUN)
@@ -866,7 +866,7 @@ void drawhudgun(float fovy, float aspect, int farplane) {
     if (d->gunselect == GUN_RIFLE)
       drawhudmodel(0, 1, 100, 0);
     else if (d->gunselect == GUN_SG)
-      drawhudmodel(19, 1, 100, 0);
+      drawhudmodel(0, 0, 100, 0);
     else if (d->gunselect == GUN_NAILGUN)
       drawhudmodel(0, 1, 100, 0);
     else if (d->gunselect == GUN_CG)
