@@ -809,13 +809,6 @@ void drawhudmodel(int start, int end, float speed, int base) {
     float fwd = -0.2f;
     px += cosf(yaw_rad) * right - sinf(yaw_rad) * fwd;
     pz += sinf(yaw_rad) * right + cosf(yaw_rad) * fwd;
-  } else if (player1->gunselect == GUN_LIGHTGUN) {
-    float yaw_rad = player1->yaw * (PI / 180.0f);
-    float right = 0.1f;
-    float fwd = 0.5f;
-    px += cosf(yaw_rad) * right - sinf(yaw_rad) * fwd;
-    pz += sinf(yaw_rad) * right + cosf(yaw_rad) * fwd;
-    py += 0.2f;
   }
 
   rendermodel(hudgunnames[player1->gunselect], start, end, 0, 1.0f, px, py, pz,
