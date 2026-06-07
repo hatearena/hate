@@ -1,4 +1,7 @@
 #include "../include/cube.h"
+#include "../include/protos.h"
+
+static int lightgunchannel = -1;
 
 struct guninfo {
   short sound, attackdelay, damage, projspeed, part, kickamount;
@@ -318,7 +321,8 @@ void moveprojectiles(float time) {
 void shootv(int gun, vec &from, vec &to, dynent *d,
             bool local) // create visual effect from a shot
 {
-  playsound(guns[gun].sound, d == player1 ? NULL : &d->o);
+  if (gun != GUN_LIGHTGUN)
+    playsound(guns[gun].sound, d == player1 ? NULL : &d->o);
   int pspeed = 25;
   switch (gun) {
   case GUN_CSAW:
@@ -392,6 +396,15 @@ void raydamage(dynent *o, vec &from, vec &to, dynent *d, int i) {
 };
 
 void shoot(dynent *d, vec &targ) {
+  if (d == player1) {
+    if (d->gunselect == GUN_LIGHTGUN && d->attacking) {
+      if (lightgunchannel < 0)
+        lightgunchannel = playsoundloop(S_LIGHTGUN);
+    } else if (lightgunchannel >= 0) {
+      stopchan(lightgunchannel);
+      lightgunchannel = -1;
+    }
+  }
   if (editmode)
     return;
   int attacktime = lastmillis - d->lastaction;
