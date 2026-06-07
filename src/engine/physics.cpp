@@ -85,9 +85,10 @@ bool collide(dynent *d, bool spawn, float drop, float rise) {
   const int x2 = fast_f2nat(fx2);
   const int y2 = fast_f2nat(fy2);
   float hi = 127, lo = -128;
-  float minfloor = (d->monsterstate && !spawn && d->health > 100 && d->mtype >= 0)
-                       ? d->o.z - d->eyeheight - 4.5f
-                       : -1000.0f;
+  float minfloor =
+      (d->monsterstate && !spawn && d->health > 100 && d->mtype >= 0)
+          ? d->o.z - d->eyeheight - 4.5f
+          : -1000.0f;
 
   for (int x = x1; x <= x2; x++)
     for (int y = y1; y <= y2; y++) // collide with map
@@ -290,8 +291,13 @@ void moveplayer(dynent *pl, int moveres, bool local, int curtime) {
         };
         if (local)
           playsoundc(S_JUMP);
-        else if (pl->monsterstate)
-          playsound(S_JUMP, &pl->o);
+        else if (pl->monsterstate) {
+          static int lastjump = 0;
+          if (lastmillis - lastjump >= 700) {
+            playsound(S_JUMP, &pl->o);
+            lastjump = lastmillis;
+          };
+        }
       }
     } else if (pl->timeinair > 800) {
       if (local)
