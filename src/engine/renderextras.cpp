@@ -381,6 +381,18 @@ void damageblend(int n) {
 VARP(show_stats, 0, 1, 1);
 VARP(crosshairfx, 0, 1, 1);
 
+VARP(crosshair_r, 0, 255, 255);
+VARP(crosshair_g, 0, 255, 255);
+VARP(crosshair_b, 0, 255, 255);
+VARP(crosshair_a, 0, 255, 255);
+void crosshair(int r, int g, int b, int a) {
+    setvar("crosshair_r", r);
+    setvar("crosshair_g", g);
+    setvar("crosshair_b", b);
+    setvar("crosshair_a", a);
+};
+COMMAND(crosshair, ARG_4INT);
+
 void roundedbox(int x1, int y1, int x2, int y2, int r) {
   int segs = 6;
   glBegin(GL_QUADS);
@@ -554,14 +566,14 @@ void gl_drawhud(int w, int h, int curfps, int nquads, int curvert,
     curGap += (targetGap - curGap) * decay;
     curLen += (targetLen - curLen) * decay;
 
-    glColor3ub(255, 255, 255);
+    glColor4ub(crosshair_r, crosshair_g, crosshair_b, crosshair_a);
     if (crosshairfx) {
       if (player1->gunwait && !player1->ammo[player1->gunselect])
-        glColor3ub(128, 128, 128);
+        glColor4ub(128, 128, 128, crosshair_a);
       else if (player1->health <= 25)
-        glColor3ub(255, 0, 0);
+        glColor4ub(255, 0, 0, crosshair_a);
       else if (player1->health <= 50)
-        glColor3ub(255, 128, 0);
+        glColor4ub(255, 128, 0, crosshair_a);
     };
 
     glBegin(GL_QUADS);
