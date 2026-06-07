@@ -3,8 +3,11 @@
 vector<entity> ents;
 
 char *entmdlnames[] = {
-    "shells", "bullets",  "rockets",  "rrounds", "nails",
-    "health", "boost",  "g_armour", "y_armour", "quad",    "teleporter",
+    "shells", "bullets",  "rockets",  "rrounds", "nails",      "health",
+    "boost",  "g_armour", "y_armour", "quad",    "teleporter",
+};
+float entzoffsets[] = {
+    -0.3f, 1.0f, 0.2f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
 };
 
 int triggertime = 0;
@@ -36,7 +39,8 @@ void renderentities() {
           continue;
         if (e.type < I_SHELLS || e.type > TELEPORT)
           continue;
-        renderent(e, entmdlnames[e.type - I_SHELLS], 1.0f, lastmillis / 10.0f);
+        renderent(e, entmdlnames[e.type - I_SHELLS],
+                  entzoffsets[e.type - I_SHELLS], lastmillis / 10.0f);
         if (e.spawned && (rnd(8) == 0)) {
           float f = S(e.x, e.y)->floor;
           vec pos = {(float)e.x + (rnd(21) - 10) * 0.1f,
@@ -45,10 +49,9 @@ void renderentities() {
           vec vel = {(rnd(21) - 10) * 0.6f, (rnd(21) - 10) * 0.6f,
                      3.0f + rnd(8) * 0.5f};
           static const uchar glowcols[10][3] = {
-              {160, 130, 60}, {130, 130, 70}, {160, 100, 50},
-              {80, 140, 180}, {120, 120, 200}, {160, 80, 80},
-              {80, 160, 80},  {80, 150, 80},   {160, 150, 60},
-              {160, 80, 160},
+              {160, 130, 60},  {130, 130, 70}, {160, 100, 50}, {80, 140, 180},
+              {120, 120, 200}, {160, 80, 80},  {80, 160, 80},  {80, 150, 80},
+              {160, 150, 60},  {160, 80, 160},
           };
           newparticlecol(
               pos, vel, rnd(300) + 400, 9, glowcols[e.type - I_SHELLS][0],
@@ -85,9 +88,9 @@ void renderentities() {
 struct itemstat {
   int add, max, sound;
 } itemstats[] = {
-    10,  50,  S_ITEMAMMO,   20,  100, S_ITEMAMMO,   5,     25,    S_ITEMAMMO,
-    5,   25,  S_ITEMAMMO,   15,  75,  S_ITEMAMMO,   25,  100, S_ITEMHEALTH,
-    50,  200, S_ITEMHEALTH, 100, 100, S_ITEMARMOUR, 150, 150, S_ITEMARMOUR,
+    10,    50,    S_ITEMAMMO,   20,  100, S_ITEMAMMO,   5,   25,  S_ITEMAMMO,
+    5,     25,    S_ITEMAMMO,   15,  75,  S_ITEMAMMO,   25,  100, S_ITEMHEALTH,
+    50,    200,   S_ITEMHEALTH, 100, 100, S_ITEMARMOUR, 150, 150, S_ITEMARMOUR,
     20000, 30000, S_ITEMPUP,
 };
 
@@ -104,8 +107,11 @@ void radditem(int i, int &v) {
 
 void realpickup(int n, dynent *d) {
   if (m_infected && d->team[0] && !strcmp(d->team, "INFD")) {
-    if (ents[n].type == I_HEALTH) { radditem(n, d->health); }
-    else if (ents[n].type == I_BOOST) { radditem(n, d->health); };
+    if (ents[n].type == I_HEALTH) {
+      radditem(n, d->health);
+    } else if (ents[n].type == I_BOOST) {
+      radditem(n, d->health);
+    };
     return;
   };
   switch (ents[n].type) {
