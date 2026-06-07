@@ -41,6 +41,32 @@ static bool isgunshot(int n) {
 #define MAXVOL MIX_MAX_VOLUME
 Mix_Music *mod = NULL;
 void *stream = NULL;
+
+#define REV_MASK 1023
+static float revbuf[1024 * 2];
+static int revpos = 0;
+static float revlp[2] = {0, 0};
+VARP(reverb, 0, 25, 100);
+
+static void reverb_cb(void *udata, Uint8 *stream, int len) {
+  if (!reverb) return;
+  Sint16 *samples = (Sint16 *)stream;
+  int nsamples = len / 2;
+  float mix = reverb / 100.0f * 0.3f;
+  for (int i = 0; i < nsamples; i += 2) {
+    float in_l = samples[i];
+    float in_r = samples[i + 1];
+    float d_l = revbuf[(revpos * 2) & REV_MASK];
+    float d_r = revbuf[(revpos * 2 + 1) & REV_MASK];
+    revlp[0] += 0.4f * (d_l - revlp[0]);
+    revlp[1] += 0.4f * (d_r - revlp[1]);
+    samples[i] = (Sint16)(in_l + revlp[0] * mix);
+    samples[i + 1] = (Sint16)(in_r + revlp[1] * mix);
+    revbuf[(revpos * 2) & REV_MASK] = in_l * 0.3f + d_r * 0.15f;
+    revbuf[(revpos * 2 + 1) & REV_MASK] = in_r * 0.3f + d_l * 0.15f;
+    revpos = (revpos + 1) & REV_MASK;
+  };
+};
 #else
 #include "fmod.h"
 #define MAXVOL 255
@@ -82,6 +108,7 @@ void initsound() {
     nosound = true;
   };
   Mix_AllocateChannels(MAXCHAN);
+  Mix_SetPostMix(reverb_cb, NULL);
 #else
   if (FSOUND_GetVersion() < FMOD_VERSION)
     fatal("You're using an old FMOD dll");
