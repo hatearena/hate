@@ -391,7 +391,7 @@ void moveplayer(dynent *pl, int moveres, bool local, int curtime) {
     };
   };
 
-  if (local) {
+  if (pl == player1) {
     if (pl->onfloor && !water && pl->moving &&
         (pl->move != 0 || pl->strafe != 0)) {
       if (runchan < 0) {

@@ -20,14 +20,20 @@ vector<int> soundmax;
 VAR(maxsamesound, 0, 0, 8);
 
 static bool isgunshot(int n) {
-    switch (n) {
-        case S_RIFLE: case S_SG: case S_CG: case S_RLFIRE:
-        case S_NAILGUN: case S_CSAW: case S_FLAUNCH:
-        case S_ICEBALL: case S_SLIMEBALL:
-            return true;
-        default:
-            return false;
-    }
+  switch (n) {
+  case S_RIFLE:
+  case S_SG:
+  case S_CG:
+  case S_RLFIRE:
+  case S_NAILGUN:
+  case S_CSAW:
+  case S_FLAUNCH:
+  case S_ICEBALL:
+  case S_SLIMEBALL:
+    return true;
+  default:
+    return false;
+  }
 }
 
 #ifdef USE_MIXER
@@ -66,18 +72,21 @@ VAR(soundbufferlen, 128, 1024, 4096);
 
 void initsound() {
   memset(soundlocs, 0, sizeof(soundloc) * MAXCHAN);
-  loopi(MAXCHAN) { soundchan[i] = -1; chanprio[i] = 0; }
+  loopi(MAXCHAN) {
+    soundchan[i] = -1;
+    chanprio[i] = 0;
+  }
 #ifdef USE_MIXER
   if (Mix_OpenAudio(SOUNDFREQ, MIX_DEFAULT_FORMAT, 2, soundbufferlen) < 0) {
-    conoutf("sound init failed (SDL_mixer): %s", (size_t)Mix_GetError());
+    conoutf("Sound init failed (SDL_Mixer): %s", (size_t)Mix_GetError());
     nosound = true;
   };
   Mix_AllocateChannels(MAXCHAN);
 #else
   if (FSOUND_GetVersion() < FMOD_VERSION)
-    fatal("old FMOD dll");
+    fatal("You're using an old FMOD dll");
   if (!FSOUND_Init(SOUNDFREQ, MAXCHAN, FSOUND_INIT_GLOBALFOCUS)) {
-    conoutf("sound init failed (FMOD): %d", FSOUND_GetError());
+    conoutf("Sound init failed (FMOD): %d", FSOUND_GetError());
     nosound = true;
   };
 #endif
@@ -108,7 +117,7 @@ void music(char *name) {
         FSOUND_SetPaused(chan, false);
       };
     } else {
-      conoutf("could not play music: %s", sn);
+      conoutf("Could not play music: %s", sn);
     };
 #endif
   };
@@ -201,25 +210,30 @@ void updatevol() {
 };
 
 void playsoundc(int n) {
-  if (editmode) return;
+  if (editmode)
+    return;
   addmsg(0, 2, SV_SOUND, n);
   playsound(n);
 };
 
 void playsoundmax(int n) {
-  if (nosound) return;
-  if (editmode) return;
-  if (n < 0 || n >= samples.length()) return;
+  if (nosound)
+    return;
+  if (editmode)
+    return;
+  if (n < 0 || n >= samples.length())
+    return;
   if (!samples[n]) {
     sprintf_sd(buf)("packages/sounds/%s.wav", snames[n]);
     samples[n] = Mix_LoadWAV(path(buf));
     if (!samples[n]) {
-      conoutf("failed to load sample: %s", buf);
+      conoutf("Failed to load sample: %s", buf);
       return;
     }
   }
   int chan = Mix_PlayChannel(-1, samples[n], 0);
-  if (chan < 0) return;
+  if (chan < 0)
+    return;
   soundchan[chan] = n;
   Mix_Volume(chan, MIX_MAX_VOLUME);
 };
@@ -239,7 +253,7 @@ void playsound(int n, vec *loc) {
     soundsatonce = 1;
   lastsoundmillis = lastmillis;
   if (soundsatonce > 5)
-    return; // avoid bursts of sounds with heavy packetloss and in sp
+    return;
   if (n < 0 || n >= samples.length()) {
     if (n == 22018) {
       if (!samples[53]) {
@@ -288,7 +302,7 @@ void playsound(int n, vec *loc) {
 #endif
 
     if (!samples[n]) {
-      conoutf("failed to load sample: %s", buf);
+      conoutf("Failed to load sample: %s", buf);
       return;
     };
   };
@@ -336,7 +350,7 @@ int playsoundloop(int n, vec *loc) {
   if (editmode)
     return -1;
   if (n < 0 || n >= samples.length()) {
-    conoutf("unregistered sound: %d", n);
+    conoutf("Unregistered sound: %d", n);
     if (n == 22018) {
       if (!samples[53]) {
         sprintf_sd(buf)("packages/sounds/free/punch2.wav");
@@ -367,7 +381,7 @@ int playsoundloop(int n, vec *loc) {
     samples[n] = FSOUND_Sample_Load(n, path(buf), FSOUND_LOOP_NORMAL, 0, 0);
 #endif
     if (!samples[n]) {
-      conoutf("failed to load sample: %s", buf);
+      conoutf("Failed to load sample: %s", buf);
       return -1;
     }
   }
@@ -389,17 +403,18 @@ int playsoundloop(int n, vec *loc) {
 };
 
 void stopsounds() {
-    if (nosound) return;
+  if (nosound)
+    return;
 #ifdef USE_MIXER
-    Mix_HaltChannel(-1);
+  Mix_HaltChannel(-1);
 #else
-    loopi(MAXCHAN) stopchan(i);
+  loopi(MAXCHAN) stopchan(i);
 #endif
-    loopi(MAXCHAN) {
-        soundlocs[i].inuse = false;
-        soundchan[i] = -1;
-        chanprio[i] = 0;
-    }
+  loopi(MAXCHAN) {
+    soundlocs[i].inuse = false;
+    soundchan[i] = -1;
+    chanprio[i] = 0;
+  }
 }
 
 void stopchan(int chan) {
@@ -418,23 +433,26 @@ void stopchan(int chan) {
 };
 
 void preloadweaponsounds() {
-    if (nosound) return;
-    int ids[] = {S_CSAW, S_SG, S_CG, S_RLFIRE, S_RIFLE, S_NAILGUN, S_WEAPLOAD, S_NOAMMO};
-    loopi(sizeof(ids)/sizeof(ids[0])) {
-        int n = ids[i];
-        if (n < 0 || n >= samples.length()) continue;
-        if (!samples[n]) {
-            sprintf_sd(buf)("packages/sounds/%s.wav", snames[n]);
+  if (nosound)
+    return;
+  int ids[] = {S_CSAW,  S_SG,      S_CG,       S_RLFIRE,
+               S_RIFLE, S_NAILGUN, S_WEAPLOAD, S_NOAMMO};
+  loopi(sizeof(ids) / sizeof(ids[0])) {
+    int n = ids[i];
+    if (n < 0 || n >= samples.length())
+      continue;
+    if (!samples[n]) {
+      sprintf_sd(buf)("packages/sounds/%s.wav", snames[n]);
 #ifdef USE_MIXER
-            samples[n] = Mix_LoadWAV(path(buf));
+      samples[n] = Mix_LoadWAV(path(buf));
 #else
-            samples[n] = FSOUND_Sample_Load(n, path(buf), FSOUND_LOOP_OFF, 0, 0);
+      samples[n] = FSOUND_Sample_Load(n, path(buf), FSOUND_LOOP_OFF, 0, 0);
 #endif
-            if (!samples[n]) {
-                conoutf("failed to preload sound: %s", buf);
-            }
-        }
+      if (!samples[n]) {
+        conoutf("Failed to preload sound: %s", buf);
+      }
     }
+  }
 }
 
 void sound(int n) { playsound(n, NULL); };
