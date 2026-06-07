@@ -288,6 +288,7 @@ char *entnames[] = {
     "bullets",
     "rockets",
     "riflerounds",
+    "nails",
     "health",
     "healthboost",
     "greenarmour",
