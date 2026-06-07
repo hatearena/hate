@@ -42,6 +42,7 @@ enum // static entity types
   I_ROCKETS,
   I_ROUNDS,
   I_NAILS,
+  I_ENERGY,
   I_HEALTH,
   I_BOOST,
   I_GREENARMOUR,
@@ -113,6 +114,7 @@ enum {
   GUN_RL,
   GUN_RIFLE,
   GUN_NAILGUN,
+  GUN_LIGHTGUN,
   GUN_FIREBALL,
   GUN_ICEBALL,
   GUN_SLIMEBALL,
@@ -276,6 +278,7 @@ enum {
   S_NAILGUN = 57,
   S_DEAD = 58,
   S_RUN_STOP = 59,
+  S_LIGHTGUN = 60,
 };
 
 // vertex array format

@@ -300,9 +300,10 @@ COMMAND(mapmodelreset, ARG_NONE);
 void preloadhudmodels() {
   char *names[] = {"hudguns/hate_csaw",  "hudguns/hate_shotg",
                    "hudguns/hate_cgun", "hudguns/hate_rocket",
-                   "hudguns/hate_rail",  "hudguns/hate_nailgun"};
+                   "hudguns/hate_rail",  "hudguns/hate_nailgun",
+                   "hudguns/hate_lightgun"};
 
-  for (int i = 0; i < 6; i++) {
+  for (int i = 0; i < 7; i++) {
     md2 *m = loadmodel(names[i]);
     delayedload(m);
   }

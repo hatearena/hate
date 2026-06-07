@@ -22,6 +22,7 @@ guninfo guns[NUMGUNS] = {
     {S_RLFIRE, 800, 120, 80, 0, 10, "rocketlauncher"},
     {S_RIFLE, 1500, 100, 0, 0, 30, "rifle"},
     {S_NAILGUN, 100, 25, 0, 0, 5, "nailgun"},
+    {S_LIGHTGUN, 50, 15, 0, 0, 2, "lightgun"},
     {S_FLAUNCH, 200, 20, 50, 4, 1, "fireball"},
     {S_ICEBALL, 200, 40, 30, 6, 1, "iceball"},
     {S_SLIMEBALL, 200, 30, 160, 7, 1, "slimeball"},
@@ -49,6 +50,8 @@ void selectgun(int a, int b, int c) {
     s = GUN_RIFLE;
   else if (s != GUN_NAILGUN && player1->ammo[GUN_NAILGUN])
     s = GUN_NAILGUN;
+  else if (s != GUN_LIGHTGUN && player1->ammo[GUN_LIGHTGUN])
+    s = GUN_LIGHTGUN;
   else
     s = GUN_CSAW;
   if (s != player1->gunselect) {
@@ -70,8 +73,8 @@ COMMAND(weapon, ARG_3STR);
 
 void nextweapon() {
   int s = player1->gunselect;
-  for (int i = 1; i <= 5; i++) {
-    int g = (s + i) % 6;
+  for (int i = 1; i <= 6; i++) {
+    int g = (s + i) % 7;
     if (player1->ammo[g]) {
       if (g != player1->gunselect) {
         player1->gunselect = g;
@@ -85,8 +88,8 @@ void nextweapon() {
 
 void prevweapon() {
   int s = player1->gunselect;
-  for (int i = 1; i <= 5; i++) {
-    int g = (s - i + 6) % 6;
+  for (int i = 1; i <= 6; i++) {
+    int g = (s - i + 7) % 7;
     if (player1->ammo[g]) {
       if (g != player1->gunselect) {
         player1->gunselect = g;
@@ -354,6 +357,12 @@ void shootv(int gun, vec &from, vec &to, dynent *d,
     particle_splash(1, 15, 500, to);
     newbeam(from, to, 150);
     break;
+
+  case GUN_LIGHTGUN:
+    particle_splash(0, 30, 200, to);
+    particle_splash(1, 5, 300, to);
+    newbeam(from, to, 100, 1);
+    break;
   };
 };
 
@@ -396,7 +405,7 @@ void shoot(dynent *d, vec &targ) {
   if (!d->ammo[d->gunselect]) {
     if (autoswitch) {
       int s = d->gunselect;
-      for (int i = 1; i <= 5; i++) {
+      for (int i = 1; i <= 6; i++) {
         if (d->ammo[i]) { s = i; break; }
       }
       if (s == d->gunselect) s = GUN_CSAW;

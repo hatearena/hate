@@ -233,11 +233,13 @@ static void botaction(dynent *m) {
   } else if (disttoenemy < 8.0f) {
     if (m->gunselect != GUN_CSAW)
       m->gunselect = GUN_CSAW;
-  } else if (!m->ammo[m->gunselect]) {
+    } else if (!m->ammo[m->gunselect]) {
     if (m->ammo[GUN_RL])
       m->gunselect = GUN_RL;
     else if (m->ammo[GUN_CG])
       m->gunselect = GUN_CG;
+    else if (m->ammo[GUN_LIGHTGUN])
+      m->gunselect = GUN_LIGHTGUN;
     else if (m->ammo[GUN_NAILGUN])
       m->gunselect = GUN_NAILGUN;
     else if (m->ammo[GUN_SG])
@@ -251,6 +253,8 @@ static void botaction(dynent *m) {
       m->gunselect = GUN_RL;
     else if (m->ammo[GUN_CG])
       m->gunselect = GUN_CG;
+    else if (m->ammo[GUN_LIGHTGUN])
+      m->gunselect = GUN_LIGHTGUN;
     else if (m->ammo[GUN_NAILGUN])
       m->gunselect = GUN_NAILGUN;
     else if (m->ammo[GUN_SG])
@@ -525,7 +529,7 @@ static void spawnonebot() {
     loopi(NUMGUNS) b->ammo[i] = 0;
     b->ammo[GUN_CSAW] = 1;
   } else {
-    b->gunselect = GUN_SG + rnd(5);
+    b->gunselect = GUN_SG + rnd(6);
     loopi(NUMGUNS) b->ammo[i] = 100;
   };
   b->maxspeed = max(28.0f + botdifficulty * 4.0f, 16.0f);

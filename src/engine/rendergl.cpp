@@ -758,7 +758,8 @@ VARP(viewbobamp, 0, 10, 50);
 
 char *hudgunnames[] = {"hudguns/hate_csaw", "hudguns/hate_shotg",
                        "hudguns/hate_cgun", "hudguns/hate_rocket",
-                       "hudguns/hate_rail", "hudguns/hate_nailgun"};
+                       "hudguns/hate_rail", "hudguns/hate_nailgun",
+                       "hudguns/hate_lightgun"};
 
 void drawhudmodel(int start, int end, float speed, int base) {
   float bx = 0, bz = 0;
@@ -854,6 +855,8 @@ void drawhudgun(float fovy, float aspect, int farplane) {
       drawhudmodel(1, 8, rtime / 8.0f, d->lastaction);
     else if (d->gunselect == GUN_RL)
       drawhudmodel(1, 6, 170, d->lastaction);
+    else if (d->gunselect == GUN_LIGHTGUN)
+      drawhudmodel(1, 6, rtime / 6.0f, d->lastaction);
     else
       drawhudmodel(7, 18, rtime / 18.0f, d->lastaction);
   } else {
@@ -873,6 +876,8 @@ void drawhudgun(float fovy, float aspect, int farplane) {
       drawhudmodel(0, 1, 100, 0);
     else if (d->gunselect == GUN_CSAW)
       drawhudmodel(1, 1, 100, 0);
+    else if (d->gunselect == GUN_LIGHTGUN)
+      drawhudmodel(0, 1, 100, 0);
     else
       drawhudmodel(6, 1, 100, 0);
   };

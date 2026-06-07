@@ -134,12 +134,13 @@ struct beam {
   vec from, to;
   int spawntime;
   int duration;
+  int color;
   beam *next;
 };
 beam beams[MAXBEAMS], *blist = NULL, *bempty = NULL;
 bool binitb = false;
 
-void newbeam(vec &from, vec &to, int duration) {
+void newbeam(vec &from, vec &to, int duration, int color = 0) {
   if (!binitb) {
     loopi(MAXBEAMS) {
       beams[i].next = bempty;
@@ -154,6 +155,7 @@ void newbeam(vec &from, vec &to, int duration) {
     p->to = to;
     p->spawntime = lastmillis;
     p->duration = duration;
+    p->color = color;
     p->next = blist;
     blist = p;
   };
@@ -206,7 +208,11 @@ void renderbeams(int time) {
         vup.z = right.x * dir.y - right.y * dir.x;
 
         float gw = width * 1.5f;
-        glColor4f(1.0f, 0.2f, 0.05f, alpha * 0.3f);
+        if (p->color == 1) {
+          glColor4f(0.1f, 0.3f, 1.0f, alpha * 0.3f);
+        } else {
+          glColor4f(1.0f, 0.2f, 0.05f, alpha * 0.3f);
+        }
         glBegin(GL_QUADS);
 #define BEAMQUAD(rv)                                                           \
   glVertex3f(p->from.x + rv.x * gw, p->from.z + rv.z * gw,                     \
@@ -220,7 +226,11 @@ void renderbeams(int time) {
 #undef BEAMQUAD
         glEnd();
 
-        glColor4f(1.0f, 0.5f, 0.2f, alpha);
+        if (p->color == 1) {
+          glColor4f(0.3f, 0.6f, 1.0f, alpha);
+        } else {
+          glColor4f(1.0f, 0.5f, 0.2f, alpha);
+        }
         glBegin(GL_QUADS);
 #define BEAMQUAD(rv)                                                           \
   glVertex3f(p->from.x + rv.x * width, p->from.z + rv.z * width,               \
@@ -667,6 +677,19 @@ void gl_drawhud(int w, int h, int curfps, int nquads, int curvert,
 
     if (d->gunselect == GUN_NAILGUN) {
       glBindTexture(GL_TEXTURE_2D, 11);
+      glBegin(GL_QUADS);
+      glTexCoord2f(0, 0);
+      glVertex2i(VIRTW - 250, 1620);
+      glTexCoord2f(1, 0);
+      glVertex2i(VIRTW - 250 + 64, 1620);
+      glTexCoord2f(1, 1);
+      glVertex2i(VIRTW - 250 + 64, 1620 + 64);
+      glTexCoord2f(0, 1);
+      glVertex2i(VIRTW - 250, 1620 + 64);
+      glEnd();
+      xtraverts += 4;
+    } else if (d->gunselect == GUN_LIGHTGUN) {
+      glBindTexture(GL_TEXTURE_2D, 12);
       glBegin(GL_QUADS);
       glTexCoord2f(0, 0);
       glVertex2i(VIRTW - 250, 1620);
