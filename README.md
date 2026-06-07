@@ -4,7 +4,7 @@ It is based on the original Cube engine.
 
 - [Site](https://hate-arena.pages.dev)
 - [Itch.io](https://endseven.itch.io/hatearena)
-- [Gameplay demo](https://www.youtube.com/watch?v=FnsB4S_5HXo)
+- [Gameplay demo](https://www.youtube.com/watch?v=Y4KZWVmz86U)
 
 <img src=".github/screen.png">
 <img src=".github/screen2.png">
