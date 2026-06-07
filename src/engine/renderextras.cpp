@@ -281,30 +281,12 @@ void renderspheres(int time) {
 };
 
 char *entnames[] = {
-    "none?",
-    "light",
-    "playerstart",
-    "shells",
-    "bullets",
-    "rockets",
-    "riflerounds",
-    "nails",
-    "health",
-    "healthboost",
-    "greenarmour",
-    "yellowarmour",
-    "quaddamage",
-    "teleport",
-    "teledest",
-    "mapmodel",
-    "monster",
-    "trigger",
-    "jumppad",
-    "?",
-    "?",
-    "?",
-    "?",
-    "?",
+    "none?",      "light",       "playerstart", "shells",
+    "bullets",    "rockets",     "riflerounds", "nails",
+    "health",     "healthboost", "greenarmour", "yellowarmour",
+    "quaddamage", "teleport",    "teledest",    "mapmodel",
+    "monster",    "trigger",     "jumppad",     "?",
+    "?",          "?",           "?",           "?",
 };
 
 void loadsky(char *basename) {
@@ -549,39 +531,37 @@ void gl_drawhud(int w, int h, int curfps, int nquads, int curvert,
   }
 
   renderscores();
-  if (!rendermenu() && !intermission && !screenshotmode && !editmode && !spectator) {
+  if (!rendermenu() && !intermission && !screenshotmode && !editmode &&
+      !spectator) {
     glDisable(GL_TEXTURE_2D);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     float cx = VIRTW / 2.0f, cy = VIRTH / 2.0f;
     float thick = 3.0f;
 
-    bool moving = player1->move || player1->strafe || player1->attacking
+    bool moving = !player1->ads && (player1->move || player1->strafe || player1->attacking
         || (player1->vel.x * player1->vel.x
           + player1->vel.y * player1->vel.y
-          + player1->vel.z * player1->vel.z) > 1.0f;
+          + player1->vel.z * player1->vel.z) > 1.0f);
 
     float targetGap = moving ? crosshairsize * 0.4f : 2.0f;
     float targetLen = moving ? crosshairsize * 1.3f : crosshairsize * 0.9f;
 
     static float curGap = 2.0f, curLen = crosshairsize * 0.9f;
     float decay = curtime * 0.008f;
-    if (decay > 1.0f) decay = 1.0f;
+    if (decay > 1.0f)
+      decay = 1.0f;
     curGap += (targetGap - curGap) * decay;
     curLen += (targetLen - curLen) * decay;
 
-    bool gunAvailable = player1->ammo[player1->gunselect] > 0
-        && (!player1->gunwait || player1->attacking);
-    int alpha = gunAvailable ? 255 : 128;
-
-    glColor4ub(255, 255, 255, alpha);
+    glColor3ub(255, 255, 255);
     if (crosshairfx) {
-      if (!gunAvailable)
-        glColor4ub(128, 128, 128, alpha);
+      if (player1->gunwait && !player1->ammo[player1->gunselect])
+        glColor3ub(128, 128, 128);
       else if (player1->health <= 25)
-        glColor4ub(255, 0, 0, alpha);
+        glColor3ub(255, 0, 0);
       else if (player1->health <= 50)
-        glColor4ub(255, 128, 0, alpha);
+        glColor3ub(255, 128, 0);
     };
 
     glBegin(GL_QUADS);
@@ -634,14 +614,18 @@ void gl_drawhud(int w, int h, int curfps, int nquads, int curvert,
   glPopMatrix();
 
   {
-    if (editmode || spectator) goto skiphud;
+    if (editmode || spectator)
+      goto skiphud;
     dynent *d = player1;
     if (spectator && !speclook) {
       dynent *t = getspectarget();
-      if (t) d = t;
-      else goto skiphud;
+      if (t)
+        d = t;
+      else
+        goto skiphud;
     };
-    if (d->state != CS_ALIVE) goto skiphud;
+    if (d->state != CS_ALIVE)
+      goto skiphud;
     glPushMatrix();
     glOrtho(0, VIRTW, VIRTH, 0, -1, 1);
     glDisable(GL_TEXTURE_2D);
@@ -680,10 +664,14 @@ void gl_drawhud(int w, int h, int curfps, int nquads, int curvert,
     if (d->gunselect == GUN_NAILGUN) {
       glBindTexture(GL_TEXTURE_2D, 11);
       glBegin(GL_QUADS);
-      glTexCoord2f(0, 0); glVertex2i(VIRTW - 250, 1620);
-      glTexCoord2f(1, 0); glVertex2i(VIRTW - 250 + 64, 1620);
-      glTexCoord2f(1, 1); glVertex2i(VIRTW - 250 + 64, 1620 + 64);
-      glTexCoord2f(0, 1); glVertex2i(VIRTW - 250, 1620 + 64);
+      glTexCoord2f(0, 0);
+      glVertex2i(VIRTW - 250, 1620);
+      glTexCoord2f(1, 0);
+      glVertex2i(VIRTW - 250 + 64, 1620);
+      glTexCoord2f(1, 1);
+      glVertex2i(VIRTW - 250 + 64, 1620 + 64);
+      glTexCoord2f(0, 1);
+      glVertex2i(VIRTW - 250, 1620 + 64);
       glEnd();
       xtraverts += 4;
     } else {
@@ -709,9 +697,8 @@ void gl_drawhud(int w, int h, int curfps, int nquads, int curvert,
       int bw = 205 - inner * 2;
       int bh = 1750 - 1580 - inner * 2;
       int by = 1580 + inner;
-      float pct = d->boostmillis > 0
-                      ? 1.0f - (float)d->boostmillis / 4000.0f
-                      : 1.0f;
+      float pct =
+          d->boostmillis > 0 ? 1.0f - (float)d->boostmillis / 4000.0f : 1.0f;
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
       glColor4ub(180, 180, 180, d->boostmillis > 0 ? 20 : 54);
       roundedbox(bx + inner, by, bx + inner + (int)(bw * pct), by + bh, 12);
@@ -732,15 +719,14 @@ void gl_drawhud(int w, int h, int curfps, int nquads, int curvert,
       glTexCoord2f(0, 1);
       glVertex2i(bx + 10, 1684);
       glEnd();
-      int boostval =
-          d->boostmillis > 0
-              ? (int)((1.0f - (float)d->boostmillis / 4000.0f) * 100)
-              : 100;
+      int boostval = d->boostmillis > 0
+                         ? (int)((1.0f - (float)d->boostmillis / 4000.0f) * 100)
+                         : 100;
       draw_textf("%d", bx + 85, 1660, 2, boostval);
     };
     glPopMatrix();
   };
-  skiphud:
+skiphud:
 
   if (editmode && !screenshotmode) {
     extern int closestent();
