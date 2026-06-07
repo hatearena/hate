@@ -57,11 +57,23 @@ void topt(sqr *s, bool &wf, bool &uf, int &wt, int &ut) {
     };
   } else {
     loopi(4) if (!SOLID(o[i])) {
-      if (o[i]->floor < s->floor) {
+      float sfloor = (float)s->floor;
+      float ofloor = (float)o[i]->floor;
+      if (s->type == FHF && o[i]->type != FHF)
+        sfloor -= s->vdelta / 4.0f;
+      if (o[i]->type == FHF && s->type != FHF)
+        ofloor -= o[i]->vdelta / 4.0f;
+      if (ofloor < sfloor) {
         wt = s->wtex;
         wf = false;
       };
-      if (o[i]->ceil > s->ceil) {
+      float sceil = (float)s->ceil;
+      float oceil = (float)o[i]->ceil;
+      if (s->type == CHF && o[i]->type != CHF)
+        sceil += s->vdelta / 4.0f;
+      if (o[i]->type == CHF && s->type != CHF)
+        oceil += o[i]->vdelta / 4.0f;
+      if (oceil > sceil) {
         ut = s->utex;
         uf = false;
       };
