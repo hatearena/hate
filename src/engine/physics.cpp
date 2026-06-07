@@ -282,23 +282,30 @@ void moveplayer(dynent *pl, int moveres, bool local, int curtime) {
         pl->vel.y += strafey * 0.6f;
         pl->walljump = false;
         pl->walljumped = true;
-        if (local)
+        if (local) {
           playsoundc(S_JUMP);
+        } else if (pl->monsterstate) {
+          static int lastjump = 0;
+          if (lastmillis - lastjump >= 400) {
+            playsound(S_JUMP, &pl->o);
+            lastjump = lastmillis;
+          };
+        };
       } else {
         pl->vel.z = 1.7f;
         if (water) {
           pl->vel.x /= 8;
           pl->vel.y /= 8;
         };
-        if (local)
+        if (local) {
           playsoundc(S_JUMP);
-        else if (pl->monsterstate) {
+        } else if (pl->monsterstate) {
           static int lastjump = 0;
-          if (lastmillis - lastjump >= 700) {
+          if (lastmillis - lastjump >= 400) {
             playsound(S_JUMP, &pl->o);
             lastjump = lastmillis;
           };
-        }
+        };
       }
     } else if (pl->timeinair > 800) {
       if (local)

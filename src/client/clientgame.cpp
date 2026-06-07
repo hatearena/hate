@@ -671,19 +671,22 @@ void selfdamage(int damage, int actor, dynent *act) {
   damageblend(damage);
   demoblend(damage);
   int ad = damage * (player1->armourtype + 1) * 20 /
-           100; // let armour absorb when possible
+            100; // let armour absorb when possible
   if (ad > player1->armour)
     ad = player1->armour;
   player1->armour -= ad;
   damage -= ad;
-  float droll = damage / 0.5f;
-  player1->roll +=
-      player1->roll > 0
-          ? droll
-          : (player1->roll < 0
-                 ? -droll
-                 : (rnd(2) ? droll : -droll)); // give player a kick depending
-                                               // on amount of damage
+  static int lastrollkick = 0;
+  if (lastmillis - lastrollkick >= 700) {
+    float droll = damage / 0.5f;
+    player1->roll +=
+        player1->roll > 0
+            ? droll
+            : (player1->roll < 0
+                   ? -droll
+                   : (rnd(2) ? droll : -droll));
+    lastrollkick = lastmillis;
+  };
   if ((player1->health -= damage) <= 0) {
     if (actor == -2) {
       conoutf("%s fragged %s", act->name, player1->name);
