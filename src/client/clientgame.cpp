@@ -154,6 +154,7 @@ void spawnstate(dynent *d) {
     if (m_noitemsrail) {
       d->health = 1;
       d->ammo[GUN_CSAW] = 0;
+      d->ammo[GUN_NAILGUN] = 0;
       d->ammo[GUN_RIFLE] = 999;
     } else {
       d->health = 256;
