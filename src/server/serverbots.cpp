@@ -22,7 +22,8 @@ static int nextcn = BOT_CLIENT_BASE;
 static enet_uint32 lastthink = 0;
 static float spawnx[MAXBOTS], spawny[MAXBOTS], spawnz[MAXBOTS];
 static int numspawns = 0;
-static int mapsize = 1024;
+static bool *walkable = NULL;
+static int mapsize = 512;
 
 static const char *bnames[] = {
     "Cerelo","Diaso","Ceria","Deathly","Ra","Va","Never","Abu",
@@ -31,7 +32,9 @@ static const char *bnames[] = {
 
 static void loadspawns() {
   numspawns = 0;
-  mapsize = 1024;
+  mapsize = 512;
+  free(walkable);
+  walkable = NULL;
   if (!smapname[0]) return;
   char cgzname[256], pakname[64], mapname[64];
   char *slash = strpbrk(smapname, "/\\");
@@ -67,7 +70,36 @@ static void loadspawns() {
       numspawns++;
     };
   };
+  int total = mapsize * mapsize;
+  walkable = (bool *)calloc(total, 1);
+  if (!walkable) { gzclose(f); return; }
+  int prev = -1, k = 0;
+  while (k < total) {
+    int type = gzgetc(f);
+    if (type < 0) break;
+    if (type == 255) {
+      int n = gzgetc(f);
+      if (n < 0) break;
+      for (int r = 0; r < n && k < total; r++, k++)
+        walkable[k] = (prev != 0);
+      continue;
+    }
+    prev = type;
+    walkable[k++] = (type != 0);
+    if (type == 0) {
+      gzgetc(f); gzgetc(f);
+      if (hdr.version <= 2) { gzgetc(f); gzgetc(f); }
+    } else {
+      gzgetc(f); gzgetc(f); gzgetc(f);
+      gzgetc(f); gzgetc(f);
+      if (hdr.version <= 2) { gzgetc(f); gzgetc(f); }
+      gzgetc(f);
+      if (hdr.version >= 2) gzgetc(f);
+      if (hdr.version >= 5) gzgetc(f);
+    }
+  }
   gzclose(f);
+  printf("serverbot: loaded %d spawns, mapsize=%d\n", numspawns, mapsize);
 }
 
 int serverbot_count() { return numsbots; }
@@ -106,7 +138,7 @@ void serverbot_spawn(int count) {
   }
 }
 
-void serverbot_clear() { numsbots = 0; numspawns = 0; }
+void serverbot_clear() { numsbots = 0; numspawns = 0; free(walkable); walkable = NULL; }
 
 bool serverbot_kick(const char *name) {
   loopi(numsbots) if (!strcmp(sbot[i].name, name)) {
@@ -231,15 +263,15 @@ void serverbot_update() {
     float rad = b.yaw / 180.0f * PI;
     float nx = b.x + sinf(rad) * diff * 0.03f;
     float ny = b.y + cosf(rad) * diff * 0.03f;
-    if (nx >= 0 && ny >= 0 && nx < mapsize && ny < mapsize) {
+    int ix = (int)nx, iy = (int)ny;
+    bool ok = false;
+    if (walkable && ix >= 0 && iy >= 0 && ix < mapsize && iy < mapsize)
+      ok = walkable[iy * mapsize + ix];
+    if (ok) {
       b.x = nx;
       b.y = ny;
     } else {
       b.targetyaw += 90.0f + rnd(90);
-      if (b.x < 0) b.x = 1;
-      if (b.y < 0) b.y = 1;
-      if (b.x >= mapsize) b.x = mapsize - 2;
-      if (b.y >= mapsize) b.y = mapsize - 2;
     }
   }
 }
