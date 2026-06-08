@@ -177,8 +177,6 @@ void serverbot_broadcast() {
   static enet_uint32 lastbc = 0;
   if (enet_time_get() - lastbc < 40) return;
   lastbc = enet_time_get();
-  static int once = 0;
-  if (!once && numsbots > 0) { once = 1; printf("serverbot: broadcasting %d bots\n", numsbots); }
   loopi(numsbots) {
     serverbot &b = sbot[i];
     ENetPacket *packet = enet_packet_create(NULL, 40, 0);
@@ -265,15 +263,11 @@ void serverbot_update() {
     else if (yd > 0) b.yaw += turnrate;
     else b.yaw -= turnrate;
     float rad = b.yaw / 180.0f * PI;
-    b.x += sinf(rad) * diff * 0.05f;
-    b.y += cosf(rad) * diff * 0.05f;
-    /* walkable check disabled for debug
     float nx = b.x + sinf(rad) * diff * 0.05f;
     float ny = b.y + cosf(rad) * diff * 0.05f;
     int ix = (int)nx, iy = (int)ny;
     if (walkable && ix >= 0 && iy >= 0 && ix < mapsize && iy < mapsize) {
-      int idx = iy * mapsize + ix;
-      if (walkable[idx]) {
+      if (walkable[iy * mapsize + ix]) {
         b.x = nx;
         b.y = ny;
       } else {
@@ -282,6 +276,5 @@ void serverbot_update() {
     } else {
       b.targetyaw += 90.0f + rnd(90);
     }
-    */
   }
 }

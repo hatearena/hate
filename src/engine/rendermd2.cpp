@@ -315,11 +315,8 @@ void rendermodel(const char *mdl, int frame, int range, int tex, float rad,
                  int basetime, float glow) {
   md2 *m = loadmodel(mdl);
 
-  if (isoccluded(player1->o.x, player1->o.y, x - rad, z - rad, rad * 2)) {
-    static int occnt = 0;
-    if (++occnt < 10) printf("rendermodel: occluded at %.0f %.0f\n", x, z);
+  if (isoccluded(player1->o.x, player1->o.y, x - rad, z - rad, rad * 2))
     return;
-  }
 
   delayedload(m);
 

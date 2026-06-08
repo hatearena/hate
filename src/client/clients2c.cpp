@@ -109,9 +109,6 @@ void localservertoclient(uchar *buf,
        if (state == CS_DEAD && d->state != CS_DEAD)
          d->lastaction = lastmillis;
         d->state = state;
-       static int spc = 0;
-       if (cn >= BOT_CLIENT_BASE && ++spc < 5)
-         printf("client: SV_POS bot %d at %.0f,%.0f,%.0f name=%s\n", cn, d->o.x, d->o.y, d->o.z, d->name);
        if (!demoplayback)
         updatepos(d);
       break;
