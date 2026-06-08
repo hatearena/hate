@@ -16,14 +16,24 @@ struct serverbot {
   float targetyaw;
 };
 
+struct walkinfo {
+  char floor;
+  char ceil;
+  bool walkable;
+};
+
 static serverbot sbot[MAXBOTS];
 static int numsbots = 0;
 static int nextcn = BOT_CLIENT_BASE;
 static enet_uint32 lastthink = 0;
 static float spawnx[MAXBOTS], spawny[MAXBOTS], spawnz[MAXBOTS];
 static int numspawns = 0;
-static bool *walkable = NULL;
+static walkinfo *walkdata = NULL;
 static int mapsize = 512;
+
+static const float BOT_EYEHEIGHT = 3.2f;
+static const float BOT_ABOVEEYE = 0.7f;
+static const float BOT_RADIUS = 1.1f;
 
 static const char *bnames[] = {
     "Cerelo","Diaso","Ceria","Deathly","Ra","Va","Never","Abu",
@@ -33,8 +43,8 @@ static const char *bnames[] = {
 static void loadspawns() {
   numspawns = 0;
   mapsize = 512;
-  free(walkable);
-  walkable = NULL;
+  free(walkdata);
+  walkdata = NULL;
   if (!smapname[0]) return;
   char cgzname[256], pakname[64], mapname[64];
   char *slash = strpbrk(smapname, "/\\");
@@ -71,32 +81,42 @@ static void loadspawns() {
     };
   };
   int total = mapsize * mapsize;
-  walkable = (bool *)calloc(total, 1);
-  if (!walkable) { gzclose(f); return; }
-  int prev = -1, k = 0;
+  walkdata = (walkinfo *)calloc(total, sizeof(walkinfo));
+  if (!walkdata) { gzclose(f); return; }
+  walkinfo prevdata;
+  bool hasprev = false;
+  int k = 0;
   while (k < total) {
     int type = gzgetc(f);
     if (type < 0) break;
     if (type == 255) {
       int n = gzgetc(f);
       if (n < 0) break;
-      for (int r = 0; r < n && k < total; r++, k++)
-        walkable[k] = (prev != 0 && prev != 1);
+      for (int r = 0; r < n && k < total; r++, k++) {
+        if (hasprev) walkdata[k] = prevdata;
+      }
       continue;
     }
-    prev = type;
-    walkable[k++] = (type != 0 && type != 1);
+    walkinfo &wi = walkdata[k];
     if (type == 0) {
+      wi.walkable = false;
+      wi.floor = 0;
+      wi.ceil = 16;
       gzgetc(f); gzgetc(f);
       if (hdr.version <= 2) { gzgetc(f); gzgetc(f); }
     } else {
+      wi.floor = (char)gzgetc(f);
+      wi.ceil = (char)gzgetc(f);
+      wi.walkable = (type != 1);
       gzgetc(f); gzgetc(f); gzgetc(f);
-      gzgetc(f); gzgetc(f);
       if (hdr.version <= 2) { gzgetc(f); gzgetc(f); }
       gzgetc(f);
       if (hdr.version >= 2) gzgetc(f);
       if (hdr.version >= 5) gzgetc(f);
     }
+    prevdata = wi;
+    hasprev = true;
+    k++;
   }
   gzclose(f);
 }
@@ -119,7 +139,7 @@ void serverbot_spawn(int count) {
     int si = rnd(numspawns);
     b.x = spawnx[si];
     b.y = spawny[si];
-        b.z = spawnz[si] + 0.5f;
+        b.z = spawnz[si] + BOT_EYEHEIGHT;
     b.yaw = (float)rnd(360);
     b.pitch = 0;
     b.roll = 0;
@@ -137,7 +157,7 @@ void serverbot_spawn(int count) {
   }
 }
 
-void serverbot_clear() { numsbots = 0; numspawns = 0; free(walkable); walkable = NULL; }
+void serverbot_clear() { numsbots = 0; numspawns = 0; free(walkdata); walkdata = NULL; }
 
 bool serverbot_kick(const char *name) {
   loopi(numsbots) if (!strcmp(sbot[i].name, name)) {
@@ -243,7 +263,7 @@ void serverbot_update() {
         int si = rnd(numspawns);
         b.x = spawnx[si];
         b.y = spawny[si];
-    b.z = spawnz[si] + 0.5f;
+    b.z = spawnz[si] + BOT_EYEHEIGHT;
         b.health = 100;
         b.state = CS_ALIVE;
         b.lastmove = 0;
@@ -264,13 +284,35 @@ void serverbot_update() {
     if (step > 0.9f) step = 0.9f;
     float nx = b.x + sinf(rad) * step;
     float ny = b.y + cosf(rad) * step;
-    int ix = (int)nx, iy = (int)ny;
-    bool ok = false;
-    if (walkable && ix >= 0 && iy >= 0 && ix < mapsize && iy < mapsize)
-      ok = walkable[iy * mapsize + ix];
-    if (ok) {
+    if (!walkdata || mapsize <= 0) {
+      b.targetyaw += 90.0f + rnd(90);
+      continue;
+    }
+    int x1 = (int)(nx - BOT_RADIUS);
+    int y1 = (int)(ny - BOT_RADIUS);
+    int x2 = (int)(nx + BOT_RADIUS);
+    int y2 = (int)(ny + BOT_RADIUS);
+    bool blocked = false;
+    char bestfloor = -128;
+    for (int cx = x1; cx <= x2; cx++) {
+      for (int cy = y1; cy <= y2; cy++) {
+        if (cx < 0 || cy < 0 || cx >= mapsize || cy >= mapsize) {
+          blocked = true;
+          break;
+        }
+        walkinfo &wi = walkdata[cy * mapsize + cx];
+        if (!wi.walkable) {
+          blocked = true;
+          break;
+        }
+        if (wi.floor > bestfloor) bestfloor = wi.floor;
+      }
+      if (blocked) break;
+    }
+    if (!blocked) {
       b.x = nx;
       b.y = ny;
+      b.z = bestfloor + BOT_EYEHEIGHT;
     } else {
       b.targetyaw += 90.0f + rnd(90);
     }
