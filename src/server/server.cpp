@@ -396,12 +396,12 @@ void process(ENetPacket *packet, int sender) {
             return;
           };
           int n = atoi(text + 8);
-          if (n < 1) n = 1;
+          if (n < 1)
+            n = 1;
           serverbot_spawn(n);
           sprintf_sd(msg)("Spawned %d bot(s).", n);
           sendservmsg(msg);
-          loopv(clients) if (clients[i].type == ST_TCPIP)
-            serverbot_sendinit(i);
+          loopv(clients) if (clients[i].type == ST_TCPIP) serverbot_sendinit(i);
           return;
         } else if (strncmp(text + 1, "kick ", 5) == 0) {
           if (!clients[sender].rcon) {
@@ -489,6 +489,7 @@ void process(ENetPacket *packet, int sender) {
       if (isdedicated && botcount > 0) {
         serverbot_clear();
         serverbot_spawn(botcount);
+        loopv(clients) if (clients[i].type == ST_TCPIP) serverbot_sendinit(i);
       }
       sender = -1;
       break;
@@ -528,8 +529,10 @@ void process(ENetPacket *packet, int sender) {
       float pz = getint(p) / DMF;
       float pyaw = getint(p) / DAF;
       float ppitch = getint(p) / DAF;
-      getint(p);               // roll
-      getint(p); getint(p); getint(p); // velocity
+      getint(p); // roll
+      getint(p);
+      getint(p);
+      getint(p); // velocity
       int flags = getint(p);
       int pstate = (flags >> 3) & 3;
       serverbot_trackplayer(cn, px, py, pz, pyaw, ppitch, pstate);
