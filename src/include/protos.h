@@ -271,6 +271,7 @@ extern void endsp(bool allkilled);
 extern void botclear();
 extern void botthink();
 extern void botrender();
+extern void serverbotthink();
 extern dvector &getbots();
 extern void botpain(dynent *m, int damage, dynent *d);
 

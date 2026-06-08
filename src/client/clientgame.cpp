@@ -414,6 +414,7 @@ void updateworld(int millis) // main game update loop
       if (!intermission) {
         monsterthink();
         botthink();
+        serverbotthink();
       }
       if (spectator) {
         if (speclook) {
