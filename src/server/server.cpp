@@ -342,8 +342,8 @@ void process(ENetPacket *packet, int sender) {
             sendservmsg("You are not authorized.");
             return;
           };
-          extern void botclear();
-          botclear();
+          extern void serverbot_clear();
+          serverbot_clear();
           sendservmsg("All bots have been kicked.");
           return;
         } else if (strcmp(text + 1, "list") == 0) {
