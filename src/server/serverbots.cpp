@@ -118,18 +118,18 @@ void serverbot_sendinit(int cn) {
     return;
   loopi(numsbots) {
     serverbot &b = sbot[i];
-    ENetPacket *pkt = enet_packet_create(NULL, 128, ENET_PACKET_FLAG_RELIABLE);
+    ENetPacket *pkt = enet_packet_create(NULL, 64, ENET_PACKET_FLAG_RELIABLE);
     uchar *start = pkt->data;
     uchar *p = start + 2;
     putint(p, SV_POS);
     putint(p, b.cn);
+    putint(p, (int)(b.x * DMF));
+    putint(p, (int)(b.y * DMF));
+    putint(p, (int)(b.z * DMF));
+    putint(p, (int)(b.yaw * DAF));
+    putint(p, (int)(b.pitch * DAF));
+    putint(p, (int)(b.roll * DAF));
     putint(p, 0); putint(p, 0); putint(p, 0);
-    putint(p, 0); putint(p, 0); putint(p, 0);
-    putint(p, 0); putint(p, 0); putint(p, 0);
-    putint(p, 0);
-    putint(p, SV_INITC2S);
-    sendstring(b.name, p);
-    sendstring("", p);
     putint(p, 0);
     *(ushort *)start = ENET_HOST_TO_NET_16(p - start);
     enet_packet_resize(pkt, p - start);
