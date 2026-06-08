@@ -15,6 +15,7 @@ struct serverbot {
   int lastaction, lastmove, lastattack;
   float targetyaw;
   int ammo[NUMGUNS];
+  int movemode, strafemode;
 };
 
 struct walkinfo {
@@ -168,6 +169,8 @@ void serverbot_spawn(int count) {
     b.gunselect = 1 + rnd(6);
     loopk(NUMGUNS) b.ammo[k] = 100;
     b.ammo[GUN_CSAW] = 1;
+    b.movemode = 1;
+    b.strafemode = 0;
     b.frags = 0;
     b.deaths = 0;
     b.lastaction = 0;
@@ -261,7 +264,7 @@ void serverbot_broadcast() {
     putint(p, (int)(b.roll * DAF));
     if (b.state == CS_ALIVE) {
       putint(p, 0); putint(p, 0); putint(p, 0);
-      putint(p, (0 & 3) | ((1 & 3) << 2) | (1 << 4) | (b.state << 3));
+      putint(p, (b.movemode & 3) | ((b.strafemode & 3) << 2) | (1 << 4) | (b.state << 3));
     } else {
       putint(p, 0); putint(p, 0); putint(p, 0);
       putint(p, (b.state << 3));
@@ -293,7 +296,7 @@ void serverbot_sendinit(int cn) {
     putint(p, (int)(b.roll * DAF));
     if (b.state == CS_ALIVE) {
       putint(p, 0); putint(p, 0); putint(p, 0);
-      putint(p, (0 & 3) | ((1 & 3) << 2) | (1 << 4) | (b.state << 3));
+      putint(p, (b.movemode & 3) | ((b.strafemode & 3) << 2) | (1 << 4) | (b.state << 3));
     } else {
       putint(p, 0); putint(p, 0); putint(p, 0);
       putint(p, (b.state << 3));
@@ -588,6 +591,7 @@ void serverbot_update() {
         if (sbot[i].ammo[GUN_CG] < 40)        sbot[i].ammo[GUN_CG] = 40;
         if (sbot[i].ammo[GUN_RL] < 8)         sbot[i].ammo[GUN_RL] = 8;
         if (sbot[i].ammo[GUN_RIFLE] < 8)      sbot[i].ammo[GUN_RIFLE] = 8;
+        sbot[i].ammo[GUN_CSAW] = 1;
       }
     }
   }
@@ -613,6 +617,8 @@ void serverbot_update() {
         b.gunselect = 1 + rnd(6);
         loopk(NUMGUNS) b.ammo[k] = 100;
         b.ammo[GUN_CSAW] = 1;
+        b.movemode = 1;
+        b.strafemode = 0;
       }
       continue;
     }
@@ -700,16 +706,18 @@ void serverbot_update() {
       b.pitch = enemypitch;
 
       int move = 1, strafe = 0;
-      if (realdist < 4 && b.gunselect != GUN_CSAW) {
-        move = -1;
-      } else if (realdist < 12) {
-        strafe = (b.lastmove & 1) ? 1 : -1;
-        if (now - b.lastmove > 800 + rnd(400)) {
+      if (realdist < 8 && b.gunselect != GUN_CSAW) {
+        if (now - b.lastmove > 1000) {
+          strafe = rnd(2) ? 1 : -1;
           b.lastmove = now;
         }
       }
+      b.movemode = move;
+      b.strafemode = strafe;
       if (!try_move_bot(b, diff, move, strafe)) {
-        b.targetyaw += rnd(2) ? 90.0f : -90.0f;
+        b.yaw += rnd(2) ? 90.0f : -90.0f;
+        b.targetyaw = b.yaw;
+        continue;
       }
 
       float yaw_to_target = enemyyaw - b.yaw;
@@ -719,50 +727,39 @@ void serverbot_update() {
       int weapondelay = BOT_WEAPON_DELAYS[b.gunselect];
       int reactdelay = 200 + rnd(200);
       if (weapondelay > reactdelay) reactdelay = weapondelay;
-      if (fabs(yaw_to_target) < 30.0f &&
+      if (fabs(yaw_to_target) < 45.0f &&
           now - b.lastattack > (enet_uint32)reactdelay) {
         b.lastattack = now;
         b.lastaction = now;
 
-        float botyawrad = b.yaw / 180.0f * PI;
-        float botpitchrad = b.pitch / 180.0f * PI;
-
         if (b.gunselect == GUN_CSAW && realdist < 2.5f) {
           if (b.ammo[GUN_CSAW]) b.ammo[GUN_CSAW]--;
-          float ttx = b.x + sinf(botyawrad) * 2.0f;
-          float tty = b.y + cosf(botyawrad) * 2.0f;
+          float ttx = b.x + sinf(b.yaw / 180.0f * PI) * 2.0f;
+          float tty = b.y + cosf(b.yaw / 180.0f * PI) * 2.0f;
           send_bot_shot(b, ttx, tty, b.z - 0.2f);
           int dmg = BOT_WEAPON_DAMAGES[GUN_CSAW];
-          if (target_is_player) {
+          if (target_is_player)
             send_bot_damage_player(b, targetidx, dmg, lifeseq);
-          } else {
+          else
             serverbot_damage(sbot[targetidx].cn, dmg, b.cn);
-          }
         } else if (b.gunselect != GUN_CSAW) {
           if (b.ammo[b.gunselect]) b.ammo[b.gunselect]--;
-          float aimspread = 12.0f;
-          float attackyaw = b.yaw + (rnd(101) - 50) / 100.0f * aimspread;
-          float attackpitch = b.pitch + (rnd(101) - 50) / 100.0f * aimspread * 0.5f;
-          float arad = attackyaw / 180.0f * PI;
-          float aprad = attackpitch / 180.0f * PI;
-          float fromx = b.x;
-          float fromy = b.y;
-          float fromz = b.z - 0.2f;
-          float shotdist = realdist;
-          if (shotdist < 2.0f) shotdist = 2.0f;
-          float tox = fromx + sinf(arad) * cosf(aprad) * shotdist * 2.0f;
-          float toy = fromy + cosf(arad) * cosf(aprad) * shotdist * 2.0f;
-          float toz = fromz + sinf(aprad) * shotdist * 2.0f;
-          send_bot_shot(b, tox, toy, toz);
+          float inaccuracy = realdist * 0.03f;
+          if (b.gunselect == GUN_RIFLE) inaccuracy *= 0.3f;
+          float shot_tx = tx + (rnd(101) - 50) / 50.0f * inaccuracy;
+          float shot_ty = ty + (rnd(101) - 50) / 50.0f * inaccuracy;
+          float shot_tz = tz + (rnd(101) - 50) / 50.0f * inaccuracy * 0.5f;
+          float fromx = b.x, fromy = b.y, fromz = b.z - 0.2f;
+          send_bot_shot(b, shot_tx, shot_ty, shot_tz);
           int dmg = BOT_WEAPON_DAMAGES[b.gunselect];
           if (target_is_player) {
-            if (shot_hits_player(fromx, fromy, fromz, tox, toy, toz, tx, ty, tz)) {
+            if (shot_hits_player(fromx, fromy, fromz, shot_tx, shot_ty, shot_tz,
+                                 tx, ty, tz))
               send_bot_damage_player(b, targetidx, dmg, lifeseq);
-            }
           } else {
-            if (shot_hits_bot(fromx, fromy, fromz, tox, toy, toz, sbot[targetidx])) {
+            if (shot_hits_bot(fromx, fromy, fromz, shot_tx, shot_ty, shot_tz,
+                              sbot[targetidx]))
               serverbot_damage(sbot[targetidx].cn, dmg, b.cn);
-            }
           }
         }
       }
@@ -781,6 +778,8 @@ void serverbot_update() {
       b.yaw += turnrate;
     else
       b.yaw -= turnrate;
+    b.movemode = 1;
+    b.strafemode = 0;
     if (!try_move_bot(b, diff, 1, 0)) {
       b.targetyaw += 90.0f + rnd(90);
     }

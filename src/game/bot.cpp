@@ -390,6 +390,7 @@ void botrender() {
     bots[i]->maxspeed = saved;
   }
   loopv(players) if (players[i] && i >= BOT_CLIENT_BASE) {
+    if (players[i]->state == CS_DEAD) continue;
     renderclient(players[i], false, "monster/player", false, 1.25f);
   }
 }
