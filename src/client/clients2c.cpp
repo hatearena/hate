@@ -107,9 +107,11 @@ void localservertoclient(uchar *buf,
       float nyaw = getint(p) / DAF;
       if (cn >= BOT_CLIENT_BASE) {
         float yd = nyaw - d->yaw;
-        if (yd > 180.0f) yd -= 360.0f;
-        if (yd < -180.0f) yd += 360.0f;
-        d->yaw += yd * 0.45f;
+        if (yd > 180.0f)
+          yd -= 360.0f;
+        if (yd < -180.0f)
+          yd += 360.0f;
+        d->yaw += yd * 0.4f;
       } else {
         d->yaw = nyaw;
       }
