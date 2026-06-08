@@ -464,7 +464,7 @@ void process(ENetPacket *packet, int sender) {
       int reqmode = getint(p);
       if (reqmode < 0)
         reqmode = 0;
-      if (smapname[0] && !mapreload && !vote(text, reqmode, sender))
+      if (smapname[0] && !mapreload && !clients[sender].rcon && !vote(text, reqmode, sender))
         return;
       mapreload = false;
       if (maprotation.length() > 0) {
@@ -486,7 +486,7 @@ void process(ENetPacket *packet, int sender) {
       mapend = lastsec + minremain * 60;
       interm = 0;
       resetitems();
-      if (isdedicated && botcount > 0) {
+      if (botcount > 0) {
         serverbot_clear();
         serverbot_spawn(botcount);
         loopv(clients) if (clients[i].type == ST_TCPIP) serverbot_sendinit(i);

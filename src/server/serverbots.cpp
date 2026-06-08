@@ -21,6 +21,8 @@ struct serverbot {
   bool onfloor;
   enet_uint32 blocktime;
   enet_uint32 lastjump;
+  enet_uint32 lastupdatetime;
+  float lastupdatex, lastupdatey, lastupdatez;
 };
 
 struct walkinfo {
@@ -246,6 +248,10 @@ void serverbot_spawn(int count) {
     b.lastattack = 0;
     b.targetyaw = b.yaw;
     b.lastjump = 0;
+    b.lastupdatetime = enet_time_get();
+    b.lastupdatex = b.x;
+    b.lastupdatey = b.y;
+    b.lastupdatez = b.z;
     if ((mode & 1 && mode > 2) || mode == 12) {
       int blues = 0, reds = 0;
       loopj(numsbots) {
@@ -332,7 +338,8 @@ void serverbot_damage(int cn, int damage, int attacker) {
     putint(p, 0);
     putint(p, 0);
     putint(p, 0);
-    putint(p, (sbot[i].state << 5));
+    putint(p, (sbot[i].strafemode & 3) | ((sbot[i].movemode & 3) << 2) |
+                  ((sbot[i].onfloor ? 1 : 0) << 4) | (sbot[i].state << 5));
     if (died) {
       putint(p, SV_DIED);
       putint(p, attacker);
@@ -356,14 +363,26 @@ void serverbot_broadcast() {
   if (!serverhost)
     return;
   static enet_uint32 lastbc = 0;
-  if (enet_time_get() - lastbc < 40)
+  enet_uint32 now = enet_time_get();
+  if (now - lastbc < 40)
     return;
-  lastbc = enet_time_get();
+  float bcdt = (lastbc > 0) ? (now - lastbc) / 1000.0f : 0.04f;
+  if (bcdt < 0.001f) bcdt = 0.04f;
+  lastbc = now;
   loopi(numsbots) {
     serverbot &b = sbot[i];
     ENetPacket *packet = enet_packet_create(NULL, 40, 0);
     uchar *start = packet->data;
     uchar *p = start + 2;
+    float dt = (b.lastupdatetime > 0) ? (now - b.lastupdatetime) / 1000.0f : bcdt;
+    if (dt < 0.001f) dt = bcdt;
+    float vx = (b.x - b.lastupdatex) / dt;
+    float vy = (b.y - b.lastupdatey) / dt;
+    float vz = (b.z - b.lastupdatez) / dt;
+    b.lastupdatex = b.x;
+    b.lastupdatey = b.y;
+    b.lastupdatez = b.z;
+    b.lastupdatetime = now;
     putint(p, SV_POS);
     putint(p, b.cn);
     putint(p, (int)(b.x * DMF));
@@ -373,9 +392,9 @@ void serverbot_broadcast() {
     putint(p, (int)(b.pitch * DAF));
     putint(p, (int)(b.roll * DAF));
     if (b.state == CS_ALIVE) {
-      putint(p, 0);
-      putint(p, 0);
-      putint(p, 0);
+      putint(p, (int)(vx * DVF));
+      putint(p, (int)(vy * DVF));
+      putint(p, (int)(vz * DVF));
       putint(p, (b.strafemode & 3) | ((b.movemode & 3) << 2) |
                     ((b.onfloor ? 1 : 0) << 4) | (b.state << 5));
     } else {
@@ -592,7 +611,8 @@ static void send_bot_shot(serverbot &b, float tx, float ty, float tz) {
   putint(p, 0);
   putint(p, 0);
   putint(p, 0);
-  putint(p, (b.state << 5));
+  putint(p, (b.strafemode & 3) | ((b.movemode & 3) << 2) |
+                ((b.onfloor ? 1 : 0) << 4) | (b.state << 5));
   putint(p, SV_SHOT);
   putint(p, b.gunselect);
   putint(p, (int)(b.x * DMF));
@@ -658,7 +678,8 @@ static void send_bot_damage_player(serverbot &b, int target, int damage,
   putint(p, 0);
   putint(p, 0);
   putint(p, 0);
-  putint(p, (b.state << 5));
+  putint(p, (b.strafemode & 3) | ((b.movemode & 3) << 2) |
+                ((b.onfloor ? 1 : 0) << 4) | (b.state << 5));
   putint(p, SV_DAMAGE);
   putint(p, target);
   putint(p, damage);
