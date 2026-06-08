@@ -78,7 +78,7 @@ static gib gibs[MAXGIBS];
 
 static void initgibs() { loopi(MAXGIBS) gibs[i].inuse = false; }
 
-static void spawngibs(vec &pos, int count) {
+void spawngibs(vec &pos, int count) {
   int n = 0;
   loopi(MAXGIBS) {
     if (gibs[i].inuse)

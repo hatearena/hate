@@ -250,7 +250,16 @@ void serverbot_broadcast() {
     putint(p, (int)(b.pitch * DAF));
     putint(p, (int)(b.roll * DAF));
     putint(p, 0); putint(p, 0); putint(p, 0);
-    putint(p, (b.state << 3));
+    if (b.state == CS_ALIVE) {
+      float rad = b.yaw / 180.0f * PI;
+      putint(p, (int)(sinf(rad) * 15.0f * DVF));
+      putint(p, (int)(cosf(rad) * 15.0f * DVF));
+      putint(p, 0);
+      putint(p, (0 & 3) | ((1 & 3) << 2) | (1 << 4) | (b.state << 3));
+    } else {
+      putint(p, 0); putint(p, 0); putint(p, 0);
+      putint(p, (b.state << 3));
+    }
     *(ushort *)start = ENET_HOST_TO_NET_16(p - start);
     enet_packet_resize(packet, p - start);
     loopv(clients) {
@@ -277,7 +286,16 @@ void serverbot_sendinit(int cn) {
     putint(p, (int)(b.pitch * DAF));
     putint(p, (int)(b.roll * DAF));
     putint(p, 0); putint(p, 0); putint(p, 0);
-    putint(p, (b.state << 3));
+    if (b.state == CS_ALIVE) {
+      float rad = b.yaw / 180.0f * PI;
+      putint(p, (int)(sinf(rad) * 15.0f * DVF));
+      putint(p, (int)(cosf(rad) * 15.0f * DVF));
+      putint(p, 0);
+      putint(p, (0 & 3) | ((1 & 3) << 2) | (1 << 4) | (b.state << 3));
+    } else {
+      putint(p, 0); putint(p, 0); putint(p, 0);
+      putint(p, (b.state << 3));
+    }
     putint(p, SV_INITC2S);
     sendstring(b.name, p);
     sendstring("", p);
@@ -610,7 +628,7 @@ void serverbot_update() {
     b.y = ny;
     float targetZ = targetfloor + BOT_EYEHEIGHT;
     if (targetZ < b.z - 0.01f) {
-      float fall = diff * 0.02f;
+      float fall = diff * 0.005f;
       b.z -= fall;
       if (b.z < targetZ) b.z = targetZ;
     } else if (targetZ > b.z) {

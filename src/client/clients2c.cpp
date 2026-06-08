@@ -110,8 +110,13 @@ void localservertoclient(uchar *buf,
       d->move = (f & 3) == 3 ? -1 : f & 3;
       d->onfloor = (f >> 2) & 1;
       int state = f >> 3;
-      if (state == CS_DEAD && d->state != CS_DEAD)
+      if (state == CS_DEAD && d->state != CS_DEAD) {
         d->lastaction = lastmillis;
+        if (cn >= BOT_CLIENT_BASE) {
+          spawngibs(d->o, 4);
+          playsound(S_DEAD, &d->o);
+        }
+      }
       d->state = state;
       if (!demoplayback)
         updatepos(d);

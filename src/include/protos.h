@@ -273,6 +273,7 @@ extern void botthink();
 extern void botrender();
 extern dvector &getbots();
 extern void botpain(dynent *m, int damage, dynent *d);
+extern void spawngibs(vec &pos, int count);
 
 // server bots
 extern int serverbot_count();
