@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -29,10 +30,12 @@ const (
 	maxDescLen         = 256
 	maxServersPerIP    = 5
 	maxTotalServers    = 10000
+	workerCount        = 16
+	jobQueueSize       = 128
 )
 
 type ServerEntry struct {
-	ip         string
+	addr       string // ip:port
 	lastSeen   time.Time
 	verified   bool
 	verifyFail int
@@ -44,16 +47,46 @@ type rateLimitEntry struct {
 	count     int
 }
 
+type verifyJob struct {
+	addr  string
+	entry *ServerEntry
+}
+
 type MasterServer struct {
 	mu        sync.RWMutex
 	servers   map[string]*ServerEntry
 	rateLimit map[string]*rateLimitEntry
+	verifyCh  chan verifyJob
 }
 
 func NewMasterServer() *MasterServer {
-	return &MasterServer{
+	ms := &MasterServer{
 		servers:   make(map[string]*ServerEntry),
 		rateLimit: make(map[string]*rateLimitEntry),
+		verifyCh:  make(chan verifyJob, jobQueueSize),
+	}
+	for i := 0; i < workerCount; i++ {
+		go ms.verificationWorker(i)
+	}
+	return ms
+}
+
+func (ms *MasterServer) verificationWorker(id int) {
+	for job := range ms.verifyCh {
+		ok := verifyServer(job.addr)
+		ms.mu.Lock()
+		e, exists := ms.servers[job.addr]
+		if !exists || e != job.entry {
+			ms.mu.Unlock()
+			continue
+		}
+		if ok {
+			e.verified = true
+			log.Printf("worker %d: verified server %s", id, job.addr)
+		} else {
+			e.verifyFail++
+		}
+		ms.mu.Unlock()
 	}
 }
 
@@ -103,12 +136,12 @@ func isPrivateIP(ip string) bool {
 	return false
 }
 
-func (ms *MasterServer) verifyServer(ip string) bool {
-	addr := net.UDPAddr{
-		IP:   net.ParseIP(ip),
-		Port: servinfoPort,
-	}
-	conn, err := net.DialUDP("udp", nil, &addr)
+func serverAddr(host string) string {
+	return net.JoinHostPort(host, strconv.Itoa(servinfoPort))
+}
+
+func verifyServer(addr string) bool {
+	conn, err := net.DialTimeout("udp", addr, verifyTimeout)
 	if err != nil {
 		return false
 	}
@@ -147,16 +180,9 @@ func (ms *MasterServer) handleRegister(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	addr := serverAddr(host)
+
 	action := sanitize(r.URL.Query().Get("action"), 16)
-	mapName := sanitize(r.URL.Query().Get("map"), maxMapNameLen)
-	serverName := sanitize(r.URL.Query().Get("name"), maxServerNameLen)
-	desc := sanitize(r.URL.Query().Get("desc"), maxDescLen)
-	if desc == "" {
-		desc = sanitize(r.UserAgent(), maxDescLen)
-	}
-	if serverName == "" {
-		serverName = sanitize(r.Referer(), maxServerNameLen)
-	}
 
 	ms.mu.Lock()
 
@@ -185,7 +211,7 @@ func (ms *MasterServer) handleRegister(w http.ResponseWriter, r *http.Request) {
 
 		serverCount := 0
 		for _, s := range ms.servers {
-			if s.ip == host {
+			if strings.HasPrefix(s.addr, host+":") {
 				serverCount++
 			}
 		}
@@ -204,26 +230,14 @@ func (ms *MasterServer) handleRegister(w http.ResponseWriter, r *http.Request) {
 		rl.lastHeart = now
 	}
 
-	existing, exists := ms.servers[host]
+	existing, exists := ms.servers[addr]
 	if exists {
 		existing.lastSeen = now
 		if !existing.verified && existing.verifyFail < 3 {
-			go func(ip string) {
-				if ms.verifyServer(ip) {
-					ms.mu.Lock()
-					if e, ok := ms.servers[ip]; ok {
-						e.verified = true
-						log.Printf("verified server %s (re-check)", ip)
-					}
-					ms.mu.Unlock()
-				} else {
-					ms.mu.Lock()
-					if e, ok := ms.servers[ip]; ok {
-						e.verifyFail++
-					}
-					ms.mu.Unlock()
-				}
-			}(host)
+			select {
+			case ms.verifyCh <- verifyJob{addr: addr, entry: existing}:
+			default:
+			}
 		}
 		ms.mu.Unlock()
 		w.WriteHeader(http.StatusOK)
@@ -231,34 +245,19 @@ func (ms *MasterServer) handleRegister(w http.ResponseWriter, r *http.Request) {
 	}
 
 	entry := &ServerEntry{
-		ip:       host,
+		addr:     addr,
 		lastSeen: now,
 	}
 
-	go func(ip string, e *ServerEntry) {
-		if ms.verifyServer(ip) {
-			ms.mu.Lock()
-			if existing, ok := ms.servers[ip]; ok && existing == e {
-				e.verified = true
-				log.Printf("verified server %s", ip)
-			}
-			ms.mu.Unlock()
-		} else {
-			ms.mu.Lock()
-			if existing, ok := ms.servers[ip]; ok && existing == e {
-				e.verifyFail++
-			}
-			ms.mu.Unlock()
-		}
-	}(host, entry)
+	select {
+	case ms.verifyCh <- verifyJob{addr: addr, entry: entry}:
+	default:
+	}
 
-	ms.servers[host] = entry
-	log.Printf("registered server %s (map=%s, name=%s)", host, mapName, serverName)
+	ms.servers[addr] = entry
+	log.Printf("registered server %s", addr)
 	ms.mu.Unlock()
 
-	if mapName != "" || serverName != "" || desc != "" {
-		log.Printf("registered server metadata: map=%q name=%q desc=%q", mapName, serverName, desc)
-	}
 	w.WriteHeader(http.StatusOK)
 }
 
@@ -267,14 +266,14 @@ func (ms *MasterServer) handleRetrieve(w http.ResponseWriter, r *http.Request) {
 	servers := make([]string, 0, len(ms.servers))
 	for _, s := range ms.servers {
 		if s.verified {
-			servers = append(servers, s.ip)
+			servers = append(servers, s.addr)
 		}
 	}
 	ms.mu.RUnlock()
 
 	var sb strings.Builder
-	for _, ip := range servers {
-		fmt.Fprintf(&sb, "addserver %s\n", ip)
+	for _, a := range servers {
+		fmt.Fprintf(&sb, "addserver %s\n", a)
 	}
 
 	w.Header().Set("Content-Type", "text/plain")
@@ -288,7 +287,7 @@ func (ms *MasterServer) cleanupStale() {
 	for key, s := range ms.servers {
 		if now.Sub(s.lastSeen) > staleTimeout {
 			log.Printf("removed stale/unverified server %s (verified=%v, fails=%d)",
-				s.ip, s.verified, s.verifyFail)
+				s.addr, s.verified, s.verifyFail)
 			delete(ms.servers, key)
 		}
 	}

@@ -79,7 +79,7 @@ void checkmasterreply() {
   bool busy = mssock != ENET_SOCKET_NULL;
   httpgetrecieve(masterb);
   if (busy && mssock == ENET_SOCKET_NULL)
-    printf("masterserver reply: %s\n", stripheader(masterrep));
+    printf("masterserver replied. %s\n", stripheader(masterrep));
 };
 
 uchar *retrieveservers(uchar *buf, int buflen) {
