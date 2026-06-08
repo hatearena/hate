@@ -774,6 +774,9 @@ void initclient() {
   initclientnet();
 };
 
+extern int numbots;
+extern void addbotcmd(int n);
+
 void startmap(char *name) // called just after a map load
 {
   if (netmapstart() && m_sp) {
@@ -782,7 +785,14 @@ void startmap(char *name) // called just after a map load
   };
   sleepwait = 0;
   monsterclear();
+  int prevbots = numbots;
+  int prevserverbots = serverbot_count();
   botclear();
+  serverbot_clear();
+  loopv(serverbotents) {
+    gp()->dealloc(serverbotents[i], sizeof(dynent));
+  };
+  serverbotents.setsize(0);
   projreset();
   spawncycle = -1;
   spawnplayer(player1);
@@ -795,6 +805,10 @@ void startmap(char *name) // called just after a map load
     players[i]->suicides = 0;
   }
   resetspawns();
+  if (prevserverbots > 0)
+    serverbot_spawn(prevserverbots);
+  else if (prevbots > 0)
+    addbotcmd(prevbots);
   strcpy_s(clientmap, name);
   setvar("gamespeed", 100);
   setvar("fog", 180);

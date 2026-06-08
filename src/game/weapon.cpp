@@ -199,7 +199,11 @@ void hit(int target, int damage, dynent *d, dynent *at) {
     selfdamage(damage, at == player1 ? -1 : -2, at);
   else if (d->monsterstate && d->mtype == -1)
     botpain(d, damage, at);
-  else if (d->monsterstate)
+  else if (d->monsterstate && d->mtype == -2) {
+    int id = (int)(intptr_t)d->enemy;
+    addmsg(1, 3, SV_BOTDAMAGE, id, damage);
+    playsound(S_PAIN1 + rnd(5), &d->o);
+  } else if (d->monsterstate)
     monsterpain(d, damage, at);
   else {
     addmsg(1, 4, SV_DAMAGE, target, damage, d->lifesequence);
@@ -483,6 +487,9 @@ void shoot(dynent *d, vec &targ) {
 
   dvector &bv = getbots();
   loopv(bv) if (bv[i] != d) raydamage(bv[i], from, to, d, -2);
+
+  extern dvector serverbotents;
+  loopv(serverbotents) if (serverbotents[i] != d) raydamage(serverbotents[i], from, to, d, -2);
 
   if (d->monsterstate)
     raydamage(player1, from, to, d, -1);

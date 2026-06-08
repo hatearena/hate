@@ -389,6 +389,15 @@ void botrender() {
                  1.25f);
     bots[i]->maxspeed = saved;
   }
+  loopv(serverbotents) {
+    if (serverbotents[i]->state == CS_DEAD)
+      continue;
+    float saved = serverbotents[i]->maxspeed;
+    serverbotents[i]->maxspeed = 20.0f;
+    const char *mdl = "monster/player";
+    renderclient(serverbotents[i], true, mdl, false, 1.25f);
+    serverbotents[i]->maxspeed = saved;
+  }
 }
 
 void botpain(dynent *m, int damage, dynent *d) {
@@ -434,6 +443,7 @@ void botpain(dynent *m, int damage, dynent *d) {
 }
 
 extern bool isdedicated;
+extern string ctext;
 
 static bool findbotspawn(dynent *b) {
   int e = findentity(PLAYERSTART, botspawncycle + 1);
@@ -550,7 +560,8 @@ void addbotcmd(int n) {
     return;
   }
   if (multiplayer()) {
-    conoutf("Only the server admin can spawn bots");
+    sprintf_sd(buf)("/addbot %d", n);
+    strn0cpy(ctext, buf, 80);
     return;
   }
   if (gamemode < 0) {

@@ -274,6 +274,21 @@ extern void botrender();
 extern dvector &getbots();
 extern void botpain(dynent *m, int damage, dynent *d);
 
+// server bots
+extern dvector serverbotents;
+extern int serverbot_count();
+extern int serverbot_getid(int i);
+extern const char *serverbot_name(int i);
+extern void serverbot_getpos(int i, float &x, float &y, float &z, float &yaw, float &pitch, float &roll);
+extern int serverbot_getstate(int i);
+extern int serverbot_gethealth(int i);
+extern int serverbot_getgun(int i);
+extern void serverbot_damage(int id, int damage);
+extern void serverbot_spawn(int count);
+extern void serverbot_clear();
+extern bool serverbot_kick(const char *name);
+extern void serverbot_update();
+
 // entities
 extern void putitems(uchar *&p);
 extern void checkquad(int time);

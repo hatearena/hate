@@ -402,6 +402,17 @@ void process(ENetPacket *packet, int sender) {
           sprintf_sd(msg)("Could not find player with UUID \"%s\"", target);
           sendservmsg(msg);
           return;
+        } else if (strncmp(text + 1, "addbot ", 7) == 0) {
+          if (!clients[sender].rcon) {
+            sendservmsg("You are not authorized.");
+            return;
+          };
+          int n = atoi(text + 8);
+          if (n < 1) n = 1;
+          serverbot_spawn(n);
+          sprintf_sd(msg)("Spawned %d bot(s).", n);
+          sendservmsg(msg);
+          return;
         } else if (strncmp(text + 1, "kick ", 5) == 0) {
           if (!clients[sender].rcon) {
             sendservmsg("You are not authorized.");
@@ -423,6 +434,11 @@ void process(ENetPacket *packet, int sender) {
                              strcmp(clients[i].name, target) == 0) {
             sprintf_sd(msg)("%s has been kicked.", target);
             disconnect_client(i, "kicked");
+            sendservmsg(msg);
+            return;
+          };
+          if (serverbot_kick(target)) {
+            sprintf_sd(msg)("Bot %s kicked.", target);
             sendservmsg(msg);
             return;
           };
@@ -502,6 +518,13 @@ void process(ENetPacket *packet, int sender) {
       break;
     };
 
+    case SV_BOTDAMAGE: {
+      int id = getint(p);
+      int damage = getint(p);
+      serverbot_damage(id, damage);
+      break;
+    };
+
     case SV_PING:
       send2(false, cn, SV_PONG, getint(p));
       break;
@@ -571,6 +594,16 @@ void send_welcome(int n) {
     loopv(sents) if (sents[i].spawned) putint(p, i);
     putint(p, -1);
   };
+  loopi(serverbot_count()) {
+    int id = serverbot_getid(i);
+    if (id < 0) continue;
+    const char *name = serverbot_name(i);
+    if (!name) continue;
+    putint(p, SV_BOTINIT);
+    putint(p, id);
+    sendstring((char *)name, p);
+    sendstring((char *)"", p);
+  };
   *(ushort *)start = ENET_HOST_TO_NET_16(p - start);
   enet_packet_resize(packet, p - start);
   send(n, packet);
@@ -625,6 +658,41 @@ void resetserverifempty() {
 int nonlocalclients = 0;
 int lastconnect = 0;
 
+static void broadcastbots() {
+  if (!serverhost) return;
+  loopi(serverbot_count()) {
+    int id = serverbot_getid(i);
+    if (id < 0) continue;
+    float x, y, z, yaw, pitch, roll;
+    serverbot_getpos(i, x, y, z, yaw, pitch, roll);
+    int state = serverbot_getstate(i);
+    int health = serverbot_gethealth(i);
+    int gun = serverbot_getgun(i);
+
+    ENetPacket *packet = enet_packet_create(NULL, 64, 0);
+    uchar *start = packet->data;
+    uchar *p = start + 2;
+    putint(p, SV_BOTPOS);
+    putint(p, id);
+    putint(p, (int)(x * DMF));
+    putint(p, (int)(y * DMF));
+    putint(p, (int)(z * DMF));
+    putint(p, (int)(yaw * DAF));
+    putint(p, (int)(pitch * DAF));
+    putint(p, (int)(roll * DAF));
+    putint(p, state);
+    putint(p, health);
+    putint(p, gun);
+    *(ushort *)start = ENET_HOST_TO_NET_16(p - start);
+    enet_packet_resize(packet, p - start);
+
+    loopv(clients) {
+      if (clients[i].type == ST_TCPIP)
+        enet_peer_send(clients[i].peer, 0, packet);
+    }
+  }
+}
+
 void serverslice(int seconds, unsigned int timeout) {
   loopv(sents) {
     if (sents[i].spawnsecs && (sents[i].spawnsecs -= seconds - lastsec) <= 0) {
@@ -648,6 +716,9 @@ void serverslice(int seconds, unsigned int timeout) {
   };
 
   resetserverifempty();
+
+  serverbot_update();
+  broadcastbots();
 
   if (!isdedicated)
     return;

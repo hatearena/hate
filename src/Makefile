@@ -148,6 +148,7 @@ CLIENT_OBJS = \
     server/server.o \
     engine/serverbrowser.o \
     server/serverms.o \
+    server/serverbots.o \
     server/serverutil.o \
     engine/sound.o \
     engine/tools.o \
@@ -162,6 +163,7 @@ SERVER_OBJS = \
     standalone.o \
     server/serverms.o \
     server/server.o \
+    server/serverbots.o \
     engine/tools.o
 
 default: all

@@ -123,11 +123,21 @@ char msgsizesl[] = // size inclusive message token, 0 for variable or
      1,
      SV_SERVMSG,
      0,
-     SV_ITEMLIST,
-     0,
-     SV_EXT,
-     0,
-     -1};
+      SV_ITEMLIST,
+      0,
+      SV_BOTINIT,
+      0,
+      SV_BOTPOS,
+      0,
+      SV_BOTREMOVE,
+      0,
+      SV_BOTDAMAGE,
+      3,
+      SV_BOTSHOT,
+      0,
+      SV_EXT,
+      0,
+      -1};
 
 char msgsizelookup(int msg) {
   for (char *p = msgsizesl; *p >= 0; p += 2)
