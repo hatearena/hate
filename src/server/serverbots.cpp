@@ -22,8 +22,7 @@ static int nextcn = BOT_CLIENT_BASE;
 static enet_uint32 lastthink = 0;
 static float spawnx[MAXBOTS], spawny[MAXBOTS], spawnz[MAXBOTS];
 static int numspawns = 0;
-static bool *walkable = NULL;
-static int mapsize = 256;
+static int mapsize = 1024;
 
 static const char *bnames[] = {
     "Cerelo","Diaso","Ceria","Deathly","Ra","Va","Never","Abu",
@@ -32,9 +31,7 @@ static const char *bnames[] = {
 
 static void loadspawns() {
   numspawns = 0;
-  mapsize = 256;
-  free(walkable);
-  walkable = NULL;
+  mapsize = 1024;
   if (!smapname[0]) return;
   char cgzname[256], pakname[64], mapname[64];
   char *slash = strpbrk(smapname, "/\\");
@@ -47,7 +44,7 @@ static void loadspawns() {
   };
   sprintf_s(cgzname)("packages/%s/%s.cgz", pakname, mapname);
   gzFile f = gzopen(cgzname, "rb");
-  if (!f) { printf("serverbot: could not open %s\n", cgzname); return; }
+  if (!f) return;
   header hdr;
   gzread(f, &hdr, sizeof(header) - sizeof(int) * 16);
   endianswap(&hdr.version, sizeof(int), 4);
@@ -70,37 +67,6 @@ static void loadspawns() {
       numspawns++;
     };
   };
-  printf("serverbot: found %d spawns, mapsize=%d\n", numspawns, mapsize);
-  int total = mapsize * mapsize;
-  walkable = (bool *)calloc(total, 1);
-  if (!walkable) { gzclose(f); return; }
-  int prevtype = -1;
-  int k = 0;
-  while (k < total) {
-    int type = gzgetc(f);
-    if (type < 0) break;
-    if (type == 255) {
-      int n = gzgetc(f);
-      if (n < 0) break;
-      for (int r = 0; r < n && k < total; r++, k++)
-        walkable[k] = (prevtype != 0);
-      continue;
-    }
-    prevtype = type;
-    walkable[k] = (type != 0);
-    k++;
-    if (type == 0) {
-      gzgetc(f); gzgetc(f);
-      if (hdr.version <= 2) { gzgetc(f); gzgetc(f); }
-    } else {
-      gzgetc(f); gzgetc(f); gzgetc(f);
-      gzgetc(f); gzgetc(f);
-      if (hdr.version <= 2) { gzgetc(f); gzgetc(f); }
-      gzgetc(f);
-      if (hdr.version >= 2) gzgetc(f);
-      if (hdr.version >= 5) gzgetc(f);
-    }
-  }
   gzclose(f);
 }
 
@@ -140,7 +106,7 @@ void serverbot_spawn(int count) {
   }
 }
 
-void serverbot_clear() { numsbots = 0; numspawns = 0; free(walkable); walkable = NULL; }
+void serverbot_clear() { numsbots = 0; numspawns = 0; }
 
 bool serverbot_kick(const char *name) {
   loopi(numsbots) if (!strcmp(sbot[i].name, name)) {
@@ -239,7 +205,7 @@ void serverbot_update() {
     serverbot &b = sbot[i];
     if (b.state == CS_DEAD) {
       if (now - b.lastaction > 5000) {
-        if (numspawns == 0) loadspawns();
+        loadspawns();
         if (numspawns == 0) {
           spawnx[0] = spawny[0] = 64; spawnz[0] = 4; numspawns = 1;
         };
@@ -265,14 +231,9 @@ void serverbot_update() {
     float rad = b.yaw / 180.0f * PI;
     float nx = b.x + sinf(rad) * diff * 0.05f;
     float ny = b.y + cosf(rad) * diff * 0.05f;
-    int ix = (int)nx, iy = (int)ny;
-    if (walkable && ix >= 0 && iy >= 0 && ix < mapsize && iy < mapsize) {
-      if (walkable[iy * mapsize + ix]) {
-        b.x = nx;
-        b.y = ny;
-      } else {
-        b.targetyaw += 90.0f + rnd(90);
-      }
+    if (nx >= 0 && ny >= 0 && nx < mapsize && ny < mapsize) {
+      b.x = nx;
+      b.y = ny;
     } else {
       b.targetyaw += 90.0f + rnd(90);
     }
