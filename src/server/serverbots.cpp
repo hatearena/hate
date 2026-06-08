@@ -88,7 +88,7 @@ void serverbot_spawn(int count) {
     int si = rnd(numspawns);
     b.x = spawnx[si];
     b.y = spawny[si];
-    b.z = spawnz[si];
+        b.z = spawnz[si] + 0.5f;
     b.yaw = (float)rnd(360);
     b.pitch = 0;
     b.roll = 0;
@@ -212,7 +212,7 @@ void serverbot_update() {
         int si = rnd(numspawns);
         b.x = spawnx[si];
         b.y = spawny[si];
-        b.z = spawnz[si];
+    b.z = spawnz[si] + 0.5f;
         b.health = 100;
         b.state = CS_ALIVE;
         b.lastmove = 0;
