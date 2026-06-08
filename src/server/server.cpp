@@ -309,16 +309,15 @@ bool vote(char *map, int reqmode, int sender) {
     } else
       no++;
   };
-  if (yes == 1 && no == 0)
-    return true;
   sprintf_sd(msg)("%s started a vote for %s on map %s (set map to vote)",
                   clients[sender].name, modestr(reqmode), map);
   sendservmsg(msg);
-  if (yes / (float)(yes + no) <= 0.5f)
-    return false;
-  sendservmsg("Vote passed");
-  resetvotes();
-  return true;
+  if (yes > no) {
+    sendservmsg("Vote passed");
+    resetvotes();
+    return true;
+  }
+  return false;
 };
 
 void process(ENetPacket *packet, int sender) {
@@ -464,8 +463,13 @@ void process(ENetPacket *packet, int sender) {
       int reqmode = getint(p);
       if (reqmode < 0)
         reqmode = 0;
-      if (smapname[0] && !mapreload && !vote(text, reqmode, sender))
-        return;
+      if (smapname[0] && !mapreload) {
+        if (clients[sender].rcon) {
+          resetvotes();
+        } else if (!vote(text, reqmode, sender)) {
+          return;
+        }
+      }
       mapreload = false;
       if (maprotation.length() > 0) {
         mapRotationIndex = (mapRotationIndex + 1) % maprotation.length();
@@ -486,10 +490,13 @@ void process(ENetPacket *packet, int sender) {
       mapend = lastsec + minremain * 60;
       interm = 0;
       resetitems();
-      if (isdedicated && botcount > 0) {
-        serverbot_clear();
-        serverbot_spawn(botcount);
-        loopv(clients) if (clients[i].type == ST_TCPIP) serverbot_sendinit(i);
+      {
+        int num = serverbot_count();
+        if (num > 0) {
+          serverbot_clear();
+          serverbot_spawn(num);
+          loopv(clients) if (clients[i].type == ST_TCPIP) serverbot_sendinit(i);
+        }
       }
       sender = -1;
       break;

@@ -21,6 +21,8 @@ struct serverbot {
   bool onfloor;
   enet_uint32 blocktime;
   enet_uint32 lastjump;
+  float prevx, prevy, prevz;
+  float velx, vely, velz;
 };
 
 struct walkinfo {
@@ -246,6 +248,12 @@ void serverbot_spawn(int count) {
     b.lastattack = 0;
     b.targetyaw = b.yaw;
     b.lastjump = 0;
+    b.prevx = b.x;
+    b.prevy = b.y;
+    b.prevz = b.z;
+    b.velx = 0;
+    b.vely = 0;
+    b.velz = 0;
     if ((mode & 1 && mode > 2) || mode == 12) {
       int blues = 0, reds = 0;
       loopj(numsbots) {
@@ -269,6 +277,7 @@ void serverbot_spawn(int count) {
 void serverbot_clear() {
   numsbots = 0;
   numspawns = 0;
+  nextcn = BOT_CLIENT_BASE;
   free(walkdata);
   walkdata = NULL;
 }
@@ -356,7 +365,7 @@ void serverbot_broadcast() {
   if (!serverhost)
     return;
   static enet_uint32 lastbc = 0;
-  if (enet_time_get() - lastbc < 40)
+  if (enet_time_get() - lastbc < 30)
     return;
   lastbc = enet_time_get();
   loopi(numsbots) {
@@ -373,9 +382,9 @@ void serverbot_broadcast() {
     putint(p, (int)(b.pitch * DAF));
     putint(p, (int)(b.roll * DAF));
     if (b.state == CS_ALIVE) {
-      putint(p, 0);
-      putint(p, 0);
-      putint(p, 0);
+      putint(p, (int)(b.velx * DVF));
+      putint(p, (int)(b.vely * DVF));
+      putint(p, (int)(b.velz * DVF));
       putint(p, (b.strafemode & 3) | ((b.movemode & 3) << 2) |
                     ((b.onfloor ? 1 : 0) << 4) | (b.state << 5));
     } else {
@@ -707,16 +716,16 @@ static bool try_move_bot(serverbot &b, int diff, int move, int strafe) {
     }
     return true;
   }
-  float step = diff * 0.015f;
-  if (step > 0.9f)
-    step = 0.9f;
+  float step = diff * 0.028f;
+  if (step > 1.4f)
+    step = 1.4f;
   float rad = b.yaw / 180.0f * PI;
   float nx = b.x + sinf(rad) * step * (float)move;
   float ny = b.y + cosf(rad) * step * (float)move;
   if (strafe != 0) {
-    float st = diff * 0.01f;
-    if (st > 0.6f)
-      st = 0.6f;
+    float st = diff * 0.022f;
+    if (st > 1.1f)
+      st = 1.1f;
     float srad = (b.yaw + 90.0f * (float)strafe) / 180.0f * PI;
     nx += sinf(srad) * st;
     ny += cosf(srad) * st;
@@ -768,7 +777,7 @@ static bool try_move_bot(serverbot &b, int diff, int move, int strafe) {
 
 void serverbot_update() {
   enet_uint32 now = enet_time_get();
-  if (now - lastthink < 50)
+  if (now - lastthink < 30)
     return;
   int diff = (int)(now - lastthink);
   if (diff > 200)
@@ -800,6 +809,9 @@ void serverbot_update() {
     b.onfloor = false;
     b.movemode = 0;
     b.strafemode = 0;
+    b.prevx = b.x;
+    b.prevy = b.y;
+    b.prevz = b.z;
     if (b.state == CS_DEAD) {
       if (now - b.lastaction > 5000) {
         loadspawns();
@@ -825,6 +837,12 @@ void serverbot_update() {
         b.onfloor = true;
         b.blocktime = 0;
         b.lastjump = 0;
+        b.prevx = b.x;
+        b.prevy = b.y;
+        b.prevz = b.z;
+        b.velx = 0;
+        b.vely = 0;
+        b.velz = 0;
       }
       continue;
     }
@@ -919,7 +937,7 @@ void serverbot_update() {
       bool in_escape_cooldown = (now - b.lastmove < 500);
 
       if (!in_escape_cooldown) {
-        float turnrate = diff * 0.3f;
+        float turnrate = diff * 0.55f;
         float yd = enemyyaw - b.yaw;
         if (fabs(yd) > 135.0f)
           turnrate *= 3.0f;
@@ -1082,7 +1100,7 @@ void serverbot_update() {
       b.targetyaw = (float)rnd(360);
       b.lastmove = now;
     }
-    float turnrate = diff * 0.3f;
+    float turnrate = diff * 0.55f;
     float yd = b.targetyaw - b.yaw;
     if (fabs(yd) < turnrate)
       b.yaw = b.targetyaw;
@@ -1158,5 +1176,13 @@ void serverbot_update() {
     }
     if (!b.onfloor)
       b.movemode = 0;
+    float dt = diff / 1000.0f;
+    if (dt > 0.001f) {
+      b.velx = (b.x - b.prevx) / dt;
+      b.vely = (b.y - b.prevy) / dt;
+      b.velz = (b.z - b.prevz) / dt;
+    } else {
+      b.velx = b.vely = b.velz = 0;
+    }
   }
 }
