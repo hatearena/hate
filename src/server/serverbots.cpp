@@ -2,6 +2,7 @@
 #include <zlib.h>
 
 extern int mode;
+extern int interm;
 extern vector<client> clients;
 extern ENetHost *serverhost;
 extern string smapname;
@@ -789,6 +790,9 @@ void serverbot_update() {
   if (diff > 200)
     diff = 200;
   lastthink = now;
+
+  if (interm)
+    return;
 
   static enet_uint32 lastammorefill = 0;
   if (now - lastammorefill > 15000) {
