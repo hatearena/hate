@@ -18,6 +18,7 @@ struct serverbot {
   int movemode, strafemode;
   float fallvelocity;
   bool onfloor;
+  enet_uint32 blocktime;
 };
 
 struct walkinfo {
@@ -228,6 +229,7 @@ void serverbot_spawn(int count) {
     b.strafemode = 0;
     b.fallvelocity = 0;
     b.onfloor = true;
+    b.blocktime = 0;
     b.frags = 0;
     b.deaths = 0;
     b.lastaction = 0;
@@ -796,6 +798,7 @@ void serverbot_update() {
         b.strafemode = 0;
         b.fallvelocity = 0;
         b.onfloor = true;
+        b.blocktime = 0;
       }
       continue;
     }
@@ -886,19 +889,38 @@ void serverbot_update() {
 
       float enemyyaw = -(float)atan2(tx - b.x, ty - b.y) / PI * 180 + 180;
       float enemypitch = atan2(tz - b.z, realdist) * 180 / PI;
-      float turnrate = diff * 0.3f;
-      float yd = enemyyaw - b.yaw;
-      if (fabs(yd) < turnrate)
-        b.yaw = enemyyaw;
-      else if (yd > 0)
-        b.yaw += turnrate;
-      else
-        b.yaw -= turnrate;
-      b.targetyaw = enemyyaw;
+      if (now < b.blocktime) {
+        float turnrate = diff * 0.3f;
+        float yd = b.targetyaw - b.yaw;
+        if (fabs(yd) < turnrate)
+          b.yaw = b.targetyaw;
+        else if (yd > 0)
+          b.yaw += turnrate;
+        else
+          b.yaw -= turnrate;
+      } else {
+        float turnrate = diff * 0.3f;
+        float yd = enemyyaw - b.yaw;
+        if (fabs(yd) > 90.0f)
+          turnrate *= 2.0f;
+        if (fabs(yd) < turnrate)
+          b.yaw = enemyyaw;
+        else if (yd > 0)
+          b.yaw += turnrate;
+        else
+          b.yaw -= turnrate;
+        b.targetyaw = enemyyaw;
+      }
       b.pitch = enemypitch;
 
+      float yaw_to_target = enemyyaw - b.yaw;
+      if (yaw_to_target > 180.0f)  yaw_to_target -= 360.0f;
+      if (yaw_to_target < -180.0f) yaw_to_target += 360.0f;
+
       int move = 1, strafe = 0;
-      if (realdist < 8 && b.gunselect != GUN_CSAW) {
+      if (fabs(yaw_to_target) > 90.0f) {
+        move = 0;
+      } else if (realdist < 8 && b.gunselect != GUN_CSAW) {
         if (now - b.lastmove > 1000) {
           strafe = rnd(2) ? 1 : -1;
           b.lastmove = now;
@@ -907,20 +929,16 @@ void serverbot_update() {
       b.movemode = strafe ? 0 : move;
       b.strafemode = strafe;
       if (!try_move_bot(b, diff, move, strafe)) {
-        b.yaw += rnd(2) ? 90.0f : -90.0f;
-        b.targetyaw = b.yaw;
+        b.targetyaw += rnd(2) ? 90.0f : -90.0f;
+        b.yaw = b.targetyaw;
+        b.blocktime = now + 600;
         b.movemode = 0;
         b.strafemode = 0;
         continue;
       }
+      b.blocktime = 0;
       if (!b.onfloor)
         b.movemode = 0;
-
-      float yaw_to_target = enemyyaw - b.yaw;
-      if (yaw_to_target > 180.0f)
-        yaw_to_target -= 360.0f;
-      if (yaw_to_target < -180.0f)
-        yaw_to_target += 360.0f;
 
       int weapondelay = BOT_WEAPON_DELAYS[b.gunselect];
       int reactdelay = 200 + rnd(200);
@@ -971,7 +989,8 @@ void serverbot_update() {
       continue;
     }
 
-    if (now - b.lastmove > 500 + rnd(2000)) {
+    if (now < b.blocktime) {
+    } else if (now - b.lastmove > 500 + rnd(2000)) {
       b.targetyaw = (float)rnd(360);
       b.lastmove = now;
     }
@@ -987,9 +1006,12 @@ void serverbot_update() {
     b.strafemode = 0;
     if (!try_move_bot(b, diff, 1, 0)) {
       b.targetyaw += 90.0f + rnd(90);
+      b.yaw = b.targetyaw;
+      b.blocktime = now + 600;
       b.movemode = 0;
+    } else {
+      b.blocktime = 0;
     }
-    if (!b.onfloor)
-      b.movemode = 0;
+    if (!b.onfloor) b.movemode = 0;
   }
 }
