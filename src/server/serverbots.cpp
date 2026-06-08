@@ -58,6 +58,29 @@ static const int BOT_WEAPON_DAMAGES[NUMGUNS] = {
     20, 10, 30, 120, 100, 25, 15, 20, 40, 30, 50
 };
 
+static bool server_los(float lx, float ly, float lz, float bx, float by, float bz) {
+  if (!walkdata || mapsize <= 0) return true;
+  float dx = bx - lx;
+  float dy = by - ly;
+  float dz = bz - lz;
+  float hdist = sqrtf(dx * dx + dy * dy);
+  if (hdist < 0.01f) return true;
+  int steps = (int)(hdist / 0.5f);
+  if (steps < 1) steps = 1;
+  for (int i = 0; i <= steps; i++) {
+    float t = (float)i / (float)steps;
+    float x = lx + dx * t;
+    float y = ly + dy * t;
+    float z = lz + dz * t;
+    int cx = (int)x, cy = (int)y;
+    if (cx < 0 || cy < 0 || cx >= mapsize || cy >= mapsize) return false;
+    walkinfo &wi = walkdata[cy * mapsize + cx];
+    if (!wi.walkable) return false;
+    if (z < (float)wi.floor - 0.5f || z > (float)wi.ceil + 0.5f) return false;
+  }
+  return true;
+}
+
 static const char *bnames[] = {
     "Cerelo","Diaso","Ceria","Deathly","Ra","Va","Never","Abu",
     "Re","Why","Lucky","Lano","Cliff","Cobra","Liner","Chiba",
@@ -282,7 +305,7 @@ void serverbot_broadcast() {
     putint(p, (int)(b.roll * DAF));
     if (b.state == CS_ALIVE) {
       putint(p, 0); putint(p, 0); putint(p, 0);
-      putint(p, (b.movemode & 3) | ((b.strafemode & 3) << 2) | ((b.onfloor ? 1 : 0) << 4) | (b.state << 5));
+      putint(p, (b.strafemode & 3) | ((b.movemode & 3) << 2) | ((b.onfloor ? 1 : 0) << 4) | (b.state << 5));
     } else {
       putint(p, 0); putint(p, 0); putint(p, 0);
       putint(p, (b.state << 5));
@@ -316,7 +339,7 @@ void serverbot_sendinit(int cn) {
     putint(p, (int)(b.roll * DAF));
     if (b.state == CS_ALIVE) {
       putint(p, 0); putint(p, 0); putint(p, 0);
-      putint(p, (b.movemode & 3) | ((b.strafemode & 3) << 2) | ((b.onfloor ? 1 : 0) << 4) | (b.state << 5));
+      putint(p, (b.strafemode & 3) | ((b.movemode & 3) << 2) | ((b.onfloor ? 1 : 0) << 4) | (b.state << 5));
     } else {
       putint(p, 0); putint(p, 0); putint(p, 0);
       putint(p, (b.state << 5));
@@ -777,10 +800,10 @@ void serverbot_update() {
       if (weapondelay > reactdelay) reactdelay = weapondelay;
       if (fabs(yaw_to_target) < 45.0f &&
           now - b.lastattack > (enet_uint32)reactdelay) {
-        b.lastattack = now;
-        b.lastaction = now;
 
         if (b.gunselect == GUN_CSAW && realdist < 2.5f) {
+          b.lastattack = now;
+          b.lastaction = now;
           if (b.ammo[GUN_CSAW]) b.ammo[GUN_CSAW]--;
           float ttx = b.x + sinf(b.yaw / 180.0f * PI) * 2.0f;
           float tty = b.y + cosf(b.yaw / 180.0f * PI) * 2.0f;
@@ -790,7 +813,10 @@ void serverbot_update() {
             send_bot_damage_player(b, targetidx, dmg, lifeseq);
           else
             serverbot_damage(sbot[targetidx].cn, dmg, b.cn);
-        } else if (b.gunselect != GUN_CSAW) {
+        } else if (b.gunselect != GUN_CSAW &&
+                   server_los(b.x, b.y, b.z - 0.2f, tx, ty, tz)) {
+          b.lastattack = now;
+          b.lastaction = now;
           if (b.ammo[b.gunselect]) b.ammo[b.gunselect]--;
           float inaccuracy = realdist * 0.03f;
           if (b.gunselect == GUN_RIFLE) inaccuracy *= 0.3f;
