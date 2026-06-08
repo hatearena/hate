@@ -19,6 +19,7 @@ struct serverbot {
   float fallvelocity;
   bool onfloor;
   enet_uint32 blocktime;
+  enet_uint32 lastjump;
 };
 
 struct walkinfo {
@@ -236,6 +237,7 @@ void serverbot_spawn(int count) {
     b.lastmove = 0;
     b.lastattack = 0;
     b.targetyaw = b.yaw;
+    b.lastjump = 0;
     numsbots++;
     n++;
   }
@@ -799,6 +801,7 @@ void serverbot_update() {
         b.fallvelocity = 0;
         b.onfloor = true;
         b.blocktime = 0;
+        b.lastjump = 0;
       }
       continue;
     }
@@ -892,7 +895,9 @@ void serverbot_update() {
       {
         float turnrate = diff * 0.3f;
         float yd = enemyyaw - b.yaw;
-        if (fabs(yd) > 90.0f)
+        if (fabs(yd) > 135.0f)
+          turnrate *= 3.0f;
+        else if (fabs(yd) > 90.0f)
           turnrate *= 2.0f;
         if (fabs(yd) < turnrate)
           b.yaw = enemyyaw;
@@ -909,10 +914,12 @@ void serverbot_update() {
       if (yaw_to_target < -180.0f) yaw_to_target += 360.0f;
 
       int move = 1, strafe = 0;
-      if (fabs(yaw_to_target) > 90.0f) {
+      float abs_yaw = fabs(yaw_to_target);
+      if (abs_yaw > 90.0f && realdist < 5) {
         move = 0;
-      } else if (realdist < 8 && b.gunselect != GUN_CSAW) {
-        if (now - b.lastmove > 1000) {
+      }
+      if (realdist < 8 && b.gunselect != GUN_CSAW) {
+        if (now - b.lastmove > 500) {
           strafe = rnd(2) ? 1 : -1;
           b.lastmove = now;
         }
@@ -923,10 +930,25 @@ void serverbot_update() {
         float base = b.targetyaw;
         float angles[] = { 60, -60, 80, -80, 110, -110, 135, -135, 180 };
         bool escaped = false;
+        int escapedir = 0;
         float ox = b.x, oy = b.y, oz = b.z;
         float ov = b.fallvelocity;
         bool of = b.onfloor;
-        for (int t = 0; t < 9; t++) {
+        if (b.onfloor && of && now - b.lastjump > 400) {
+          b.lastjump = now;
+          b.fallvelocity = -40.0f;
+          b.onfloor = false;
+          b.z += 0.01f;
+          if (try_move_bot(b, diff, move, 0)) {
+            escaped = true;
+            escapedir = move;
+          } else {
+            b.x = ox; b.y = oy; b.z = oz;
+            b.fallvelocity = ov;
+            b.onfloor = of;
+          }
+        }
+        for (int t = 0; t < 9 && !escaped; t++) {
           b.yaw = base + angles[t];
           b.x = ox; b.y = oy; b.z = oz;
           b.fallvelocity = ov;
@@ -934,6 +956,7 @@ void serverbot_update() {
           if (try_move_bot(b, diff, 1, 0)) {
             b.targetyaw = b.yaw;
             escaped = true;
+            escapedir = 1;
             break;
           }
         }
@@ -942,7 +965,10 @@ void serverbot_update() {
           b.x = ox; b.y = oy; b.z = oz;
           b.fallvelocity = ov;
           b.onfloor = of;
-          escaped = try_move_bot(b, diff, -1, 0);
+          if (try_move_bot(b, diff, -1, 0)) {
+            escaped = true;
+            escapedir = -1;
+          }
           b.targetyaw = base;
         }
         if (!escaped) {
@@ -952,7 +978,7 @@ void serverbot_update() {
           b.yaw = base + 180;
           b.targetyaw = b.yaw;
         }
-        b.movemode = escaped ? 1 : 0;
+        b.movemode = escaped ? escapedir : 0;
         b.strafemode = 0;
         if (!b.onfloor) b.movemode = 0;
         continue;
@@ -961,10 +987,10 @@ void serverbot_update() {
         b.movemode = 0;
 
       int weapondelay = BOT_WEAPON_DELAYS[b.gunselect];
-      int reactdelay = 200 + rnd(200);
+      int reactdelay = 100 + rnd(150);
       if (weapondelay > reactdelay)
         reactdelay = weapondelay;
-      if (fabs(yaw_to_target) < 45.0f &&
+      if (fabs(yaw_to_target) < 60.0f &&
           now - b.lastattack > (enet_uint32)reactdelay) {
 
         if (b.gunselect == GUN_CSAW && realdist < 2.5f) {
@@ -1009,7 +1035,7 @@ void serverbot_update() {
       continue;
     }
 
-    if (now - b.lastmove > 500 + rnd(2000)) {
+    if (now - b.lastmove > 300 + rnd(1000)) {
       b.targetyaw = (float)rnd(360);
       b.lastmove = now;
     }
@@ -1027,10 +1053,25 @@ void serverbot_update() {
       float base = b.targetyaw;
       float angles[] = { 60, -60, 80, -80, 110, -110, 135, -135, 180 };
       bool escaped = false;
+      int escapedir = 0;
       float ox = b.x, oy = b.y, oz = b.z;
       float ov = b.fallvelocity;
       bool of = b.onfloor;
-      for (int t = 0; t < 9; t++) {
+      if (b.onfloor && now - b.lastjump > 400) {
+        b.lastjump = now;
+        b.fallvelocity = -40.0f;
+        b.onfloor = false;
+        b.z += 0.01f;
+        if (try_move_bot(b, diff, 1, 0)) {
+          escaped = true;
+          escapedir = 1;
+        } else {
+          b.x = ox; b.y = oy; b.z = oz;
+          b.fallvelocity = ov;
+          b.onfloor = of;
+        }
+      }
+      for (int t = 0; t < 9 && !escaped; t++) {
         b.yaw = base + angles[t];
         b.x = ox; b.y = oy; b.z = oz;
         b.fallvelocity = ov;
@@ -1038,6 +1079,7 @@ void serverbot_update() {
         if (try_move_bot(b, diff, 1, 0)) {
           b.targetyaw = b.yaw;
           escaped = true;
+          escapedir = 1;
           break;
         }
       }
@@ -1046,7 +1088,10 @@ void serverbot_update() {
         b.x = ox; b.y = oy; b.z = oz;
         b.fallvelocity = ov;
         b.onfloor = of;
-        escaped = try_move_bot(b, diff, -1, 0);
+        if (try_move_bot(b, diff, -1, 0)) {
+          escaped = true;
+          escapedir = -1;
+        }
         b.targetyaw = base;
       }
       if (!escaped) {
@@ -1056,7 +1101,7 @@ void serverbot_update() {
         b.yaw = base + 180;
         b.targetyaw = b.yaw;
       }
-      b.movemode = escaped ? 1 : 0;
+      b.movemode = escaped ? escapedir : 0;
     }
     if (!b.onfloor) b.movemode = 0;
   }

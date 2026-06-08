@@ -48,7 +48,11 @@ void renderclient(dynent *d, bool team, const char *mdlname, bool hellpig,
   } else if (!d->onfloor && d->timeinair > 100) {
     n = 18;
   } else {
-    n = 14;
+    if (d->move < 0) {
+      n = 15;
+    } else {
+      n = 14;
+    }
     speed = 5000 / d->maxspeed * scale;
     if (hellpig)
       speed = 300 / d->maxspeed;
