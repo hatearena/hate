@@ -518,9 +518,10 @@ void process(ENetPacket *packet, int sender) {
       mapend = lastsec + minremain * 60;
       interm = 0;
       resetitems();
-      if (isdedicated && botcount > 0) {
+      if (serverbot_count() > 0) {
+        int num = serverbot_count();
         serverbot_clear();
-        serverbot_spawn(botcount);
+        serverbot_spawn(num);
         loopv(clients) if (clients[i].type == ST_TCPIP) serverbot_sendinit(i);
       }
       sender = -1;
