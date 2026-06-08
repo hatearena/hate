@@ -44,6 +44,9 @@ string servername;
 bool isdedicated;
 ENetHost *serverhost = NULL;
 int bsend = 0, brec = 0, laststatus = 0, lastsec = 0;
+static int solovotetime = 0;
+static string solovotemap;
+static int solovotemode = 0;
 
 #define MAXOBUF 100000
 
@@ -462,8 +465,38 @@ void process(ENetPacket *packet, int sender) {
       if (reqmode < 0)
         reqmode = 0;
       if (smapname[0] && !mapreload) {
-        if (!clients[sender].rcon && !vote(text, reqmode, sender))
-          return;
+        if (clients[sender].rcon) {
+          resetvotes();
+          solovotetime = 0;
+        } else {
+          int total = 0;
+          loopv(clients) if (clients[i].type != ST_EMPTY) total++;
+          if (total == 1) {
+            if (!solovotetime) {
+              solovotetime = lastsec + 3;
+              strcpy_s(solovotemap, text);
+              solovotemode = reqmode;
+              sprintf_sd(msg)("Changing to %s on %s in 3 seconds...",
+                              modestr(reqmode), text);
+              sendservmsg(msg);
+              return;
+            }
+            if (lastsec < solovotetime)
+              return;
+            if (strcmp(solovotemap, text) != 0 || solovotemode != reqmode) {
+              solovotetime = lastsec + 3;
+              strcpy_s(solovotemap, text);
+              solovotemode = reqmode;
+              sprintf_sd(msg)("Changing to %s on %s in 3 seconds...",
+                              modestr(reqmode), text);
+              sendservmsg(msg);
+              return;
+            }
+            solovotetime = 0;
+          } else if (!vote(text, reqmode, sender)) {
+            return;
+          }
+        }
       }
       mapreload = false;
       if (maprotation.length() > 0) {

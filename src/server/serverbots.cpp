@@ -232,7 +232,7 @@ void serverbot_spawn(int count) {
     b.roll = 0;
     b.state = CS_ALIVE;
     b.health = 100;
-        b.gunselect = (mode == 6 || mode == 7 || mode == 10 || mode == 11)
+        b.gunselect = (mode == 4 || mode == 5)
                           ? GUN_RIFLE
                           : 1 + rnd(6);
     loopk(NUMGUNS) b.ammo[k] = 100;
@@ -821,7 +821,7 @@ void serverbot_update() {
         b.state = CS_ALIVE;
         b.lastmove = 0;
         b.lastattack = 0;
-    b.gunselect = (mode == 6 || mode == 7 || mode == 10 || mode == 11)
+    b.gunselect = (mode == 4 || mode == 5)
                       ? GUN_RIFLE
                       : 1 + rnd(6);
         loopk(NUMGUNS) b.ammo[k] = 100;
