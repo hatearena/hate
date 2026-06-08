@@ -118,6 +118,8 @@ void localservertoclient(uchar *buf,
         }
       }
       d->state = state;
+      if (cn >= BOT_CLIENT_BASE)
+        d->moving = (d->move != 0 || d->strafe != 0);
       if (!demoplayback)
         updatepos(d);
       break;

@@ -250,10 +250,7 @@ void serverbot_broadcast() {
     putint(p, (int)(b.pitch * DAF));
     putint(p, (int)(b.roll * DAF));
     if (b.state == CS_ALIVE) {
-      float rad = b.yaw / 180.0f * PI;
-      putint(p, (int)(sinf(rad) * 15.0f * DVF));
-      putint(p, (int)(cosf(rad) * 15.0f * DVF));
-      putint(p, 0);
+      putint(p, 0); putint(p, 0); putint(p, 0);
       putint(p, (0 & 3) | ((1 & 3) << 2) | (1 << 4) | (b.state << 3));
     } else {
       putint(p, 0); putint(p, 0); putint(p, 0);
@@ -285,10 +282,7 @@ void serverbot_sendinit(int cn) {
     putint(p, (int)(b.pitch * DAF));
     putint(p, (int)(b.roll * DAF));
     if (b.state == CS_ALIVE) {
-      float rad = b.yaw / 180.0f * PI;
-      putint(p, (int)(sinf(rad) * 15.0f * DVF));
-      putint(p, (int)(cosf(rad) * 15.0f * DVF));
-      putint(p, 0);
+      putint(p, 0); putint(p, 0); putint(p, 0);
       putint(p, (0 & 3) | ((1 & 3) << 2) | (1 << 4) | (b.state << 3));
     } else {
       putint(p, 0); putint(p, 0); putint(p, 0);
