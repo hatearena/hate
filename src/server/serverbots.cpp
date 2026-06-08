@@ -198,9 +198,19 @@ void serverbot_damage(int cn, int damage, int attacker) {
       sbot[i].lastaction = enet_time_get();
       sbot[i].deaths++;
     }
-    ENetPacket *packet = enet_packet_create(NULL, 20, 0);
+    ENetPacket *packet = enet_packet_create(NULL, 80, 0);
     uchar *start = packet->data;
     uchar *p = start + 2;
+    putint(p, SV_POS);
+    putint(p, cn);
+    putint(p, (int)(sbot[i].x * DMF));
+    putint(p, (int)(sbot[i].y * DMF));
+    putint(p, (int)(sbot[i].z * DMF));
+    putint(p, (int)(sbot[i].yaw * DAF));
+    putint(p, (int)(sbot[i].pitch * DAF));
+    putint(p, (int)(sbot[i].roll * DAF));
+    putint(p, 0); putint(p, 0); putint(p, 0);
+    putint(p, (sbot[i].state << 3));
     if (died) {
       putint(p, SV_DIED);
       putint(p, attacker);
