@@ -279,7 +279,7 @@ void otherplayers() {
       continue;
     };
     if (lagtime && players[i]->state != CS_DEAD &&
-        (!demoplayback || i != democlientnum))
+        (!demoplayback || i != democlientnum) && i < BOT_CLIENT_BASE)
       moveplayer(players[i], 2,
                  false); // use physics to extrapolate player position
   };
