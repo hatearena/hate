@@ -14,6 +14,7 @@ struct serverbot {
   int state, health, gunselect, frags, deaths;
   int lastaction, lastmove, lastattack;
   float targetyaw;
+  int ammo[NUMGUNS];
 };
 
 struct walkinfo {
@@ -46,6 +47,13 @@ static const float BOT_RADIUS = 1.1f;
 static const float BOT_MAXSTEP = 1.0f;
 static const float BOT_ATTACK_RANGE = 80.0f;
 static const float BOT_ATTACK_RANGE_SQ = 6400.0f;
+
+static const int BOT_WEAPON_DELAYS[NUMGUNS] = {
+    150, 1000, 100, 800, 1500, 100, 50, 200, 200, 200, 250
+};
+static const int BOT_WEAPON_DAMAGES[NUMGUNS] = {
+    20, 10, 30, 120, 100, 25, 15, 20, 40, 30, 50
+};
 
 static const char *bnames[] = {
     "Cerelo","Diaso","Ceria","Deathly","Ra","Va","Never","Abu",
@@ -158,6 +166,8 @@ void serverbot_spawn(int count) {
     b.state = CS_ALIVE;
     b.health = 100;
     b.gunselect = 1 + rnd(6);
+    loopk(NUMGUNS) b.ammo[k] = 100;
+    b.ammo[GUN_CSAW] = 1;
     b.frags = 0;
     b.deaths = 0;
     b.lastaction = 0;
@@ -475,12 +485,83 @@ static void send_bot_damage_player(serverbot &b, int target, int damage,
   }
 }
 
+static bool shot_hits_bot(float fromx, float fromy, float fromz, float tox,
+                           float toy, float toz, serverbot &target) {
+  vec f, t;
+  f.x = fromx; f.y = fromy; f.z = fromz;
+  t.x = tox;   t.y = toy;   t.z = toz;
+  return intersect_bot(target, f, t);
+}
+
+static bool try_move_bot(serverbot &b, int diff, int move, int strafe) {
+  if (move == 0 && strafe == 0) return true;
+  if (!walkdata || mapsize <= 0) return false;
+  float step = diff * 0.015f;
+  if (step > 0.9f) step = 0.9f;
+  float rad = b.yaw / 180.0f * PI;
+  float nx = b.x + sinf(rad) * step * (float)move;
+  float ny = b.y + cosf(rad) * step * (float)move;
+  if (strafe != 0) {
+    float st = diff * 0.01f;
+    if (st > 0.6f) st = 0.6f;
+    float srad = (b.yaw + 90.0f * (float)strafe) / 180.0f * PI;
+    nx += sinf(srad) * st;
+    ny += cosf(srad) * st;
+  }
+  int x1 = (int)(nx - BOT_RADIUS);
+  int y1 = (int)(ny - BOT_RADIUS);
+  int x2 = (int)(nx + BOT_RADIUS);
+  int y2 = (int)(ny + BOT_RADIUS);
+  bool blocked = false;
+  char bestfloor = -128;
+  for (int cx = x1; cx <= x2 && !blocked; cx++) {
+    for (int cy = y1; cy <= y2; cy++) {
+      if (cx < 0 || cy < 0 || cx >= mapsize || cy >= mapsize) {
+        blocked = true; break;
+      }
+      walkinfo &wi = walkdata[cy * mapsize + cx];
+      if (!wi.walkable) { blocked = true; break; }
+      if (wi.floor > bestfloor) bestfloor = wi.floor;
+    }
+  }
+  if (blocked) return false;
+  float curfloor = b.z - BOT_EYEHEIGHT;
+  float targetfloor = (float)bestfloor;
+  if (targetfloor > curfloor + BOT_MAXSTEP) return false;
+  b.x = nx;
+  b.y = ny;
+  float targetZ = targetfloor + BOT_EYEHEIGHT;
+  if (targetZ < b.z - 0.01f) {
+    float fall = diff * 0.005f;
+    b.z -= fall;
+    if (b.z < targetZ) b.z = targetZ;
+  } else if (targetZ > b.z) {
+    b.z = targetZ;
+  }
+  return true;
+}
+
 void serverbot_update() {
   enet_uint32 now = enet_time_get();
   if (now - lastthink < 50) return;
   int diff = (int)(now - lastthink);
   if (diff > 200) diff = 200;
   lastthink = now;
+
+  static enet_uint32 lastammorefill = 0;
+  if (now - lastammorefill > 15000) {
+    lastammorefill = now;
+    loopi(numsbots) {
+      if (sbot[i].state == CS_ALIVE) {
+        if (sbot[i].ammo[GUN_SG] < 10)       sbot[i].ammo[GUN_SG] = 10;
+        if (sbot[i].ammo[GUN_NAILGUN] < 40)   sbot[i].ammo[GUN_NAILGUN] = 40;
+        if (sbot[i].ammo[GUN_CG] < 40)        sbot[i].ammo[GUN_CG] = 40;
+        if (sbot[i].ammo[GUN_RL] < 8)         sbot[i].ammo[GUN_RL] = 8;
+        if (sbot[i].ammo[GUN_RIFLE] < 8)      sbot[i].ammo[GUN_RIFLE] = 8;
+      }
+    }
+  }
+
   loopi(numsbots) {
     serverbot &b = sbot[i];
     if (b.state == CS_DEAD) {
@@ -499,11 +580,17 @@ void serverbot_update() {
         b.state = CS_ALIVE;
         b.lastmove = 0;
         b.lastattack = 0;
+        b.gunselect = 1 + rnd(6);
+        loopk(NUMGUNS) b.ammo[k] = 100;
+        b.ammo[GUN_CSAW] = 1;
       }
       continue;
     }
+
+    bool target_is_player = false;
     int targetidx = -1;
     float bestdist = BOT_ATTACK_RANGE_SQ;
+
     loopj(MAXCLIENTS) {
       if (!playerpos[j].active) continue;
       if (playerpos[j].state != CS_ALIVE) continue;
@@ -514,14 +601,63 @@ void serverbot_update() {
       if (dist < bestdist) {
         bestdist = dist;
         targetidx = j;
+        target_is_player = true;
       }
     }
+
+    loopj(numsbots) {
+      if (j == i) continue;
+      serverbot &other = sbot[j];
+      if (other.state != CS_ALIVE) continue;
+      float dx = other.x - b.x;
+      float dy = other.y - b.y;
+      float dz = other.z - b.z;
+      float dist = dx * dx + dy * dy + dz * dz;
+      if (dist < bestdist) {
+        bestdist = dist;
+        targetidx = j;
+        target_is_player = false;
+      }
+    }
+
     if (targetidx >= 0 && bestdist < BOT_ATTACK_RANGE_SQ) {
-      float tx = playerpos[targetidx].x;
-      float ty = playerpos[targetidx].y;
-      float tz = playerpos[targetidx].z;
+      float tx, ty, tz;
+      int lifeseq = 0;
+      if (target_is_player) {
+        tx = playerpos[targetidx].x;
+        ty = playerpos[targetidx].y;
+        tz = playerpos[targetidx].z;
+        lifeseq = playerpos[targetidx].lifesequence;
+      } else {
+        tx = sbot[targetidx].x;
+        ty = sbot[targetidx].y;
+        tz = sbot[targetidx].z;
+      }
+      float realdist = sqrtf(bestdist);
+
+      if (bestdist < 64.0f && b.gunselect != GUN_CSAW) {
+        b.gunselect = GUN_CSAW;
+      } else if (b.gunselect == GUN_CSAW && realdist > 15.0f) {
+        if (b.ammo[GUN_RL])        b.gunselect = GUN_RL;
+        else if (b.ammo[GUN_CG])   b.gunselect = GUN_CG;
+        else if (b.ammo[GUN_LIGHTGUN]) b.gunselect = GUN_LIGHTGUN;
+        else if (b.ammo[GUN_NAILGUN])  b.gunselect = GUN_NAILGUN;
+        else if (b.ammo[GUN_SG])   b.gunselect = GUN_SG;
+        else if (b.ammo[GUN_RIFLE]) b.gunselect = GUN_RIFLE;
+      } else if (!b.ammo[b.gunselect] && b.gunselect != GUN_CSAW) {
+        if (b.ammo[GUN_RL])        b.gunselect = GUN_RL;
+        else if (b.ammo[GUN_CG])   b.gunselect = GUN_CG;
+        else if (b.ammo[GUN_LIGHTGUN]) b.gunselect = GUN_LIGHTGUN;
+        else if (b.ammo[GUN_NAILGUN])  b.gunselect = GUN_NAILGUN;
+        else if (b.ammo[GUN_SG])   b.gunselect = GUN_SG;
+        else if (b.ammo[GUN_RIFLE]) b.gunselect = GUN_RIFLE;
+        else                        b.gunselect = GUN_CSAW;
+      }
+
       float enemyyaw =
           -(float)atan2(tx - b.x, ty - b.y) / PI * 180 + 180;
+      float enemypitch =
+          atan2(tz - b.z, realdist) * 180 / PI;
       float turnrate = diff * 0.3f;
       float yd = enemyyaw - b.yaw;
       if (fabs(yd) < turnrate)
@@ -531,39 +667,68 @@ void serverbot_update() {
       else
         b.yaw -= turnrate;
       b.targetyaw = enemyyaw;
-      if (now - b.lastattack > 300 + rnd(400)) {
-        b.lastattack = now;
-        float aimspread = 12.0f;
-        float attackyaw = enemyyaw + (rnd(101) - 50) / 100.0f * aimspread;
-        float attackpitch = (rnd(101) - 50) / 100.0f * aimspread * 0.5f;
-        float rad2 = attackyaw / 180.0f * PI;
-        float pitchrad = attackpitch / 180.0f * PI;
-        float fromx = b.x;
-        float fromy = b.y;
-        float fromz = b.z - 0.2f;
-        float dist = sqrtf(bestdist);
-        if (dist < 2.0f) dist = 2.0f;
-        float tox = fromx + sinf(rad2) * cosf(pitchrad) * dist * 2.0f;
-        float toy = fromy + cosf(rad2) * cosf(pitchrad) * dist * 2.0f;
-        float toz = fromz + sinf(pitchrad) * dist * 2.0f;
-        send_bot_shot(b, tox, toy, toz);
-        if (shot_hits_player(fromx, fromy, fromz, tox, toy, toz, tx, ty, tz)) {
-          int dmg = 10;
-          if (b.gunselect == GUN_CSAW)
-            dmg = 20;
-          else if (b.gunselect == GUN_RL)
-            dmg = 50;
-          else if (b.gunselect == GUN_RIFLE)
-            dmg = 40;
-          send_bot_damage_player(b, targetidx, dmg,
-                                 playerpos[targetidx].lifesequence);
-        }
+      b.pitch = enemypitch;
+
+      int move = 1, strafe = 0;
+      if (realdist < 4 && b.gunselect != GUN_CSAW) {
+        move = -1;
+      } else if (realdist < 12) {
+        strafe = rnd(3) - 1;
       }
-      if (now - b.lastmove > 500 + rnd(2000)) {
-        b.lastmove = now;
+      if (!try_move_bot(b, diff, move, strafe)) {
+        b.targetyaw += rnd(2) ? 90.0f : -90.0f;
+      }
+
+      int weapondelay = BOT_WEAPON_DELAYS[b.gunselect];
+      int reactdelay = 200 + rnd(200);
+      if (weapondelay > reactdelay) reactdelay = weapondelay;
+      if (now - b.lastattack > (enet_uint32)reactdelay) {
+        b.lastattack = now;
+        b.lastaction = now;
+
+        if (b.gunselect == GUN_CSAW && realdist < 2.5f) {
+          if (b.ammo[GUN_CSAW]) b.ammo[GUN_CSAW]--;
+          float fromx = b.x, fromy = b.y, fromz = b.z - 0.2f;
+          float ttx = b.x + sinf(enemyyaw / 180.0f * PI) * 2.0f;
+          float tty = b.y + cosf(enemyyaw / 180.0f * PI) * 2.0f;
+          send_bot_shot(b, ttx, tty, b.z - 0.2f);
+          int dmg = BOT_WEAPON_DAMAGES[GUN_CSAW];
+          if (target_is_player) {
+            send_bot_damage_player(b, targetidx, dmg, lifeseq);
+          } else {
+            serverbot_damage(sbot[targetidx].cn, dmg, b.cn);
+          }
+        } else if (b.gunselect != GUN_CSAW) {
+          if (b.ammo[b.gunselect]) b.ammo[b.gunselect]--;
+          float aimspread = 12.0f;
+          float attackyaw = enemyyaw + (rnd(101) - 50) / 100.0f * aimspread;
+          float attackpitch = enemypitch + (rnd(101) - 50) / 100.0f * aimspread * 0.5f;
+          float rad2 = attackyaw / 180.0f * PI;
+          float pitchrad = attackpitch / 180.0f * PI;
+          float fromx = b.x;
+          float fromy = b.y;
+          float fromz = b.z - 0.2f;
+          float shotdist = realdist;
+          if (shotdist < 2.0f) shotdist = 2.0f;
+          float tox = fromx + sinf(rad2) * cosf(pitchrad) * shotdist * 2.0f;
+          float toy = fromy + cosf(rad2) * cosf(pitchrad) * shotdist * 2.0f;
+          float toz = fromz + sinf(pitchrad) * shotdist * 2.0f;
+          send_bot_shot(b, tox, toy, toz);
+          int dmg = BOT_WEAPON_DAMAGES[b.gunselect];
+          if (target_is_player) {
+            if (shot_hits_player(fromx, fromy, fromz, tox, toy, toz, tx, ty, tz)) {
+              send_bot_damage_player(b, targetidx, dmg, lifeseq);
+            }
+          } else {
+            if (shot_hits_bot(fromx, fromy, fromz, tox, toy, toz, sbot[targetidx])) {
+              serverbot_damage(sbot[targetidx].cn, dmg, b.cn);
+            }
+          }
+        }
       }
       continue;
     }
+
     if (now - b.lastmove > 500 + rnd(2000)) {
       b.targetyaw = (float)rnd(360);
       b.lastmove = now;
@@ -576,55 +741,8 @@ void serverbot_update() {
       b.yaw += turnrate;
     else
       b.yaw -= turnrate;
-    float rad = b.yaw / 180.0f * PI;
-    float step = diff * 0.015f;
-    if (step > 0.9f) step = 0.9f;
-    float nx = b.x + sinf(rad) * step;
-    float ny = b.y + cosf(rad) * step;
-    if (!walkdata || mapsize <= 0) {
+    if (!try_move_bot(b, diff, 1, 0)) {
       b.targetyaw += 90.0f + rnd(90);
-      continue;
-    }
-    int x1 = (int)(nx - BOT_RADIUS);
-    int y1 = (int)(ny - BOT_RADIUS);
-    int x2 = (int)(nx + BOT_RADIUS);
-    int y2 = (int)(ny + BOT_RADIUS);
-    bool blocked = false;
-    char bestfloor = -128;
-    for (int cx = x1; cx <= x2; cx++) {
-      for (int cy = y1; cy <= y2; cy++) {
-        if (cx < 0 || cy < 0 || cx >= mapsize || cy >= mapsize) {
-          blocked = true;
-          break;
-        }
-        walkinfo &wi = walkdata[cy * mapsize + cx];
-        if (!wi.walkable) {
-          blocked = true;
-          break;
-        }
-        if (wi.floor > bestfloor) bestfloor = wi.floor;
-      }
-      if (blocked) break;
-    }
-    if (blocked) {
-      b.targetyaw += 90.0f + rnd(90);
-      continue;
-    }
-    float curfloor = b.z - BOT_EYEHEIGHT;
-    float targetfloor = (float)bestfloor;
-    if (targetfloor > curfloor + BOT_MAXSTEP) {
-      b.targetyaw += 90.0f + rnd(90);
-      continue;
-    }
-    b.x = nx;
-    b.y = ny;
-    float targetZ = targetfloor + BOT_EYEHEIGHT;
-    if (targetZ < b.z - 0.01f) {
-      float fall = diff * 0.005f;
-      b.z -= fall;
-      if (b.z < targetZ) b.z = targetZ;
-    } else if (targetZ > b.z) {
-      b.z = targetZ;
     }
   }
 }
