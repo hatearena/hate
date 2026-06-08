@@ -61,7 +61,8 @@ static void loadspawns() {
     if (e.type == PLAYERSTART && numspawns < MAXBOTS) {
       spawnx[numspawns] = (float)e.x;
       spawny[numspawns] = (float)e.y;
-      spawnz[numspawns] = (float)e.z;
+      spawnz[numspawns] = 4.0f;
+      printf("serverbot: spawn %d at %.0f %.0f\n", numspawns, spawnx[numspawns], spawny[numspawns]);
       numspawns++;
     };
   };
