@@ -707,16 +707,16 @@ static bool try_move_bot(serverbot &b, int diff, int move, int strafe) {
     }
     return true;
   }
-  float step = diff * 0.015f;
-  if (step > 0.9f)
-    step = 0.9f;
+  float step = diff * 0.025f;
+  if (step > 1.0f)
+    step = 1.0f;
   float rad = b.yaw / 180.0f * PI;
   float nx = b.x + sinf(rad) * step * (float)move;
   float ny = b.y + cosf(rad) * step * (float)move;
   if (strafe != 0) {
-    float st = diff * 0.01f;
-    if (st > 0.6f)
-      st = 0.6f;
+    float st = diff * 0.018f;
+    if (st > 0.8f)
+      st = 0.8f;
     float srad = (b.yaw + 90.0f * (float)strafe) / 180.0f * PI;
     nx += sinf(srad) * st;
     ny += cosf(srad) * st;
