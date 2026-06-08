@@ -22,6 +22,13 @@ struct walkinfo {
   bool walkable;
 };
 
+struct clstate {
+  float x, y, z;
+  float yaw, pitch;
+  int state;
+  bool active;
+};
+
 static serverbot sbot[MAXBOTS];
 static int numsbots = 0;
 static int nextcn = BOT_CLIENT_BASE;
@@ -30,10 +37,14 @@ static float spawnx[MAXBOTS], spawny[MAXBOTS], spawnz[MAXBOTS];
 static int numspawns = 0;
 static walkinfo *walkdata = NULL;
 static int mapsize = 512;
+static clstate playerpos[MAXCLIENTS];
 
 static const float BOT_EYEHEIGHT = 3.2f;
 static const float BOT_ABOVEEYE = 0.7f;
 static const float BOT_RADIUS = 1.1f;
+static const float BOT_MAXSTEP = 1.0f;
+static const float BOT_ATTACK_RANGE = 80.0f;
+static const float BOT_ATTACK_RANGE_SQ = 6400.0f;
 
 static const char *bnames[] = {
     "Cerelo","Diaso","Ceria","Deathly","Ra","Va","Never","Abu",
@@ -178,12 +189,32 @@ const char *serverbot_name(int i) {
   return sbot[i].name;
 }
 
-void serverbot_damage(int cn, int damage) {
+void serverbot_damage(int cn, int damage, int attacker) {
   loopi(numsbots) if (sbot[i].cn == cn) {
     sbot[i].health -= damage;
-    if (sbot[i].health <= 0) {
+    bool died = sbot[i].health <= 0;
+    if (died) {
       sbot[i].state = CS_DEAD;
       sbot[i].lastaction = enet_time_get();
+      sbot[i].deaths++;
+    }
+    ENetPacket *packet = enet_packet_create(NULL, 20, 0);
+    uchar *start = packet->data;
+    uchar *p = start + 2;
+    if (died) {
+      putint(p, SV_DIED);
+      putint(p, attacker);
+    } else {
+      putint(p, SV_DAMAGE);
+      putint(p, cn);
+      putint(p, damage);
+      putint(p, 0);
+    }
+    *(ushort *)start = ENET_HOST_TO_NET_16(p - start);
+    enet_packet_resize(packet, p - start);
+    loopv(clients) {
+      if (clients[i].type == ST_TCPIP)
+        enet_peer_send(clients[i].peer, 0, packet);
     }
     return;
   }
@@ -208,7 +239,7 @@ void serverbot_broadcast() {
     putint(p, (int)(b.pitch * DAF));
     putint(p, (int)(b.roll * DAF));
     putint(p, 0); putint(p, 0); putint(p, 0);
-    putint(p, 0x14);
+    putint(p, (b.state << 3));
     *(ushort *)start = ENET_HOST_TO_NET_16(p - start);
     enet_packet_resize(packet, p - start);
     loopv(clients) {
@@ -235,7 +266,7 @@ void serverbot_sendinit(int cn) {
     putint(p, (int)(b.pitch * DAF));
     putint(p, (int)(b.roll * DAF));
     putint(p, 0); putint(p, 0); putint(p, 0);
-    putint(p, 0x14);
+    putint(p, (b.state << 3));
     putint(p, SV_INITC2S);
     sendstring(b.name, p);
     sendstring("", p);
@@ -243,6 +274,87 @@ void serverbot_sendinit(int cn) {
     *(ushort *)start = ENET_HOST_TO_NET_16(p - start);
     enet_packet_resize(pkt, p - start);
     enet_peer_send(clients[cn].peer, 0, pkt);
+  }
+}
+
+void serverbot_trackplayer(int cn, float x, float y, float z, float yaw,
+                           float pitch, int state) {
+  if (cn < 0 || cn >= MAXCLIENTS) return;
+  playerpos[cn].x = x;
+  playerpos[cn].y = y;
+  playerpos[cn].z = z;
+  playerpos[cn].yaw = yaw;
+  playerpos[cn].pitch = pitch;
+  playerpos[cn].state = state;
+  playerpos[cn].active = true;
+}
+
+void serverbot_clearplayer(int cn) {
+  if (cn < 0 || cn >= MAXCLIENTS) return;
+  playerpos[cn].active = false;
+}
+
+static bool intersect_bot(serverbot &b, vec &from, vec &to) {
+  float vx = to.x - from.x;
+  float vy = to.y - from.y;
+  float vz = to.z - from.z;
+  float wx = b.x - from.x;
+  float wy = b.y - from.y;
+  float wz = b.z - from.z;
+  float c1 = wx * vx + wy * vy + wz * vz;
+  float c2 = vx * vx + vy * vy + vz * vz;
+  float px, py, pz;
+  if (c1 <= 0) {
+    px = from.x;
+    py = from.y;
+    pz = from.z;
+  } else if (c2 <= c1) {
+    px = to.x;
+    py = to.y;
+    pz = to.z;
+  } else {
+    float f = c1 / c2;
+    px = from.x + vx * f;
+    py = from.y + vy * f;
+    pz = from.z + vz * f;
+  }
+  return px >= b.x - BOT_RADIUS && px <= b.x + BOT_RADIUS &&
+         py >= b.y - BOT_RADIUS && py <= b.y + BOT_RADIUS &&
+         pz >= b.z - BOT_EYEHEIGHT && pz <= b.z + BOT_ABOVEEYE;
+}
+
+void serverbot_hitscan(int gun, vec &from, vec &to, int sender) {
+  if (sender < 0 || sender >= MAXCLIENTS) return;
+  loopi(numsbots) {
+    serverbot &b = sbot[i];
+    if (b.state != CS_ALIVE) continue;
+    if (intersect_bot(b, from, to)) {
+      int damage = 20;
+      if (gun >= 0 && gun < NUMGUNS && gun != GUN_CSAW)
+        damage = 10;
+      serverbot_damage(b.cn, damage, sender);
+      break;
+    }
+  }
+}
+
+static void send_bot_shot(serverbot &b, float tx, float ty, float tz) {
+  ENetPacket *packet = enet_packet_create(NULL, 40, 0);
+  uchar *start = packet->data;
+  uchar *p = start + 2;
+  putint(p, SV_SHOT);
+  putint(p, b.gunselect);
+  putint(p, (int)(b.x * DMF));
+  putint(p, (int)(b.y * DMF));
+  putint(p, (int)(b.z * DMF));
+  putint(p, (int)(tx * DMF));
+  putint(p, (int)(ty * DMF));
+  putint(p, (int)(tz * DMF));
+  *(ushort *)start = ENET_HOST_TO_NET_16(p - start);
+  enet_packet_resize(packet, p - start);
+  loopv(clients) {
+    if (clients[i].type == ST_TCPIP)
+      enet_peer_send(clients[i].peer, 0, packet);
   }
 }
 
@@ -258,15 +370,64 @@ void serverbot_update() {
       if (now - b.lastaction > 5000) {
         loadspawns();
         if (numspawns == 0) {
-          spawnx[0] = spawny[0] = 64; spawnz[0] = 0; numspawns = 1;
+          spawnx[0] = spawny[0] = 64;
+          spawnz[0] = 0;
+          numspawns = 1;
         };
         int si = rnd(numspawns);
         b.x = spawnx[si];
         b.y = spawny[si];
-    b.z = spawnz[si] + BOT_EYEHEIGHT;
+        b.z = spawnz[si] + BOT_EYEHEIGHT;
         b.health = 100;
         b.state = CS_ALIVE;
         b.lastmove = 0;
+        b.lastattack = 0;
+      }
+      continue;
+    }
+    int targetidx = -1;
+    float bestdist = BOT_ATTACK_RANGE_SQ;
+    loopj(MAXCLIENTS) {
+      if (!playerpos[j].active) continue;
+      if (playerpos[j].state != CS_ALIVE) continue;
+      float dx = playerpos[j].x - b.x;
+      float dy = playerpos[j].y - b.y;
+      float dz = playerpos[j].z - b.z;
+      float dist = dx * dx + dy * dy + dz * dz;
+      if (dist < bestdist) {
+        bestdist = dist;
+        targetidx = j;
+      }
+    }
+    if (targetidx >= 0 && bestdist < BOT_ATTACK_RANGE_SQ) {
+      float tx = playerpos[targetidx].x;
+      float ty = playerpos[targetidx].y;
+      float tz = playerpos[targetidx].z;
+      float enemyyaw =
+          -(float)atan2(tx - b.x, ty - b.y) / PI * 180 + 180;
+      float turnrate = diff * 0.3f;
+      float yd = enemyyaw - b.yaw;
+      if (fabs(yd) < turnrate)
+        b.yaw = enemyyaw;
+      else if (yd > 0)
+        b.yaw += turnrate;
+      else
+        b.yaw -= turnrate;
+      b.targetyaw = enemyyaw;
+      float aimspread = 12.0f;
+      float attackyaw = enemyyaw + (rnd(101) - 50) / 100.0f * aimspread;
+      float rad2 = attackyaw / 180.0f * PI;
+      float gunrange = 8.0f;
+      if (b.gunselect != GUN_CSAW) gunrange = 12.0f;
+      float shotx = b.x + sinf(rad2) * gunrange;
+      float shoty = b.y + cosf(rad2) * gunrange;
+      float shotz = b.z - 0.2f;
+      if (now - b.lastattack > 300 + rnd(400)) {
+        b.lastattack = now;
+        send_bot_shot(b, shotx, shoty, shotz);
+      }
+      if (now - b.lastmove > 500 + rnd(2000)) {
+        b.lastmove = now;
       }
       continue;
     }
@@ -276,9 +437,12 @@ void serverbot_update() {
     }
     float turnrate = diff * 0.3f;
     float yd = b.targetyaw - b.yaw;
-    if (fabs(yd) < turnrate) b.yaw = b.targetyaw;
-    else if (yd > 0) b.yaw += turnrate;
-    else b.yaw -= turnrate;
+    if (fabs(yd) < turnrate)
+      b.yaw = b.targetyaw;
+    else if (yd > 0)
+      b.yaw += turnrate;
+    else
+      b.yaw -= turnrate;
     float rad = b.yaw / 180.0f * PI;
     float step = diff * 0.015f;
     if (step > 0.9f) step = 0.9f;
@@ -309,12 +473,25 @@ void serverbot_update() {
       }
       if (blocked) break;
     }
-    if (!blocked) {
-      b.x = nx;
-      b.y = ny;
-      b.z = bestfloor + BOT_EYEHEIGHT;
-    } else {
+    if (blocked) {
       b.targetyaw += 90.0f + rnd(90);
+      continue;
+    }
+    float curfloor = b.z - BOT_EYEHEIGHT;
+    float targetfloor = (float)bestfloor;
+    if (targetfloor > curfloor + BOT_MAXSTEP) {
+      b.targetyaw += 90.0f + rnd(90);
+      continue;
+    }
+    b.x = nx;
+    b.y = ny;
+    float targetZ = targetfloor + BOT_EYEHEIGHT;
+    if (targetZ < b.z - 0.01f) {
+      float fall = diff * 0.02f;
+      b.z -= fall;
+      if (b.z < targetZ) b.z = targetZ;
+    } else if (targetZ > b.z) {
+      b.z = targetZ;
     }
   }
 }

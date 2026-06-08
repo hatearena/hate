@@ -278,13 +278,17 @@ extern void botpain(dynent *m, int damage, dynent *d);
 extern int serverbot_count();
 extern int serverbot_getid(int i);
 extern const char *serverbot_name(int i);
-extern void serverbot_damage(int cn, int damage);
+extern void serverbot_damage(int cn, int damage, int attacker);
 extern void serverbot_spawn(int count);
 extern void serverbot_clear();
 extern bool serverbot_kick(const char *name);
 extern void serverbot_update();
 extern void serverbot_broadcast();
 extern void serverbot_sendinit(int cn);
+extern void serverbot_trackplayer(int cn, float x, float y, float z, float yaw,
+                                  float pitch, int state);
+extern void serverbot_clearplayer(int cn);
+extern void serverbot_hitscan(int gun, vec &from, vec &to, int sender);
 
 // entities
 extern void putitems(uchar *&p);

@@ -274,6 +274,7 @@ void disconnect_client(int n, char *reason) {
   serverlog("disconnecting client (%s) [%s]\n", clients[n].hostname, reason);
   enet_peer_disconnect(clients[n].peer, 0);
   clients[n].type = ST_EMPTY;
+  serverbot_clearplayer(n);
   send2(true, -1, SV_CDIS, n);
 };
 
@@ -517,9 +518,16 @@ void process(ENetPacket *packet, int sender) {
         disconnect_client(sender, "client num");
         return;
       };
-      int size = msgsizelookup(type);
-      assert(size != -1);
-      loopi(size - 2) getint(p);
+      float px = getint(p) / DMF;
+      float py = getint(p) / DMF;
+      float pz = getint(p) / DMF;
+      float pyaw = getint(p) / DAF;
+      float ppitch = getint(p) / DAF;
+      getint(p);               // roll
+      getint(p); getint(p); getint(p); // velocity
+      int flags = getint(p);
+      int pstate = (flags >> 3) & 3;
+      serverbot_trackplayer(cn, px, py, pz, pyaw, ppitch, pstate);
       break;
     };
 
@@ -537,6 +545,28 @@ void process(ENetPacket *packet, int sender) {
     case SV_EXT: {
       for (int n = getint(p); n; n--)
         getint(p);
+      break;
+    };
+
+    case SV_SHOT: {
+      int gun = getint(p);
+      vec from, to;
+      from.x = getint(p) / DMF;
+      from.y = getint(p) / DMF;
+      from.z = getint(p) / DMF;
+      to.x = getint(p) / DMF;
+      to.y = getint(p) / DMF;
+      to.z = getint(p) / DMF;
+      serverbot_hitscan(gun, from, to, sender);
+      break;
+    };
+
+    case SV_DAMAGE: {
+      int target = getint(p);
+      int damage = getint(p);
+      int ls = getint(p);
+      if (target >= BOT_CLIENT_BASE)
+        serverbot_damage(target, damage, sender);
       break;
     };
 
@@ -727,6 +757,7 @@ void serverslice(int seconds, unsigned int timeout) {
       serverlog("Disconnected client (%s)\n",
                 clients[(intptr_t)event.peer->data].hostname);
       clients[(intptr_t)event.peer->data].type = ST_EMPTY;
+      serverbot_clearplayer((intptr_t)event.peer->data);
       send2(true, -1, SV_CDIS, (intptr_t)event.peer->data);
       event.peer->data = (void *)-1;
       break;
