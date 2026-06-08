@@ -904,7 +904,7 @@ void serverbot_update() {
           b.lastmove = now;
         }
       }
-      b.movemode = move;
+      b.movemode = strafe ? 0 : move;
       b.strafemode = strafe;
       if (!try_move_bot(b, diff, move, strafe)) {
         b.yaw += rnd(2) ? 90.0f : -90.0f;

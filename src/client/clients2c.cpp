@@ -95,7 +95,7 @@ void localservertoclient(uchar *buf,
       float ny = getint(p) / DMF;
       float nz = getint(p) / DMF;
       if (cn >= BOT_CLIENT_BASE) {
-        float lerp = 0.35f;
+        float lerp = 0.22f;
         d->o.x += (nx - d->o.x) * lerp;
         d->o.y += (ny - d->o.y) * lerp;
         d->o.z += (nz - d->o.z) * lerp;
