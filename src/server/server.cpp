@@ -758,7 +758,7 @@ void initserver(bool dedicated, int uprate, char *sdesc, char *ip, char *master,
 
   if (servername[0])
     sdesc = servername;
-  servermsinit(master ? master : "0.0.0.0/", sdesc, dedicated);
+  servermsinit(master ? master : "217.154.51.60/", sdesc, dedicated);
 
   if ((isdedicated = dedicated)) {
     ENetAddress address = {ENET_HOST_ANY, CUBE_SERVER_PORT};
