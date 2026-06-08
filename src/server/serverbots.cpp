@@ -99,7 +99,9 @@ static void loadspawns() {
     }
   }
   gzclose(f);
-  printf("serverbot: loaded %d spawns, mapsize=%d\n", numspawns, mapsize);
+  int wcnt = 0, scnt = 0;
+  loopi(total) if (walkable[i]) wcnt++; else scnt++;
+  printf("serverbot: loaded %d spawns, mapsize=%d, walkable=%d solid=%d\n", numspawns, mapsize, wcnt, scnt);
 }
 
 int serverbot_count() { return numsbots; }
@@ -271,6 +273,8 @@ void serverbot_update() {
       b.x = nx;
       b.y = ny;
     } else {
+      static int wdbg = 0;
+      if (++wdbg < 5) printf("serverbot: blocked at %d,%d\n", ix, iy);
       b.targetyaw += 90.0f + rnd(90);
     }
   }
