@@ -10,6 +10,7 @@ extern void endianswap(void *, int, int);
 struct serverbot {
   int cn;
   char name[16];
+  char team[16];
   float x, y, z, yaw, pitch, roll;
   int state, health, gunselect, frags, deaths;
   int lastaction, lastmove, lastattack;
@@ -200,6 +201,12 @@ static void loadspawns() {
 
 int serverbot_count() { return numsbots; }
 
+int serverbot_teamscore(const char *team) {
+  int total = 0;
+  loopi(numsbots) if (!strcmp(sbot[i].team, team)) total += sbot[i].frags;
+  return total;
+}
+
 void serverbot_spawn(int count) {
   if (count < 1)
     count = 1;
@@ -239,6 +246,21 @@ void serverbot_spawn(int count) {
     b.lastattack = 0;
     b.targetyaw = b.yaw;
     b.lastjump = 0;
+    if ((mode & 1 && mode > 2) || mode == 12) {
+      int blues = 0, reds = 0;
+      loopj(numsbots) {
+        if (!strcmp(sbot[j].team, "BLUE") || !strcmp(sbot[j].team, "RES"))
+          blues++;
+        else
+          reds++;
+      }
+      if (mode == 12)
+        strcpy_s(b.team, blues <= reds ? "RES" : "INFD");
+      else
+        strcpy_s(b.team, blues <= reds ? "BLUE" : "RED");
+    } else {
+      b.team[0] = 0;
+    }
     numsbots++;
     n++;
   }
@@ -403,7 +425,7 @@ void serverbot_sendinit(int cn) {
     }
     putint(p, SV_INITC2S);
     sendstring(b.name, p);
-    sendstring("", p);
+    sendstring(b.team, p);
     putint(p, 0);
     *(ushort *)start = ENET_HOST_TO_NET_16(p - start);
     enet_packet_resize(pkt, p - start);
@@ -893,7 +915,10 @@ void serverbot_update() {
 
       float enemyyaw = -(float)atan2(tx - b.x, ty - b.y) / PI * 180 + 180;
       float enemypitch = atan2(tz - b.z, realdist) * 180 / PI;
-      {
+
+      bool in_escape_cooldown = (now - b.lastmove < 500);
+
+      if (!in_escape_cooldown) {
         float turnrate = diff * 0.3f;
         float yd = enemyyaw - b.yaw;
         if (fabs(yd) > 135.0f)
@@ -926,6 +951,10 @@ void serverbot_update() {
           strafe = rnd(2) ? 1 : -1;
           b.lastmove = now;
         }
+      }
+      if (now - b.lastmove < 400) {
+        move = 1;
+        abs_yaw = 0;
       }
       b.movemode = strafe ? 0 : move;
       b.strafemode = strafe;
@@ -989,6 +1018,8 @@ void serverbot_update() {
           b.yaw = base + 180;
           b.targetyaw = b.yaw;
         }
+        if (escaped)
+          b.lastmove = now;
         b.movemode = escaped ? escapedir : 0;
         b.strafemode = 0;
         if (!b.onfloor)
@@ -1047,7 +1078,7 @@ void serverbot_update() {
       continue;
     }
 
-    if (now - b.lastmove > 300 + rnd(1000)) {
+    if (now - b.lastmove > 800 + rnd(2000)) {
       b.targetyaw = (float)rnd(360);
       b.lastmove = now;
     }
@@ -1121,6 +1152,8 @@ void serverbot_update() {
         b.yaw = base + 180;
         b.targetyaw = b.yaw;
       }
+      if (escaped)
+        b.lastmove = now;
       b.movemode = escaped ? escapedir : 0;
     }
     if (!b.onfloor)

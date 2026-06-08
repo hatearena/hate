@@ -707,9 +707,9 @@ void selfdamage(int damage, int actor, dynent *act) {
       dynent *a = getclient(actor);
       if (a) {
         if (isteam(a->team, player1->team)) {
-          conoutf("You were fragged by a teammate (%s)", a->name);
+          conoutf("%s fragged a teammate (%s)", a->name, player1->name);
         } else {
-          conoutf("You were fragged by %s", a->name);
+          conoutf("%s fragged %s", a->name, player1->name);
         };
       };
     };

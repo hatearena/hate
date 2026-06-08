@@ -231,6 +231,8 @@ struct client {
   string name;
   int modevote;
   string uuid;
+  string team;
+  int frags;
   bool rcon;
 };
 

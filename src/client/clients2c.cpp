@@ -267,10 +267,10 @@ void localservertoclient(uchar *buf,
         int frags;
         if (isteam(player1->team, d->team)) {
           frags = -1;
-          conoutf("You fragged a teammate (%s)", d->name);
+          conoutf("%s fragged a teammate (%s)", player1->name, d->name);
         } else {
           frags = 1;
-          conoutf("You fragged %s", d->name);
+          conoutf("%s fragged %s", player1->name, d->name);
           playsound(S_KILL);
         };
         addmsg(1, 2, SV_FRAGS, player1->frags += frags);

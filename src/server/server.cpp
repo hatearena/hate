@@ -455,6 +455,7 @@ void process(ENetPacket *packet, int sender) {
       sgetstr();
       strcpy_s(clients[cn].name, text);
       sgetstr();
+      strcpy_s(clients[cn].team, text);
       getint(p);
       break;
 
@@ -485,6 +486,10 @@ void process(ENetPacket *packet, int sender) {
       mapend = lastsec + minremain * 60;
       interm = 0;
       resetitems();
+      if (isdedicated && botcount > 0) {
+        serverbot_clear();
+        serverbot_spawn(botcount);
+      }
       sender = -1;
       break;
     };
@@ -530,6 +535,10 @@ void process(ENetPacket *packet, int sender) {
       serverbot_trackplayer(cn, px, py, pz, pyaw, ppitch, pstate);
       break;
     };
+
+    case SV_FRAGS:
+      clients[sender].frags = getint(p);
+      break;
 
     case SV_SENDMAP: {
       sgetstr();
@@ -635,6 +644,19 @@ void checkintermission() {
   if (!minremain) {
     interm = lastsec + 15;
     mapend = lastsec + 1000;
+    if (mode & 1 && mode > 2) {
+      int red = 0, blue = 0;
+      loopv(clients) if (clients[i].type != ST_EMPTY) {
+        if (!strcmp(clients[i].team, "BLUE") || !strcmp(clients[i].team, "RES"))
+          blue += clients[i].frags;
+        else
+          red += clients[i].frags;
+      }
+      extern int serverbot_teamscore(const char *);
+      blue += serverbot_teamscore("BLUE") + serverbot_teamscore("RES");
+      red += serverbot_teamscore("RED") + serverbot_teamscore("INFD");
+      sendservmsg(blue > red ? "BLUE team wins" : "RED team wins");
+    }
   };
   send2(true, -1, SV_TIMEUP, minremain--);
 };
@@ -726,6 +748,7 @@ void serverslice(int seconds, unsigned int timeout) {
       c.peer = event.peer;
       c.peer->data = (void *)(&c - &clients[0]);
       c.rcon = false;
+      c.frags = 0;
       char hn[1024];
       strcpy_s(c.hostname,
                (enet_address_get_host(&c.peer->address, hn, sizeof(hn)) == 0)
