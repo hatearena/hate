@@ -23,6 +23,7 @@ struct serverbot {
   enet_uint32 blocktime;
   enet_uint32 lastjump;
   enet_uint32 lastturn;
+  int turncount;
 };
 
 struct walkinfo {
@@ -251,6 +252,7 @@ void serverbot_spawn(int count) {
     b.targetyaw = b.yaw;
     b.lastjump = 0;
     b.lastturn = 0;
+    b.turncount = 0;
     if ((mode & 1 && mode > 2) || mode == 12) {
       int blues = 0, reds = 0;
       loopj(numsbots) {
@@ -852,6 +854,7 @@ void serverbot_update() {
         b.blocktime = 0;
         b.lastjump = 0;
         b.lastturn = 0;
+        b.turncount = 0;
       }
       continue;
     }
@@ -988,12 +991,18 @@ void serverbot_update() {
       b.movemode = strafe ? 0 : move;
       b.strafemode = strafe;
       if (!try_move_bot(b, diff, move, strafe)) {
+        b.turncount++;
+        if (now - b.blocktime > 2000) {
+          b.turncount = 0;
+          b.blocktime = now;
+        }
+
         bool jumped = false;
         float ox = b.x, oy = b.y, oz = b.z;
         float ov = b.fallvelocity;
         bool of = b.onfloor;
 
-        if (b.onfloor && now - b.lastjump > 250) {
+        if (b.turncount >= 3 && b.onfloor && now - b.lastjump > 250) {
           b.lastjump = now;
           b.fallvelocity = -40.0f;
           b.onfloor = false;
@@ -1005,6 +1014,8 @@ void serverbot_update() {
             if (!b.onfloor)
               b.movemode = 0;
             jumped = true;
+            b.turncount = 0;
+            b.blocktime = 0;
           } else {
             b.x = ox;
             b.y = oy;
@@ -1029,6 +1040,8 @@ void serverbot_update() {
               escaped = true;
               b.lastmove = now;
               b.movemode = 1;
+              b.turncount = 0;
+              b.blocktime = 0;
               break;
             }
           }
@@ -1042,6 +1055,8 @@ void serverbot_update() {
             if (try_move_bot(b, diff, -1, 0)) {
               b.lastmove = now;
               b.movemode = -1;
+              b.turncount = 0;
+              b.blocktime = 0;
             } else if (b.onfloor && now - b.lastjump > 250) {
               b.lastjump = now;
               b.fallvelocity = -40.0f;
@@ -1052,6 +1067,8 @@ void serverbot_update() {
               b.yaw = b.targetyaw + 180;
               b.targetyaw = b.yaw;
               b.lastmove = now;
+              b.turncount = 0;
+              b.blocktime = 0;
               if (!try_move_bot(b, diff, 1, 0))
                 b.movemode = 0;
               else
@@ -1063,6 +1080,9 @@ void serverbot_update() {
         if (!b.onfloor)
           b.movemode = 0;
         continue;
+      } else {
+        b.turncount = 0;
+        b.blocktime = 0;
       }
       if (!b.onfloor)
         b.movemode = 0;
@@ -1131,12 +1151,18 @@ void serverbot_update() {
     b.movemode = 1;
     b.strafemode = 0;
     if (!try_move_bot(b, diff, 1, 0)) {
+      b.turncount++;
+      if (now - b.blocktime > 2000) {
+        b.turncount = 0;
+        b.blocktime = now;
+      }
+
       bool jumped = false;
       float ox = b.x, oy = b.y, oz = b.z;
       float ov = b.fallvelocity;
       bool of = b.onfloor;
 
-      if (b.onfloor && now - b.lastjump > 250) {
+      if (b.turncount >= 3 && b.onfloor && now - b.lastjump > 250) {
         b.lastjump = now;
         b.fallvelocity = -40.0f;
         b.onfloor = false;
@@ -1147,6 +1173,8 @@ void serverbot_update() {
           if (!b.onfloor)
             b.movemode = 0;
           jumped = true;
+          b.turncount = 0;
+          b.blocktime = 0;
         } else {
           b.x = ox;
           b.y = oy;
@@ -1171,6 +1199,8 @@ void serverbot_update() {
             escaped = true;
             b.lastmove = now;
             b.movemode = 1;
+            b.turncount = 0;
+            b.blocktime = 0;
             break;
           }
         }
@@ -1184,6 +1214,8 @@ void serverbot_update() {
           if (try_move_bot(b, diff, -1, 0)) {
             b.lastmove = now;
             b.movemode = -1;
+            b.turncount = 0;
+            b.blocktime = 0;
           } else if (b.onfloor && now - b.lastjump > 250) {
             b.lastjump = now;
             b.fallvelocity = -40.0f;
@@ -1194,6 +1226,8 @@ void serverbot_update() {
             b.yaw = b.targetyaw + 180;
             b.targetyaw = b.yaw;
             b.lastmove = now;
+            b.turncount = 0;
+            b.blocktime = 0;
             if (!try_move_bot(b, diff, 1, 0))
               b.movemode = 0;
             else
@@ -1202,6 +1236,9 @@ void serverbot_update() {
         }
       }
       b.strafemode = 0;
+    } else {
+      b.turncount = 0;
+      b.blocktime = 0;
     }
     if (!b.onfloor)
       b.movemode = 0;
