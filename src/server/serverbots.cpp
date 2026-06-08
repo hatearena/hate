@@ -81,11 +81,11 @@ static void loadspawns() {
       int n = gzgetc(f);
       if (n < 0) break;
       for (int r = 0; r < n && k < total; r++, k++)
-        walkable[k] = (prev != 0);
+        walkable[k] = (prev != 0 && prev != 1);
       continue;
     }
     prev = type;
-    walkable[k++] = (type != 0);
+    walkable[k++] = (type != 0 && type != 1);
     if (type == 0) {
       gzgetc(f); gzgetc(f);
       if (hdr.version <= 2) { gzgetc(f); gzgetc(f); }
