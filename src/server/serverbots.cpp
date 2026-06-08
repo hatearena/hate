@@ -921,21 +921,29 @@ void serverbot_update() {
       b.strafemode = strafe;
       if (!try_move_bot(b, diff, move, strafe)) {
         float base = b.targetyaw;
-        float offsets[] = { 60, -60, 90, -90, 135, -135, 180 };
+        float angles[] = { 60, -60, 80, -80, 110, -110, 135, -135, 180 };
         bool escaped = false;
         float ox = b.x, oy = b.y, oz = b.z;
         float ov = b.fallvelocity;
         bool of = b.onfloor;
-        for (int t = 0; t < 7; t++) {
-          b.yaw = base + offsets[t];
-          b.targetyaw = b.yaw;
+        for (int t = 0; t < 9; t++) {
+          b.yaw = base + angles[t];
           b.x = ox; b.y = oy; b.z = oz;
           b.fallvelocity = ov;
           b.onfloor = of;
           if (try_move_bot(b, diff, 1, 0)) {
+            b.targetyaw = b.yaw;
             escaped = true;
             break;
           }
+        }
+        if (!escaped) {
+          b.yaw = base;
+          b.x = ox; b.y = oy; b.z = oz;
+          b.fallvelocity = ov;
+          b.onfloor = of;
+          escaped = try_move_bot(b, diff, -1, 0);
+          b.targetyaw = base;
         }
         if (!escaped) {
           b.x = ox; b.y = oy; b.z = oz;
@@ -1017,21 +1025,29 @@ void serverbot_update() {
     b.strafemode = 0;
     if (!try_move_bot(b, diff, 1, 0)) {
       float base = b.targetyaw;
-      float offsets[] = { 60, -60, 90, -90, 135, -135, 180 };
+      float angles[] = { 60, -60, 80, -80, 110, -110, 135, -135, 180 };
       bool escaped = false;
       float ox = b.x, oy = b.y, oz = b.z;
       float ov = b.fallvelocity;
       bool of = b.onfloor;
-      for (int t = 0; t < 7; t++) {
-        b.yaw = base + offsets[t];
-        b.targetyaw = b.yaw;
+      for (int t = 0; t < 9; t++) {
+        b.yaw = base + angles[t];
         b.x = ox; b.y = oy; b.z = oz;
         b.fallvelocity = ov;
         b.onfloor = of;
         if (try_move_bot(b, diff, 1, 0)) {
+          b.targetyaw = b.yaw;
           escaped = true;
           break;
         }
+      }
+      if (!escaped) {
+        b.yaw = base;
+        b.x = ox; b.y = oy; b.z = oz;
+        b.fallvelocity = ov;
+        b.onfloor = of;
+        escaped = try_move_bot(b, diff, -1, 0);
+        b.targetyaw = base;
       }
       if (!escaped) {
         b.x = ox; b.y = oy; b.z = oz;

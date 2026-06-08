@@ -95,7 +95,7 @@ void localservertoclient(uchar *buf,
       float ny = getint(p) / DMF;
       float nz = getint(p) / DMF;
       if (cn >= BOT_CLIENT_BASE) {
-        float lerp = 0.22f;
+        float lerp = 0.15f;
         d->o.x += (nx - d->o.x) * lerp;
         d->o.y += (ny - d->o.y) * lerp;
         d->o.z += (nz - d->o.z) * lerp;
@@ -104,7 +104,15 @@ void localservertoclient(uchar *buf,
         d->o.y = ny;
         d->o.z = nz;
       }
-      d->yaw = getint(p) / DAF;
+      float nyaw = getint(p) / DAF;
+      if (cn >= BOT_CLIENT_BASE) {
+        float yd = nyaw - d->yaw;
+        if (yd > 180.0f) yd -= 360.0f;
+        if (yd < -180.0f) yd += 360.0f;
+        d->yaw += yd * 0.3f;
+      } else {
+        d->yaw = nyaw;
+      }
       d->pitch = getint(p) / DAF;
       d->roll = getint(p) / DAF;
       d->vel.x = getint(p) / DVF;
