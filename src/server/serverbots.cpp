@@ -33,9 +33,9 @@ void serverbot_spawn(int count) {
     serverbot &b = sbot[i];
     b.cn = nextcn++;
     strcpy_s(b.name, bnames[rnd(24)]);
-    b.x = (float)(rnd(401) - 200);
-    b.y = (float)(rnd(401) - 200);
-    b.z = 20;
+    b.x = 64.0f + (float)(rnd(129) - 64);
+    b.y = 64.0f + (float)(rnd(129) - 64);
+    b.z = 100.0f;
     b.yaw = (float)rnd(360);
     b.pitch = 0;
     b.roll = 0;
@@ -148,9 +148,9 @@ void serverbot_update() {
     serverbot &b = sbot[i];
     if (b.state == CS_DEAD) {
       if (now - b.lastaction > 5000) {
-        b.x = (float)(rnd(401) - 200);
-        b.y = (float)(rnd(401) - 200);
-        b.z = 20;
+        b.x = 64.0f + (float)(rnd(129) - 64);
+        b.y = 64.0f + (float)(rnd(129) - 64);
+        b.z = 100.0f;
         b.health = 100;
         b.state = CS_ALIVE;
         b.lastmove = 0;

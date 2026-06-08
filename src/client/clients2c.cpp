@@ -106,9 +106,11 @@ void localservertoclient(uchar *buf,
       d->move = (f & 3) == 3 ? -1 : f & 3;
       d->onfloor = (f >> 2) & 1;
       int state = f >> 3;
-      if (state == CS_DEAD && d->state != CS_DEAD)
-        d->lastaction = lastmillis;
-      d->state = state;
+       if (state == CS_DEAD && d->state != CS_DEAD)
+         d->lastaction = lastmillis;
+       d->state = state;
+       if (cn >= BOT_CLIENT_BASE)
+         printf("SV_POS bot %d at %.1f %.1f %.1f\n", cn, d->o.x, d->o.y, d->o.z);
       if (!demoplayback)
         updatepos(d);
       break;

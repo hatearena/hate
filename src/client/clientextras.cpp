@@ -67,6 +67,12 @@ extern int democlientnum;
 
 void renderclients() {
   dynent *d;
+  static int once = 0;
+  if (!once) {
+    loopv(players) if (players[i] && i >= BOT_CLIENT_BASE)
+      printf("renderclients found bot %d at %.1f %.1f %.1f name=%s\n", i, players[i]->o.x, players[i]->o.y, players[i]->o.z, players[i]->name);
+    once = 1;
+  }
   loopv(players) if ((d = players[i]) &&
                      (!demoplayback || i != democlientnum)) {
     const char *mdl = "monster/player";
