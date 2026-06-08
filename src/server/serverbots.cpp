@@ -911,8 +911,10 @@ void serverbot_update() {
       b.pitch = enemypitch;
 
       float yaw_to_target = enemyyaw - b.yaw;
-      if (yaw_to_target > 180.0f)  yaw_to_target -= 360.0f;
-      if (yaw_to_target < -180.0f) yaw_to_target += 360.0f;
+      if (yaw_to_target > 180.0f)
+        yaw_to_target -= 360.0f;
+      if (yaw_to_target < -180.0f)
+        yaw_to_target += 360.0f;
 
       int move = 1, strafe = 0;
       float abs_yaw = fabs(yaw_to_target);
@@ -929,7 +931,7 @@ void serverbot_update() {
       b.strafemode = strafe;
       if (!try_move_bot(b, diff, move, strafe)) {
         float base = b.targetyaw;
-        float angles[] = { 60, -60, 80, -80, 110, -110, 135, -135, 180 };
+        float angles[] = {60, -60, 80, -80, 110, -110, 135, -135, 180};
         bool escaped = false;
         int escapedir = 0;
         float ox = b.x, oy = b.y, oz = b.z;
@@ -944,14 +946,18 @@ void serverbot_update() {
             escaped = true;
             escapedir = move;
           } else {
-            b.x = ox; b.y = oy; b.z = oz;
+            b.x = ox;
+            b.y = oy;
+            b.z = oz;
             b.fallvelocity = ov;
             b.onfloor = of;
           }
         }
         for (int t = 0; t < 9 && !escaped; t++) {
           b.yaw = base + angles[t];
-          b.x = ox; b.y = oy; b.z = oz;
+          b.x = ox;
+          b.y = oy;
+          b.z = oz;
           b.fallvelocity = ov;
           b.onfloor = of;
           if (try_move_bot(b, diff, 1, 0)) {
@@ -963,7 +969,9 @@ void serverbot_update() {
         }
         if (!escaped) {
           b.yaw = base;
-          b.x = ox; b.y = oy; b.z = oz;
+          b.x = ox;
+          b.y = oy;
+          b.z = oz;
           b.fallvelocity = ov;
           b.onfloor = of;
           if (try_move_bot(b, diff, -1, 0)) {
@@ -973,7 +981,9 @@ void serverbot_update() {
           b.targetyaw = base;
         }
         if (!escaped) {
-          b.x = ox; b.y = oy; b.z = oz;
+          b.x = ox;
+          b.y = oy;
+          b.z = oz;
           b.fallvelocity = ov;
           b.onfloor = of;
           b.yaw = base + 180;
@@ -981,7 +991,8 @@ void serverbot_update() {
         }
         b.movemode = escaped ? escapedir : 0;
         b.strafemode = 0;
-        if (!b.onfloor) b.movemode = 0;
+        if (!b.onfloor)
+          b.movemode = 0;
         continue;
       }
       if (!b.onfloor)
@@ -1052,7 +1063,7 @@ void serverbot_update() {
     b.strafemode = 0;
     if (!try_move_bot(b, diff, 1, 0)) {
       float base = b.targetyaw;
-      float angles[] = { 60, -60, 80, -80, 110, -110, 135, -135, 180 };
+      float angles[] = {60, -60, 80, -80, 110, -110, 135, -135, 180};
       bool escaped = false;
       int escapedir = 0;
       float ox = b.x, oy = b.y, oz = b.z;
@@ -1067,14 +1078,18 @@ void serverbot_update() {
           escaped = true;
           escapedir = 1;
         } else {
-          b.x = ox; b.y = oy; b.z = oz;
+          b.x = ox;
+          b.y = oy;
+          b.z = oz;
           b.fallvelocity = ov;
           b.onfloor = of;
         }
       }
       for (int t = 0; t < 9 && !escaped; t++) {
         b.yaw = base + angles[t];
-        b.x = ox; b.y = oy; b.z = oz;
+        b.x = ox;
+        b.y = oy;
+        b.z = oz;
         b.fallvelocity = ov;
         b.onfloor = of;
         if (try_move_bot(b, diff, 1, 0)) {
@@ -1086,7 +1101,9 @@ void serverbot_update() {
       }
       if (!escaped) {
         b.yaw = base;
-        b.x = ox; b.y = oy; b.z = oz;
+        b.x = ox;
+        b.y = oy;
+        b.z = oz;
         b.fallvelocity = ov;
         b.onfloor = of;
         if (try_move_bot(b, diff, -1, 0)) {
@@ -1096,7 +1113,9 @@ void serverbot_update() {
         b.targetyaw = base;
       }
       if (!escaped) {
-        b.x = ox; b.y = oy; b.z = oz;
+        b.x = ox;
+        b.y = oy;
+        b.z = oz;
         b.fallvelocity = ov;
         b.onfloor = of;
         b.yaw = base + 180;
@@ -1104,6 +1123,7 @@ void serverbot_update() {
       }
       b.movemode = escaped ? escapedir : 0;
     }
-    if (!b.onfloor) b.movemode = 0;
+    if (!b.onfloor)
+      b.movemode = 0;
   }
 }
