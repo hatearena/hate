@@ -278,6 +278,16 @@ void serverbot_clear() {
   walkdata = NULL;
 }
 
+void serverbot_update_weapons() {
+  loopi(numsbots) {
+    sbot[i].gunselect = (mode == 4 || mode == 5) ? GUN_RIFLE : 1 + rnd(6);
+    if (mode == 4 || mode == 5) {
+      loopk(NUMGUNS) sbot[i].ammo[k] = 0;
+      sbot[i].ammo[GUN_RIFLE] = 100;
+    }
+  }
+}
+
 bool serverbot_kick(const char *name) {
   loopi(numsbots) if (!strcmp(sbot[i].name, name)) {
     memmove(&sbot[i], &sbot[i + 1], (numsbots - i - 1) * sizeof(serverbot));

@@ -282,6 +282,7 @@ extern const char *serverbot_name(int i);
 extern void serverbot_damage(int cn, int damage, int attacker);
 extern void serverbot_spawn(int count);
 extern void serverbot_clear();
+extern void serverbot_update_weapons();
 extern bool serverbot_kick(const char *name);
 extern void serverbot_update();
 extern void serverbot_broadcast();
