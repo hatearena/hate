@@ -787,6 +787,8 @@ void serverbot_update() {
       if (!try_move_bot(b, diff, move, strafe)) {
         b.yaw += rnd(2) ? 90.0f : -90.0f;
         b.targetyaw = b.yaw;
+        b.movemode = 0;
+        b.strafemode = 0;
         continue;
       }
       if (!b.onfloor) b.movemode = 0;
@@ -856,6 +858,7 @@ void serverbot_update() {
     b.strafemode = 0;
     if (!try_move_bot(b, diff, 1, 0)) {
       b.targetyaw += 90.0f + rnd(90);
+      b.movemode = 0;
     }
     if (!b.onfloor) b.movemode = 0;
   }

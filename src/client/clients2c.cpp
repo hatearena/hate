@@ -91,9 +91,19 @@ void localservertoclient(uchar *buf,
       d = getclient(cn);
       if (!d)
         return;
-      d->o.x = getint(p) / DMF;
-      d->o.y = getint(p) / DMF;
-      d->o.z = getint(p) / DMF;
+      float nx = getint(p) / DMF;
+      float ny = getint(p) / DMF;
+      float nz = getint(p) / DMF;
+      if (cn >= BOT_CLIENT_BASE) {
+        float lerp = 0.35f;
+        d->o.x += (nx - d->o.x) * lerp;
+        d->o.y += (ny - d->o.y) * lerp;
+        d->o.z += (nz - d->o.z) * lerp;
+      } else {
+        d->o.x = nx;
+        d->o.y = ny;
+        d->o.z = nz;
+      }
       d->yaw = getint(p) / DAF;
       d->pitch = getint(p) / DAF;
       d->roll = getint(p) / DAF;
