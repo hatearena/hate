@@ -49,6 +49,7 @@ static clstate playerpos[MAXCLIENTS];
 static const float BOT_EYEHEIGHT = 3.2f;
 static const float BOT_ABOVEEYE = 0.7f;
 static const float BOT_RADIUS = 1.1f;
+static const float BOT_HIT_RADIUS = 1.5f;
 static const float BOT_MAXSTEP = 1.0f;
 static const float BOT_ATTACK_RANGE = 80.0f;
 static const float BOT_ATTACK_RANGE_SQ = 6400.0f;
@@ -458,8 +459,8 @@ static bool intersect_bot(serverbot &b, vec &from, vec &to) {
     py = from.y + vy * f;
     pz = from.z + vz * f;
   }
-  return px >= b.x - BOT_RADIUS && px <= b.x + BOT_RADIUS &&
-         py >= b.y - BOT_RADIUS && py <= b.y + BOT_RADIUS &&
+  return px >= b.x - BOT_HIT_RADIUS && px <= b.x + BOT_HIT_RADIUS &&
+         py >= b.y - BOT_HIT_RADIUS && py <= b.y + BOT_HIT_RADIUS &&
          pz >= b.z - BOT_EYEHEIGHT && pz <= b.z + BOT_ABOVEEYE;
 }
 
@@ -915,11 +916,11 @@ void serverbot_update() {
 
       int move = 1, strafe = 0;
       float abs_yaw = fabs(yaw_to_target);
-      if (abs_yaw > 90.0f && realdist < 5) {
+      if (abs_yaw > 90.0f) {
         move = 0;
       }
       if (realdist < 8 && b.gunselect != GUN_CSAW) {
-        if (now - b.lastmove > 500) {
+        if (now - b.lastmove > 300) {
           strafe = rnd(2) ? 1 : -1;
           b.lastmove = now;
         }
