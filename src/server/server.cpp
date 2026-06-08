@@ -563,6 +563,8 @@ void process(ENetPacket *packet, int sender) {
 
     case SV_DIED: {
       int actor = getint(p);
+      extern void serverbot_fragged(int);
+      serverbot_fragged(actor);
       serverbot_player_died(cn);
       break;
     };

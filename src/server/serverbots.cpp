@@ -203,6 +203,14 @@ const char *serverbot_name(int i) {
   return sbot[i].name;
 }
 
+void serverbot_fragged(int cn) {
+  if (cn < BOT_CLIENT_BASE) return;
+  loopi(numsbots) if (sbot[i].cn == cn) {
+    sbot[i].frags++;
+    return;
+  }
+}
+
 void serverbot_damage(int cn, int damage, int attacker) {
   loopi(numsbots) if (sbot[i].cn == cn) {
     sbot[i].health -= damage;
@@ -211,6 +219,12 @@ void serverbot_damage(int cn, int damage, int attacker) {
       sbot[i].state = CS_DEAD;
       sbot[i].lastaction = enet_time_get();
       sbot[i].deaths++;
+      if (attacker >= BOT_CLIENT_BASE) {
+        loopk(numsbots) if (sbot[k].cn == attacker) {
+          sbot[k].frags++;
+          break;
+        }
+      }
     }
     ENetPacket *packet = enet_packet_create(NULL, 80, 0);
     uchar *start = packet->data;
@@ -224,7 +238,7 @@ void serverbot_damage(int cn, int damage, int attacker) {
     putint(p, (int)(sbot[i].pitch * DAF));
     putint(p, (int)(sbot[i].roll * DAF));
     putint(p, 0); putint(p, 0); putint(p, 0);
-    putint(p, (sbot[i].state << 3));
+    putint(p, (sbot[i].state << 5));
     if (died) {
       putint(p, SV_DIED);
       putint(p, attacker);
@@ -264,11 +278,13 @@ void serverbot_broadcast() {
     putint(p, (int)(b.roll * DAF));
     if (b.state == CS_ALIVE) {
       putint(p, 0); putint(p, 0); putint(p, 0);
-      putint(p, (b.movemode & 3) | ((b.strafemode & 3) << 2) | (1 << 4) | (b.state << 3));
+      putint(p, (b.movemode & 3) | ((b.strafemode & 3) << 2) | (1 << 4) | (b.state << 5));
     } else {
       putint(p, 0); putint(p, 0); putint(p, 0);
-      putint(p, (b.state << 3));
+      putint(p, (b.state << 5));
     }
+    putint(p, SV_FRAGS);
+    putint(p, b.frags);
     *(ushort *)start = ENET_HOST_TO_NET_16(p - start);
     enet_packet_resize(packet, p - start);
     loopv(clients) {
@@ -296,10 +312,10 @@ void serverbot_sendinit(int cn) {
     putint(p, (int)(b.roll * DAF));
     if (b.state == CS_ALIVE) {
       putint(p, 0); putint(p, 0); putint(p, 0);
-      putint(p, (b.movemode & 3) | ((b.strafemode & 3) << 2) | (1 << 4) | (b.state << 3));
+      putint(p, (b.movemode & 3) | ((b.strafemode & 3) << 2) | (1 << 4) | (b.state << 5));
     } else {
       putint(p, 0); putint(p, 0); putint(p, 0);
-      putint(p, (b.state << 3));
+      putint(p, (b.state << 5));
     }
     putint(p, SV_INITC2S);
     sendstring(b.name, p);
@@ -441,7 +457,7 @@ static void send_bot_shot(serverbot &b, float tx, float ty, float tz) {
   putint(p, (int)(b.pitch * DAF));
   putint(p, (int)(b.roll * DAF));
   putint(p, 0); putint(p, 0); putint(p, 0);
-  putint(p, (b.state << 3));
+  putint(p, (b.state << 5));
   putint(p, SV_SHOT);
   putint(p, b.gunselect);
   putint(p, (int)(b.x * DMF));
@@ -505,7 +521,7 @@ static void send_bot_damage_player(serverbot &b, int target, int damage,
   putint(p, (int)(b.pitch * DAF));
   putint(p, (int)(b.roll * DAF));
   putint(p, 0); putint(p, 0); putint(p, 0);
-  putint(p, (b.state << 3));
+  putint(p, (b.state << 5));
   putint(p, SV_DAMAGE);
   putint(p, target);
   putint(p, damage);
