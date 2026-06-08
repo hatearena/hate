@@ -147,8 +147,6 @@ void spawnstate(dynent *d) {
     return;
   };
   d->ammo[GUN_CSAW] = 1;
-  d->ammo[GUN_NAILGUN] = 20;
-  d->ammo[GUN_LIGHTGUN] = 50;
   if (m_noitems) {
     d->gunselect = GUN_RIFLE;
     d->armour = 0;
