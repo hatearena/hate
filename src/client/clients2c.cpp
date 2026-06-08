@@ -101,25 +101,29 @@ void localservertoclient(uchar *buf,
       d->vel.y = getint(p) / DVF;
       d->vel.z = getint(p) / DVF;
       int f = getint(p);
+      if (cn >= BOT_CLIENT_BASE && !d->onfloor) {
+        entinmap(d);
+        d->onfloor = true;
+      }
       d->strafe = (f & 3) == 3 ? -1 : f & 3;
       f >>= 2;
       d->move = (f & 3) == 3 ? -1 : f & 3;
       d->onfloor = (f >> 2) & 1;
       int state = f >> 3;
-       if (state == CS_DEAD && d->state != CS_DEAD)
-         d->lastaction = lastmillis;
-        d->state = state;
-       if (!demoplayback)
+      if (state == CS_DEAD && d->state != CS_DEAD)
+        d->lastaction = lastmillis;
+      d->state = state;
+      if (!demoplayback)
         updatepos(d);
       break;
     };
 
-    case SV_SOUND:
-    {
+    case SV_SOUND: {
       int sound = getint(p);
       if (sound == S_JUMP) {
         static int lastjump = 0;
-        if (lastmillis - lastjump < 400) break;
+        if (lastmillis - lastjump < 400)
+          break;
         lastjump = lastmillis;
       }
       playsound(sound, &d->o);

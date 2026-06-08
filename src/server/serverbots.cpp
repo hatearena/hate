@@ -157,7 +157,7 @@ void serverbot_broadcast() {
     putint(p, (int)(b.pitch * DAF));
     putint(p, (int)(b.roll * DAF));
     putint(p, 0); putint(p, 0); putint(p, 0);
-    putint(p, 0);
+    putint(p, 0x14);
     *(ushort *)start = ENET_HOST_TO_NET_16(p - start);
     enet_packet_resize(packet, p - start);
     loopv(clients) {
@@ -184,7 +184,7 @@ void serverbot_sendinit(int cn) {
     putint(p, (int)(b.pitch * DAF));
     putint(p, (int)(b.roll * DAF));
     putint(p, 0); putint(p, 0); putint(p, 0);
-    putint(p, 0);
+    putint(p, 0x14);
     putint(p, SV_INITC2S);
     sendstring(b.name, p);
     sendstring("", p);
