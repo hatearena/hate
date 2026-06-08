@@ -889,16 +889,7 @@ void serverbot_update() {
 
       float enemyyaw = -(float)atan2(tx - b.x, ty - b.y) / PI * 180 + 180;
       float enemypitch = atan2(tz - b.z, realdist) * 180 / PI;
-      if (now < b.blocktime) {
-        float turnrate = diff * 0.3f;
-        float yd = b.targetyaw - b.yaw;
-        if (fabs(yd) < turnrate)
-          b.yaw = b.targetyaw;
-        else if (yd > 0)
-          b.yaw += turnrate;
-        else
-          b.yaw -= turnrate;
-      } else {
+      {
         float turnrate = diff * 0.3f;
         float yd = enemyyaw - b.yaw;
         if (fabs(yd) > 90.0f)
@@ -929,14 +920,35 @@ void serverbot_update() {
       b.movemode = strafe ? 0 : move;
       b.strafemode = strafe;
       if (!try_move_bot(b, diff, move, strafe)) {
-        b.targetyaw += rnd(2) ? 90.0f : -90.0f;
-        b.yaw = b.targetyaw;
-        b.blocktime = now + 600;
-        b.movemode = 0;
+        float base = b.targetyaw;
+        float offsets[] = { 60, -60, 90, -90, 135, -135, 180 };
+        bool escaped = false;
+        float ox = b.x, oy = b.y, oz = b.z;
+        float ov = b.fallvelocity;
+        bool of = b.onfloor;
+        for (int t = 0; t < 7; t++) {
+          b.yaw = base + offsets[t];
+          b.targetyaw = b.yaw;
+          b.x = ox; b.y = oy; b.z = oz;
+          b.fallvelocity = ov;
+          b.onfloor = of;
+          if (try_move_bot(b, diff, 1, 0)) {
+            escaped = true;
+            break;
+          }
+        }
+        if (!escaped) {
+          b.x = ox; b.y = oy; b.z = oz;
+          b.fallvelocity = ov;
+          b.onfloor = of;
+          b.yaw = base + 180;
+          b.targetyaw = b.yaw;
+        }
+        b.movemode = escaped ? 1 : 0;
         b.strafemode = 0;
+        if (!b.onfloor) b.movemode = 0;
         continue;
       }
-      b.blocktime = 0;
       if (!b.onfloor)
         b.movemode = 0;
 
@@ -989,8 +1001,7 @@ void serverbot_update() {
       continue;
     }
 
-    if (now < b.blocktime) {
-    } else if (now - b.lastmove > 500 + rnd(2000)) {
+    if (now - b.lastmove > 500 + rnd(2000)) {
       b.targetyaw = (float)rnd(360);
       b.lastmove = now;
     }
@@ -1005,12 +1016,31 @@ void serverbot_update() {
     b.movemode = 1;
     b.strafemode = 0;
     if (!try_move_bot(b, diff, 1, 0)) {
-      b.targetyaw += 90.0f + rnd(90);
-      b.yaw = b.targetyaw;
-      b.blocktime = now + 600;
-      b.movemode = 0;
-    } else {
-      b.blocktime = 0;
+      float base = b.targetyaw;
+      float offsets[] = { 60, -60, 90, -90, 135, -135, 180 };
+      bool escaped = false;
+      float ox = b.x, oy = b.y, oz = b.z;
+      float ov = b.fallvelocity;
+      bool of = b.onfloor;
+      for (int t = 0; t < 7; t++) {
+        b.yaw = base + offsets[t];
+        b.targetyaw = b.yaw;
+        b.x = ox; b.y = oy; b.z = oz;
+        b.fallvelocity = ov;
+        b.onfloor = of;
+        if (try_move_bot(b, diff, 1, 0)) {
+          escaped = true;
+          break;
+        }
+      }
+      if (!escaped) {
+        b.x = ox; b.y = oy; b.z = oz;
+        b.fallvelocity = ov;
+        b.onfloor = of;
+        b.yaw = base + 180;
+        b.targetyaw = b.yaw;
+      }
+      b.movemode = escaped ? 1 : 0;
     }
     if (!b.onfloor) b.movemode = 0;
   }
