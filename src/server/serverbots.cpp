@@ -1002,8 +1002,33 @@ void serverbot_update() {
         }
 
         if (!jumped) {
-          float angles[] = {60, -60, 80, -80, 110, -110, 135, -135, 180};
           bool escaped = false;
+          b.yaw = b.targetyaw;
+          b.x = ox;
+          b.y = oy;
+          b.z = oz;
+          b.fallvelocity = ov;
+          b.onfloor = of;
+          if (try_move_bot(b, diff, 0, 1)) {
+            escaped = true;
+            b.lastmove = now;
+            b.movemode = 0;
+            b.strafemode = 1;
+          }
+          if (!escaped) {
+            b.x = ox;
+            b.y = oy;
+            b.z = oz;
+            b.fallvelocity = ov;
+            b.onfloor = of;
+            if (try_move_bot(b, diff, 0, -1)) {
+              escaped = true;
+              b.lastmove = now;
+              b.movemode = 0;
+              b.strafemode = -1;
+            }
+          }
+          float angles[] = {60, -60, 80, -80, 110, -110, 135, -135, 180};
           for (int t = 0; t < 9 && !escaped; t++) {
             b.yaw = b.targetyaw + angles[t];
             b.x = ox;
@@ -1016,6 +1041,7 @@ void serverbot_update() {
               escaped = true;
               b.lastmove = now;
               b.movemode = 1;
+              b.strafemode = 0;
               break;
             }
           }
@@ -1038,7 +1064,11 @@ void serverbot_update() {
             } else {
               b.yaw = b.targetyaw + 180;
               b.targetyaw = b.yaw;
-              b.movemode = 0;
+              b.lastmove = now;
+              if (try_move_bot(b, diff, 1, 0))
+                b.movemode = 1;
+              else
+                b.movemode = 0;
             }
           }
         }
@@ -1153,8 +1183,33 @@ void serverbot_update() {
       }
 
       if (!jumped) {
-        float angles[] = {60, -60, 80, -80, 110, -110, 135, -135, 180};
         bool escaped = false;
+        b.yaw = b.targetyaw;
+        b.x = ox;
+        b.y = oy;
+        b.z = oz;
+        b.fallvelocity = ov;
+        b.onfloor = of;
+        if (try_move_bot(b, diff, 0, 1)) {
+          escaped = true;
+          b.lastmove = now;
+          b.movemode = 0;
+          b.strafemode = 1;
+        }
+        if (!escaped) {
+          b.x = ox;
+          b.y = oy;
+          b.z = oz;
+          b.fallvelocity = ov;
+          b.onfloor = of;
+          if (try_move_bot(b, diff, 0, -1)) {
+            escaped = true;
+            b.lastmove = now;
+            b.movemode = 0;
+            b.strafemode = -1;
+          }
+        }
+        float angles[] = {60, -60, 80, -80, 110, -110, 135, -135, 180};
         for (int t = 0; t < 9 && !escaped; t++) {
           b.yaw = b.targetyaw + angles[t];
           b.x = ox;
@@ -1167,6 +1222,7 @@ void serverbot_update() {
             escaped = true;
             b.lastmove = now;
             b.movemode = 1;
+            b.strafemode = 0;
             break;
           }
         }
@@ -1189,7 +1245,11 @@ void serverbot_update() {
           } else {
             b.yaw = b.targetyaw + 180;
             b.targetyaw = b.yaw;
-            b.movemode = 0;
+            b.lastmove = now;
+            if (try_move_bot(b, diff, 1, 0))
+              b.movemode = 1;
+            else
+              b.movemode = 0;
           }
         }
       }
