@@ -18,7 +18,9 @@ void httpgetsend(ENetAddress &ad, char *hostname, char *req, char *ref,
     return;
   };
   if (enet_socket_connect(mssock, &ad) < 0) {
-    printf("could not connect\n");
+    printf("could not connect to %s\n", hostname);
+    enet_socket_destroy(mssock);
+    mssock = ENET_SOCKET_NULL;
     return;
   };
   ENetBuffer buf;
@@ -85,12 +87,30 @@ void checkmasterreply() {
 uchar *retrieveservers(uchar *buf, int buflen) {
   sprintf_sd(path)("%sretrieve.do?item=list", masterpath);
   httpgetsend(masterserver, masterbase, path, "hateserver", "HATE Server");
+  if (mssock == ENET_SOCKET_NULL) {
+    printf("failed to connect to master server\n");
+    buf[0] = 0;
+    return buf;
+  };
   ENetBuffer eb;
   buf[0] = 0;
   eb.data = buf;
   eb.dataLength = buflen - 1;
-  while (mssock != ENET_SOCKET_NULL)
+  enet_uint32 timeout = enet_time_get() + 10000;
+  while (mssock != ENET_SOCKET_NULL) {
     httpgetrecieve(eb);
+    if (enet_time_get() > timeout) {
+      printf("retrieveservers timed out\n");
+      enet_socket_destroy(mssock);
+      mssock = ENET_SOCKET_NULL;
+      break;
+    };
+  };
+  if (buf[0])
+    printf("received server list from master server (%d bytes)\n",
+           strlen((char *)buf));
+  else
+    printf("master server returned empty reply\n");
   return stripheader(buf);
 };
 
@@ -102,7 +122,6 @@ void serverms(int mode, int numplayers, int minremain, char *smapname,
   checkmasterreply();
   updatemasterserver(seconds);
 
-  // reply all server info requests
   ENetBuffer buf;
   ENetAddress addr;
   uchar pong[MAXTRANS], *p;

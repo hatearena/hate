@@ -265,13 +265,15 @@ void servermenu() {
 void updatefrommaster() {
   const int MAXUPD = 32000;
   uchar buf[MAXUPD];
+  conoutf("Updating server list from master server...");
   uchar *reply = retrieveservers(buf, MAXUPD);
   if (!*reply || strstr((char *)reply, "<html>") ||
-      strstr((char *)reply, "<HTML>"))
+      strstr((char *)reply, "<HTML>")) {
     conoutf("Master server is not replying");
-  else {
+  } else {
     servers.setsize(0);
     execute((char *)reply);
+    conoutf("Server list updated successfully (%d servers)", servers.length());
   };
   servermenu();
 };
