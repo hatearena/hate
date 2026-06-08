@@ -101,8 +101,9 @@ else
             -lGLU \
             -lX11
 
-        SERVER_LIBS = \
-            -lenet
+SERVER_LIBS = \
+    -lenet \
+    -lz
     endif
 endif
 
