@@ -21,6 +21,7 @@ struct serverbot {
   bool onfloor;
   enet_uint32 blocktime;
   enet_uint32 lastjump;
+  enet_uint32 lastturn;
 };
 
 struct walkinfo {
@@ -246,6 +247,7 @@ void serverbot_spawn(int count) {
     b.lastattack = 0;
     b.targetyaw = b.yaw;
     b.lastjump = 0;
+    b.lastturn = 0;
     if ((mode & 1 && mode > 2) || mode == 12) {
       int blues = 0, reds = 0;
       loopj(numsbots) {
@@ -825,6 +827,7 @@ void serverbot_update() {
         b.onfloor = true;
         b.blocktime = 0;
         b.lastjump = 0;
+        b.lastturn = 0;
       }
       continue;
     }
@@ -941,86 +944,104 @@ void serverbot_update() {
       if (yaw_to_target < -180.0f)
         yaw_to_target += 360.0f;
 
-      int move = 1, strafe = 0;
+      int move = 0, strafe = 0;
       float abs_yaw = fabs(yaw_to_target);
-      if (abs_yaw > 90.0f) {
-        move = 0;
+
+      if (abs_yaw < 30.0f) {
+        move = 1;
+      } else if (abs_yaw > 45.0f && realdist > 4.0f) {
+        strafe = (yaw_to_target > 0) ? 1 : -1;
       }
+
       if (realdist < 8 && b.gunselect != GUN_CSAW) {
-        if (now - b.lastmove > 300) {
+        if (now - b.lastmove > 400) {
           strafe = rnd(2) ? 1 : -1;
           b.lastmove = now;
         }
       }
-      if (now - b.lastmove < 400) {
-        move = 1;
-        abs_yaw = 0;
-      }
       b.movemode = strafe ? 0 : move;
       b.strafemode = strafe;
       if (!try_move_bot(b, diff, move, strafe)) {
-        float base = b.targetyaw;
-        float angles[] = {60, -60, 80, -80, 110, -110, 135, -135, 180};
-        bool escaped = false;
-        int escapedir = 0;
+        bool jumped = false;
         float ox = b.x, oy = b.y, oz = b.z;
         float ov = b.fallvelocity;
         bool of = b.onfloor;
-        if (b.onfloor && of && now - b.lastjump > 400) {
+
+        if (b.onfloor && now - b.lastjump > 250) {
           b.lastjump = now;
           b.fallvelocity = -40.0f;
           b.onfloor = false;
           b.z += 0.01f;
-          if (try_move_bot(b, diff, move, 0)) {
-            escaped = true;
-            escapedir = move;
-          } else {
+          float angles[] = {0, 60, -60, 80, -80, 110, -110, 135, -135, 180};
+          for (int t = 0; t < 10; t++) {
+            b.yaw = b.targetyaw + angles[t];
+            b.x = ox;
+            b.y = oy;
+            b.z = oz + 0.01f;
+            b.fallvelocity = -40.0f;
+            b.onfloor = false;
+            if (try_move_bot(b, diff, 1, 0)) {
+              b.targetyaw = b.yaw;
+              b.lastmove = now;
+              b.movemode = 1;
+              b.strafemode = 0;
+              if (!b.onfloor)
+                b.movemode = 0;
+              jumped = true;
+              break;
+            }
+          }
+          if (!jumped) {
             b.x = ox;
             b.y = oy;
             b.z = oz;
             b.fallvelocity = ov;
             b.onfloor = of;
+            b.yaw = b.targetyaw;
           }
         }
-        for (int t = 0; t < 9 && !escaped; t++) {
-          b.yaw = base + angles[t];
-          b.x = ox;
-          b.y = oy;
-          b.z = oz;
-          b.fallvelocity = ov;
-          b.onfloor = of;
-          if (try_move_bot(b, diff, 1, 0)) {
-            b.targetyaw = b.yaw;
-            escaped = true;
-            escapedir = 1;
-            break;
+
+        if (!jumped) {
+          float angles[] = {60, -60, 80, -80, 110, -110, 135, -135, 180};
+          bool escaped = false;
+          for (int t = 0; t < 9 && !escaped; t++) {
+            b.yaw = b.targetyaw + angles[t];
+            b.x = ox;
+            b.y = oy;
+            b.z = oz;
+            b.fallvelocity = ov;
+            b.onfloor = of;
+            if (try_move_bot(b, diff, 1, 0)) {
+              b.targetyaw = b.yaw;
+              escaped = true;
+              b.lastmove = now;
+              b.movemode = 1;
+              break;
+            }
+          }
+          if (!escaped) {
+            b.yaw = b.targetyaw;
+            b.x = ox;
+            b.y = oy;
+            b.z = oz;
+            b.fallvelocity = ov;
+            b.onfloor = of;
+            if (try_move_bot(b, diff, -1, 0)) {
+              b.lastmove = now;
+              b.movemode = -1;
+            } else if (b.onfloor && now - b.lastjump > 250) {
+              b.lastjump = now;
+              b.fallvelocity = -40.0f;
+              b.onfloor = false;
+              b.z += 0.01f;
+              b.movemode = 0;
+            } else {
+              b.yaw = b.targetyaw + 180;
+              b.targetyaw = b.yaw;
+              b.movemode = 0;
+            }
           }
         }
-        if (!escaped) {
-          b.yaw = base;
-          b.x = ox;
-          b.y = oy;
-          b.z = oz;
-          b.fallvelocity = ov;
-          b.onfloor = of;
-          if (try_move_bot(b, diff, -1, 0)) {
-            escaped = true;
-            escapedir = -1;
-          }
-          b.targetyaw = base;
-        }
-        if (!escaped) {
-          b.x = ox;
-          b.y = oy;
-          b.z = oz;
-          b.fallvelocity = ov;
-          b.onfloor = of;
-          b.yaw = base + 180;
-          b.targetyaw = b.yaw;
-        }
-        if (escaped)
-          b.lastmove = now;
-        b.movemode = escaped ? escapedir : 0;
         b.strafemode = 0;
         if (!b.onfloor)
           b.movemode = 0;
@@ -1093,68 +1114,86 @@ void serverbot_update() {
     b.movemode = 1;
     b.strafemode = 0;
     if (!try_move_bot(b, diff, 1, 0)) {
-      float base = b.targetyaw;
-      float angles[] = {60, -60, 80, -80, 110, -110, 135, -135, 180};
-      bool escaped = false;
-      int escapedir = 0;
+      bool jumped = false;
       float ox = b.x, oy = b.y, oz = b.z;
       float ov = b.fallvelocity;
       bool of = b.onfloor;
-      if (b.onfloor && now - b.lastjump > 400) {
+
+      if (b.onfloor && now - b.lastjump > 250) {
         b.lastjump = now;
         b.fallvelocity = -40.0f;
         b.onfloor = false;
         b.z += 0.01f;
-        if (try_move_bot(b, diff, 1, 0)) {
-          escaped = true;
-          escapedir = 1;
-        } else {
+        float angles[] = {0, 60, -60, 80, -80, 110, -110, 135, -135, 180};
+        for (int t = 0; t < 10; t++) {
+          b.yaw = b.targetyaw + angles[t];
+          b.x = ox;
+          b.y = oy;
+          b.z = oz + 0.01f;
+          b.fallvelocity = -40.0f;
+          b.onfloor = false;
+          if (try_move_bot(b, diff, 1, 0)) {
+            b.targetyaw = b.yaw;
+            b.lastmove = now;
+            b.movemode = 1;
+            if (!b.onfloor)
+              b.movemode = 0;
+            jumped = true;
+            break;
+          }
+        }
+        if (!jumped) {
           b.x = ox;
           b.y = oy;
           b.z = oz;
           b.fallvelocity = ov;
           b.onfloor = of;
+          b.yaw = b.targetyaw;
         }
       }
-      for (int t = 0; t < 9 && !escaped; t++) {
-        b.yaw = base + angles[t];
-        b.x = ox;
-        b.y = oy;
-        b.z = oz;
-        b.fallvelocity = ov;
-        b.onfloor = of;
-        if (try_move_bot(b, diff, 1, 0)) {
-          b.targetyaw = b.yaw;
-          escaped = true;
-          escapedir = 1;
-          break;
+
+      if (!jumped) {
+        float angles[] = {60, -60, 80, -80, 110, -110, 135, -135, 180};
+        bool escaped = false;
+        for (int t = 0; t < 9 && !escaped; t++) {
+          b.yaw = b.targetyaw + angles[t];
+          b.x = ox;
+          b.y = oy;
+          b.z = oz;
+          b.fallvelocity = ov;
+          b.onfloor = of;
+          if (try_move_bot(b, diff, 1, 0)) {
+            b.targetyaw = b.yaw;
+            escaped = true;
+            b.lastmove = now;
+            b.movemode = 1;
+            break;
+          }
+        }
+        if (!escaped) {
+          b.yaw = b.targetyaw;
+          b.x = ox;
+          b.y = oy;
+          b.z = oz;
+          b.fallvelocity = ov;
+          b.onfloor = of;
+          if (try_move_bot(b, diff, -1, 0)) {
+            b.lastmove = now;
+            b.movemode = -1;
+          } else if (b.onfloor && now - b.lastjump > 250) {
+            b.lastjump = now;
+            b.fallvelocity = -40.0f;
+            b.onfloor = false;
+            b.z += 0.01f;
+            b.movemode = 0;
+          } else {
+            b.yaw = b.targetyaw + 180;
+            b.targetyaw = b.yaw;
+            b.movemode = 0;
+          }
         }
       }
-      if (!escaped) {
-        b.yaw = base;
-        b.x = ox;
-        b.y = oy;
-        b.z = oz;
-        b.fallvelocity = ov;
-        b.onfloor = of;
-        if (try_move_bot(b, diff, -1, 0)) {
-          escaped = true;
-          escapedir = -1;
-        }
-        b.targetyaw = base;
-      }
-      if (!escaped) {
-        b.x = ox;
-        b.y = oy;
-        b.z = oz;
-        b.fallvelocity = ov;
-        b.onfloor = of;
-        b.yaw = base + 180;
-        b.targetyaw = b.yaw;
-      }
-      if (escaped)
-        b.lastmove = now;
-      b.movemode = escaped ? escapedir : 0;
+      b.strafemode = 0;
     }
     if (!b.onfloor)
       b.movemode = 0;

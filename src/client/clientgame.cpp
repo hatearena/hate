@@ -279,9 +279,28 @@ void otherplayers() {
       continue;
     };
     if (lagtime && players[i]->state != CS_DEAD &&
-        (!demoplayback || i != democlientnum) && i < BOT_CLIENT_BASE)
-      moveplayer(players[i], 2,
-                 false); // use physics to extrapolate player position
+        (!demoplayback || i != democlientnum)) {
+      if (i >= BOT_CLIENT_BASE) {
+        dynent *d = players[i];
+        int saved_move = d->move;
+        int saved_strafe = d->strafe;
+        bool saved_moving = d->moving;
+        float saved_velx = d->vel.x;
+        float saved_vely = d->vel.y;
+        d->move = 0;
+        d->strafe = 0;
+        d->vel.x = 0;
+        d->vel.y = 0;
+        moveplayer(d, 2, false);
+        d->move = saved_move;
+        d->strafe = saved_strafe;
+        d->moving = saved_moving;
+        d->vel.x = saved_velx;
+        d->vel.y = saved_vely;
+      } else {
+        moveplayer(players[i], 2, false);
+      }
+    }
   };
 };
 
@@ -324,21 +343,30 @@ void updateworld(int millis) // main game update loop
     if (m_infected && !intermission) {
       int infected = 0, resistance = 0, infecteddead = 0;
       if (!strcmp(player1->team, "INFD")) {
-        if (player1->state != CS_DEAD) infected++;
-        else infecteddead++;
-      } else if (player1->state != CS_DEAD) resistance++;
+        if (player1->state != CS_DEAD)
+          infected++;
+        else
+          infecteddead++;
+      } else if (player1->state != CS_DEAD)
+        resistance++;
       loopv(players) if (players[i]) {
         if (!strcmp(players[i]->team, "INFD")) {
-          if (players[i]->state != CS_DEAD) infected++;
-          else infecteddead++;
-        } else if (players[i]->state != CS_DEAD) resistance++;
+          if (players[i]->state != CS_DEAD)
+            infected++;
+          else
+            infecteddead++;
+        } else if (players[i]->state != CS_DEAD)
+          resistance++;
       };
       dvector &bv = getbots();
       loopv(bv) if (bv[i]) {
         if (!strcmp(bv[i]->team, "INFD")) {
-          if (bv[i]->state != CS_DEAD) infected++;
-          else infecteddead++;
-        } else if (bv[i]->state != CS_DEAD) resistance++;
+          if (bv[i]->state != CS_DEAD)
+            infected++;
+          else
+            infecteddead++;
+        } else if (bv[i]->state != CS_DEAD)
+          resistance++;
       };
       if (infected + resistance >= 2 && infected > 0 && resistance == 0) {
         intermission = true;
@@ -350,7 +378,8 @@ void updateworld(int millis) // main game update loop
         conoutf("New map in 15 seconds");
         showscores(true);
       } else if (infected == 0 && infecteddead == 0 && resistance >= 1) {
-        if (resistance >= 2 || (infected_picktime && lastmillis > infected_picktime)) {
+        if (resistance >= 2 ||
+            (infected_picktime && lastmillis > infected_picktime)) {
           infected_picktime = 0;
           int pick = rnd(resistance);
           if (player1->state != CS_DEAD && strcmp(player1->team, "INFD")) {
@@ -365,7 +394,8 @@ void updateworld(int millis) // main game update loop
             };
             pick--;
           };
-          loopv(players) if (players[i] && players[i]->state != CS_DEAD && strcmp(players[i]->team, "INFD")) {
+          loopv(players) if (players[i] && players[i]->state != CS_DEAD &&
+                             strcmp(players[i]->team, "INFD")) {
             if (pick == 0) {
               strn0cpy(players[i]->team, "INFD", 5);
               conoutf("%s is the infected.", players[i]->name);
@@ -374,7 +404,8 @@ void updateworld(int millis) // main game update loop
             };
             pick--;
           };
-          loopv(bv) if (bv[i] && bv[i]->state != CS_DEAD && strcmp(bv[i]->team, "INFD")) {
+          loopv(bv) if (bv[i] && bv[i]->state != CS_DEAD &&
+                        strcmp(bv[i]->team, "INFD")) {
             if (pick == 0) {
               strn0cpy(bv[i]->team, "INFD", 5);
               conoutf("%s is the infected.", bv[i]->name);
@@ -383,7 +414,7 @@ void updateworld(int millis) // main game update loop
             };
             pick--;
           };
-          infected_done: ;
+        infected_done:;
         } else if (!infected_picktime) {
           infected_picktime = lastmillis + 15000;
         };
@@ -466,8 +497,10 @@ int spawncycle = -1;
 int fixspawn = 2;
 
 void infected_checkpick() {
-  if (!m_infected) return;
-  if (intermission) return;
+  if (!m_infected)
+    return;
+  if (intermission)
+    return;
   infected_picktime = 0;
   int total = 0;
   if (player1->state != CS_DEAD && strcmp(player1->team, "INFD"))
@@ -475,9 +508,10 @@ void infected_checkpick() {
   loopv(players) if (players[i] && players[i]->state != CS_DEAD &&
                      strcmp(players[i]->team, "INFD")) total++;
   dvector &bv = getbots();
-  loopv(bv) if (bv[i] && bv[i]->state != CS_DEAD &&
-                strcmp(bv[i]->team, "INFD")) total++;
-  if (total < 1) return;
+  loopv(bv) if (bv[i] && bv[i]->state != CS_DEAD && strcmp(bv[i]->team, "INFD"))
+      total++;
+  if (total < 1)
+    return;
   int pick = rnd(total);
   if (player1->state != CS_DEAD && strcmp(player1->team, "INFD")) {
     if (pick == 0) {
@@ -670,7 +704,7 @@ void selfdamage(int damage, int actor, dynent *act) {
   damageblend(damage);
   demoblend(damage);
   int ad = damage * (player1->armourtype + 1) * 20 /
-            100; // let armour absorb when possible
+           100; // let armour absorb when possible
   if (ad > player1->armour)
     ad = player1->armour;
   player1->armour -= ad;
@@ -681,9 +715,7 @@ void selfdamage(int damage, int actor, dynent *act) {
     player1->roll +=
         player1->roll > 0
             ? droll
-            : (player1->roll < 0
-                   ? -droll
-                   : (rnd(2) ? droll : -droll));
+            : (player1->roll < 0 ? -droll : (rnd(2) ? droll : -droll));
     lastrollkick = lastmillis;
   };
   if ((player1->health -= damage) <= 0) {

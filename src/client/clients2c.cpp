@@ -137,6 +137,9 @@ void localservertoclient(uchar *buf,
           playsound(S_DEAD, &d->o);
         }
       }
+      if (state == CS_ALIVE && d->state == CS_DEAD && cn >= BOT_CLIENT_BASE) {
+        particle_splash(0, 20, 500, d->o);
+      }
       d->state = state;
       if (cn >= BOT_CLIENT_BASE)
         d->moving = (d->move != 0 || d->strafe != 0);
