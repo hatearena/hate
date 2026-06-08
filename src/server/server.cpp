@@ -561,12 +561,9 @@ void process(ENetPacket *packet, int sender) {
       break;
     };
 
-    case SV_DAMAGE: {
-      int target = getint(p);
-      int damage = getint(p);
-      int ls = getint(p);
-      if (target >= BOT_CLIENT_BASE)
-        serverbot_damage(target, damage, sender);
+    case SV_DIED: {
+      int actor = getint(p);
+      serverbot_player_died(cn);
       break;
     };
 

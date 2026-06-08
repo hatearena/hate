@@ -26,6 +26,7 @@ struct clstate {
   float x, y, z;
   float yaw, pitch;
   int state;
+  int lifesequence;
   bool active;
 };
 
@@ -304,6 +305,11 @@ void serverbot_clearplayer(int cn) {
   playerpos[cn].active = false;
 }
 
+void serverbot_player_died(int cn) {
+  if (cn >= 0 && cn < MAXCLIENTS && playerpos[cn].active)
+    playerpos[cn].lifesequence++;
+}
+
 static bool intersect_bot(serverbot &b, vec &from, vec &to) {
   float vx = to.x - from.x;
   float vy = to.y - from.y;
@@ -339,9 +345,30 @@ void serverbot_hitscan(int gun, vec &from, vec &to, int sender) {
     serverbot &b = sbot[i];
     if (b.state != CS_ALIVE) continue;
     if (intersect_bot(b, from, to)) {
-      int damage = 20;
-      if (gun >= 0 && gun < NUMGUNS && gun != GUN_CSAW)
+      int damage = 10;
+      switch (gun) {
+      case GUN_CSAW:
+        damage = 20;
+        break;
+      case GUN_SG:
         damage = 10;
+        break;
+      case GUN_CG:
+        damage = 30;
+        break;
+      case GUN_RL:
+        damage = 120;
+        break;
+      case GUN_RIFLE:
+        damage = 100;
+        break;
+      case GUN_NAILGUN:
+        damage = 25;
+        break;
+      case GUN_LIGHTGUN:
+        damage = 15;
+        break;
+      }
       serverbot_damage(b.cn, damage, sender);
       break;
     }
@@ -360,6 +387,55 @@ static void send_bot_shot(serverbot &b, float tx, float ty, float tz) {
   putint(p, (int)(tx * DMF));
   putint(p, (int)(ty * DMF));
   putint(p, (int)(tz * DMF));
+  *(ushort *)start = ENET_HOST_TO_NET_16(p - start);
+  enet_packet_resize(packet, p - start);
+  loopv(clients) {
+    if (clients[i].type == ST_TCPIP)
+      enet_peer_send(clients[i].peer, 0, packet);
+  }
+}
+
+static bool shot_hits_player(float fromx, float fromy, float fromz, float tox,
+                             float toy, float toz, float px, float py,
+                             float pz) {
+  float vx = tox - fromx;
+  float vy = toy - fromy;
+  float vz = toz - fromz;
+  float wx = px - fromx;
+  float wy = py - fromy;
+  float wz = pz - fromz;
+  float c1 = wx * vx + wy * vy + wz * vz;
+  float c2 = vx * vx + vy * vy + vz * vz;
+  float hx, hy, hz;
+  if (c1 <= 0) {
+    hx = fromx;
+    hy = fromy;
+    hz = fromz;
+  } else if (c2 <= c1) {
+    hx = tox;
+    hy = toy;
+    hz = toz;
+  } else {
+    float f = c1 / c2;
+    hx = fromx + vx * f;
+    hy = fromy + vy * f;
+    hz = fromz + vz * f;
+  }
+  const float pr = 1.1f;
+  const float peh = 3.2f;
+  const float pae = 0.7f;
+  return hx >= px - pr && hx <= px + pr && hy >= py - pr && hy <= py + pr &&
+         hz >= pz - peh && hz <= pz + pae;
+}
+
+static void send_bot_damage_player(int target, int damage, int lifeseq) {
+  ENetPacket *packet = enet_packet_create(NULL, 20, 0);
+  uchar *start = packet->data;
+  uchar *p = start + 2;
+  putint(p, SV_DAMAGE);
+  putint(p, target);
+  putint(p, damage);
+  putint(p, lifeseq);
   *(ushort *)start = ENET_HOST_TO_NET_16(p - start);
   enet_packet_resize(packet, p - start);
   loopv(clients) {
@@ -424,17 +500,33 @@ void serverbot_update() {
       else
         b.yaw -= turnrate;
       b.targetyaw = enemyyaw;
-      float aimspread = 12.0f;
-      float attackyaw = enemyyaw + (rnd(101) - 50) / 100.0f * aimspread;
-      float rad2 = attackyaw / 180.0f * PI;
-      float gunrange = 8.0f;
-      if (b.gunselect != GUN_CSAW) gunrange = 12.0f;
-      float shotx = b.x + sinf(rad2) * gunrange;
-      float shoty = b.y + cosf(rad2) * gunrange;
-      float shotz = b.z - 0.2f;
       if (now - b.lastattack > 300 + rnd(400)) {
         b.lastattack = now;
-        send_bot_shot(b, shotx, shoty, shotz);
+        float aimspread = 12.0f;
+        float attackyaw = enemyyaw + (rnd(101) - 50) / 100.0f * aimspread;
+        float attackpitch = (rnd(101) - 50) / 100.0f * aimspread * 0.5f;
+        float rad2 = attackyaw / 180.0f * PI;
+        float pitchrad = attackpitch / 180.0f * PI;
+        float fromx = b.x;
+        float fromy = b.y;
+        float fromz = b.z - 0.2f;
+        float dist = sqrtf(bestdist);
+        if (dist < 2.0f) dist = 2.0f;
+        float tox = fromx + sinf(rad2) * cosf(pitchrad) * dist * 2.0f;
+        float toy = fromy + cosf(rad2) * cosf(pitchrad) * dist * 2.0f;
+        float toz = fromz + sinf(pitchrad) * dist * 2.0f;
+        send_bot_shot(b, tox, toy, toz);
+        if (shot_hits_player(fromx, fromy, fromz, tox, toy, toz, tx, ty, tz)) {
+          int dmg = 10;
+          if (b.gunselect == GUN_CSAW)
+            dmg = 20;
+          else if (b.gunselect == GUN_RL)
+            dmg = 50;
+          else if (b.gunselect == GUN_RIFLE)
+            dmg = 40;
+          send_bot_damage_player(targetidx, dmg,
+                                 playerpos[targetidx].lifesequence);
+        }
       }
       if (now - b.lastmove > 500 + rnd(2000)) {
         b.lastmove = now;
