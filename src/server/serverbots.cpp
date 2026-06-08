@@ -265,6 +265,9 @@ void serverbot_update() {
     else if (yd > 0) b.yaw += turnrate;
     else b.yaw -= turnrate;
     float rad = b.yaw / 180.0f * PI;
+    b.x += sinf(rad) * diff * 0.05f;
+    b.y += cosf(rad) * diff * 0.05f;
+    /* walkable check disabled for debug
     float nx = b.x + sinf(rad) * diff * 0.05f;
     float ny = b.y + cosf(rad) * diff * 0.05f;
     int ix = (int)nx, iy = (int)ny;
@@ -279,5 +282,6 @@ void serverbot_update() {
     } else {
       b.targetyaw += 90.0f + rnd(90);
     }
+    */
   }
 }
