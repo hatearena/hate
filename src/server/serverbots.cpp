@@ -16,6 +16,8 @@ struct serverbot {
   float targetyaw;
   int ammo[NUMGUNS];
   int movemode, strafemode;
+  float fallvelocity;
+  bool onfloor;
 };
 
 struct walkinfo {
@@ -171,6 +173,8 @@ void serverbot_spawn(int count) {
     b.ammo[GUN_CSAW] = 1;
     b.movemode = 1;
     b.strafemode = 0;
+    b.fallvelocity = 0;
+    b.onfloor = true;
     b.frags = 0;
     b.deaths = 0;
     b.lastaction = 0;
@@ -278,7 +282,7 @@ void serverbot_broadcast() {
     putint(p, (int)(b.roll * DAF));
     if (b.state == CS_ALIVE) {
       putint(p, 0); putint(p, 0); putint(p, 0);
-      putint(p, (b.movemode & 3) | ((b.strafemode & 3) << 2) | (1 << 4) | (b.state << 5));
+      putint(p, (b.movemode & 3) | ((b.strafemode & 3) << 2) | ((b.onfloor ? 1 : 0) << 4) | (b.state << 5));
     } else {
       putint(p, 0); putint(p, 0); putint(p, 0);
       putint(p, (b.state << 5));
@@ -312,7 +316,7 @@ void serverbot_sendinit(int cn) {
     putint(p, (int)(b.roll * DAF));
     if (b.state == CS_ALIVE) {
       putint(p, 0); putint(p, 0); putint(p, 0);
-      putint(p, (b.movemode & 3) | ((b.strafemode & 3) << 2) | (1 << 4) | (b.state << 5));
+      putint(p, (b.movemode & 3) | ((b.strafemode & 3) << 2) | ((b.onfloor ? 1 : 0) << 4) | (b.state << 5));
     } else {
       putint(p, 0); putint(p, 0); putint(p, 0);
       putint(p, (b.state << 5));
@@ -543,8 +547,25 @@ static bool shot_hits_bot(float fromx, float fromy, float fromz, float tox,
 }
 
 static bool try_move_bot(serverbot &b, int diff, int move, int strafe) {
-  if (move == 0 && strafe == 0) return true;
   if (!walkdata || mapsize <= 0) return false;
+  float dt = diff / 1000.0f;
+  if (move == 0 && strafe == 0) {
+    int cx = (int)b.x, cy = (int)b.y;
+    if (cx >= 0 && cy >= 0 && cx < mapsize && cy < mapsize) {
+      float floor = (float)walkdata[cy * mapsize + cx].floor;
+      float targetZ = floor + BOT_EYEHEIGHT;
+      if (targetZ < b.z - 0.01f) {
+        b.fallvelocity += 600.0f * dt;
+        b.z -= b.fallvelocity * dt;
+        if (b.z < targetZ) { b.z = targetZ; b.fallvelocity = 0; }
+      } else if (targetZ > b.z + 0.01f) {
+        b.z = targetZ;
+        b.fallvelocity = 0;
+      }
+      b.onfloor = (b.z <= targetZ + 0.1f);
+    }
+    return true;
+  }
   float step = diff * 0.015f;
   if (step > 0.9f) step = 0.9f;
   float rad = b.yaw / 180.0f * PI;
@@ -581,12 +602,17 @@ static bool try_move_bot(serverbot &b, int diff, int move, int strafe) {
   b.y = ny;
   float targetZ = targetfloor + BOT_EYEHEIGHT;
   if (targetZ < b.z - 0.01f) {
-    float fall = diff * 0.005f;
-    b.z -= fall;
-    if (b.z < targetZ) b.z = targetZ;
-  } else if (targetZ > b.z) {
+    b.fallvelocity += 600.0f * dt;
+    b.z -= b.fallvelocity * dt;
+    if (b.z < targetZ) {
+      b.z = targetZ;
+      b.fallvelocity = 0;
+    }
+  } else if (targetZ > b.z + 0.01f) {
     b.z = targetZ;
+    b.fallvelocity = 0;
   }
+  b.onfloor = (b.z <= targetZ + 0.1f);
   return true;
 }
 
@@ -614,6 +640,9 @@ void serverbot_update() {
 
   loopi(numsbots) {
     serverbot &b = sbot[i];
+    b.onfloor = false;
+    b.movemode = 0;
+    b.strafemode = 0;
     if (b.state == CS_DEAD) {
       if (now - b.lastaction > 5000) {
         loadspawns();
@@ -635,6 +664,8 @@ void serverbot_update() {
         b.ammo[GUN_CSAW] = 1;
         b.movemode = 1;
         b.strafemode = 0;
+        b.fallvelocity = 0;
+        b.onfloor = true;
       }
       continue;
     }
@@ -735,6 +766,7 @@ void serverbot_update() {
         b.targetyaw = b.yaw;
         continue;
       }
+      if (!b.onfloor) b.movemode = 0;
 
       float yaw_to_target = enemyyaw - b.yaw;
       if (yaw_to_target > 180.0f)  yaw_to_target -= 360.0f;
@@ -799,5 +831,6 @@ void serverbot_update() {
     if (!try_move_bot(b, diff, 1, 0)) {
       b.targetyaw += 90.0f + rnd(90);
     }
+    if (!b.onfloor) b.movemode = 0;
   }
 }

@@ -68,7 +68,8 @@ extern int democlientnum;
 void renderclients() {
   dynent *d;
   loopv(players) if ((d = players[i]) &&
-                     (!demoplayback || i != democlientnum)) {
+                      (!demoplayback || i != democlientnum)) {
+    if (d->state == CS_DEAD) continue;
     const char *mdl = "monster/player";
     if (m_teammode || m_infected) {
       if (d->team[0] && !strcmp(d->team, m_infected ? "RES" : "BLUE"))
