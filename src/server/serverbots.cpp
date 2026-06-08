@@ -376,9 +376,19 @@ void serverbot_hitscan(int gun, vec &from, vec &to, int sender) {
 }
 
 static void send_bot_shot(serverbot &b, float tx, float ty, float tz) {
-  ENetPacket *packet = enet_packet_create(NULL, 40, 0);
+  ENetPacket *packet = enet_packet_create(NULL, 80, 0);
   uchar *start = packet->data;
   uchar *p = start + 2;
+  putint(p, SV_POS);
+  putint(p, b.cn);
+  putint(p, (int)(b.x * DMF));
+  putint(p, (int)(b.y * DMF));
+  putint(p, (int)(b.z * DMF));
+  putint(p, (int)(b.yaw * DAF));
+  putint(p, (int)(b.pitch * DAF));
+  putint(p, (int)(b.roll * DAF));
+  putint(p, 0); putint(p, 0); putint(p, 0);
+  putint(p, (b.state << 3));
   putint(p, SV_SHOT);
   putint(p, b.gunselect);
   putint(p, (int)(b.x * DMF));
@@ -428,10 +438,21 @@ static bool shot_hits_player(float fromx, float fromy, float fromz, float tox,
          hz >= pz - peh && hz <= pz + pae;
 }
 
-static void send_bot_damage_player(int target, int damage, int lifeseq) {
-  ENetPacket *packet = enet_packet_create(NULL, 20, 0);
+static void send_bot_damage_player(serverbot &b, int target, int damage,
+                                   int lifeseq) {
+  ENetPacket *packet = enet_packet_create(NULL, 80, 0);
   uchar *start = packet->data;
   uchar *p = start + 2;
+  putint(p, SV_POS);
+  putint(p, b.cn);
+  putint(p, (int)(b.x * DMF));
+  putint(p, (int)(b.y * DMF));
+  putint(p, (int)(b.z * DMF));
+  putint(p, (int)(b.yaw * DAF));
+  putint(p, (int)(b.pitch * DAF));
+  putint(p, (int)(b.roll * DAF));
+  putint(p, 0); putint(p, 0); putint(p, 0);
+  putint(p, (b.state << 3));
   putint(p, SV_DAMAGE);
   putint(p, target);
   putint(p, damage);
@@ -524,7 +545,7 @@ void serverbot_update() {
             dmg = 50;
           else if (b.gunselect == GUN_RIFLE)
             dmg = 40;
-          send_bot_damage_player(targetidx, dmg,
+          send_bot_damage_player(b, targetidx, dmg,
                                  playerpos[targetidx].lifesequence);
         }
       }
