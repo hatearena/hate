@@ -164,9 +164,11 @@ void bancmd(char *uuid) {
   strn0cpy(ctext, buf, 80);
 };
 void listcmd() { strn0cpy(ctext, "/list", 80); };
+void timecmd() { strn0cpy(ctext, "/time", 80); };
 COMMANDN(rcon, rconcmd, ARG_1STR);
 COMMANDN(ban, bancmd, ARG_1STR);
 COMMANDN(list, listcmd, ARG_NONE);
+COMMANDN(time, timecmd, ARG_NONE);
 
 void viewposcmd() { conoutf("Position: %.0f %.0f %.0f  yaw=%.0f", player1->o.x, player1->o.y, player1->o.z, player1->yaw); };
 COMMANDN(viewpos, viewposcmd, ARG_NONE);

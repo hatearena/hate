@@ -362,6 +362,10 @@ void process(ENetPacket *packet, int sender) {
           sprintf_sd(count)("%d player(s) connected.", n);
           sendservmsg(count);
           return;
+        } else if (strcmp(text + 1, "time") == 0) {
+          sprintf_sd(msg)("Time remaining: %d minute(s)", minremain);
+          sendservmsg(msg);
+          return;
         } else if (strncmp(text + 1, "rcon ", 5) == 0) {
           char *pass = text + 6;
           if (rconpass[0] && strcmp(pass, rconpass) == 0) {
