@@ -146,24 +146,13 @@ func verifyServer(addr string) bool {
 		return false
 	}
 	defer conn.Close()
-
 	conn.SetDeadline(time.Now().Add(verifyTimeout))
-
 	if _, err := conn.Write([]byte{0}); err != nil {
 		return false
 	}
-
 	buf := make([]byte, 1500)
 	n, err := conn.Read(buf)
-	if err != nil {
-		return false
-	}
-
-	if n < 1 {
-		return false
-	}
-
-	return buf[0] == protocolVersion
+	return err == nil && n >= 1
 }
 
 func (ms *MasterServer) handleRegister(w http.ResponseWriter, r *http.Request) {
