@@ -410,6 +410,25 @@ void process(ENetPacket *packet, int sender) {
           int n = atoi(text + 8);
           if (n < 1) n = 1;
           serverbot_spawn(n);
+          loopi(serverbot_count()) {
+            int id = serverbot_getid(i);
+            if (id < 0) continue;
+            const char *name = serverbot_name(i);
+            if (!name) continue;
+            ENetPacket *pkt = enet_packet_create(NULL, 64, ENET_PACKET_FLAG_RELIABLE);
+            uchar *start = pkt->data;
+            uchar *pp = start + 2;
+            putint(pp, SV_BOTINIT);
+            putint(pp, id);
+            sendstring((char *)name, pp);
+            sendstring((char *)"", pp);
+            *(ushort *)start = ENET_HOST_TO_NET_16(pp - start);
+            enet_packet_resize(pkt, pp - start);
+            loopv(clients) {
+              if (clients[i].type == ST_TCPIP)
+                enet_peer_send(clients[i].peer, 0, pkt);
+            }
+          };
           sprintf_sd(msg)("Spawned %d bot(s).", n);
           sendservmsg(msg);
           return;
@@ -660,6 +679,8 @@ int lastconnect = 0;
 
 static void broadcastbots() {
   if (!serverhost) return;
+  static int once = 0;
+  if (serverbot_count() && !once) { once = 1; printf("broadcasting %d bots\n", serverbot_count()); };
   loopi(serverbot_count()) {
     int id = serverbot_getid(i);
     if (id < 0) continue;

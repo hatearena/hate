@@ -559,7 +559,8 @@ void addbotcmd(int n) {
     conoutf("Bots not supported on dedicated servers");
     return;
   }
-  if (multiplayer()) {
+  extern ENetHost *clienthost;
+  if (clienthost) {
     sprintf_sd(buf)("/addbot %d", n);
     strn0cpy(ctext, buf, 80);
     return;

@@ -31,6 +31,7 @@ static void updateserverbotpos(int id, float x, float y, float z, float yaw,
     d->state = CS_ALIVE;
     d->lifesequence = 0;
     serverbotents.add(d);
+    printf("created server bot ent %d at %.0f,%.0f,%.0f\n", id, x, y, z);
   }
   d->o.x = x;
   d->o.y = y;
