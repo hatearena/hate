@@ -830,13 +830,14 @@ static bool bot_try_escape(serverbot &b, int diff, int move, int strafe,
     b.fallvelocity = ov;
     b.onfloor = of;
     if (try_move_bot(b, diff, 1, 0)) {
-      b.targetyaw = b.yaw;
-      b.lastmove = now - 600;
-      b.movemode = 1;
+      b.targetyaw = normyaw((float)rnd(360));
+      b.yaw = normyaw(b.targetyaw + angles[t]);
+      b.lastmove = now;
+      b.movemode = 0;
       b.strafemode = 0;
       b.turncount = 0;
       b.blocktime = 0;
-      return true;
+      break;
     }
   }
 
@@ -1157,18 +1158,16 @@ void serverbot_update() {
       b.lastmove = now;
     }
 
-    {
-      float turnrate = diff * 0.3f;
-      float yd = yawd(b.targetyaw, b.yaw);
-      if (fabs(yd) < turnrate)
-        b.yaw = normyaw(b.targetyaw);
-      else if (yd > 0)
-        b.yaw = normyaw(b.yaw + turnrate);
-      else
-        b.yaw = normyaw(b.yaw - turnrate);
-    }
+    float turnrate = diff * 0.3f;
+    float yd = yawd(b.targetyaw, b.yaw);
+    if (fabs(yd) < turnrate)
+      b.yaw = normyaw(b.targetyaw);
+    else if (yd > 0)
+      b.yaw = normyaw(b.yaw + turnrate);
+    else
+      b.yaw = normyaw(b.yaw - turnrate);
 
-    b.movemode = 1;
+    b.movemode = (fabs(yawd(b.targetyaw, b.yaw)) < 25.0f) ? 1 : 0;
     b.strafemode = 0;
 
     if (!try_move_bot(b, diff, 1, 0)) {
