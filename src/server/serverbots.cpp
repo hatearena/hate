@@ -22,6 +22,8 @@ static int nextcn = BOT_CLIENT_BASE;
 static enet_uint32 lastthink = 0;
 static float spawnx[MAXBOTS], spawny[MAXBOTS], spawnz[MAXBOTS];
 static int numspawns = 0;
+static bool *walkable = NULL;
+static int mapsize = 256;
 
 static const char *bnames[] = {
     "Cerelo","Diaso","Ceria","Deathly","Ra","Va","Never","Abu",
@@ -30,6 +32,9 @@ static const char *bnames[] = {
 
 static void loadspawns() {
   numspawns = 0;
+  mapsize = 256;
+  free(walkable);
+  walkable = NULL;
   if (!smapname[0]) return;
   char cgzname[256], pakname[64], mapname[64];
   char *slash = strpbrk(smapname, "/\\");
@@ -47,9 +52,9 @@ static void loadspawns() {
   gzread(f, &hdr, sizeof(header) - sizeof(int) * 16);
   endianswap(&hdr.version, sizeof(int), 4);
   if (strncmp(hdr.head, "CUBE", 4) != 0 || hdr.version > MAPVERSION) {
-    gzclose(f);
-    return;
+    gzclose(f); return;
   };
+  mapsize = 1 << hdr.sfactor;
   if (hdr.version >= 4) {
     gzread(f, &hdr.waterlevel, sizeof(int) * 16);
     endianswap(&hdr.waterlevel, sizeof(int), 16);
@@ -62,12 +67,41 @@ static void loadspawns() {
       spawnx[numspawns] = (float)e.x;
       spawny[numspawns] = (float)e.y;
       spawnz[numspawns] = 4.0f;
-      printf("serverbot: spawn %d at %.0f %.0f\n", numspawns, spawnx[numspawns], spawny[numspawns]);
       numspawns++;
     };
   };
+  printf("serverbot: found %d spawns, mapsize=%d\n", numspawns, mapsize);
+  int total = mapsize * mapsize;
+  walkable = (bool *)calloc(total, 1);
+  if (!walkable) { gzclose(f); return; }
+  int prevtype = -1;
+  int k = 0;
+  while (k < total) {
+    int type = gzgetc(f);
+    if (type < 0) break;
+    if (type == 255) {
+      int n = gzgetc(f);
+      if (n < 0) break;
+      for (int r = 0; r < n && k < total; r++, k++)
+        walkable[k] = (prevtype != 0);
+      continue;
+    }
+    prevtype = type;
+    walkable[k] = (type != 0);
+    k++;
+    if (type == 0) {
+      gzgetc(f); gzgetc(f);
+      if (hdr.version <= 2) { gzgetc(f); gzgetc(f); }
+    } else {
+      gzgetc(f); gzgetc(f); gzgetc(f);
+      gzgetc(f); gzgetc(f);
+      if (hdr.version <= 2) { gzgetc(f); gzgetc(f); }
+      gzgetc(f);
+      if (hdr.version >= 2) gzgetc(f);
+      if (hdr.version >= 5) gzgetc(f);
+    }
+  }
   gzclose(f);
-  printf("serverbot: found %d spawns in %s\n", numspawns, cgzname);
 }
 
 int serverbot_count() { return numsbots; }
@@ -106,7 +140,7 @@ void serverbot_spawn(int count) {
   }
 }
 
-void serverbot_clear() { numsbots = 0; numspawns = 0; }
+void serverbot_clear() { numsbots = 0; numspawns = 0; free(walkable); walkable = NULL; }
 
 bool serverbot_kick(const char *name) {
   loopi(numsbots) if (!strcmp(sbot[i].name, name)) {
@@ -219,7 +253,7 @@ void serverbot_update() {
       }
       continue;
     }
-    if (now - b.lastmove > 3000 + rnd(4500)) {
+    if (now - b.lastmove > 1000 + rnd(3000)) {
       b.targetyaw = (float)rnd(360);
       b.lastmove = now;
     }
@@ -229,7 +263,19 @@ void serverbot_update() {
     else if (yd > 0) b.yaw += turnrate;
     else b.yaw -= turnrate;
     float rad = b.yaw / 180.0f * PI;
-    b.x += sinf(rad) * diff * 0.05f;
-    b.y += cosf(rad) * diff * 0.05f;
+    float nx = b.x + sinf(rad) * diff * 0.05f;
+    float ny = b.y + cosf(rad) * diff * 0.05f;
+    int ix = (int)nx, iy = (int)ny;
+    if (walkable && ix >= 0 && iy >= 0 && ix < mapsize && iy < mapsize) {
+      int idx = iy * mapsize + ix;
+      if (walkable[idx]) {
+        b.x = nx;
+        b.y = ny;
+      } else {
+        b.targetyaw += 90.0f + rnd(90);
+      }
+    } else {
+      b.targetyaw += 90.0f + rnd(90);
+    }
   }
 }
