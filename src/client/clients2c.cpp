@@ -109,6 +109,10 @@ void localservertoclient(uchar *buf,
        if (state == CS_DEAD && d->state != CS_DEAD)
          d->lastaction = lastmillis;
        d->state = state;
+       if (cn >= BOT_CLIENT_BASE && !d->onfloor) {
+         entinmap(d);
+         d->onfloor = true;
+       }
       if (!demoplayback)
         updatepos(d);
       break;
