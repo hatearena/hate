@@ -177,6 +177,8 @@ void serverbot_broadcast() {
   static enet_uint32 lastbc = 0;
   if (enet_time_get() - lastbc < 40) return;
   lastbc = enet_time_get();
+  static int once = 0;
+  if (!once) { once = 1; printf("serverbot: broadcasting %d bots\n", numsbots); }
   loopi(numsbots) {
     serverbot &b = sbot[i];
     ENetPacket *packet = enet_packet_create(NULL, 40, 0);
