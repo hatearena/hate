@@ -298,27 +298,24 @@ void resetvotes() { loopv(clients) clients[i].mapvote[0] = 0; };
 bool vote(char *map, int reqmode, int sender) {
   strcpy_s(clients[sender].mapvote, map);
   clients[sender].modevote = reqmode;
-  int yes = 0, no = 0;
+  int total = 0, yes = 0;
   loopv(clients) if (clients[i].type != ST_EMPTY) {
+    total++;
     if (clients[i].mapvote[0]) {
       if (strcmp(clients[i].mapvote, map) == 0 &&
           clients[i].modevote == reqmode)
         yes++;
-      else
-        no++;
-    } else
-      no++;
+    }
   };
-  if (yes == 1 && no == 0)
-    return true;
   sprintf_sd(msg)("%s started a vote for %s on map %s (set map to vote)",
                   clients[sender].name, modestr(reqmode), map);
   sendservmsg(msg);
-  if (yes / (float)(yes + no) <= 0.5f)
-    return false;
-  sendservmsg("Vote passed");
-  resetvotes();
-  return true;
+  if (yes > total / 2) {
+    sendservmsg("Vote passed");
+    resetvotes();
+    return true;
+  }
+  return false;
 };
 
 void process(ENetPacket *packet, int sender) {
@@ -464,8 +461,10 @@ void process(ENetPacket *packet, int sender) {
       int reqmode = getint(p);
       if (reqmode < 0)
         reqmode = 0;
-      if (smapname[0] && !mapreload && !vote(text, reqmode, sender))
-        return;
+      if (smapname[0] && !mapreload) {
+        if (!clients[sender].rcon && !vote(text, reqmode, sender))
+          return;
+      }
       mapreload = false;
       if (maprotation.length() > 0) {
         mapRotationIndex = (mapRotationIndex + 1) % maprotation.length();
