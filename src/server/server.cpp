@@ -742,6 +742,35 @@ void serverslice(int seconds, unsigned int timeout) {
 
   resetserverifempty();
 
+  if (solovotetime && seconds >= solovotetime) {
+    solovotetime = 0;
+    mode = solovotemode;
+    strcpy_s(smapname, solovotemap);
+    minremain = timelimit ? timelimit : 10;
+    mapend = lastsec + minremain * 60;
+    interm = 0;
+    resetitems();
+    if (serverbot_count() > 0) {
+      int num = serverbot_count();
+      serverbot_clear();
+      serverbot_spawn(num);
+      loopv(clients) if (clients[i].type == ST_TCPIP) serverbot_sendinit(i);
+    }
+    ENetPacket *packet =
+        enet_packet_create(NULL, MAXTRANS, ENET_PACKET_FLAG_RELIABLE);
+    uchar *start = packet->data;
+    uchar *p = start + 2;
+    putint(p, SV_MAPCHANGE);
+    sendstring(smapname, p);
+    putint(p, mode);
+    *(ushort *)start = ENET_HOST_TO_NET_16(p - start);
+    enet_packet_resize(packet, p - start);
+    loopv(clients) if (clients[i].type != ST_EMPTY) send(i, packet);
+    if (packet->referenceCount == 0)
+      enet_packet_destroy(packet);
+    mapreload = false;
+  }
+
   serverbot_update();
   serverbot_broadcast();
 
