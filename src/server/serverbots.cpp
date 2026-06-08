@@ -780,11 +780,14 @@ static bool try_move_bot(serverbot &b, int diff, int move, int strafe) {
 
 void serverbot_update() {
   enet_uint32 now = enet_time_get();
-  if (now - lastthink < 50)
+  if (now - lastthink < 33)
     return;
   int diff = (int)(now - lastthink);
-  if (diff > 200)
-    diff = 200;
+  if (diff > 150) {
+    lastthink = now;
+    serverbot_broadcast();
+    return;
+  }
   lastthink = now;
 
   if (interm) {
