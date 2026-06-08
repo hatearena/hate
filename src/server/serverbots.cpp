@@ -89,7 +89,7 @@ void serverbot_broadcast() {
   if (!serverhost) return;
   loopi(numsbots) {
     serverbot &b = sbot[i];
-    ENetPacket *packet = enet_packet_create(NULL, 32, 0);
+    ENetPacket *packet = enet_packet_create(NULL, 40, 0);
     uchar *start = packet->data;
     uchar *p = start + 2;
     putint(p, SV_POS);
@@ -100,6 +100,9 @@ void serverbot_broadcast() {
     putint(p, (int)(b.yaw * DAF));
     putint(p, (int)(b.pitch * DAF));
     putint(p, (int)(b.roll * DAF));
+    putint(p, 0);
+    putint(p, 0);
+    putint(p, 0);
     putint(p, 0);
     *(ushort *)start = ENET_HOST_TO_NET_16(p - start);
     enet_packet_resize(packet, p - start);
@@ -115,11 +118,12 @@ void serverbot_sendinit(int cn) {
     return;
   loopi(numsbots) {
     serverbot &b = sbot[i];
-    ENetPacket *pkt = enet_packet_create(NULL, 96, ENET_PACKET_FLAG_RELIABLE);
+    ENetPacket *pkt = enet_packet_create(NULL, 128, ENET_PACKET_FLAG_RELIABLE);
     uchar *start = pkt->data;
     uchar *p = start + 2;
     putint(p, SV_POS);
     putint(p, b.cn);
+    putint(p, 0); putint(p, 0); putint(p, 0);
     putint(p, 0); putint(p, 0); putint(p, 0);
     putint(p, 0); putint(p, 0); putint(p, 0);
     putint(p, 0);
