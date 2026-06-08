@@ -219,7 +219,7 @@ void serverbot_update() {
       }
       continue;
     }
-    if (now - b.lastmove > 1000 + rnd(3000)) {
+    if (now - b.lastmove > 500 + rnd(2000)) {
       b.targetyaw = (float)rnd(360);
       b.lastmove = now;
     }
@@ -229,13 +229,17 @@ void serverbot_update() {
     else if (yd > 0) b.yaw += turnrate;
     else b.yaw -= turnrate;
     float rad = b.yaw / 180.0f * PI;
-    float nx = b.x + sinf(rad) * diff * 0.05f;
-    float ny = b.y + cosf(rad) * diff * 0.05f;
+    float nx = b.x + sinf(rad) * diff * 0.03f;
+    float ny = b.y + cosf(rad) * diff * 0.03f;
     if (nx >= 0 && ny >= 0 && nx < mapsize && ny < mapsize) {
       b.x = nx;
       b.y = ny;
     } else {
       b.targetyaw += 90.0f + rnd(90);
+      if (b.x < 0) b.x = 1;
+      if (b.y < 0) b.y = 1;
+      if (b.x >= mapsize) b.x = mapsize - 2;
+      if (b.y >= mapsize) b.y = mapsize - 2;
     }
   }
 }

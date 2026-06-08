@@ -101,6 +101,10 @@ void localservertoclient(uchar *buf,
       d->vel.y = getint(p) / DVF;
       d->vel.z = getint(p) / DVF;
       int f = getint(p);
+      if (cn >= BOT_CLIENT_BASE && d->maxspeed == 48.0f) {
+        entinmap(d);
+        d->maxspeed = 49.0f;
+      }
       d->strafe = (f & 3) == 3 ? -1 : f & 3;
       f >>= 2;
       d->move = (f & 3) == 3 ? -1 : f & 3;
