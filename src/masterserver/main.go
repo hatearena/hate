@@ -262,7 +262,11 @@ func (ms *MasterServer) handleRetrieve(w http.ResponseWriter, r *http.Request) {
 
 	var sb strings.Builder
 	for _, a := range servers {
-		fmt.Fprintf(&sb, "addserver %s\n", a)
+		host, _, err := net.SplitHostPort(a)
+		if err != nil {
+			continue
+		}
+		fmt.Fprintf(&sb, "addserver %s\n", host)
 	}
 
 	w.Header().Set("Content-Type", "text/plain")
