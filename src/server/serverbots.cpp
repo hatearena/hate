@@ -51,7 +51,7 @@ static clstate playerpos[MAXCLIENTS];
 static const float BOT_EYEHEIGHT = 3.2f;
 static const float BOT_ABOVEEYE = 0.7f;
 static const float BOT_RADIUS = 1.1f;
-static const float BOT_HIT_RADIUS = 1.5f;
+static const float BOT_HIT_RADIUS = 2.5f;
 static const float BOT_MAXSTEP = 1.0f;
 static const float BOT_ATTACK_RANGE = 80.0f;
 static const float BOT_ATTACK_RANGE_SQ = 6400.0f;
@@ -795,17 +795,21 @@ void serverbot_update() {
     lastammorefill = now;
     loopi(numsbots) {
       if (sbot[i].state == CS_ALIVE) {
-        if (sbot[i].ammo[GUN_SG] < 10)
-          sbot[i].ammo[GUN_SG] = 10;
-        if (sbot[i].ammo[GUN_NAILGUN] < 40)
-          sbot[i].ammo[GUN_NAILGUN] = 40;
-        if (sbot[i].ammo[GUN_CG] < 40)
-          sbot[i].ammo[GUN_CG] = 40;
-        if (sbot[i].ammo[GUN_RL] < 8)
-          sbot[i].ammo[GUN_RL] = 8;
-        if (sbot[i].ammo[GUN_RIFLE] < 8)
-          sbot[i].ammo[GUN_RIFLE] = 8;
-        sbot[i].ammo[GUN_CSAW] = 1;
+        if (mode == 4 || mode == 5) {
+          sbot[i].ammo[GUN_RIFLE] = 100;
+        } else {
+          if (sbot[i].ammo[GUN_SG] < 10)
+            sbot[i].ammo[GUN_SG] = 10;
+          if (sbot[i].ammo[GUN_NAILGUN] < 40)
+            sbot[i].ammo[GUN_NAILGUN] = 40;
+          if (sbot[i].ammo[GUN_CG] < 40)
+            sbot[i].ammo[GUN_CG] = 40;
+          if (sbot[i].ammo[GUN_RL] < 8)
+            sbot[i].ammo[GUN_RL] = 8;
+          if (sbot[i].ammo[GUN_RIFLE] < 8)
+            sbot[i].ammo[GUN_RIFLE] = 8;
+          sbot[i].ammo[GUN_CSAW] = 1;
+        }
       }
     }
   }
@@ -899,7 +903,9 @@ void serverbot_update() {
       }
       float realdist = sqrtf(bestdist);
 
-      if (bestdist < 64.0f && b.gunselect != GUN_CSAW) {
+      if (mode == 4 || mode == 5) {
+        b.gunselect = GUN_RIFLE;
+      } else if (bestdist < 64.0f && b.gunselect != GUN_CSAW) {
         b.gunselect = GUN_CSAW;
       } else if (b.gunselect == GUN_CSAW && realdist > 15.0f) {
         if (b.ammo[GUN_RL])
