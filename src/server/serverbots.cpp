@@ -1038,7 +1038,11 @@ void serverbot_update() {
             } else {
               b.yaw = b.targetyaw + 180;
               b.targetyaw = b.yaw;
-              b.movemode = 0;
+              b.lastmove = now;
+              if (!try_move_bot(b, diff, 1, 0))
+                b.movemode = 0;
+              else
+                b.movemode = 1;
             }
           }
         }
@@ -1189,7 +1193,11 @@ void serverbot_update() {
           } else {
             b.yaw = b.targetyaw + 180;
             b.targetyaw = b.yaw;
-            b.movemode = 0;
+            b.lastmove = now;
+            if (!try_move_bot(b, diff, 1, 0))
+              b.movemode = 0;
+            else
+              b.movemode = 1;
           }
         }
       }
