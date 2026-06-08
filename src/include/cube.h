@@ -212,15 +212,27 @@ enum {
   SV_RECVMAP,
   SV_SERVMSG,
   SV_ITEMLIST,
-  SV_BOTINIT,
-  SV_BOTPOS,
-  SV_BOTREMOVE,
-  SV_BOTDAMAGE,
-  SV_BOTSHOT,
   SV_EXT,
 };
 
 #define MAXBOTS 8
+#define BOT_CLIENT_BASE 200
+
+struct _ENetPeer;
+typedef struct _ENetPeer ENetPeer;
+
+enum { ST_EMPTY, ST_LOCAL, ST_TCPIP };
+
+struct client {
+  int type;
+  ENetPeer *peer;
+  string hostname;
+  string mapvote;
+  string name;
+  int modevote;
+  string uuid;
+  bool rcon;
+};
 
 enum { CS_ALIVE = 0, CS_DEAD, CS_LAGGED, CS_SPECTATOR };
 

@@ -5,48 +5,6 @@ extern bool c2sinit, senditemstoserver;
 extern string toservermap;
 extern string clientpassword;
 
-dvector serverbotents;
-
-static dynent *findserverbot(int id) {
-  loopv(serverbotents) {
-    if ((intptr_t)serverbotents[i]->enemy == id) return serverbotents[i];
-  }
-  return NULL;
-}
-
-static void updateserverbotpos(int id, float x, float y, float z, float yaw,
-                                float pitch, float roll, int state, int health,
-                                int gun) {
-  dynent *d = findserverbot(id);
-  if (!d) {
-    d = (dynent *)gp()->alloc(sizeof(dynent));
-    memset(d, 0, sizeof(dynent));
-    d->radius = 1.1f;
-    d->eyeheight = 3.2f;
-    d->aboveeye = 0.7f;
-    d->maxspeed = 48;
-    d->monsterstate = 1;
-    d->mtype = -2;
-    d->enemy = (dynent *)(intptr_t)id;
-    d->state = CS_ALIVE;
-    d->lifesequence = 0;
-    d->yaw = 270;
-    serverbotents.add(d);
-    printf("created server bot ent %d at %.0f,%.0f,%.0f\n", id, x, y, z);
-  }
-  d->o.x = x;
-  d->o.y = y;
-  d->o.z = z;
-  d->yaw = yaw;
-  d->pitch = pitch;
-  d->roll = roll;
-  d->state = state;
-  if (!d->onfloor) {
-    entinmap(d);
-    d->onfloor = true;
-  }
-}
-
 void neterr(char *s) {
   conoutf("Illegal network message: %s", s);
   disconnect();
@@ -362,82 +320,6 @@ void localservertoclient(uchar *buf,
       sgetstr();
       conoutf("%s", text);
       break;
-
-    case SV_BOTINIT: {
-      int id = getint(p);
-      sgetstr();
-      char bname[MAXTRANS];
-      strcpy_s(bname, text);
-      sgetstr();
-      if (!findserverbot(id)) {
-        dynent *d = (dynent *)gp()->alloc(sizeof(dynent));
-        memset(d, 0, sizeof(dynent));
-        d->radius = 1.1f;
-        d->eyeheight = 3.2f;
-        d->aboveeye = 0.7f;
-        d->maxspeed = 48;
-        d->monsterstate = 1;
-        d->mtype = -2;
-        d->enemy = (dynent *)(intptr_t)id;
-        d->state = CS_ALIVE;
-        d->lifesequence = 0;
-        strcpy_s(d->name, bname);
-        strcpy_s(d->team, text);
-        serverbotents.add(d);
-      };
-      break;
-    };
-
-    case SV_BOTPOS: {
-      int id = getint(p);
-      float x = getint(p) / DMF;
-      float y = getint(p) / DMF;
-      float z = getint(p) / DMF;
-      float yaw = getint(p) / DAF;
-      float pitch = getint(p) / DAF;
-      float roll = getint(p) / DAF;
-      int state = getint(p);
-      int health = getint(p);
-      int gun = getint(p);
-      updateserverbotpos(id, x, y, z, yaw, pitch, roll, state, health, gun);
-      break;
-    };
-
-    case SV_BOTREMOVE: {
-      int id = getint(p);
-      loopv(serverbotents) {
-        if ((intptr_t)serverbotents[i]->enemy == id) {
-          gp()->dealloc(serverbotents[i], sizeof(dynent));
-          serverbotents.remove(i);
-          break;
-        };
-      };
-      break;
-    };
-
-    case SV_BOTDAMAGE: {
-      int id = getint(p);
-      int target = getint(p);
-      int damage = getint(p);
-      if (target == clientnum) {
-        selfdamage(damage, -2, findserverbot(id));
-      };
-      break;
-    };
-
-    case SV_BOTSHOT: {
-      int id = getint(p);
-      vec from, to;
-      from.x = getint(p) / DMF;
-      from.y = getint(p) / DMF;
-      from.z = getint(p) / DMF;
-      to.x = getint(p) / DMF;
-      to.y = getint(p) / DMF;
-      to.z = getint(p) / DMF;
-      dynent *d = findserverbot(id);
-      if (d) shootv(d->gunselect, from, to, d, false);
-      break;
-    };
 
     case SV_EXT: // so we can messages without breaking previous
                  // clients/servers, if necessary

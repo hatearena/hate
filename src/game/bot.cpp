@@ -337,25 +337,6 @@ static void botaction(dynent *m) {
   moveplayer(m, 20, true);
 }
 
-void serverbotthink() {
-  loopv(serverbotents) {
-    dynent *b = serverbotents[i];
-    if (b->state == CS_DEAD) continue;
-    if (b->state == CS_ALIVE) {
-      if (m_infected && b->team[0] && !strcmp(b->team, "INFD")) {
-      } else if (lastmillis - lastammorefill > 15000) {
-        lastammorefill = lastmillis;
-        b->ammo[GUN_SG] = max(b->ammo[GUN_SG], 10);
-        b->ammo[GUN_NAILGUN] = max(b->ammo[GUN_NAILGUN], 40);
-        b->ammo[GUN_CG] = max(b->ammo[GUN_CG], 40);
-        b->ammo[GUN_RL] = max(b->ammo[GUN_RL], 8);
-        b->ammo[GUN_RIFLE] = max(b->ammo[GUN_RIFLE], 8);
-      }
-      botaction(b);
-    }
-  }
-}
-
 void botthink() {
   updategibs();
   loopv(bots) {
@@ -391,9 +372,6 @@ void botthink() {
 
 void botrender() {
   rendergibs();
-  static int rcount = 0;
-  if (serverbotents.length() && ++rcount < 10)
-    printf("botrender: rendering %d server bots at %.0f %.0f\n", serverbotents.length(), serverbotents[0]->o.x, serverbotents[0]->o.y);
   loopv(bots) {
     if (bots[i]->state == CS_DEAD)
       continue;
@@ -410,15 +388,6 @@ void botrender() {
     renderclient(bots[i], isteam(player1->team, bots[i]->team), mdl, false,
                  1.25f);
     bots[i]->maxspeed = saved;
-  }
-  loopv(serverbotents) {
-    if (serverbotents[i]->state == CS_DEAD)
-      continue;
-    float saved = serverbotents[i]->maxspeed;
-    serverbotents[i]->maxspeed = 20.0f;
-    const char *mdl = "monster/player";
-    renderclient(serverbotents[i], true, mdl, false, 1.25f);
-    serverbotents[i]->maxspeed = saved;
   }
 }
 

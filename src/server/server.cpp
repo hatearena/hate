@@ -1,19 +1,6 @@
 #include "../include/cube.h"
 #include <cstdint>
 
-enum { ST_EMPTY, ST_LOCAL, ST_TCPIP };
-
-struct client {
-  int type;
-  ENetPeer *peer;
-  string hostname;
-  string mapvote;
-  string name;
-  int modevote;
-  string uuid;
-  bool rcon;
-};
-
 vector<client> clients;
 int maxclients = 8;
 string smapname;
@@ -410,27 +397,10 @@ void process(ENetPacket *packet, int sender) {
           int n = atoi(text + 8);
           if (n < 1) n = 1;
           serverbot_spawn(n);
-          loopi(serverbot_count()) {
-            int id = serverbot_getid(i);
-            if (id < 0) continue;
-            const char *name = serverbot_name(i);
-            if (!name) continue;
-            ENetPacket *pkt = enet_packet_create(NULL, 64, ENET_PACKET_FLAG_RELIABLE);
-            uchar *start = pkt->data;
-            uchar *pp = start + 2;
-            putint(pp, SV_BOTINIT);
-            putint(pp, id);
-            sendstring((char *)name, pp);
-            sendstring((char *)"", pp);
-            *(ushort *)start = ENET_HOST_TO_NET_16(pp - start);
-            enet_packet_resize(pkt, pp - start);
-            loopv(clients) {
-              if (clients[i].type == ST_TCPIP)
-                enet_peer_send(clients[i].peer, 0, pkt);
-            }
-          };
           sprintf_sd(msg)("Spawned %d bot(s).", n);
           sendservmsg(msg);
+          loopv(clients) if (clients[i].type == ST_TCPIP)
+            serverbot_sendinit(i);
           return;
         } else if (strncmp(text + 1, "kick ", 5) == 0) {
           if (!clients[sender].rcon) {
@@ -537,13 +507,6 @@ void process(ENetPacket *packet, int sender) {
       break;
     };
 
-    case SV_BOTDAMAGE: {
-      int id = getint(p);
-      int damage = getint(p);
-      serverbot_damage(id, damage);
-      break;
-    };
-
     case SV_PING:
       send2(false, cn, SV_PONG, getint(p));
       break;
@@ -613,19 +576,10 @@ void send_welcome(int n) {
     loopv(sents) if (sents[i].spawned) putint(p, i);
     putint(p, -1);
   };
-  loopi(serverbot_count()) {
-    int id = serverbot_getid(i);
-    if (id < 0) continue;
-    const char *name = serverbot_name(i);
-    if (!name) continue;
-    putint(p, SV_BOTINIT);
-    putint(p, id);
-    sendstring((char *)name, p);
-    sendstring((char *)"", p);
-  };
   *(ushort *)start = ENET_HOST_TO_NET_16(p - start);
   enet_packet_resize(packet, p - start);
   send(n, packet);
+  serverbot_sendinit(n);
 };
 
 void multicast(ENetPacket *packet, int sender) {
@@ -677,43 +631,6 @@ void resetserverifempty() {
 int nonlocalclients = 0;
 int lastconnect = 0;
 
-static void broadcastbots() {
-  if (!serverhost) return;
-  static int once = 0;
-  if (serverbot_count() && !once) { once = 1; printf("broadcasting %d bots\n", serverbot_count()); };
-  loopi(serverbot_count()) {
-    int id = serverbot_getid(i);
-    if (id < 0) continue;
-    float x, y, z, yaw, pitch, roll;
-    serverbot_getpos(i, x, y, z, yaw, pitch, roll);
-    int state = serverbot_getstate(i);
-    int health = serverbot_gethealth(i);
-    int gun = serverbot_getgun(i);
-
-    ENetPacket *packet = enet_packet_create(NULL, 64, 0);
-    uchar *start = packet->data;
-    uchar *p = start + 2;
-    putint(p, SV_BOTPOS);
-    putint(p, id);
-    putint(p, (int)(x * DMF));
-    putint(p, (int)(y * DMF));
-    putint(p, (int)(z * DMF));
-    putint(p, (int)(yaw * DAF));
-    putint(p, (int)(pitch * DAF));
-    putint(p, (int)(roll * DAF));
-    putint(p, state);
-    putint(p, health);
-    putint(p, gun);
-    *(ushort *)start = ENET_HOST_TO_NET_16(p - start);
-    enet_packet_resize(packet, p - start);
-
-    loopv(clients) {
-      if (clients[i].type == ST_TCPIP)
-        enet_peer_send(clients[i].peer, 0, packet);
-    }
-  }
-}
-
 void serverslice(int seconds, unsigned int timeout) {
   loopv(sents) {
     if (sents[i].spawnsecs && (sents[i].spawnsecs -= seconds - lastsec) <= 0) {
@@ -739,7 +656,7 @@ void serverslice(int seconds, unsigned int timeout) {
   resetserverifempty();
 
   serverbot_update();
-  broadcastbots();
+  serverbot_broadcast();
 
   if (!isdedicated)
     return;
