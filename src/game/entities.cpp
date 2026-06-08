@@ -37,7 +37,7 @@ void renderentities() {
       if (OUTBORD(e.x, e.y))
         continue;
       if (e.type != CARROT) {
-        if (!e.spawned && e.type != TELEPORT && e.type != I_ENERGY)
+        if (!e.spawned && e.type != TELEPORT)
           continue;
         if (e.type < I_SHELLS || e.type > TELEPORT)
           continue;
@@ -91,7 +91,7 @@ struct itemstat {
   int add, max, sound;
 } itemstats[] = {
     10,   50,   S_ITEMAMMO,   20,  100,  S_ITEMAMMO,   5,   25,   S_ITEMAMMO,
-    5,    25,   S_ITEMAMMO,   15,  75,   S_ITEMAMMO,   20,  100,  S_ITEMAMMO,
+    5,    25,   S_ITEMAMMO,   15,  75,   S_ITEMAMMO,   20,  180,  S_ITEMAMMO,
     25,   100,  S_ITEMHEALTH, 50,  200,  S_ITEMHEALTH, 100, 100,  S_ITEMARMOUR,
     150,  150,  S_ITEMARMOUR, 20000, 30000, S_ITEMPUP,
 };
@@ -224,6 +224,9 @@ void pickup(int n, dynent *d) {
     break;
   case I_NAILS:
     additem(n, d->ammo[5], ammo);
+    break;
+  case I_ENERGY:
+    additem(n, d->ammo[6], ammo);
     break;
   case I_HEALTH:
     additem(n, d->health, np * 5);
