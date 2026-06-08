@@ -779,7 +779,6 @@ void serverslice(int seconds, unsigned int timeout) {
   }
 
   serverbot_update();
-  serverbot_broadcast();
 
   if (!isdedicated)
     return;

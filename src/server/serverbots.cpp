@@ -371,10 +371,6 @@ void serverbot_damage(int cn, int damage, int attacker) {
 void serverbot_broadcast() {
   if (!serverhost)
     return;
-  static enet_uint32 lastbc = 0;
-  if (enet_time_get() - lastbc < 40)
-    return;
-  lastbc = enet_time_get();
   loopi(numsbots) {
     serverbot &b = sbot[i];
     ENetPacket *packet = enet_packet_create(NULL, 40, 0);
@@ -791,8 +787,10 @@ void serverbot_update() {
     diff = 200;
   lastthink = now;
 
-  if (interm)
+  if (interm) {
+    serverbot_broadcast();
     return;
+  }
 
   static enet_uint32 lastammorefill = 0;
   if (now - lastammorefill > 15000) {
@@ -1205,4 +1203,5 @@ void serverbot_update() {
     if (!b.onfloor)
       b.movemode = 0;
   }
+  serverbot_broadcast();
 }
