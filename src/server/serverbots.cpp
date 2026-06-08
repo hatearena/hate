@@ -361,33 +361,63 @@ static bool intersect_bot(serverbot &b, vec &from, vec &to) {
 
 void serverbot_hitscan(int gun, vec &from, vec &to, int sender) {
   if (sender < 0 || sender >= MAXCLIENTS) return;
+  if (gun == GUN_SG) {
+    float dx = to.x - from.x;
+    float dy = to.y - from.y;
+    float dz = to.z - from.z;
+    float dist = sqrtf(dx*dx + dy*dy + dz*dz);
+    if (dist < 1.0f) dist = 1.0f;
+    float udx = dx / dist, udy = dy / dist, udz = dz / dist;
+    float rightx, righty, rightz;
+    if (fabs(udx) < 0.9f) {
+      rightx = -udy; righty = udx; rightz = 0;
+    } else {
+      rightx = 0; righty = -udz; rightz = udy;
+    }
+    float rlen = sqrtf(rightx*rightx + righty*righty + rightz*rightz);
+    rightx /= rlen; righty /= rlen; rightz /= rlen;
+    float upx = udy * rightz - udz * righty;
+    float upy = udz * rightx - udx * rightz;
+    float upz = udx * righty - udy * rightx;
+    const int SGRAYS = 20;
+    const float SGSPREAD = 2.0f * PI / 180.0f;
+    loopi(numsbots) {
+      serverbot &b = sbot[i];
+      if (b.state != CS_ALIVE) continue;
+      int totaldamage = 0;
+      loopk(SGRAYS) {
+        float spreadx = (rnd(101) - 50) / 50.0f * SGSPREAD;
+        float spready = (rnd(101) - 50) / 50.0f * SGSPREAD;
+        float rx = udx + rightx * spreadx + upx * spready;
+        float ry = udy + righty * spreadx + upy * spready;
+        float rz = udz + rightz * spreadx + upz * spready;
+        float rdist = sqrtf(rx*rx + ry*ry + rz*rz);
+        rx /= rdist; ry /= rdist; rz /= rdist;
+        vec rto;
+        rto.x = from.x + rx * dist;
+        rto.y = from.y + ry * dist;
+        rto.z = from.z + rz * dist;
+        if (intersect_bot(b, from, rto)) totaldamage += 10;
+      }
+      if (totaldamage > 0) {
+        serverbot_damage(b.cn, totaldamage, sender);
+        break;
+      }
+    }
+    return;
+  }
   loopi(numsbots) {
     serverbot &b = sbot[i];
     if (b.state != CS_ALIVE) continue;
     if (intersect_bot(b, from, to)) {
       int damage = 10;
       switch (gun) {
-      case GUN_CSAW:
-        damage = 20;
-        break;
-      case GUN_SG:
-        damage = 10;
-        break;
-      case GUN_CG:
-        damage = 30;
-        break;
-      case GUN_RL:
-        damage = 120;
-        break;
-      case GUN_RIFLE:
-        damage = 100;
-        break;
-      case GUN_NAILGUN:
-        damage = 25;
-        break;
-      case GUN_LIGHTGUN:
-        damage = 15;
-        break;
+      case GUN_CSAW:  damage = 20;  break;
+      case GUN_CG:    damage = 30;  break;
+      case GUN_RL:    damage = 120; break;
+      case GUN_RIFLE: damage = 100; break;
+      case GUN_NAILGUN: damage = 25; break;
+      case GUN_LIGHTGUN: damage = 15; break;
       }
       serverbot_damage(b.cn, damage, sender);
       break;
@@ -673,24 +703,34 @@ void serverbot_update() {
       if (realdist < 4 && b.gunselect != GUN_CSAW) {
         move = -1;
       } else if (realdist < 12) {
-        strafe = rnd(3) - 1;
+        strafe = (b.lastmove & 1) ? 1 : -1;
+        if (now - b.lastmove > 800 + rnd(400)) {
+          b.lastmove = now;
+        }
       }
       if (!try_move_bot(b, diff, move, strafe)) {
         b.targetyaw += rnd(2) ? 90.0f : -90.0f;
       }
 
+      float yaw_to_target = enemyyaw - b.yaw;
+      if (yaw_to_target > 180.0f)  yaw_to_target -= 360.0f;
+      if (yaw_to_target < -180.0f) yaw_to_target += 360.0f;
+
       int weapondelay = BOT_WEAPON_DELAYS[b.gunselect];
       int reactdelay = 200 + rnd(200);
       if (weapondelay > reactdelay) reactdelay = weapondelay;
-      if (now - b.lastattack > (enet_uint32)reactdelay) {
+      if (fabs(yaw_to_target) < 30.0f &&
+          now - b.lastattack > (enet_uint32)reactdelay) {
         b.lastattack = now;
         b.lastaction = now;
 
+        float botyawrad = b.yaw / 180.0f * PI;
+        float botpitchrad = b.pitch / 180.0f * PI;
+
         if (b.gunselect == GUN_CSAW && realdist < 2.5f) {
           if (b.ammo[GUN_CSAW]) b.ammo[GUN_CSAW]--;
-          float fromx = b.x, fromy = b.y, fromz = b.z - 0.2f;
-          float ttx = b.x + sinf(enemyyaw / 180.0f * PI) * 2.0f;
-          float tty = b.y + cosf(enemyyaw / 180.0f * PI) * 2.0f;
+          float ttx = b.x + sinf(botyawrad) * 2.0f;
+          float tty = b.y + cosf(botyawrad) * 2.0f;
           send_bot_shot(b, ttx, tty, b.z - 0.2f);
           int dmg = BOT_WEAPON_DAMAGES[GUN_CSAW];
           if (target_is_player) {
@@ -701,18 +741,18 @@ void serverbot_update() {
         } else if (b.gunselect != GUN_CSAW) {
           if (b.ammo[b.gunselect]) b.ammo[b.gunselect]--;
           float aimspread = 12.0f;
-          float attackyaw = enemyyaw + (rnd(101) - 50) / 100.0f * aimspread;
-          float attackpitch = enemypitch + (rnd(101) - 50) / 100.0f * aimspread * 0.5f;
-          float rad2 = attackyaw / 180.0f * PI;
-          float pitchrad = attackpitch / 180.0f * PI;
+          float attackyaw = b.yaw + (rnd(101) - 50) / 100.0f * aimspread;
+          float attackpitch = b.pitch + (rnd(101) - 50) / 100.0f * aimspread * 0.5f;
+          float arad = attackyaw / 180.0f * PI;
+          float aprad = attackpitch / 180.0f * PI;
           float fromx = b.x;
           float fromy = b.y;
           float fromz = b.z - 0.2f;
           float shotdist = realdist;
           if (shotdist < 2.0f) shotdist = 2.0f;
-          float tox = fromx + sinf(rad2) * cosf(pitchrad) * shotdist * 2.0f;
-          float toy = fromy + cosf(rad2) * cosf(pitchrad) * shotdist * 2.0f;
-          float toz = fromz + sinf(pitchrad) * shotdist * 2.0f;
+          float tox = fromx + sinf(arad) * cosf(aprad) * shotdist * 2.0f;
+          float toy = fromy + cosf(arad) * cosf(aprad) * shotdist * 2.0f;
+          float toz = fromz + sinf(aprad) * shotdist * 2.0f;
           send_bot_shot(b, tox, toy, toz);
           int dmg = BOT_WEAPON_DAMAGES[b.gunselect];
           if (target_is_player) {
