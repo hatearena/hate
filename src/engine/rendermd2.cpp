@@ -202,6 +202,8 @@ void md2::render(vec &light, int frame, int range, float x, float y, float z,
     vec *verts2 = mverts[fr2];
 
     if (!verts1 || !verts2) {
+      static int vcnt = 0;
+      if (++vcnt < 5) conoutf("rendermodel NULL verts: fr1=%d fr2=%d numFrames=%d", fr1, fr2, numFrames);
       glPopMatrix();
       return;
     }

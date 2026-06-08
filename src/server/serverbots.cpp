@@ -63,7 +63,7 @@ static void loadspawns() {
     if (e.type == PLAYERSTART && numspawns < MAXBOTS) {
       spawnx[numspawns] = (float)e.x;
       spawny[numspawns] = (float)e.y;
-      spawnz[numspawns] = 4.0f;
+      spawnz[numspawns] = (float)e.z;
       numspawns++;
     };
   };
@@ -76,7 +76,7 @@ void serverbot_spawn(int count) {
   if (count < 1) count = 1;
   loadspawns();
   if (numspawns == 0) {
-    spawnx[0] = spawny[0] = 64; spawnz[0] = 4;
+    spawnx[0] = spawny[0] = 64; spawnz[0] = 0;
     numspawns = 1;
   };
   int n = 0;
@@ -207,7 +207,7 @@ void serverbot_update() {
       if (now - b.lastaction > 5000) {
         loadspawns();
         if (numspawns == 0) {
-          spawnx[0] = spawny[0] = 64; spawnz[0] = 4; numspawns = 1;
+          spawnx[0] = spawny[0] = 64; spawnz[0] = 0; numspawns = 1;
         };
         int si = rnd(numspawns);
         b.x = spawnx[si];
