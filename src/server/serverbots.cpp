@@ -1072,7 +1072,9 @@ void serverbot_update() {
       float abs_yaw = fabs(yaw_to_target);
 
       int move = 0, strafe = 0;
-      if (abs_yaw < 30.0f) {
+      if (in_escape_cooldown) {
+        move = 1;
+      } else if (abs_yaw < 30.0f) {
         move = 1;
       } else if (abs_yaw > 45.0f && realdist > 4.0f) {
         strafe = (yaw_to_target > 0) ? 1 : -1;
