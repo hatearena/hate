@@ -177,7 +177,7 @@ enum {
 #define MAXTRANS 5000  // max amount of data to swallow in 1 go
 #define CUBE_SERVER_PORT 28765
 #define CUBE_SERVINFO_PORT 28766
-#define PROTOCOL_VERSION 123 // bump when protocol changes
+#define PROTOCOL_VERSION 122 // bump when protocol changes
 #define GAME_VERSION "0.0.2"
 
 // network messages codes, c2s, c2c, s2c
@@ -237,8 +237,7 @@ struct client {
   bool rcon;
   vec o;
   float yaw, pitch;
-  int state;
-  int lifesequence, health, armour;
+  int state, lifesequence;
 };
 
 enum { CS_ALIVE = 0, CS_DEAD, CS_LAGGED, CS_SPECTATOR };

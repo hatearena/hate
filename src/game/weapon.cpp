@@ -201,9 +201,8 @@ void hit(int target, int damage, dynent *d, dynent *at) {
     botpain(d, damage, at);
   else if (d->monsterstate)
     monsterpain(d, damage, at);
-  else if (at && at->gunselect != GUN_SG && at->gunselect != GUN_CG &&
-           at->gunselect != GUN_RIFLE && at->gunselect != GUN_NAILGUN &&
-           at->gunselect != GUN_LIGHTGUN) {
+  else if (at && (at->gunselect == GUN_RL || at->gunselect == GUN_FIREBALL ||
+           at->gunselect == GUN_ICEBALL || at->gunselect == GUN_SLIMEBALL)) {
     addmsg(1, 4, SV_DAMAGE, target, damage, d->lifesequence);
     playsound(S_PAIN1 + rnd(5), &d->o);
   } else {

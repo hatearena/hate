@@ -296,8 +296,10 @@ void otherplayers() {
           d->o.y += (bot_target[idx].y - d->o.y) * t;
           d->o.z += (bot_target[idx].z - d->o.z) * t;
           float yd = bot_yaw_target[idx] - d->yaw;
-          if (yd > 180.0f) yd -= 360.0f;
-          if (yd < -180.0f) yd += 360.0f;
+          if (yd > 180.0f)
+            yd -= 360.0f;
+          if (yd < -180.0f)
+            yd += 360.0f;
           d->yaw += yd * minf(1.0f, elapsed / 50.0f);
         }
       } else {
@@ -723,8 +725,11 @@ void selfdamage(int damage, int actor, dynent *act) {
   };
   if ((player1->health -= damage) <= 0) {
     if (actor == -2) {
-      conoutf("%s fragged %s", act->name, player1->name);
-      if (act->monsterstate && act->mtype == -1)
+      if (act && act->name[0])
+        conoutf("%s fragged %s", act->name, player1->name);
+      else
+        conoutf("<Bogus> fragged %s", player1->name);
+      if (act && act->monsterstate && act->mtype == -1)
         act->frags++;
     } else if (actor == -1) {
       actor = getclientnum();
@@ -740,12 +745,14 @@ void selfdamage(int damage, int actor, dynent *act) {
       player1->suicides++;
     } else {
       dynent *a = getclient(actor);
-      if (a) {
+      if (a && a->name[0]) {
         if (isteam(a->team, player1->team)) {
           conoutf("%s fragged a teammate (%s)", a->name, player1->name);
         } else {
           conoutf("%s fragged %s", a->name, player1->name);
         };
+      } else {
+        conoutf("<Bogus> (%d) fragged %s", actor, player1->name);
       };
     };
     if (m_infected && strcmp(player1->team, "INFD") == 0) {
