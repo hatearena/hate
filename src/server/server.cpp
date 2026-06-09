@@ -920,6 +920,7 @@ void serverslice(int seconds, unsigned int timeout) {
       if (moderotation.length() > mapRotationIndex)
         mode = moderotation[mapRotationIndex];
     }
+    fprintf(stderr, "INTERMISSION: rotating to map=%s mode=%d index=%d rotlen=%d\n", smapname, mode, mapRotationIndex, maprotation.length());
     loopv(clients) if (clients[i].type != ST_EMPTY) {
       ENetPacket *mappkt =
           enet_packet_create(NULL, MAXTRANS, ENET_PACKET_FLAG_RELIABLE);
