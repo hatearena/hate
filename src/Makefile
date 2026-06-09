@@ -45,6 +45,7 @@ ifeq ($(PLATFORM),windows)
 	    -L$(MSYS2_PREFIX_WIN)/lib \
 	    -mconsole \
 	    -lenet \
+	    -lz \
 	    -lws2_32
 
 else
