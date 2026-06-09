@@ -197,10 +197,12 @@ void loadserverconf() {
     else if (strcmp(key, "name") == 0)
       strcpy_s(servername, vbuf);
     else if (strcmp(key, "maprotation") == 0) {
-      for (char *s = vstart; *s; s++)
+      char rawline[_MAXDEFSTR];
+      strcpy_s(rawline, p + strlen(key));
+      for (char *s = rawline; *s; s++)
         if (*s == '"')
           *s = ' ';
-      char *tok = vstart;
+      char *tok = rawline;
       while (*tok) {
         while (*tok == ' ' || *tok == ',')
           tok++;
