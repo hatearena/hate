@@ -197,7 +197,14 @@ void loadserverconf() {
       strcpy_s(servername, vbuf);
     else if (strcmp(key, "maprotation") == 0) {
       char temp[_MAXDEFSTR];
-      strcpy_s(temp, vbuf);
+      char *src = vstart;
+      if (*src == '"') src++;
+      int ti = 0;
+      while (*src && ti < _MAXDEFSTR - 1) {
+        temp[ti++] = *src;
+        src++;
+      }
+      temp[ti] = 0;
       char *tok = temp;
       while (*tok) {
         while (*tok == ' ' || *tok == ',' || *tok == '"')
