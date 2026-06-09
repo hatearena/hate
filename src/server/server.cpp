@@ -28,6 +28,7 @@ int cfg_gamemode = -1;
 vector<char *> maprotation;
 vector<int> moderotation;
 int map_rotation_index = 0;
+int rotation_done = 0;
 
 void restoreserverstate(vector<entity> &ents) {
   loopv(sents) {
@@ -540,7 +541,8 @@ void process(ENetPacket *packet, int sender) {
         }
       }
       mapreload = false;
-      if (maprotation.length() > 0 && smapname[0]) {
+      if (maprotation.length() > 0 && smapname[0] && rotation_done != lastsec) {
+        rotation_done = lastsec;
         map_rotation_index = (map_rotation_index + 1) % maprotation.length();
         strcpy_s(smapname, maprotation[map_rotation_index]);
         if (moderotation.length() > map_rotation_index) {
@@ -928,6 +930,7 @@ void serverslice(int seconds, unsigned int timeout) {
       if (moderotation.length() > map_rotation_index)
         mode = moderotation[map_rotation_index];
     }
+    rotation_done = seconds;
     fprintf(stderr,
             "INTERMISSION: rotating to map=%s mode=%d index=%d rotlen=%d\n",
             smapname, mode, map_rotation_index, maprotation.length());
