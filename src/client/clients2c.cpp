@@ -5,6 +5,10 @@ extern bool c2sinit, senditemstoserver;
 extern string toservermap;
 extern string clientpassword;
 
+vec bot_target[MAXBOTS];
+float bot_yaw_target[MAXBOTS];
+int bot_target_time[MAXBOTS];
+
 void neterr(char *s) {
   conoutf("Illegal network message: %s", s);
   disconnect();
@@ -97,10 +101,18 @@ void localservertoclient(uchar *buf,
       float ny = getint(p) / DMF;
       float nz = getint(p) / DMF;
       if (cn >= BOT_CLIENT_BASE) {
-        float lerp = minf(1.0f, (lastmillis - d->lastupdate) / 50.0f);
-        d->o.x += (nx - d->o.x) * lerp;
-        d->o.y += (ny - d->o.y) * lerp;
-        d->o.z += (nz - d->o.z) * lerp;
+        int idx = cn - BOT_CLIENT_BASE;
+        if (idx >= 0 && idx < MAXBOTS) {
+          if (!bot_target_time[idx]) {
+            d->o.x = nx;
+            d->o.y = ny;
+            d->o.z = nz;
+          }
+          bot_target[idx].x = nx;
+          bot_target[idx].y = ny;
+          bot_target[idx].z = nz;
+          bot_target_time[idx] = lastmillis;
+        }
       } else {
         d->o.x = nx;
         d->o.y = ny;
@@ -108,12 +120,9 @@ void localservertoclient(uchar *buf,
       }
       float nyaw = getint(p) / DAF;
       if (cn >= BOT_CLIENT_BASE) {
-        float yd = nyaw - d->yaw;
-        if (yd > 180.0f)
-          yd -= 360.0f;
-        if (yd < -180.0f)
-          yd += 360.0f;
-        d->yaw += yd * 0.8f;
+        int idx = cn - BOT_CLIENT_BASE;
+        if (idx >= 0 && idx < MAXBOTS)
+          bot_yaw_target[idx] = nyaw;
       } else {
         d->yaw = nyaw;
       }

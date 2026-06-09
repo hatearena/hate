@@ -4,6 +4,10 @@ int nextmode = 0;
 int infected_picktime = 0;
 VAR(gamemode, 1, 0, 0);
 
+extern vec bot_target[MAXBOTS];
+extern float bot_yaw_target[MAXBOTS];
+extern int bot_target_time[MAXBOTS];
+
 void mode(int n) { addmsg(1, 2, SV_GAMEMODE, nextmode = n); };
 COMMAND(mode, ARG_1INT);
 
@@ -271,6 +275,8 @@ void zapdynent(dynent *&d) {
 
 extern int democlientnum;
 
+static inline float minf(float a, float b) { return a < b ? a : b; }
+
 void otherplayers() {
   loopv(players) if (players[i]) {
     const int lagtime = lastmillis - players[i]->lastupdate;
@@ -282,7 +288,18 @@ void otherplayers() {
         (!demoplayback || i != democlientnum)) {
       if (i >= BOT_CLIENT_BASE) {
         dynent *d = players[i];
-        moveplayer(d, 2, false);
+        int idx = i - BOT_CLIENT_BASE;
+        if (idx >= 0 && idx < MAXBOTS && bot_target_time[idx]) {
+          int elapsed = lastmillis - bot_target_time[idx];
+          float t = minf(1.0f, elapsed / 33.0f);
+          d->o.x += (bot_target[idx].x - d->o.x) * t;
+          d->o.y += (bot_target[idx].y - d->o.y) * t;
+          d->o.z += (bot_target[idx].z - d->o.z) * t;
+          float yd = bot_yaw_target[idx] - d->yaw;
+          if (yd > 180.0f) yd -= 360.0f;
+          if (yd < -180.0f) yd += 360.0f;
+          d->yaw += yd * minf(1.0f, elapsed / 50.0f);
+        }
       } else {
         moveplayer(players[i], 2, false);
       }
