@@ -578,7 +578,7 @@ void process(ENetPacket *packet, int sender) {
       getint(p);
       getint(p); // velocity
       int flags = getint(p);
-      int pstate = (flags >> 3) & 3;
+      int pstate = (flags >> 5) & 3;
       clients[cn].o.x = px;
       clients[cn].o.y = py;
       clients[cn].o.z = pz;
