@@ -27,7 +27,7 @@ char logfile_str[_MAXDEFSTR] = "";
 int cfg_gamemode = -1;
 vector<char *> maprotation;
 vector<int> moderotation;
-int mapRotationIndex = -1;
+int mapRotationIndex = 0;
 
 void restoreserverstate(vector<entity> &ents) {
   loopv(sents) {
@@ -558,7 +558,8 @@ void process(ENetPacket *packet, int sender) {
         serverbot_spawn(botcount);
       }
       loopv(clients) if (clients[i].type != ST_EMPTY) {
-        ENetPacket *mappkt = enet_packet_create(NULL, MAXTRANS, ENET_PACKET_FLAG_RELIABLE);
+        ENetPacket *mappkt =
+            enet_packet_create(NULL, MAXTRANS, ENET_PACKET_FLAG_RELIABLE);
         uchar *ms = mappkt->data, *mp = ms + 2;
         putint(mp, SV_MAPCHANGE);
         sendstring(smapname, mp);
@@ -566,7 +567,8 @@ void process(ENetPacket *packet, int sender) {
         *(ushort *)ms = ENET_HOST_TO_NET_16(mp - ms);
         enet_packet_resize(mappkt, mp - ms);
         send(i, mappkt);
-        if (mappkt->referenceCount == 0) enet_packet_destroy(mappkt);
+        if (mappkt->referenceCount == 0)
+          enet_packet_destroy(mappkt);
       }
       loopv(clients) if (clients[i].type == ST_TCPIP) serverbot_sendinit(i);
       return;
@@ -657,8 +659,11 @@ void process(ENetPacket *packet, int sender) {
 
       if (gun == GUN_SG || gun == GUN_CG || gun == GUN_RIFLE ||
           gun == GUN_NAILGUN || gun == GUN_LIGHTGUN) {
-        int qdam = gun == GUN_RIFLE ? 100 : gun == GUN_SG ? 10 :
-                   gun == GUN_CG ? 30 : gun == GUN_NAILGUN ? 25 : 15;
+        int qdam = gun == GUN_RIFLE     ? 100
+                   : gun == GUN_SG      ? 10
+                   : gun == GUN_CG      ? 30
+                   : gun == GUN_NAILGUN ? 25
+                                        : 15;
         vec sg[20];
         int numrays = 1;
         if (gun == GUN_SG) {
@@ -678,9 +683,12 @@ void process(ENetPacket *packet, int sender) {
           };
         };
         loopv(clients) {
-          if (i == sender || clients[i].type == ST_EMPTY) continue;
-          if (clients[i].state != CS_ALIVE) continue;
-          if (i >= BOT_CLIENT_BASE) continue;
+          if (i == sender || clients[i].type == ST_EMPTY)
+            continue;
+          if (clients[i].state != CS_ALIVE)
+            continue;
+          if (i >= BOT_CLIENT_BASE)
+            continue;
 
           float radius = 1.1f, eyeheight = 3.2f, aboveeye = 0.7f;
           vec &o = clients[i].o;
@@ -696,10 +704,12 @@ void process(ENetPacket *packet, int sender) {
                 vsub(w, from);
                 float c1 = dotprod(w, v);
                 vec *pp;
-                if (c1 <= 0) pp = &from;
+                if (c1 <= 0)
+                  pp = &from;
                 else {
                   float c2 = dotprod(v, v);
-                  if (c2 <= c1) pp = &ray;
+                  if (c2 <= c1)
+                    pp = &ray;
                   else {
                     float ff = c1 / c2;
                     vmul(v, ff);
@@ -711,7 +721,8 @@ void process(ENetPacket *packet, int sender) {
                       pp->y <= o.y + radius && pp->y >= o.y - radius &&
                       pp->z <= o.z + aboveeye && pp->z >= o.z - eyeheight;
               };
-              if (hit) damage += qdam;
+              if (hit)
+                damage += qdam;
             };
           } else {
             vec v = to, w = o;
@@ -719,10 +730,12 @@ void process(ENetPacket *packet, int sender) {
             vsub(w, from);
             float c1 = dotprod(w, v);
             vec *pp;
-            if (c1 <= 0) pp = &from;
+            if (c1 <= 0)
+              pp = &from;
             else {
               float c2 = dotprod(v, v);
-              if (c2 <= c1) pp = &to;
+              if (c2 <= c1)
+                pp = &to;
               else {
                 float ff = c1 / c2;
                 vmul(v, ff);
@@ -736,9 +749,11 @@ void process(ENetPacket *packet, int sender) {
               damage = qdam;
           };
           if (damage > 0) {
-            if (clients[sender].team[0] && clients[i].team[0] && !strcmp(clients[sender].team, clients[i].team))
+            if (clients[sender].team[0] && clients[i].team[0] &&
+                !strcmp(clients[sender].team, clients[i].team))
               continue;
-            ENetPacket *dmgpkt = enet_packet_create(NULL, 64, ENET_PACKET_FLAG_RELIABLE);
+            ENetPacket *dmgpkt =
+                enet_packet_create(NULL, 64, ENET_PACKET_FLAG_RELIABLE);
             uchar *dpkt = dmgpkt->data;
             uchar *dp = dpkt + 2;
             putint(dp, SV_POS);
@@ -904,19 +919,21 @@ void serverslice(int seconds, unsigned int timeout) {
       strcpy_s(smapname, maprotation[mapRotationIndex]);
       if (moderotation.length() > mapRotationIndex)
         mode = moderotation[mapRotationIndex];
-      fprintf(stderr, "ROTATION: index=%d map=%s mode=%d\n", mapRotationIndex, smapname, mode);
-    } else
-      fprintf(stderr, "ROTATION: no maprotation set (len=%d)\n", maprotation.length());
+    }
     loopv(clients) if (clients[i].type != ST_EMPTY) {
-      ENetPacket *mappkt = enet_packet_create(NULL, MAXTRANS, ENET_PACKET_FLAG_RELIABLE);
+      ENetPacket *mappkt =
+          enet_packet_create(NULL, MAXTRANS, ENET_PACKET_FLAG_RELIABLE);
       uchar *ms = mappkt->data, *mp = ms + 2;
       putint(mp, SV_MAPCHANGE);
       sendstring(smapname, mp);
       putint(mp, mode);
       *(ushort *)ms = ENET_HOST_TO_NET_16(mp - ms);
       enet_packet_resize(mappkt, mp - ms);
-      for (int k = 0; k < clients.length(); k++) if (clients[k].type != ST_EMPTY) send(k, mappkt);
-      if (mappkt->referenceCount == 0) enet_packet_destroy(mappkt);
+      for (int k = 0; k < clients.length(); k++)
+        if (clients[k].type != ST_EMPTY)
+          send(k, mappkt);
+      if (mappkt->referenceCount == 0)
+        enet_packet_destroy(mappkt);
       break;
     };
     mapreload = true;
