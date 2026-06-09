@@ -561,6 +561,8 @@ void serverbot_hitscan(int gun, vec &from, vec &to, int sender) {
       serverbot &b = sbot[i];
       if (b.state != CS_ALIVE)
         continue;
+      if (clients[sender].team[0] && b.team[0] && !strcmp(clients[sender].team, b.team))
+        continue;
       int totaldamage = 0;
       loopk(SGRAYS) {
         float spreadx = (rnd(101) - 50) / 50.0f * SGSPREAD;
@@ -589,6 +591,8 @@ void serverbot_hitscan(int gun, vec &from, vec &to, int sender) {
   loopi(numsbots) {
     serverbot &b = sbot[i];
     if (b.state != CS_ALIVE)
+      continue;
+    if (clients[sender].team[0] && b.team[0] && !strcmp(clients[sender].team, b.team))
       continue;
     if (intersect_bot(b, from, to)) {
       int damage = 10;
