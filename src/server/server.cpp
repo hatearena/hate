@@ -899,11 +899,30 @@ void serverslice(int seconds, unsigned int timeout) {
     checkintermission();
   if (interm && seconds > interm) {
     interm = 0;
+    if (maprotation.length() > 0) {
+      mapRotationIndex = (mapRotationIndex + 1) % maprotation.length();
+      strcpy_s(smapname, maprotation[mapRotationIndex]);
+      if (moderotation.length() > mapRotationIndex)
+        mode = moderotation[mapRotationIndex];
+    }
     loopv(clients) if (clients[i].type != ST_EMPTY) {
-      send2(true, i, SV_MAPRELOAD, 0);
-      mapreload = true;
+      ENetPacket *mappkt = enet_packet_create(NULL, MAXTRANS, ENET_PACKET_FLAG_RELIABLE);
+      uchar *ms = mappkt->data, *mp = ms + 2;
+      putint(mp, SV_MAPCHANGE);
+      sendstring(smapname, mp);
+      putint(mp, mode);
+      *(ushort *)ms = ENET_HOST_TO_NET_16(mp - ms);
+      enet_packet_resize(mappkt, mp - ms);
+      loopv(clients) if (clients[j].type != ST_EMPTY) send(j, mappkt);
+      if (mappkt->referenceCount == 0) enet_packet_destroy(mappkt);
       break;
     };
+    mapreload = true;
+    if (botcount > 0) {
+      serverbot_clear();
+      serverbot_spawn(botcount);
+      loopv(clients) if (clients[i].type == ST_TCPIP) serverbot_sendinit(i);
+    }
   };
 
   resetserverifempty();
