@@ -27,7 +27,7 @@ char logfile_str[_MAXDEFSTR] = "";
 int cfg_gamemode = -1;
 vector<char *> maprotation;
 vector<int> moderotation;
-int map_rotation_index = -1;
+int map_rotation_index = 0;
 
 void restoreserverstate(vector<entity> &ents) {
   loopv(sents) {
