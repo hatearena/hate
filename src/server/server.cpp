@@ -220,8 +220,8 @@ void loadserverconf() {
         if (*tok == ',')
           tok++;
       }
-      fprintf(stderr, "MAPROTATION: raw=[%s] count=%d\n", vstart, maprotation.length());
-      loopi(maprotation.length()) fprintf(stderr, "  [%d]: %s\n", i, maprotation[i]);
+      loopi(maprotation.length())
+          fprintf(stderr, "[%d]: %s\n", i, maprotation[i]);
     } else if (strcmp(key, "moderotation") == 0) {
       char temp[_MAXDEFSTR];
       strcpy_s(temp, vbuf);
