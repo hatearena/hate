@@ -256,7 +256,7 @@ void localservertoclient(uchar *buf,
       int damage = getint(p);
       int ls = getint(p);
       if (target == clientnum) {
-        if ((m_teammode || m_infected) && d && player1->team[0] && d->team[0] && !strcmp(d->team, player1->team))
+        if (d && player1->team[0] && d->team[0] && !strcmp(d->team, player1->team))
           ;
         else if (ls == player1->lifesequence)
           selfdamage(damage, cn, d);
@@ -288,23 +288,14 @@ void localservertoclient(uchar *buf,
         d->suicides++;
       } else if (actor == clientnum) {
         int frags;
-        if (isteam(player1->team, d->team)) {
-          frags = -1;
-          conoutf("%s fragged a teammate (%s)", player1->name, d->name);
-        } else {
-          frags = 1;
-          conoutf("%s fragged %s", player1->name, d->name);
-          playsound(S_KILL);
-        };
+        frags = 1;
+        conoutf("%s fragged %s", player1->name, d->name);
+        playsound(S_KILL);
         addmsg(1, 2, SV_FRAGS, player1->frags += frags);
       } else {
         dynent *a = getclient(actor);
         if (a) {
-          if (isteam(a->team, d->name)) {
-            conoutf("%s fragged his teammate (%s)", a->name, d->name);
-          } else {
-            conoutf("%s fragged %s", a->name, d->name);
-          };
+          conoutf("%s fragged %s", a->name, d->name);
         };
       };
       d->deaths++;

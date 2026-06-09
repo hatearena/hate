@@ -703,7 +703,7 @@ void process(ENetPacket *packet, int sender) {
               damage = qdam;
           };
           if (damage > 0) {
-            if (((mode & 1 && mode > 2) || mode == 12) && clients[sender].team[0] && clients[i].team[0] && !strcmp(clients[sender].team, clients[i].team))
+            if (clients[sender].team[0] && clients[i].team[0] && !strcmp(clients[sender].team, clients[i].team))
               continue;
             ENetPacket *dmgpkt = enet_packet_create(NULL, 64, ENET_PACKET_FLAG_RELIABLE);
             uchar *dpkt = dmgpkt->data;
