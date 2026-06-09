@@ -247,6 +247,8 @@ void serverbot_spawn(int count) {
     int si = rnd(numspawns);
     b.x = spawnx[si];
     b.y = spawny[si];
+    if (b.x < 1 || b.x >= mapsize - 1) b.x = mapsize / 2.0f;
+    if (b.y < 1 || b.y >= mapsize - 1) b.y = mapsize / 2.0f;
     b.z = spawnz[si] + BOT_EYEHEIGHT;
     b.yaw = normyaw((float)rnd(360));
     b.pitch = 0;
@@ -813,6 +815,8 @@ static bool try_move_bot(serverbot &b, int diff, int move, int strafe) {
     return false;
   b.x = nx;
   b.y = ny;
+  if (b.x < 1 || b.x >= mapsize - 1) b.x = mapsize / 2.0f;
+  if (b.y < 1 || b.y >= mapsize - 1) b.y = mapsize / 2.0f;
   float targetZ = targetfloor + BOT_EYEHEIGHT;
   if (targetZ < b.z - 0.01f) {
     b.fallvelocity += 600.0f * dt;
