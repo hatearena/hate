@@ -7,7 +7,7 @@ struct cline {
 };
 vector<cline> conlines;
 
-const int WORDWRAP = 80;
+const int WORDWRAP = 256;
 VARP(msglimit, 1, 8, 50);
 int conskip = 0;
 
@@ -49,10 +49,14 @@ void conoutf(const char *s, ...) {
   int n = 0;
   while (strlen(s) > WORDWRAP) // cut strings to fit on screen
   {
+    int wrap = WORDWRAP;
+    while (wrap > 0 && s[wrap] != ' ') wrap--;
+    if (wrap <= 0) wrap = WORDWRAP;
     string t;
-    strn0cpy(t, s, WORDWRAP + 1);
+    strn0cpy(t, s, wrap + 1);
     conline(t, n++ != 0);
-    s += WORDWRAP;
+    s += wrap;
+    while (*s == ' ') s++;
   };
   conline(s, n != 0);
 };
