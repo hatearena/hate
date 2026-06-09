@@ -904,7 +904,9 @@ void serverslice(int seconds, unsigned int timeout) {
       strcpy_s(smapname, maprotation[mapRotationIndex]);
       if (moderotation.length() > mapRotationIndex)
         mode = moderotation[mapRotationIndex];
-    }
+      fprintf(stderr, "ROTATION: index=%d map=%s mode=%d\n", mapRotationIndex, smapname, mode);
+    } else
+      fprintf(stderr, "ROTATION: no maprotation set (len=%d)\n", maprotation.length());
     loopv(clients) if (clients[i].type != ST_EMPTY) {
       ENetPacket *mappkt = enet_packet_create(NULL, MAXTRANS, ENET_PACKET_FLAG_RELIABLE);
       uchar *ms = mappkt->data, *mp = ms + 2;
