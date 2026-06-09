@@ -286,6 +286,7 @@ void c2sinfo(dynent *d) // send update to the server
       packet->flags = ENET_PACKET_FLAG_RELIABLE;
       c2sinit = true;
       putint(p, SV_INITC2S);
+      sendstring(GAME_VERSION, p);
       sendstring(player1->name, p);
       sendstring(player1->team, p);
       putint(p, player1->lifesequence);

@@ -86,6 +86,13 @@ void localservertoclient(uchar *buf,
       if (getint(p) == 1) {
         conoutf("Server is FULL, disconnecting.");
       };
+      sgetstr();
+      if (strcmp(text, GAME_VERSION)) {
+        conoutf("Server version mismatch (server: %s, you: %s)", text,
+                GAME_VERSION);
+        disconnect();
+        return;
+      };
       break;
     };
 

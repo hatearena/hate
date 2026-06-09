@@ -457,6 +457,11 @@ void process(ENetPacket *packet, int sender) {
 
     case SV_INITC2S:
       sgetstr();
+      if (strcmp(text, GAME_VERSION)) {
+        disconnect_client(sender, "version mismatch");
+        break;
+      }
+      sgetstr();
       strcpy_s(clients[cn].name, text);
       sgetstr();
       strcpy_s(clients[cn].team, text);
@@ -647,6 +652,7 @@ void send_welcome(int n) {
   putint(p, smapname[0]);
   sendstring(serverpassword, p);
   putint(p, clients.length() > maxclients);
+  sendstring(GAME_VERSION, p);
   if (smapname[0]) {
     putint(p, SV_MAPCHANGE);
     sendstring(smapname, p);
