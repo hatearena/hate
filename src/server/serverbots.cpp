@@ -990,6 +990,8 @@ void serverbot_update() {
     loopj(MAXCLIENTS) {
       if (!playerpos[j].active || playerpos[j].state != CS_ALIVE)
         continue;
+      if (b.team[0] && j < clients.length() && clients[j].team[0] && !strcmp(b.team, clients[j].team))
+        continue;
       float dx = playerpos[j].x - b.x;
       float dy = playerpos[j].y - b.y;
       float dz = playerpos[j].z - b.z;
@@ -1006,6 +1008,8 @@ void serverbot_update() {
         continue;
       serverbot &other = sbot[j];
       if (other.state != CS_ALIVE)
+        continue;
+      if (b.team[0] && other.team[0] && !strcmp(b.team, other.team))
         continue;
       float dx = other.x - b.x;
       float dy = other.y - b.y;
