@@ -26,6 +26,7 @@ int botskill = 50;
 char logfile_str[_MAXDEFSTR] = "";
 int cfg_gamemode = -1;
 vector<char *> maprotation;
+vector<int> moderotation;
 int mapRotationIndex = 0;
 
 void restoreserverstate(vector<entity> &ents) {
@@ -213,6 +214,27 @@ void loadserverconf() {
         *end = saved;
         tok = end;
         if (*tok == ',' || *tok == '"')
+          tok++;
+      }
+    } else if (strcmp(key, "moderotation") == 0) {
+      char temp[_MAXDEFSTR];
+      strcpy_s(temp, vbuf);
+      char *tok = temp;
+      while (*tok) {
+        while (*tok == ' ' || *tok == ',')
+          tok++;
+        if (!*tok)
+          break;
+        char *end = tok;
+        while (*end && *end != ',')
+          end++;
+        char saved = *end;
+        *end = 0;
+        if (*tok)
+          moderotation.add(atoi(tok));
+        *end = saved;
+        tok = end;
+        if (*tok == ',')
           tok++;
       }
     }
@@ -513,7 +535,9 @@ void process(ENetPacket *packet, int sender) {
       if (maprotation.length() > 0) {
         mapRotationIndex = (mapRotationIndex + 1) % maprotation.length();
         strcpy_s(smapname, maprotation[mapRotationIndex]);
-        if (cfg_gamemode == 6) {
+        if (moderotation.length() > mapRotationIndex) {
+          mode = moderotation[mapRotationIndex];
+        } else if (cfg_gamemode == 6) {
           int modes[] = {0, 3, 4, 5};
           mode = modes[rand() % 4];
         } else if (cfg_gamemode >= 0) {
@@ -821,7 +845,7 @@ void checkintermission() {
       extern int serverbot_teamscore(const char *);
       blue += serverbot_teamscore("BLUE") + serverbot_teamscore("RES");
       red += serverbot_teamscore("RED") + serverbot_teamscore("INFD");
-      sendservmsg(blue > red ? "BLUE team wins" : "RED team wins");
+      sendservmsg((char *)(blue > red ? "BLUE team wins" : "RED team wins"));
     }
   };
   send2(true, -1, SV_TIMEUP, minremain--);

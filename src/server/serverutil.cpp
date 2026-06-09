@@ -40,11 +40,11 @@ void sendstring(char *t, uchar *&p) {
 };
 
 const char *modenames[] = {
-    "SP",
-    "DMSP",
-    "ffa/default",
+    "sp",
+    "dmsp",
+    "dm",
     "coopedit",
-    "ffa/duel",
+    "dm duel",
     "tdm",
     "insta",
     "insta team",
@@ -123,11 +123,11 @@ char msgsizesl[] = // size inclusive message token, 0 for variable or
      1,
      SV_SERVMSG,
      0,
-      SV_ITEMLIST,
-      0,
-      SV_EXT,
-      0,
-      -1};
+     SV_ITEMLIST,
+     0,
+     SV_EXT,
+     0,
+     -1};
 
 char msgsizelookup(int msg) {
   for (char *p = msgsizesl; *p >= 0; p += 2)
@@ -196,9 +196,11 @@ int main(int argc, char *argv[]) {
   for (int i = 1; i < argc; i++) {
     if (strcmp(argv[i], "--gen-rcon") == 0) {
       srand(time(NULL));
-      const char *chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+      const char *chars =
+          "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
       char pass[17];
-      for (int j = 0; j < 16; j++) pass[j] = chars[rand() % 62];
+      for (int j = 0; j < 16; j++)
+        pass[j] = chars[rand() % 62];
       pass[16] = 0;
       printf("Generated RCON password: %s\n", pass);
       return 0;
