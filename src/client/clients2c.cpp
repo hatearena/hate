@@ -25,8 +25,6 @@ void changemap(const char *name) // request map change, server may ignore
   strcpy_s(toservermap, name);
 };
 
-inline float minf(float a, float b) { return a < b ? a : b; }
-
 void updatepos(dynent *d) {
   const float r = player1->radius + d->radius;
   const float dx = player1->o.x - d->o.x;
