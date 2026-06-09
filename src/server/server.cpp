@@ -937,10 +937,6 @@ void serverslice(int seconds, unsigned int timeout) {
 
   lastsec = seconds;
 
-  if (timelimit && minremain < 1 && !interm) {
-    minremain = timelimit;
-    mapend = seconds + minremain * 60;
-  }
   if (timelimit && mode != 1 && seconds > mapend - minremain * 60)
     checkintermission();
   if (interm && seconds > interm) {
