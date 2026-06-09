@@ -608,6 +608,9 @@ void process(ENetPacket *packet, int sender) {
             sents.add(se);
           sents[n].spawned = true;
         };
+      if (notgotitems) {
+        loopv(sents) if (sents[i].spawned) send2(true, -1, SV_ITEMSPAWN, i);
+      };
       notgotitems = false;
       break;
     };
