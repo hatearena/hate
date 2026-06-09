@@ -304,6 +304,7 @@ enum {
   S_DEAD = 58,
   S_RUN_STOP = 59,
   S_LIGHTGUN = 60,
+  S_SPAWN = 61,
 };
 
 // vertex array format
