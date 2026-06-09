@@ -27,7 +27,7 @@ char logfile_str[_MAXDEFSTR] = "";
 int cfg_gamemode = -1;
 vector<char *> maprotation;
 vector<int> moderotation;
-int mapRotationIndex = 0;
+int map_rotation_index = -1;
 
 void restoreserverstate(vector<entity> &ents) {
   loopv(sents) {
@@ -198,7 +198,8 @@ void loadserverconf() {
     else if (strcmp(key, "maprotation") == 0) {
       char temp[_MAXDEFSTR];
       char *src = vstart;
-      if (*src == '"') src++;
+      if (*src == '"')
+        src++;
       int ti = 0;
       while (*src && ti < _MAXDEFSTR - 1) {
         temp[ti++] = *src;
@@ -540,10 +541,10 @@ void process(ENetPacket *packet, int sender) {
       }
       mapreload = false;
       if (maprotation.length() > 0) {
-        mapRotationIndex = (mapRotationIndex + 1) % maprotation.length();
-        strcpy_s(smapname, maprotation[mapRotationIndex]);
-        if (moderotation.length() > mapRotationIndex) {
-          mode = moderotation[mapRotationIndex];
+        map_rotation_index = (map_rotation_index + 1) % maprotation.length();
+        strcpy_s(smapname, maprotation[map_rotation_index]);
+        if (moderotation.length() > map_rotation_index) {
+          mode = moderotation[map_rotation_index];
         } else if (cfg_gamemode == 6) {
           int modes[] = {0, 3, 4, 5};
           mode = modes[rand() % 4];
@@ -922,12 +923,14 @@ void serverslice(int seconds, unsigned int timeout) {
   if (interm && seconds > interm) {
     interm = 0;
     if (maprotation.length() > 0) {
-      mapRotationIndex = (mapRotationIndex + 1) % maprotation.length();
-      strcpy_s(smapname, maprotation[mapRotationIndex]);
-      if (moderotation.length() > mapRotationIndex)
-        mode = moderotation[mapRotationIndex];
+      map_rotation_index = (map_rotation_index + 1) % maprotation.length();
+      strcpy_s(smapname, maprotation[map_rotation_index]);
+      if (moderotation.length() > map_rotation_index)
+        mode = moderotation[map_rotation_index];
     }
-    fprintf(stderr, "INTERMISSION: rotating to map=%s mode=%d index=%d rotlen=%d\n", smapname, mode, mapRotationIndex, maprotation.length());
+    fprintf(stderr,
+            "INTERMISSION: rotating to map=%s mode=%d index=%d rotlen=%d\n",
+            smapname, mode, map_rotation_index, maprotation.length());
     loopv(clients) if (clients[i].type != ST_EMPTY) {
       ENetPacket *mappkt =
           enet_packet_create(NULL, MAXTRANS, ENET_PACKET_FLAG_RELIABLE);
