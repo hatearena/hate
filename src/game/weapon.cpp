@@ -481,11 +481,15 @@ void shoot(dynent *d, vec &targ) {
   if (guns[d->gunselect].projspeed)
     return;
 
-  loopv(players) {
-    dynent *o = players[i];
-    if (!o)
-      continue;
-    raydamage(o, from, to, d, i);
+  if (d->gunselect != GUN_SG && d->gunselect != GUN_CG &&
+      d->gunselect != GUN_RIFLE && d->gunselect != GUN_NAILGUN &&
+      d->gunselect != GUN_LIGHTGUN) {
+    loopv(players) {
+      dynent *o = players[i];
+      if (!o)
+        continue;
+      raydamage(o, from, to, d, i);
+    };
   };
 
   dvector &v = getmonsters();

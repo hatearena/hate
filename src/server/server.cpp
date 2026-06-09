@@ -623,104 +623,110 @@ void process(ENetPacket *packet, int sender) {
       to.z = getint(p) / DMF;
       serverbot_hitscan(gun, from, to, sender);
 
-      if (gun == GUN_SG || gun == GUN_RIFLE) {
-        int qdam = gun == GUN_RIFLE ? 100 : 10;
-        vec sg[20];
-        int numrays = 1;
+      int qdam = 0, numrays = 1;
+      vec sg[20];
+      switch (gun) {
+        case GUN_SG:     qdam = 10;  break;
+        case GUN_CG:     qdam = 30;  break;
+        case GUN_NAILGUN: qdam = 25; break;
+        case GUN_RIFLE:  qdam = 100; break;
+        case GUN_LIGHTGUN: qdam = 15; break;
+      };
+      if (!qdam) break;
+
+      if (gun == GUN_SG) {
+        vec dvec = to;
+        vsub(dvec, from);
+        float sdist = sqrtf(dotprod(dvec, dvec));
+        float f = sdist * 2.0f / 1000;
+        numrays = 20;
+        loopi(numrays) {
+          float rx = (rnd(101) - 50) * f;
+          float ry = (rnd(101) - 50) * f;
+          float rz = (rnd(101) - 50) * f;
+          sg[i] = to;
+          sg[i].x += rx;
+          sg[i].y += ry;
+          sg[i].z += rz;
+        };
+      };
+
+      loopv(clients) {
+        if (i == sender || clients[i].type == ST_EMPTY) continue;
+        if (clients[i].state != CS_ALIVE) continue;
+        if (i >= BOT_CLIENT_BASE) continue;
+
+        float radius = 1.1f, eyeheight = 3.2f, aboveeye = 0.7f;
+        vec &o = clients[i].o;
+        int damage = 0;
+
         if (gun == GUN_SG) {
-          vec dvec = to;
-          vsub(dvec, from);
-          float sdist = sqrtf(dotprod(dvec, dvec));
-          float f = sdist * 2.0f / 1000;
-          numrays = 20;
-          loopi(numrays) {
-            float rx = (rnd(101) - 50) * f;
-            float ry = (rnd(101) - 50) * f;
-            float rz = (rnd(101) - 50) * f;
-            sg[i] = to;
-            sg[i].x += rx;
-            sg[i].y += ry;
-            sg[i].z += rz;
+          loop(r, numrays) {
+            vec ray = sg[r];
+            bool hit = false;
+            {
+              vec v = ray, w = o;
+              vsub(v, from);
+              vsub(w, from);
+              float c1 = dotprod(w, v);
+              vec *pp;
+              if (c1 <= 0) {
+                pp = &from;
+              } else {
+                float c2 = dotprod(v, v);
+                if (c2 <= c1) {
+                  pp = &ray;
+                } else {
+                  float ff = c1 / c2;
+                  vmul(v, ff);
+                  vadd(v, from);
+                  pp = &v;
+                };
+              };
+              hit = pp->x <= o.x + radius && pp->x >= o.x - radius &&
+                    pp->y <= o.y + radius && pp->y >= o.y - radius &&
+                    pp->z <= o.z + aboveeye && pp->z >= o.z - eyeheight;
+            };
+            if (hit) damage += qdam;
           };
+        } else {
+          vec v = to, w = o;
+          vsub(v, from);
+          vsub(w, from);
+          float c1 = dotprod(w, v);
+          vec *pp;
+          if (c1 <= 0) {
+            pp = &from;
+          } else {
+            float c2 = dotprod(v, v);
+            if (c2 <= c1) {
+              pp = &to;
+            } else {
+              float ff = c1 / c2;
+              vmul(v, ff);
+              vadd(v, from);
+              pp = &v;
+            };
+          };
+          if (pp->x <= o.x + radius && pp->x >= o.x - radius &&
+              pp->y <= o.y + radius && pp->y >= o.y - radius &&
+              pp->z <= o.z + aboveeye && pp->z >= o.z - eyeheight)
+            damage = qdam;
         };
 
-        loopv(clients) {
-          if (i == sender || clients[i].type == ST_EMPTY) continue;
-          if (clients[i].state != CS_ALIVE) continue;
-          if (i >= BOT_CLIENT_BASE) continue;
-
-          float radius = 1.1f, eyeheight = 3.2f, aboveeye = 0.7f;
-          vec &o = clients[i].o;
-          int damage = 0;
-
-          if (gun == GUN_SG) {
-            loop(r, numrays) {
-              vec ray = sg[r];
-              bool hit = false;
-              {
-                vec v = ray, w = o;
-                vsub(v, from);
-                vsub(w, from);
-                float c1 = dotprod(w, v);
-                vec *pp;
-                if (c1 <= 0) {
-                  pp = &from;
-                } else {
-                  float c2 = dotprod(v, v);
-                  if (c2 <= c1) {
-                    pp = &ray;
-                  } else {
-                    float ff = c1 / c2;
-                    vmul(v, ff);
-                    vadd(v, from);
-                    pp = &v;
-                  };
-                };
-                hit = pp->x <= o.x + radius && pp->x >= o.x - radius &&
-                      pp->y <= o.y + radius && pp->y >= o.y - radius &&
-                      pp->z <= o.z + aboveeye && pp->z >= o.z - eyeheight;
-              };
-              if (hit) damage += qdam;
-            };
-          } else {
-            vec v = to, w = o;
-            vsub(v, from);
-            vsub(w, from);
-            float c1 = dotprod(w, v);
-            vec *pp;
-            if (c1 <= 0) {
-              pp = &from;
-            } else {
-              float c2 = dotprod(v, v);
-              if (c2 <= c1) {
-                pp = &to;
-              } else {
-                float ff = c1 / c2;
-                vmul(v, ff);
-                vadd(v, from);
-                pp = &v;
-              };
-            };
-            if (pp->x <= o.x + radius && pp->x >= o.x - radius &&
-                pp->y <= o.y + radius && pp->y >= o.y - radius &&
-                pp->z <= o.z + aboveeye && pp->z >= o.z - eyeheight)
-              damage = qdam;
-          };
-
-          if (damage > 0) {
-            ENetPacket *dmgpkt = enet_packet_create(NULL, 32, ENET_PACKET_FLAG_RELIABLE);
-            uchar *dpkt = dmgpkt->data;
-            uchar *dp = dpkt + 2;
-            putint(dp, SV_DAMAGE);
-            putint(dp, i);
-            putint(dp, damage);
-            putint(dp, sender);
-            *(ushort *)dpkt = ENET_HOST_TO_NET_16(dp - dpkt);
-            enet_packet_resize(dmgpkt, dp - dpkt);
-            multicast(dmgpkt, -1);
-            if (dmgpkt->referenceCount == 0)
-              enet_packet_destroy(dmgpkt);
-          };
+        if (damage > 0) {
+          ENetPacket *dmgpkt = enet_packet_create(NULL, 32, ENET_PACKET_FLAG_RELIABLE);
+          uchar *dpkt = dmgpkt->data;
+          uchar *dp = dpkt + 2;
+          putint(dp, SV_DAMAGE);
+          putint(dp, i);
+          putint(dp, damage);
+          putint(dp, sender);
+          *(ushort *)dpkt = ENET_HOST_TO_NET_16(dp - dpkt);
+          enet_packet_resize(dmgpkt, dp - dpkt);
+          multicast(dmgpkt, -1);
+          if (dmgpkt->referenceCount == 0)
+            enet_packet_destroy(dmgpkt);
         };
       };
       break;
