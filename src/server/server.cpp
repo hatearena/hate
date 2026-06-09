@@ -529,12 +529,10 @@ void process(ENetPacket *packet, int sender) {
       mapend = lastsec + minremain * 60;
       interm = 0;
       resetitems();
-      if (isdedicated && botcount > 0) {
+      if (botcount > 0) {
         serverbot_clear();
         serverbot_spawn(botcount);
         loopv(clients) if (clients[i].type == ST_TCPIP) serverbot_sendinit(i);
-      } else {
-        serverbot_update_weapons();
       }
       sender = -1;
       break;
@@ -883,12 +881,10 @@ void serverslice(int seconds, unsigned int timeout) {
     mapend = lastsec + minremain * 60;
     interm = 0;
     resetitems();
-    if (isdedicated && botcount > 0) {
+    if (botcount > 0) {
       serverbot_clear();
       serverbot_spawn(botcount);
       loopv(clients) if (clients[i].type == ST_TCPIP) serverbot_sendinit(i);
-    } else if (serverbot_count() > 0) {
-      serverbot_update_weapons();
     }
     ENetPacket *packet =
         enet_packet_create(NULL, MAXTRANS, ENET_PACKET_FLAG_RELIABLE);
