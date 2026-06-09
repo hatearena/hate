@@ -555,7 +555,13 @@ static void autoteamplayer(dynent *d) {
   if (!m_teammode)
     return;
   if (m_infected) {
+    string oldteam;
+    strcpy_s(oldteam, d->team);
     strn0cpy(d->team, "RES", 5);
+    if (d == player1 && strcmp(d->team, oldteam)) {
+      extern bool c2sinit;
+      c2sinit = false;
+    }
     return;
   }
   int red = 0, blue = 0;
@@ -584,7 +590,13 @@ static void autoteamplayer(dynent *d) {
         blue++;
     }
   }
+  string oldteam;
+  strcpy_s(oldteam, d->team);
   strn0cpy(d->team, red <= blue ? "RED" : "BLUE", 5);
+  if (d == player1 && strcmp(d->team, oldteam)) {
+    extern bool c2sinit;
+    c2sinit = false;
+  }
 }
 
 void spawnplayer(dynent *d) // place at random spawn. also used by monsters!
