@@ -247,9 +247,10 @@ void serverbot_spawn(int count) {
     int si = rnd(numspawns);
     b.x = spawnx[si];
     b.y = spawny[si];
-    if (b.x < 1 || b.x >= mapsize - 1) b.x = mapsize / 2.0f;
-    if (b.y < 1 || b.y >= mapsize - 1) b.y = mapsize / 2.0f;
+    if (b.x < 1 || b.x >= mapsize - 1 || b.x == 0) b.x = mapsize >= 2 ? mapsize / 2.0f : 64;
+    if (b.y < 1 || b.y >= mapsize - 1 || b.y == 0) b.y = mapsize >= 2 ? mapsize / 2.0f : 64;
     b.z = spawnz[si] + BOT_EYEHEIGHT;
+    if (b.z < -999 || b.z > 999) b.z = spawnz[0] + BOT_EYEHEIGHT;
     b.yaw = normyaw((float)rnd(360));
     b.pitch = 0;
     b.roll = 0;
@@ -289,7 +290,6 @@ void serverbot_spawn(int count) {
     } else {
       b.team[0] = 0;
     }
-    fprintf(stderr, "BOT %d: team=%s pos=(%.0f,%.0f,%.0f) mapsize=%d\n", i, b.team[0] ? b.team : "(none)", b.x, b.y, b.z, mapsize);
     numsbots++;
     n++;
   }
@@ -443,11 +443,8 @@ void serverbot_broadcast() {
     *(ushort *)start = ENET_HOST_TO_NET_16(p - start);
     enet_packet_resize(packet, p - start);
     loopv(clients) {
-      if (clients[i].type == ST_TCPIP) {
-        fprintf(stderr, "BCAST bot %d (%s) pos=(%.0f,%.0f,%.0f) state=%d alive=%d\n",
-          i, b.team[0] ? b.team : "?", b.x, b.y, b.z, b.state, b.state == CS_ALIVE ? 1 : 0);
+      if (clients[i].type == ST_TCPIP)
         enet_peer_send(clients[i].peer, 0, packet);
-      }
     }
   }
 }
@@ -819,8 +816,8 @@ static bool try_move_bot(serverbot &b, int diff, int move, int strafe) {
     return false;
   b.x = nx;
   b.y = ny;
-  if (b.x < 1 || b.x >= mapsize - 1) b.x = mapsize / 2.0f;
-  if (b.y < 1 || b.y >= mapsize - 1) b.y = mapsize / 2.0f;
+  if (b.x < 1 || b.x >= mapsize - 1) b.x = mapsize >= 2 ? mapsize / 2.0f : 64;
+  if (b.y < 1 || b.y >= mapsize - 1) b.y = mapsize >= 2 ? mapsize / 2.0f : 64;
   float targetZ = targetfloor + BOT_EYEHEIGHT;
   if (targetZ < b.z - 0.01f) {
     b.fallvelocity += 600.0f * dt;
