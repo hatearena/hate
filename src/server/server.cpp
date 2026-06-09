@@ -27,7 +27,7 @@ char logfile_str[_MAXDEFSTR] = "";
 int cfg_gamemode = -1;
 vector<char *> maprotation;
 vector<int> moderotation;
-int mapRotationIndex = 0;
+int mapRotationIndex = -1;
 
 void restoreserverstate(vector<entity> &ents) {
   loopv(sents) {
@@ -556,8 +556,20 @@ void process(ENetPacket *packet, int sender) {
       if (botcount > 0) {
         serverbot_clear();
         serverbot_spawn(botcount);
-        loopv(clients) if (clients[i].type == ST_TCPIP) serverbot_sendinit(i);
       }
+      {
+        ENetPacket *mappkt = enet_packet_create(NULL, MAXTRANS, ENET_PACKET_FLAG_RELIABLE);
+        uchar *mpkt = mappkt->data;
+        uchar *mp = mpkt + 2;
+        putint(mp, SV_MAPCHANGE);
+        sendstring(smapname, mp);
+        putint(mp, mode);
+        *(ushort *)mpkt = ENET_HOST_TO_NET_16(mp - mpkt);
+        enet_packet_resize(mappkt, mp - mpkt);
+        loopv(clients) if (clients[i].type != ST_EMPTY) send(i, mappkt);
+        if (mappkt->referenceCount == 0) enet_packet_destroy(mappkt);
+      }
+      loopv(clients) if (clients[i].type == ST_TCPIP) serverbot_sendinit(i);
       sender = -1;
       break;
     };
@@ -1051,6 +1063,10 @@ void initserver(bool dedicated, int uprate, char *sdesc, char *ip, char *master,
   };
 
   resetserverifempty();
+  if (!smapname[0] && maprotation.length() > 0) {
+    strcpy_s(smapname, maprotation[0]);
+    mode = moderotation.length() > 0 ? moderotation[0] : mode;
+  }
 
   if (isdedicated) {
 #ifdef WIN32
