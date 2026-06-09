@@ -623,6 +623,8 @@ void process(ENetPacket *packet, int sender) {
       to.z = getint(p) / DMF;
       serverbot_hitscan(gun, from, to, sender);
 
+      if (sender >= BOT_CLIENT_BASE) break;
+
       int qdam = 0, numrays = 1;
       vec sg[20];
       switch (gun) {
