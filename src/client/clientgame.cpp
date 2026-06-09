@@ -282,21 +282,7 @@ void otherplayers() {
         (!demoplayback || i != democlientnum)) {
       if (i >= BOT_CLIENT_BASE) {
         dynent *d = players[i];
-        int saved_move = d->move;
-        int saved_strafe = d->strafe;
-        bool saved_moving = d->moving;
-        float saved_velx = d->vel.x;
-        float saved_vely = d->vel.y;
-        d->move = 0;
-        d->strafe = 0;
-        d->vel.x = 0;
-        d->vel.y = 0;
         moveplayer(d, 2, false);
-        d->move = saved_move;
-        d->strafe = saved_strafe;
-        d->moving = saved_moving;
-        d->vel.x = saved_velx;
-        d->vel.y = saved_vely;
       } else {
         moveplayer(players[i], 2, false);
       }

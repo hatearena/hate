@@ -21,6 +21,8 @@ void changemap(const char *name) // request map change, server may ignore
   strcpy_s(toservermap, name);
 };
 
+inline float minf(float a, float b) { return a < b ? a : b; }
+
 void updatepos(dynent *d) {
   const float r = player1->radius + d->radius;
   const float dx = player1->o.x - d->o.x;
@@ -95,7 +97,7 @@ void localservertoclient(uchar *buf,
       float ny = getint(p) / DMF;
       float nz = getint(p) / DMF;
       if (cn >= BOT_CLIENT_BASE) {
-        float lerp = 0.35f;
+        float lerp = minf(1.0f, (lastmillis - d->lastupdate) / 50.0f);
         d->o.x += (nx - d->o.x) * lerp;
         d->o.y += (ny - d->o.y) * lerp;
         d->o.z += (nz - d->o.z) * lerp;
@@ -111,7 +113,7 @@ void localservertoclient(uchar *buf,
           yd -= 360.0f;
         if (yd < -180.0f)
           yd += 360.0f;
-        d->yaw += yd * 0.4f;
+        d->yaw += yd * 0.8f;
       } else {
         d->yaw = nyaw;
       }
