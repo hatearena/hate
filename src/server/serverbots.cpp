@@ -969,6 +969,18 @@ void serverbot_update() {
 
   loopi(numsbots) {
     serverbot &b = sbot[i];
+    if (b.x == 0 && b.y == 0 && b.z == 0) {
+      if (numspawns > 0) {
+        int si = rnd(numspawns);
+        b.x = spawnx[si];
+        b.y = spawny[si];
+        b.z = spawnz[si] + BOT_EYEHEIGHT;
+      } else {
+        b.x = 64;
+        b.y = 64;
+        b.z = BOT_EYEHEIGHT;
+      }
+    }
     b.onfloor = false;
     b.movemode = 0;
     b.strafemode = 0;
