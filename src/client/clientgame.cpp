@@ -811,7 +811,7 @@ void timeupdate(int timeremain) {
       showscores(true);
     };
   } else if (!intermission) {
-    conoutf("Time remaining: %d minutes", timeremain);
+    conoutf("Time remaining: %d minute(s)", timeremain);
   };
 };
 
