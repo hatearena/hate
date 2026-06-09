@@ -703,9 +703,23 @@ void process(ENetPacket *packet, int sender) {
               damage = qdam;
           };
           if (damage > 0) {
-            ENetPacket *dmgpkt = enet_packet_create(NULL, 32, ENET_PACKET_FLAG_RELIABLE);
+            if (((mode & 1 && mode > 2) || mode == 12) && clients[sender].team[0] && clients[i].team[0] && !strcmp(clients[sender].team, clients[i].team))
+              continue;
+            ENetPacket *dmgpkt = enet_packet_create(NULL, 64, ENET_PACKET_FLAG_RELIABLE);
             uchar *dpkt = dmgpkt->data;
             uchar *dp = dpkt + 2;
+            putint(dp, SV_POS);
+            putint(dp, sender);
+            putint(dp, (int)(clients[sender].o.x * DMF));
+            putint(dp, (int)(clients[sender].o.y * DMF));
+            putint(dp, (int)(clients[sender].o.z * DMF));
+            putint(dp, (int)(clients[sender].yaw * DAF));
+            putint(dp, (int)(clients[sender].pitch * DAF));
+            putint(dp, 0);
+            putint(dp, 0);
+            putint(dp, 0);
+            putint(dp, 0);
+            putint(dp, CS_ALIVE << 5);
             putint(dp, SV_DAMAGE);
             putint(dp, i);
             putint(dp, damage);

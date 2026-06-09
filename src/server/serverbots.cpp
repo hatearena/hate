@@ -25,6 +25,8 @@ struct serverbot {
   enet_uint32 lastjump;
   enet_uint32 lastturn;
   int turncount;
+  enet_uint32 acquiretime;
+  bool acquired;
 };
 
 struct walkinfo {
@@ -268,6 +270,8 @@ void serverbot_spawn(int count) {
     b.lastjump = 0;
     b.lastturn = 0;
     b.turncount = 0;
+    b.acquiretime = 0;
+    b.acquired = false;
     if ((mode & 1 && mode > 2) || mode == 12) {
       int blues = 0, reds = 0;
       loopj(numsbots) {
@@ -969,6 +973,8 @@ void serverbot_update() {
         b.lastjump = 0;
         b.lastturn = 0;
         b.turncount = 0;
+        b.acquiretime = 0;
+        b.acquired = false;
       }
       continue;
     }
@@ -1022,6 +1028,15 @@ void serverbot_update() {
         tz = sbot[targetidx].z;
       }
       float realdist = sqrtf(bestdist);
+
+      int acquiredelay = (101 - botskill) * 20;
+      if (acquiredelay < 20) acquiredelay = 20;
+      if (!b.acquired) {
+        if (b.acquiretime == 0)
+          b.acquiretime = now;
+        else if (now - b.acquiretime >= (enet_uint32)acquiredelay)
+          b.acquired = true;
+      }
 
       if (mode == 4 || mode == 5) {
         b.gunselect = GUN_RIFLE;
@@ -1131,7 +1146,7 @@ void serverbot_update() {
       if (weapondelay > reactdelay)
         reactdelay = weapondelay;
 
-      if ((in_escape_cooldown || fabs(yaw_to_target) < 60.0f) &&
+      if (b.acquired && (in_escape_cooldown || fabs(yaw_to_target) < 60.0f) &&
           now - b.lastattack > (enet_uint32)reactdelay) {
         if (b.gunselect == GUN_CSAW && realdist < 2.5f) {
           b.lastattack = now;
@@ -1177,6 +1192,9 @@ void serverbot_update() {
       }
       continue;
     }
+
+    b.acquiretime = 0;
+    b.acquired = false;
 
     if (now - b.lastmove > (enet_uint32)(800 + rnd(2000))) {
       b.targetyaw = normyaw((float)rnd(360));
