@@ -913,7 +913,7 @@ void serverslice(int seconds, unsigned int timeout) {
       putint(mp, mode);
       *(ushort *)ms = ENET_HOST_TO_NET_16(mp - ms);
       enet_packet_resize(mappkt, mp - ms);
-      loopv(clients) if (clients[j].type != ST_EMPTY) send(j, mappkt);
+      for (int k = 0; k < clients.length(); k++) if (clients[k].type != ST_EMPTY) send(k, mappkt);
       if (mappkt->referenceCount == 0) enet_packet_destroy(mappkt);
       break;
     };
