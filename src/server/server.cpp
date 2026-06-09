@@ -465,7 +465,10 @@ void process(ENetPacket *packet, int sender) {
       strcpy_s(clients[cn].name, text);
       sgetstr();
       strcpy_s(clients[cn].team, text);
-      getint(p);
+      clients[cn].lifesequence = getint(p);
+      clients[cn].state = CS_ALIVE;
+      clients[cn].health = 100;
+      clients[cn].armour = 0;
       break;
 
     case SV_MAPCHANGE: {
@@ -578,6 +581,12 @@ void process(ENetPacket *packet, int sender) {
       getint(p); // velocity
       int flags = getint(p);
       int pstate = (flags >> 3) & 3;
+      clients[cn].o.x = px;
+      clients[cn].o.y = py;
+      clients[cn].o.z = pz;
+      clients[cn].yaw = pyaw;
+      clients[cn].pitch = ppitch;
+      clients[cn].state = pstate;
       serverbot_trackplayer(cn, px, py, pz, pyaw, ppitch, pstate);
       break;
     };
@@ -613,11 +622,120 @@ void process(ENetPacket *packet, int sender) {
       to.y = getint(p) / DMF;
       to.z = getint(p) / DMF;
       serverbot_hitscan(gun, from, to, sender);
+
+      if (gun == GUN_SG || gun == GUN_RIFLE) {
+        int qdam = gun == GUN_RIFLE ? 100 : 10;
+        vec sg[20];
+        int numrays = 1;
+        if (gun == GUN_SG) {
+          vec dvec = to;
+          vsub(dvec, from);
+          float sdist = sqrtf(dotprod(dvec, dvec));
+          float f = sdist * 2.0f / 1000;
+          numrays = 20;
+          loopi(numrays) {
+            float rx = (rnd(101) - 50) * f;
+            float ry = (rnd(101) - 50) * f;
+            float rz = (rnd(101) - 50) * f;
+            sg[i] = to;
+            sg[i].x += rx;
+            sg[i].y += ry;
+            sg[i].z += rz;
+          };
+        };
+
+        loopv(clients) {
+          if (i == sender || clients[i].type == ST_EMPTY) continue;
+          if (clients[i].state != CS_ALIVE) continue;
+          if (i >= BOT_CLIENT_BASE) continue;
+
+          float radius = 1.1f, eyeheight = 3.2f, aboveeye = 0.7f;
+          vec &o = clients[i].o;
+          int damage = 0;
+
+          if (gun == GUN_SG) {
+            loop(r, numrays) {
+              vec ray = sg[r];
+              bool hit = false;
+              {
+                vec v = ray, w = o;
+                vsub(v, from);
+                vsub(w, from);
+                float c1 = dotprod(w, v);
+                vec *pp;
+                if (c1 <= 0) {
+                  pp = &from;
+                } else {
+                  float c2 = dotprod(v, v);
+                  if (c2 <= c1) {
+                    pp = &ray;
+                  } else {
+                    float ff = c1 / c2;
+                    vmul(v, ff);
+                    vadd(v, from);
+                    pp = &v;
+                  };
+                };
+                hit = pp->x <= o.x + radius && pp->x >= o.x - radius &&
+                      pp->y <= o.y + radius && pp->y >= o.y - radius &&
+                      pp->z <= o.z + aboveeye && pp->z >= o.z - eyeheight;
+              };
+              if (hit) damage += qdam;
+            };
+          } else {
+            vec v = to, w = o;
+            vsub(v, from);
+            vsub(w, from);
+            float c1 = dotprod(w, v);
+            vec *pp;
+            if (c1 <= 0) {
+              pp = &from;
+            } else {
+              float c2 = dotprod(v, v);
+              if (c2 <= c1) {
+                pp = &to;
+              } else {
+                float ff = c1 / c2;
+                vmul(v, ff);
+                vadd(v, from);
+                pp = &v;
+              };
+            };
+            if (pp->x <= o.x + radius && pp->x >= o.x - radius &&
+                pp->y <= o.y + radius && pp->y >= o.y - radius &&
+                pp->z <= o.z + aboveeye && pp->z >= o.z - eyeheight)
+              damage = qdam;
+          };
+
+          if (damage > 0) {
+            ENetPacket *dmgpkt = enet_packet_create(NULL, 32, ENET_PACKET_FLAG_RELIABLE);
+            uchar *dpkt = dmgpkt->data;
+            uchar *dp = dpkt + 2;
+            putint(dp, SV_DAMAGE);
+            putint(dp, i);
+            putint(dp, damage);
+            putint(dp, sender);
+            *(ushort *)dpkt = ENET_HOST_TO_NET_16(dp - dpkt);
+            enet_packet_resize(dmgpkt, dp - dpkt);
+            multicast(dmgpkt, -1);
+            if (dmgpkt->referenceCount == 0)
+              enet_packet_destroy(dmgpkt);
+          };
+        };
+      };
+      break;
+    };
+
+    case SV_DAMAGE: {
+      getint(p);
+      getint(p);
+      getint(p);
       break;
     };
 
     case SV_DIED: {
       int actor = getint(p);
+      clients[cn].state = CS_DEAD;
       extern void serverbot_fragged(int);
       serverbot_fragged(actor);
       serverbot_player_died(cn);

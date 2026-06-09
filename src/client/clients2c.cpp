@@ -254,10 +254,13 @@ void localservertoclient(uchar *buf,
     case SV_DAMAGE: {
       int target = getint(p);
       int damage = getint(p);
-      int ls = getint(p);
+      int actor = getint(p);
+      dynent *a = getclient(actor);
       if (target == clientnum) {
-        if (ls == player1->lifesequence)
-          selfdamage(damage, cn, d);
+        if ((m_teammode || m_infected) && a && player1->team[0] && a->team[0] && !strcmp(a->team, player1->team))
+          ;
+        else
+          selfdamage(damage, actor, a);
       } else
         playsound(S_PAIN1 + rnd(5), &getclient(target)->o);
       break;

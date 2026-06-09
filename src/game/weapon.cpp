@@ -201,9 +201,13 @@ void hit(int target, int damage, dynent *d, dynent *at) {
     botpain(d, damage, at);
   else if (d->monsterstate)
     monsterpain(d, damage, at);
-  else {
-    addmsg(1, 4, SV_DAMAGE, target, damage, d->lifesequence);
-    playsound(S_PAIN1 + rnd(5), &d->o);
+  else if (d != player1) {
+    particle_splash(3, damage, 1000, d->o);
+    demodamage(damage, d->o);
+    if (at == player1 && d != player1) {
+      playsoundc(S_HIT);
+    };
+    return;
   };
   particle_splash(3, damage, 1000, d->o);
   demodamage(damage, d->o);
