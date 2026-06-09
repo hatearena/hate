@@ -756,9 +756,9 @@ VARP(hudgun, 0, 1, 1);
 VARP(viewbob, 0, 1, 1);
 VARP(viewbobamp, 0, 10, 50);
 
-char *hudgunnames[] = {"hudguns/hate_csaw", "hudguns/hate_shotg",
-                       "hudguns/hate_cgun", "hudguns/hate_rocket",
-                       "hudguns/hate_rail", "hudguns/hate_nailgun",
+char *hudgunnames[] = {"hudguns/hate_csaw",    "hudguns/hate_shotg",
+                       "hudguns/hate_cgun",    "hudguns/hate_rocket",
+                       "hudguns/hate_rail",    "hudguns/hate_nailgun",
                        "hudguns/hate_lightgun"};
 
 void drawhudmodel(int start, int end, float speed, int base) {
@@ -802,14 +802,6 @@ void drawhudmodel(int start, int end, float speed, int base) {
   float pz = player1->o.y;
   float pyaw = player1->yaw + 90;
   float ppitch = player1->pitch;
-
-  if (player1->gunselect == GUN_RIFLE) {
-    float yaw_rad = player1->yaw * (PI / 180.0f);
-    float right = 0.3f;
-    float fwd = -0.2f;
-    px += cosf(yaw_rad) * right - sinf(yaw_rad) * fwd;
-    pz += sinf(yaw_rad) * right + cosf(yaw_rad) * fwd;
-  }
 
   rendermodel(hudgunnames[player1->gunselect], start, end, 0, 1.0f, px, py, pz,
               pyaw, ppitch, false, scale, speed, 0, base);
