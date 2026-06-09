@@ -1113,7 +1113,7 @@ void serverbot_update() {
       if (weapondelay > reactdelay)
         reactdelay = weapondelay;
 
-      if (fabs(yaw_to_target) < 60.0f &&
+      if ((in_escape_cooldown || fabs(yaw_to_target) < 60.0f) &&
           now - b.lastattack > (enet_uint32)reactdelay) {
         if (b.gunselect == GUN_CSAW && realdist < 2.5f) {
           b.lastattack = now;
