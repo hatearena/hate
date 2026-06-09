@@ -197,24 +197,17 @@ void loadserverconf() {
     else if (strcmp(key, "name") == 0)
       strcpy_s(servername, vbuf);
     else if (strcmp(key, "maprotation") == 0) {
-      char temp[_MAXDEFSTR];
-      char *src = vstart;
-      if (*src == '"')
-        src++;
-      int ti = 0;
-      while (*src && ti < _MAXDEFSTR - 1) {
-        temp[ti++] = *src;
-        src++;
-      }
-      temp[ti] = 0;
-      char *tok = temp;
+      for (char *s = vstart; *s; s++)
+        if (*s == '"')
+          *s = ' ';
+      char *tok = vstart;
       while (*tok) {
-        while (*tok == ' ' || *tok == ',' || *tok == '"')
+        while (*tok == ' ' || *tok == ',')
           tok++;
         if (!*tok)
           break;
         char *end = tok;
-        while (*end && *end != ',' && *end != '"' && *end != ' ')
+        while (*end && *end != ',' && *end != ' ')
           end++;
         char saved = *end;
         *end = 0;
@@ -222,7 +215,7 @@ void loadserverconf() {
           maprotation.add(newstring(tok));
         *end = saved;
         tok = end;
-        if (*tok == ',' || *tok == '"')
+        if (*tok == ',')
           tok++;
       }
     } else if (strcmp(key, "moderotation") == 0) {
