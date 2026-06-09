@@ -628,8 +628,6 @@ void spawnplayer(dynent *d) // place at random spawn. also used by monsters!
   particle_splash(0, 20, 500, d->o);
 };
 
-// movement input code
-
 #define dir(name, v, d, s, os)                                                 \
   void name(bool isdown) {                                                     \
     player1->s = isdown;                                                       \
@@ -838,7 +836,7 @@ void startmap(char *name) // called just after a map load
 {
   if (netmapstart() && m_sp) {
     gamemode = 0;
-    conoutf("coop sp not supported yet");
+    conoutf("Co-op SP not supported.");
   };
   sleepwait = 0;
   monsterclear();
