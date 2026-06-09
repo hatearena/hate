@@ -8,13 +8,12 @@ VARF(skill, 1, 3, 10, conoutf("skill is now %d", skill));
 dvector &getmonsters() { return monsters; };
 void restoremonsterstate() {
   loopv(monsters) if (monsters[i]->state == CS_DEAD) numkilled++;
-}; // for savegames
+};
 
 #define TOTMFREQ 13
 #define NUMMONSTERTYPES 8
 
-struct monstertype // see docs for how these values modify behaviour
-{
+struct monstertype {
   short gun, speed, health, freq, lag, rate, pain, loyalty, mscale, bscale;
   short painsound, diesound;
   char *name, *mdlname;
@@ -149,13 +148,6 @@ bool enemylos(dynent *m, vec &v) {
   return los(m->o.x, m->o.y, m->o.z, m->enemy->o.x, m->enemy->o.y,
              m->enemy->o.z, v);
 };
-
-// monster AI is sequenced using transitions: they are in a particular state
-// where they execute a particular behaviour until the trigger time is hit, and
-// then they reevaluate their situation based on the current state, the
-// environment etc., and transition to the next state. Transition timeframes are
-// parametrized by difficulty level (skill), faster transitions means quicker
-// decision making means tougher AI.
 
 void transition(
     dynent *m, int state, int moving, int n,
@@ -307,15 +299,15 @@ void monsterpain(dynent *m, int damage, dynent *d) {
     playsound(S_KILL);
     int remain = monstertotal - numkilled;
     if (remain > 0 && remain <= 5)
-      conoutf("only %d monster(s) remaining", remain);
+      conoutf("%d monster(s) remaining", remain);
   } else {
     playsound(monstertypes[m->mtype].painsound, &m->o);
   };
 };
 
 void endsp(bool allkilled) {
-  conoutf(allkilled ? "you have cleared the map!" : "you reached the exit!");
-  conoutf("score: %d kills in %d seconds", numkilled,
+  conoutf(allkilled ? "You have cleared the map." : "You reached the exit.");
+  conoutf("Score: %d kills in %d seconds", numkilled,
           (lastmillis - mtimestart) / 1000);
   monstertotal = 0;
   startintermission();
@@ -324,7 +316,7 @@ void endsp(bool allkilled) {
 void monsterthink() {
   if (m_dmsp && spawnremain && lastmillis > nextmonster) {
     if (spawnremain-- == monstertotal)
-      conoutf("The invasion has begun!");
+      conoutf("The invasion has begun.");
     nextmonster = lastmillis + 1000;
     spawnmonster();
   };
@@ -332,8 +324,7 @@ void monsterthink() {
   if (monstertotal && !spawnremain && numkilled == monstertotal)
     endsp(true);
 
-  loopv(ents) // equivalent of player entity touch, but only teleports are used
-  {
+  loopv(ents) {
     entity &e = ents[i];
     if (e.type != TELEPORT)
       continue;
