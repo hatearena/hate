@@ -892,12 +892,8 @@ void startintermission() {
 void resetserverifempty() {
   loopv(clients) if (clients[i].type != ST_EMPTY) return;
   clients.setsize(0);
-  smapname[0] = 0;
   resetvotes();
   resetitems();
-  mode = 0;
-  map_rotation_index = 0;
-  rotation_done = 0;
   mapreload = false;
   lastsec = (int)time(NULL);
   minremain = timelimit ? timelimit : 10;
