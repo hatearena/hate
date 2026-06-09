@@ -222,6 +222,7 @@ void loadserverconf() {
       }
       loopi(maprotation.length())
           fprintf(stderr, "[%d]: %s\n", i, maprotation[i]);
+      printf("\n");
     } else if (strcmp(key, "moderotation") == 0) {
       char temp[_MAXDEFSTR];
       strcpy_s(temp, vbuf);
