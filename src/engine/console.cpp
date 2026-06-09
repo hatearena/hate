@@ -7,8 +7,8 @@ struct cline {
 };
 vector<cline> conlines;
 
-const int ndraw = 5;
 const int WORDWRAP = 80;
+VARP(msglimit, 1, 8, 50);
 int conskip = 0;
 
 bool saycommandon = false;
@@ -63,14 +63,14 @@ void renderconsole() // render buffer taking into account time & scrolling
   struct {
     char *text;
     int age;
-  } refs[ndraw];
-  loopv(conlines) if (conskip
-                          ? i >= conskip - 1 || i >= conlines.length() - ndraw
-                          : lastmillis - conlines[i].outtime < 20000) {
+  } refs[50];
+  loopv(conlines) if (conskip ? i >= conskip - 1 ||
+                                    i >= conlines.length() - msglimit
+                              : lastmillis - conlines[i].outtime < 20000) {
     refs[nd].text = conlines[i].cref;
     refs[nd].age = lastmillis - conlines[i].outtime;
     nd++;
-    if (nd == ndraw)
+    if (nd >= msglimit || nd >= 50)
       break;
   };
   loopj(nd) {
