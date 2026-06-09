@@ -8,6 +8,7 @@ extern vector<client> clients;
 extern ENetHost *serverhost;
 extern string smapname;
 extern void endianswap(void *, int, int);
+extern void send2(bool, int, int, int);
 
 struct serverbot {
   int cn;
@@ -296,6 +297,7 @@ void serverbot_spawn(int count) {
 }
 
 void serverbot_clear() {
+  loopi(numsbots) send2(true, -1, SV_CDIS, sbot[i].cn);
   numsbots = 0;
   numspawns = 0;
   nextcn = BOT_CLIENT_BASE;
@@ -333,6 +335,7 @@ void serverbot_update_weapons() {
 
 bool serverbot_kick(const char *name) {
   loopi(numsbots) if (!strcmp(sbot[i].name, name)) {
+    send2(true, -1, SV_CDIS, sbot[i].cn);
     memmove(&sbot[i], &sbot[i + 1], (numsbots - i - 1) * sizeof(serverbot));
     numsbots--;
     return true;

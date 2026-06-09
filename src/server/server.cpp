@@ -375,7 +375,9 @@ void process(ENetPacket *packet, int sender) {
             return;
           };
           extern void serverbot_clear();
+          extern void serverbot_spawn(int count);
           serverbot_clear();
+          if (botcount > 0) serverbot_spawn(botcount);
           sendservmsg("All bots have been kicked.");
           return;
         } else if (strcmp(text + 1, "list") == 0) {
@@ -467,6 +469,7 @@ void process(ENetPacket *packet, int sender) {
           if (serverbot_kick(target)) {
             sprintf_sd(msg)("Bot %s kicked.", target);
             sendservmsg(msg);
+            if (botcount > 0) serverbot_spawn(1);
             return;
           };
           extern dvector &getbots();
