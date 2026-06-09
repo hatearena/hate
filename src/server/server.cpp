@@ -559,13 +559,15 @@ void process(ENetPacket *packet, int sender) {
       }
       {
         ENetPacket *mappkt = enet_packet_create(NULL, MAXTRANS, ENET_PACKET_FLAG_RELIABLE);
-        uchar *mpkt = mappkt->data;
-        uchar *mp = mpkt + 2;
+        uchar *mp = mappkt->data + 2;
         putint(mp, SV_MAPCHANGE);
         sendstring(smapname, mp);
         putint(mp, mode);
-        *(ushort *)mpkt = ENET_HOST_TO_NET_16(mp - mpkt);
-        enet_packet_resize(mappkt, mp - mpkt);
+        putint(mp, SV_ITEMLIST);
+        loopv(sents) if (sents[i].spawned) putint(mp, i);
+        putint(mp, -1);
+        *(ushort *)mappkt->data = ENET_HOST_TO_NET_16(mp - (uchar *)mappkt->data - 2);
+        enet_packet_resize(mappkt, mp - (uchar *)mappkt->data);
         loopv(clients) if (clients[i].type != ST_EMPTY) send(i, mappkt);
         if (mappkt->referenceCount == 0) enet_packet_destroy(mappkt);
       }
@@ -819,10 +821,6 @@ void send_welcome(int n) {
   *(ushort *)start = ENET_HOST_TO_NET_16(p - start);
   enet_packet_resize(packet, p - start);
   send(n, packet);
-  if (serverbot_count() == 0 && botcount > 0 && smapname[0]) {
-    serverbot_clear();
-    serverbot_spawn(botcount);
-  }
   if (serverbot_count())
     serverbot_sendinit(n);
 };
@@ -1067,10 +1065,6 @@ void initserver(bool dedicated, int uprate, char *sdesc, char *ip, char *master,
   };
 
   resetserverifempty();
-  if (!smapname[0] && maprotation.length() > 0) {
-    strcpy_s(smapname, maprotation[0]);
-    mode = moderotation.length() > 0 ? moderotation[0] : mode;
-  }
 
   if (isdedicated) {
 #ifdef WIN32
