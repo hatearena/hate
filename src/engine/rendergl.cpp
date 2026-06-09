@@ -452,7 +452,7 @@ static GLuint grtex[2] = {0, 0};
 static int grw = 0, grh = 0;
 
 VARP(godrays, 0, 1, 1);
-VARP(godraysintensity, 0, 20, 100);
+VAR(godraysintensity, 0, 20, 100);
 VARP(godrayssamples, 1, 24, 64);
 VARP(godraysscale, 10, 200, 500);
 VARP(godrayslightx, 0, 50, 100);
