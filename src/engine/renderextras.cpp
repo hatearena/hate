@@ -667,7 +667,7 @@ void gl_drawhud(int w, int h, int curfps, int nquads, int curvert,
   glPopMatrix();
 
   {
-    if (editmode || spectator)
+    if (editmode || spectator || screenshotmode)
       goto skiphud;
     dynent *d = player1;
     if (spectator && !speclook) {
