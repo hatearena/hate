@@ -728,7 +728,7 @@ void selfdamage(int damage, int actor, dynent *act) {
       if (act && act->name[0])
         conoutf("%s fragged %s", act->name, player1->name);
       else
-        conoutf("<Bogus> fragged %s", player1->name);
+        conoutf("<Rando> fragged %s", player1->name);
       if (act && act->monsterstate && act->mtype == -1)
         act->frags++;
     } else if (actor == -1) {
@@ -752,7 +752,7 @@ void selfdamage(int damage, int actor, dynent *act) {
           conoutf("%s fragged %s", a->name, player1->name);
         };
       } else {
-        conoutf("<Bogus> (%d) fragged %s", actor, player1->name);
+        conoutf("<Rando> (%d) fragged %s", actor, player1->name);
       };
     };
     if (m_infected && strcmp(player1->team, "INFD") == 0) {
