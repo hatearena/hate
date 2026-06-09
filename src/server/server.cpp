@@ -563,9 +563,6 @@ void process(ENetPacket *packet, int sender) {
         putint(mp, SV_MAPCHANGE);
         sendstring(smapname, mp);
         putint(mp, mode);
-        putint(mp, SV_ITEMLIST);
-        loopv(sents) if (sents[i].spawned) putint(mp, i);
-        putint(mp, -1);
         *(ushort *)ms = ENET_HOST_TO_NET_16(mp - ms);
         enet_packet_resize(mappkt, mp - ms);
         send(i, mappkt);
