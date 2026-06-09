@@ -289,6 +289,7 @@ void serverbot_spawn(int count) {
     } else {
       b.team[0] = 0;
     }
+    fprintf(stderr, "BOT %d: team=%s pos=(%.0f,%.0f,%.0f) mapsize=%d\n", i, b.team[0] ? b.team : "(none)", b.x, b.y, b.z, mapsize);
     numsbots++;
     n++;
   }
@@ -442,8 +443,11 @@ void serverbot_broadcast() {
     *(ushort *)start = ENET_HOST_TO_NET_16(p - start);
     enet_packet_resize(packet, p - start);
     loopv(clients) {
-      if (clients[i].type == ST_TCPIP)
+      if (clients[i].type == ST_TCPIP) {
+        fprintf(stderr, "BCAST bot %d (%s) pos=(%.0f,%.0f,%.0f) state=%d alive=%d\n",
+          i, b.team[0] ? b.team : "?", b.x, b.y, b.z, b.state, b.state == CS_ALIVE ? 1 : 0);
         enet_peer_send(clients[i].peer, 0, packet);
+      }
     }
   }
 }
