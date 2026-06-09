@@ -920,6 +920,10 @@ void serverslice(int seconds, unsigned int timeout) {
 
   lastsec = seconds;
 
+  if (timelimit && minremain < 1 && !interm) {
+    minremain = timelimit;
+    mapend = seconds + minremain * 60;
+  }
   if (timelimit && mode != 1 && seconds > mapend - minremain * 60)
     checkintermission();
   if (interm && seconds > interm) {
@@ -931,6 +935,8 @@ void serverslice(int seconds, unsigned int timeout) {
         mode = moderotation[map_rotation_index];
     }
     rotation_done = seconds;
+    minremain = timelimit ? timelimit : 10;
+    mapend = lastsec + minremain * 60;
     fprintf(stderr,
             "INTERMISSION: rotating to map=%s mode=%d index=%d rotlen=%d\n",
             smapname, mode, map_rotation_index, maprotation.length());
