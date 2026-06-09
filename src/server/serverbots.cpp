@@ -837,7 +837,7 @@ static bool bot_try_escape(serverbot &b, int diff, int move, int strafe,
       b.strafemode = 0;
       b.turncount = 0;
       b.blocktime = 0;
-      break;
+      return true;
     }
   }
 
@@ -848,8 +848,10 @@ static bool bot_try_escape(serverbot &b, int diff, int move, int strafe,
   b.fallvelocity = ov;
   b.onfloor = of;
   if (try_move_bot(b, diff, -1, 0)) {
+    b.yaw = normyaw(b.yaw + 180.0f);
+    b.targetyaw = b.yaw;
     b.lastmove = now;
-    b.movemode = -1;
+    b.movemode = 1;
     b.strafemode = 0;
     b.turncount = 0;
     b.blocktime = 0;
