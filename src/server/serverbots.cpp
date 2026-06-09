@@ -57,8 +57,8 @@ static const float BOT_HIT_RADIUS = 2.5f;
 static const float BOT_MAXSTEP = 1.0f;
 static const float BOT_ATTACK_RANGE = 80.0f;
 static const float BOT_ATTACK_RANGE_SQ = 6400.0f;
-static const int BOT_WEAPON_DELAYS[NUMGUNS] = {150, 1000, 100, 800, 1500, 100,
-                                               50,  200,  200, 200, 250};
+static const int BOT_WEAPON_DELAYS[NUMGUNS] = {75,  500, 50,  400, 750, 50,
+                                               25,  100, 100, 100, 125};
 static const int BOT_WEAPON_DAMAGES[NUMGUNS] = {20, 10, 30, 120, 100, 25,
                                                 15, 20, 40, 30,  50};
 
@@ -1109,7 +1109,7 @@ void serverbot_update() {
         b.movemode = 0;
 
       int weapondelay = BOT_WEAPON_DELAYS[b.gunselect];
-      int reactdelay = 100 + rnd(150);
+      int reactdelay = 50 + rnd(75);
       if (weapondelay > reactdelay)
         reactdelay = weapondelay;
 

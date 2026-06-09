@@ -711,7 +711,7 @@ void selfdamage(int damage, int actor, dynent *act) {
   damage -= ad;
   static int lastrollkick = 0;
   if (lastmillis - lastrollkick >= 700) {
-    float droll = damage / 0.5f;
+    float droll = damage / 4.0f;
     player1->roll +=
         player1->roll > 0
             ? droll
