@@ -549,6 +549,7 @@ void gl_drawhud(int w, int h, int curfps, int nquads, int curvert,
     extern bool saycommandon;
     extern int saycommand_start;
     extern int saycommand_end;
+    extern int commandpos;
     int showbg = 0;
     if (saycommandon) {
       int elapsed = lastmillis - saycommand_start;
@@ -559,15 +560,34 @@ void gl_drawhud(int w, int h, int curfps, int nquads, int curvert,
     };
     if (showbg > 0) {
       int tw =
-          command ? text_width(command) + text_width("$ _") : text_width("$ _");
+          command ? text_width(command) + text_width("$  ") : text_width("$  ");
       glDisable(GL_TEXTURE_2D);
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
       glColor4ub(0, 0, 0, showbg);
       roundedbox(10, 1388, 30 + tw + 10, 1420 + FONTH + 4, 6);
       glEnable(GL_TEXTURE_2D);
     };
-    if (command)
-      draw_textf("$ %s_", 20, 1400, 2, command);
+    if (command) {
+      draw_textf("$ %s", 20, 1400, 2, command);
+      int len = strlen(command);
+      int pos = commandpos > len ? len : commandpos;
+      int cx = 20 + text_width("$ ");
+      if (pos > 0)
+        cx += text_width(command) - text_width(command + pos);
+      int cw = FONTH / 3;
+      if (command[pos])
+        cw = text_width(command + pos) - text_width(command + pos + 1);
+      glDisable(GL_TEXTURE_2D);
+      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+      glColor4ub(255, 255, 255, 200);
+      glBegin(GL_QUADS);
+      glVertex2i(cx, 1400 + FONTH - 3);
+      glVertex2i(cx + cw, 1400 + FONTH - 3);
+      glVertex2i(cx + cw, 1400 + FONTH);
+      glVertex2i(cx, 1400 + FONTH);
+      glEnd();
+      glEnable(GL_TEXTURE_2D);
+    };
   }
 
   renderscores();

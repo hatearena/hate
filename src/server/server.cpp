@@ -365,6 +365,9 @@ void process(ENetPacket *packet, int sender) {
     switch (type = getint(p)) {
     case SV_TEXT: {
       sgetstr();
+      if (text[0] != '/')
+        serverlog("[chat] %s (%s) [%s]: %s\n", clients[sender].name,
+                  clients[sender].hostname, clients[sender].uuid, text);
       if (text[0] == '/') {
         if (strcmp(text + 1, "kick_all_bots") == 0) {
           if (!clients[sender].rcon) {

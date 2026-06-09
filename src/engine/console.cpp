@@ -14,6 +14,7 @@ int conskip = 0;
 bool saycommandon = false;
 int saycommand_start = 0;
 int saycommand_end = 0;
+int commandpos = 0;
 string commandbuf;
 
 void setconskip(int n) {
@@ -147,6 +148,7 @@ void saycommand(char *init) // turns input to the command line on or off
     init = "";
   }
   strcpy_s(commandbuf, init);
+  commandpos = strlen(commandbuf);
 };
 
 void mapmsg(char *s) { strn0cpy(hdr.maptitle, s, 128); };
@@ -218,8 +220,13 @@ void keypress(int code, bool isdown, bool textinput, char text[32]) {
       dont_query_next_key = false;
     else {
       resetcomplete();
-      char buf[] = {text[0], 0};
-      strcat_s(commandbuf, buf);
+      int len = strlen(commandbuf);
+      if (len + 1 < _MAXDEFSTR) {
+        memmove(commandbuf + commandpos + 1, commandbuf + commandpos,
+                len - commandpos + 1);
+        commandbuf[commandpos] = text[0];
+        commandpos++;
+      }
       return;
     }
   }
@@ -270,25 +277,57 @@ void keypress(int code, bool isdown, bool textinput, char text[32]) {
         break;
 
       case SDLK_BACKSPACE: {
-        for (int i = 0; commandbuf[i]; i++)
-          if (!commandbuf[i + 1])
-            commandbuf[i] = 0;
+        if (commandpos > 0) {
+          memmove(commandbuf + commandpos - 1, commandbuf + commandpos,
+                  strlen(commandbuf) - commandpos + 1);
+          commandpos--;
+        }
         resetcomplete();
         break;
       };
 
+      case SDLK_DELETE: {
+        if (commandbuf[commandpos]) {
+          memmove(commandbuf + commandpos, commandbuf + commandpos + 1,
+                  strlen(commandbuf) - commandpos);
+        }
+        resetcomplete();
+        break;
+      };
+
+      case SDLK_LEFT:
+        if (commandpos > 0)
+          commandpos--;
+        break;
+
+      case SDLK_RIGHT:
+        if (commandbuf[commandpos])
+          commandpos++;
+        break;
+
+      case SDLK_HOME:
+        commandpos = 0;
+        break;
+
+      case SDLK_END:
+        commandpos = strlen(commandbuf);
+        break;
+
       case SDLK_UP:
         if (histpos)
           strcpy_s(commandbuf, vhistory[--histpos]);
+        commandpos = strlen(commandbuf);
         break;
 
       case SDLK_DOWN:
         if (histpos < vhistory.length())
           strcpy_s(commandbuf, vhistory[histpos++]);
+        commandpos = strlen(commandbuf);
         break;
 
       case SDLK_TAB:
         complete(commandbuf);
+        commandpos = strlen(commandbuf);
         break;
 
 #if 0
