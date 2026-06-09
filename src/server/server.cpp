@@ -386,8 +386,9 @@ void process(ENetPacket *packet, int sender) {
           string msg;
           int n = 0;
           loopv(clients) if (clients[i].type != ST_EMPTY) {
-            sprintf_s(msg)("%s (%s) [%s]", clients[i].name, clients[i].hostname,
-                           clients[i].uuid);
+            sprintf_s(msg)("%s (%s) [%s] (%d frags)", clients[i].name,
+                           clients[i].hostname, clients[i].uuid,
+                           clients[i].frags);
             sendservmsg(msg);
             n++;
           };
