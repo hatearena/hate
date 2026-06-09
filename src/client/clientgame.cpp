@@ -878,5 +878,4 @@ COMMAND(togglespectate, ARG_NONE);
 COMMAND(togglespeclook, ARG_NONE);
 COMMAND(spectate_next, ARG_NONE);
 COMMAND(spectate_prev, ARG_NONE);
-
 COMMANDN(map, changemap, ARG_1STR);
