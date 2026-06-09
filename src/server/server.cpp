@@ -557,22 +557,22 @@ void process(ENetPacket *packet, int sender) {
         serverbot_clear();
         serverbot_spawn(botcount);
       }
-      {
+      loopv(clients) if (clients[i].type != ST_EMPTY) {
         ENetPacket *mappkt = enet_packet_create(NULL, MAXTRANS, ENET_PACKET_FLAG_RELIABLE);
-        uchar *mp = mappkt->data + 2;
+        uchar *ms = mappkt->data, *mp = ms + 2;
         putint(mp, SV_MAPCHANGE);
         sendstring(smapname, mp);
         putint(mp, mode);
         putint(mp, SV_ITEMLIST);
         loopv(sents) if (sents[i].spawned) putint(mp, i);
         putint(mp, -1);
-        *(ushort *)mappkt->data = ENET_HOST_TO_NET_16(mp - (uchar *)mappkt->data - 2);
-        enet_packet_resize(mappkt, mp - (uchar *)mappkt->data);
-        loopv(clients) if (clients[i].type != ST_EMPTY) send(i, mappkt);
+        *(ushort *)ms = ENET_HOST_TO_NET_16(mp - ms);
+        enet_packet_resize(mappkt, mp - ms);
+        send(i, mappkt);
         if (mappkt->referenceCount == 0) enet_packet_destroy(mappkt);
       }
       loopv(clients) if (clients[i].type == ST_TCPIP) serverbot_sendinit(i);
-      sender = -1;
+      return;
       break;
     };
 
