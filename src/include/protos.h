@@ -291,6 +291,7 @@ extern void serverbot_trackplayer(int cn, float x, float y, float z, float yaw,
                                   float pitch, int state);
 extern void serverbot_clearplayer(int cn);
 extern void serverbot_player_died(int cn);
+extern void serverbot_setlifeseq(int cn, int ls);
 extern void serverbot_hitscan(int gun, vec &from, vec &to, int sender);
 
 // entities

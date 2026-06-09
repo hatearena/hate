@@ -467,6 +467,7 @@ void process(ENetPacket *packet, int sender) {
       strcpy_s(clients[cn].team, text);
       clients[cn].lifesequence = getint(p);
       clients[cn].state = CS_ALIVE;
+      serverbot_setlifeseq(cn, clients[cn].lifesequence);
       break;
 
     case SV_MAPCHANGE: {

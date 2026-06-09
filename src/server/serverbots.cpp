@@ -3,6 +3,7 @@
 
 extern int mode;
 extern int interm;
+extern int botskill;
 extern vector<client> clients;
 extern ENetHost *serverhost;
 extern string smapname;
@@ -478,6 +479,14 @@ void serverbot_clearplayer(int cn) {
   if (cn < 0 || cn >= MAXCLIENTS)
     return;
   playerpos[cn].active = false;
+}
+
+void serverbot_setlifeseq(int cn, int ls) {
+  if (cn >= 0 && cn < MAXCLIENTS) {
+    playerpos[cn].lifesequence = ls;
+    playerpos[cn].active = true;
+    playerpos[cn].state = CS_ALIVE;
+  }
 }
 
 void serverbot_player_died(int cn) {
@@ -1054,7 +1063,9 @@ void serverbot_update() {
       bool in_escape_cooldown = (now - b.lastmove < 500);
 
       if (!in_escape_cooldown) {
-        float turnrate = diff * 0.3f;
+        float skillturn = botskill / 100.0f;
+        if (skillturn < 0.1f) skillturn = 0.1f;
+        float turnrate = diff * skillturn * 0.4f;
         float yd = yawd(enemyyaw, b.yaw);
         if (fabs(yd) > 135.0f)
           turnrate *= 3.0f;
@@ -1066,9 +1077,15 @@ void serverbot_update() {
           b.yaw = normyaw(b.yaw + turnrate);
         else
           b.yaw = normyaw(b.yaw - turnrate);
-        b.targetyaw = normyaw(enemyyaw);
+        if (rnd(100) < (100 - botskill) * 2)
+          b.targetyaw = normyaw(enemyyaw + (rnd(41) - 20) * 0.5f);
+        else
+          b.targetyaw = normyaw(enemyyaw);
       }
-      b.pitch = enemypitch;
+      {
+        float pitchspread = (101 - botskill) * 0.15f;
+        b.pitch = enemypitch + (rnd(101) - 50) / 50.0f * pitchspread;
+      }
 
       float yaw_to_target = yawd(enemyyaw, b.yaw);
       float abs_yaw = fabs(yaw_to_target);
@@ -1109,7 +1126,8 @@ void serverbot_update() {
         b.movemode = 0;
 
       int weapondelay = BOT_WEAPON_DELAYS[b.gunselect];
-      int reactdelay = 50 + rnd(75);
+      int skillreact = (101 - botskill) * 3;
+      int reactdelay = skillreact + rnd(skillreact + 50);
       if (weapondelay > reactdelay)
         reactdelay = weapondelay;
 
@@ -1135,9 +1153,11 @@ void serverbot_update() {
           b.lastaction = now;
           if (b.ammo[b.gunselect])
             b.ammo[b.gunselect]--;
-          float inaccuracy = realdist * 0.03f;
+          float skillfactor = (101 - botskill) / 100.0f;
+          if (skillfactor < 0.01f) skillfactor = 0.01f;
+          float inaccuracy = realdist * skillfactor * 0.12f;
           if (b.gunselect == GUN_RIFLE)
-            inaccuracy *= 0.3f;
+            inaccuracy *= 0.5f;
           float shot_tx = tx + (rnd(101) - 50) / 50.0f * inaccuracy;
           float shot_ty = ty + (rnd(101) - 50) / 50.0f * inaccuracy;
           float shot_tz = tz + (rnd(101) - 50) / 50.0f * inaccuracy * 0.5f;
