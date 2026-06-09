@@ -1029,7 +1029,6 @@ void gl_drawframe(int w, int h, float curfps) {
   addlensflare(w, h);
 
   glDisable(GL_FOG);
-
   glDisable(GL_TEXTURE_2D);
 
   if (editmode) {
