@@ -853,9 +853,11 @@ void send_welcome(int n) {
     putint(p, SV_MAPCHANGE);
     sendstring(smapname, p);
     putint(p, mode);
-    putint(p, SV_ITEMLIST);
-    loopv(sents) if (sents[i].spawned) putint(p, i);
-    putint(p, -1);
+    if (!sents.empty()) {
+      putint(p, SV_ITEMLIST);
+      loopv(sents) if (sents[i].spawned) putint(p, i);
+      putint(p, -1);
+    };
   };
   *(ushort *)start = ENET_HOST_TO_NET_16(p - start);
   enet_packet_resize(packet, p - start);
