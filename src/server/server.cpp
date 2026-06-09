@@ -703,16 +703,8 @@ void process(ENetPacket *packet, int sender) {
               damage = qdam;
           };
           if (damage > 0) {
-            if (clients[sender].team[0] && clients[i].team[0]) {
-              if (!strcmp(clients[sender].team, clients[i].team)) {
-                fprintf(stderr, "DEBUG SV_SHOT: blocked team damage from %s (team=%s) to %s (team=%s)\n",
-                  clients[sender].name, clients[sender].team, clients[i].name, clients[i].team);
-                continue;
-              }
-            } else {
-              fprintf(stderr, "DEBUG SV_SHOT: MISSING TEAM sender=%s(team=%s) target=%s(team=%s) mode=%d\n",
-                clients[sender].name, clients[sender].team, clients[i].name, clients[i].team, mode);
-            }
+            if (clients[sender].team[0] && clients[i].team[0] && !strcmp(clients[sender].team, clients[i].team))
+              continue;
             ENetPacket *dmgpkt = enet_packet_create(NULL, 64, ENET_PACKET_FLAG_RELIABLE);
             uchar *dpkt = dmgpkt->data;
             uchar *dp = dpkt + 2;

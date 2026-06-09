@@ -195,10 +195,6 @@ void newprojectile(vec &from, vec &to, float speed, bool local, dynent *owner,
 void hit(int target, int damage, dynent *d, dynent *at) {
   if (at && d != at && at->team[0] && d->team[0] && !strcmp(at->team, d->team))
     return;
-  if (d != player1 && !d->monsterstate)
-    conoutf("DEBUG hit(): d=%s at=%s d_team=%s at_team=%s", d->name[0]?d->name:"?", at?at->name:"NULL", d->team, at?at->team:"?");
-  if (d != player1 && d->monsterstate && d->mtype == -1)
-    conoutf("DEBUG hit() bot: d=%s(team=%s) at=%s(team=%s)", d->name[0]?d->name:"?", d->team, at?at->name:"NULL", at?at->team:"?");
   if (d == player1)
     selfdamage(damage, at == player1 ? -1 : -2, at);
   else if (d->monsterstate && d->mtype == -1)
