@@ -256,10 +256,16 @@ void localservertoclient(uchar *buf,
       int damage = getint(p);
       int ls = getint(p);
       if (target == clientnum) {
-        if (d && player1->team[0] && d->team[0] && !strcmp(d->team, player1->team))
-          ;
-        else if (ls == player1->lifesequence)
+        if (d && player1->team[0] && d->team[0] && !strcmp(d->team, player1->team)) {
+          conoutf("DEBUG: blocked team damage from %s (team=%s) to %s (team=%s)", d->name[0] ? d->name : "?", d->team, player1->name, player1->team);
+        } else if (ls == player1->lifesequence) {
+          if (d && player1->team[0] && d->team[0])
+            conoutf("DEBUG: ALLOWED damage from %s (team=%s) to %s (team=%s) - DIFFERENT TEAMS", d->name[0] ? d->name : "?", d->team, player1->name, player1->team);
+          else
+            conoutf("DEBUG: ALLOWED damage from %s (team=%s) to %s (team=%s) - MISSING TEAM", d ? d->name : "NULL", d ? d->team : "?", player1->name, player1->team);
           selfdamage(damage, cn, d);
+        } else
+          conoutf("DEBUG: IGNORED damage (lifeseq mismatch) from %s", d ? d->name : "NULL");
       } else
         playsound(S_PAIN1 + rnd(5), &getclient(target)->o);
       break;
