@@ -376,8 +376,13 @@ void process(ENetPacket *packet, int sender) {
           };
           extern void serverbot_clear();
           extern void serverbot_spawn(int count);
+          extern void serverbot_sendinit(int cn);
           serverbot_clear();
-          if (botcount > 0) serverbot_spawn(botcount);
+          if (botcount > 0) {
+            serverbot_spawn(botcount);
+            loopv(clients) if (clients[i].type == ST_TCPIP)
+              serverbot_sendinit(i);
+          }
           sendservmsg("All bots have been kicked.");
           return;
         } else if (strcmp(text + 1, "list") == 0) {
@@ -469,7 +474,11 @@ void process(ENetPacket *packet, int sender) {
           if (serverbot_kick(target)) {
             sprintf_sd(msg)("Bot %s kicked.", target);
             sendservmsg(msg);
-            if (botcount > 0) serverbot_spawn(1);
+            if (botcount > 0) {
+              serverbot_spawn(1);
+              loopv(clients) if (clients[i].type == ST_TCPIP)
+                serverbot_sendinit(i);
+            }
             return;
           };
           extern dvector &getbots();
