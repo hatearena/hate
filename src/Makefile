@@ -77,7 +77,8 @@ else
 
         SERVER_LIBS = \
             -L$(BREW_PREFIX)/lib \
-            -lenet
+            -lenet \
+            -lz
     else
 
         CXX = g++

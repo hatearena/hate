@@ -140,7 +140,7 @@ struct beam {
 beam beams[MAXBEAMS], *blist = NULL, *bempty = NULL;
 bool binitb = false;
 
-void newbeam(vec &from, vec &to, int duration, int color = 0) {
+void newbeam(vec &from, vec &to, int duration, int color) {
   if (!binitb) {
     loopi(MAXBEAMS) {
       beams[i].next = bempty;
