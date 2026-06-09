@@ -540,7 +540,7 @@ void process(ENetPacket *packet, int sender) {
         }
       }
       mapreload = false;
-      if (maprotation.length() > 0) {
+      if (maprotation.length() > 0 && smapname[0]) {
         map_rotation_index = (map_rotation_index + 1) % maprotation.length();
         strcpy_s(smapname, maprotation[map_rotation_index]);
         if (moderotation.length() > map_rotation_index) {
