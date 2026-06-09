@@ -300,6 +300,23 @@ void serverbot_clear() {
   walkdata = NULL;
 }
 
+void serverbot_reteam() {
+  loopi(numsbots) {
+    sbot[i].team[0] = 0;
+    if ((mode & 1 && mode > 2) || mode == 12) {
+      int blues = 0, reds = 0;
+      loopj(numsbots) {
+        if (j >= i) break;
+        if (!strcmp(sbot[j].team, "BLUE") || !strcmp(sbot[j].team, "RES"))
+          blues++;
+        else
+          reds++;
+      }
+      strcpy_s(sbot[i].team, blues <= reds ? "BLUE" : "RED");
+    }
+  }
+}
+
 void serverbot_update_weapons() {
   loopi(numsbots) {
     sbot[i].gunselect = (mode == 4 || mode == 5) ? GUN_RIFLE : 1 + rnd(6);
@@ -308,6 +325,7 @@ void serverbot_update_weapons() {
       sbot[i].ammo[GUN_RIFLE] = 100;
     }
   }
+  serverbot_reteam();
 }
 
 bool serverbot_kick(const char *name) {
