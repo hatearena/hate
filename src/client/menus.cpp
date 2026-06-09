@@ -714,6 +714,7 @@ void showmapmodels() {
     mi2.action = newstring(" ");
     mi2.checkbox = false;
     mi2.slider = false;
+    mi2.textinput = false;
   };
   if (menustack.empty())
     menustack.add(mi);
@@ -804,6 +805,7 @@ void showentities() {
     mi2.action = newstring(" ");
     mi2.checkbox = false;
     mi2.slider = false;
+    mi2.textinput = false;
   };
   if (menustack.empty())
     menustack.add(mi);
