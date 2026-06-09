@@ -819,6 +819,10 @@ void send_welcome(int n) {
   *(ushort *)start = ENET_HOST_TO_NET_16(p - start);
   enet_packet_resize(packet, p - start);
   send(n, packet);
+  if (serverbot_count() == 0 && botcount > 0 && smapname[0]) {
+    serverbot_clear();
+    serverbot_spawn(botcount);
+  }
   if (serverbot_count())
     serverbot_sendinit(n);
 };
