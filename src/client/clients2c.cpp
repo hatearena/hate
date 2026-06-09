@@ -153,14 +153,8 @@ void localservertoclient(uchar *buf,
           playsound(S_DEAD, &d->o);
         }
       }
-      if (state == CS_ALIVE && d->state == CS_DEAD) {
-        if (cn >= BOT_CLIENT_BASE)
-          particle_splash(0, 20, 500, d->o);
-        static int lastspawnsound = 0;
-        if (lastmillis - lastspawnsound >= 10000) {
-          playsound(S_SPAWN, &d->o);
-          lastspawnsound = lastmillis;
-        }
+      if (state == CS_ALIVE && d->state == CS_DEAD && cn >= BOT_CLIENT_BASE) {
+        particle_splash(0, 20, 500, d->o);
       }
       d->state = state;
       if (cn >= BOT_CLIENT_BASE)

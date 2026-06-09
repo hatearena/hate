@@ -606,10 +606,12 @@ void spawnplayer(dynent *d) // place at random spawn. also used by monsters!
   entinmap(d);
   spawnstate(d);
   d->state = CS_ALIVE;
-  static int lastspawnsound = 0;
-  if (lastmillis - lastspawnsound >= 10000) {
-    playsound(S_SPAWN, &d->o);
-    lastspawnsound = lastmillis;
+  if (d == player1) {
+    static int lastspawnsound = 0;
+    if (lastmillis - lastspawnsound >= 10000) {
+      playsound(S_SPAWN, &d->o);
+      lastspawnsound = lastmillis;
+    }
   }
   particle_splash(0, 20, 500, d->o);
 };
