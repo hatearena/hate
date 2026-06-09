@@ -805,7 +805,7 @@ static bool bot_try_escape(serverbot &b, int diff, int move, int strafe,
     b.onfloor = false;
     b.z += 0.01f;
     if (try_move_bot(b, diff, move, strafe)) {
-      b.lastmove = now - 600;
+      b.lastmove = now;
       b.movemode = strafe ? 0 : move;
       b.strafemode = strafe;
       if (!b.onfloor)
@@ -823,17 +823,17 @@ static bool bot_try_escape(serverbot &b, int diff, int move, int strafe,
 
   float angles[] = {60, -60, 80, -80, 110, -110, 135, -135, 180};
   for (int t = 0; t < 9; t++) {
-    b.yaw = normyaw(b.targetyaw + angles[t]);
+    float escape_yaw = normyaw(b.targetyaw + angles[t]);
+    b.yaw = escape_yaw;
     b.x = ox;
     b.y = oy;
     b.z = oz;
     b.fallvelocity = ov;
     b.onfloor = of;
     if (try_move_bot(b, diff, 1, 0)) {
-      b.targetyaw = normyaw((float)rnd(360));
-      b.yaw = normyaw(b.targetyaw + angles[t]);
+      b.targetyaw = escape_yaw;
       b.lastmove = now;
-      b.movemode = 0;
+      b.movemode = 1;
       b.strafemode = 0;
       b.turncount = 0;
       b.blocktime = 0;
@@ -848,7 +848,7 @@ static bool bot_try_escape(serverbot &b, int diff, int move, int strafe,
   b.fallvelocity = ov;
   b.onfloor = of;
   if (try_move_bot(b, diff, -1, 0)) {
-    b.lastmove = now - 600;
+    b.lastmove = now;
     b.movemode = -1;
     b.strafemode = 0;
     b.turncount = 0;
@@ -873,7 +873,7 @@ static bool bot_try_escape(serverbot &b, int diff, int move, int strafe,
   b.z = oz;
   b.fallvelocity = ov;
   b.onfloor = of;
-  b.lastmove = now - 600;
+  b.lastmove = now;
   b.turncount = 0;
   b.blocktime = 0;
   if (!try_move_bot(b, diff, 1, 0))
