@@ -1129,7 +1129,8 @@ void serverbot_update() {
           else
             serverbot_damage(sbot[targetidx].cn, dmg, b.cn);
         } else if (b.gunselect != GUN_CSAW &&
-                   server_los(b.x, b.y, b.z - 0.2f, tx, ty, tz)) {
+                   (server_los(b.x, b.y, b.z - 0.2f, tx, ty, tz) ||
+                    server_los(b.x, b.y, b.z - 0.2f, tx, ty, tz + BOT_ABOVEEYE))) {
           b.lastattack = now;
           b.lastaction = now;
           if (b.ammo[b.gunselect])
