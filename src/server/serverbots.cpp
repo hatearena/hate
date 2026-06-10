@@ -150,10 +150,10 @@ static void loadspawns() {
   char *slash = strpbrk(smapname, "/\\");
   if (slash) {
     strn0cpy(pakname, smapname, slash - smapname + 1);
-    strcpy_s(mapname, slash + 1);
+    strn0cpy(mapname, slash + 1, 64);
   } else {
-    strcpy_s(pakname, "base");
-    strcpy_s(mapname, smapname);
+    strn0cpy(pakname, "base", 64);
+    strn0cpy(mapname, smapname, 64);
   };
   sprintf_s(cgzname)("packages/%s/%s.cgz", pakname, mapname);
   gzFile f = gzopen(cgzname, "rb");
@@ -509,7 +509,6 @@ void serverbot_sendinit(int cn) {
     *(ushort *)start = ENET_HOST_TO_NET_16(p - start);
     enet_packet_resize(pkt, p - start);
     enet_peer_send(clients[cn].peer, 0, pkt);
-    enet_packet_destroy(pkt);
   }
 }
 
