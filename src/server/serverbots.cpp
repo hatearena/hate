@@ -429,7 +429,6 @@ void serverbot_damage(int cn, int damage, int attacker) {
       if (clients[i].type == ST_TCPIP)
         enet_peer_send(clients[i].peer, 0, packet);
     }
-    enet_packet_destroy(packet);
     return;
   }
 }
@@ -470,7 +469,6 @@ void serverbot_broadcast() {
       if (clients[i].type == ST_TCPIP)
         enet_peer_send(clients[i].peer, 0, packet);
     }
-    enet_packet_destroy(packet);
   }
 }
 
@@ -698,7 +696,6 @@ static void send_bot_shot(serverbot &b, float tx, float ty, float tz) {
     if (clients[i].type == ST_TCPIP)
       enet_peer_send(clients[i].peer, 0, packet);
   }
-  enet_packet_destroy(packet);
 }
 
 static bool shot_hits_player(float fromx, float fromy, float fromz, float tox,
@@ -761,7 +758,6 @@ static void send_bot_damage_player(serverbot &b, int target, int damage,
     if (clients[i].type == ST_TCPIP)
       enet_peer_send(clients[i].peer, 0, packet);
   }
-  enet_packet_destroy(packet);
 }
 
 static bool shot_hits_bot(float fromx, float fromy, float fromz, float tox,
