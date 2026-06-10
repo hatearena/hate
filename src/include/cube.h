@@ -216,7 +216,7 @@ enum {
   SV_EXT,
 };
 
-#define MAXBOTS 8
+#define MAXBOTS 16
 #define BOT_CLIENT_BASE 200
 
 struct _ENetPeer;
