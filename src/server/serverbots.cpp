@@ -28,6 +28,11 @@ struct serverbot {
   int turncount;
   enet_uint32 acquiretime;
   bool acquired;
+  enet_uint32 proj_arrival;
+  int proj_target;
+  int proj_damage;
+  int proj_lifeseq;
+  bool proj_target_is_player;
 };
 
 struct walkinfo {
@@ -65,6 +70,19 @@ static const int BOT_WEAPON_DELAYS[NUMGUNS] = {75,  500, 50,  400, 750, 50,
                                                25,  100, 100, 100, 125};
 static const int BOT_WEAPON_DAMAGES[NUMGUNS] = {20, 10, 30, 120, 100, 25,
                                                 15, 20, 40, 30,  50};
+
+static inline bool isprojectile(int gun) {
+    return gun == GUN_RL || gun == GUN_FIREBALL || gun == GUN_ICEBALL || gun == GUN_SLIMEBALL;
+}
+static inline int projspeed(int gun) {
+    switch(gun) {
+        case GUN_RL: return 80;
+        case GUN_FIREBALL: return 50;
+        case GUN_ICEBALL: return 30;
+        case GUN_SLIMEBALL: return 160;
+        default: return 0;
+    }
+}
 
 static float normyaw(float y) {
   while (y < 0)
@@ -276,6 +294,7 @@ void serverbot_spawn(int count) {
     b.turncount = 0;
     b.acquiretime = 0;
     b.acquired = false;
+    b.proj_arrival = 0;
     if ((mode & 1 && mode > 2) || mode == 12) {
       int blues = 0, reds = 0;
       loopj(numsbots) {
@@ -372,6 +391,7 @@ void serverbot_damage(int cn, int damage, int attacker) {
       sbot[i].state = CS_DEAD;
       sbot[i].lastaction = enet_time_get();
       sbot[i].deaths++;
+      sbot[i].proj_arrival = 0;
       if (attacker >= BOT_CLIENT_BASE) {
         loopk(numsbots) if (sbot[k].cn == attacker) {
           sbot[k].frags++;
@@ -409,6 +429,7 @@ void serverbot_damage(int cn, int damage, int attacker) {
       if (clients[i].type == ST_TCPIP)
         enet_peer_send(clients[i].peer, 0, packet);
     }
+    enet_packet_destroy(packet);
     return;
   }
 }
@@ -449,6 +470,7 @@ void serverbot_broadcast() {
       if (clients[i].type == ST_TCPIP)
         enet_peer_send(clients[i].peer, 0, packet);
     }
+    enet_packet_destroy(packet);
   }
 }
 
@@ -676,6 +698,7 @@ static void send_bot_shot(serverbot &b, float tx, float ty, float tz) {
     if (clients[i].type == ST_TCPIP)
       enet_peer_send(clients[i].peer, 0, packet);
   }
+  enet_packet_destroy(packet);
 }
 
 static bool shot_hits_player(float fromx, float fromy, float fromz, float tox,
@@ -738,6 +761,7 @@ static void send_bot_damage_player(serverbot &b, int target, int damage,
     if (clients[i].type == ST_TCPIP)
       enet_peer_send(clients[i].peer, 0, packet);
   }
+  enet_packet_destroy(packet);
 }
 
 static bool shot_hits_bot(float fromx, float fromy, float fromz, float tox,
@@ -989,6 +1013,7 @@ void serverbot_update() {
     b.strafemode = 0;
 
     if (b.state == CS_DEAD) {
+      b.proj_arrival = 0;
       if (now - b.lastaction > 5000) {
         loadspawns();
         if (numspawns == 0) {
@@ -1019,6 +1044,22 @@ void serverbot_update() {
         b.acquired = false;
       }
       continue;
+    }
+
+    if (b.proj_arrival > 0 && now >= b.proj_arrival) {
+      b.proj_arrival = 0;
+      int dmg = b.proj_damage;
+      if (b.proj_target_is_player) {
+        int t = b.proj_target;
+        if (t >= 0 && t < MAXCLIENTS && playerpos[t].active && playerpos[t].state == CS_ALIVE) {
+          send_bot_damage_player(b, t, dmg, b.proj_lifeseq);
+        }
+      } else {
+        int t = b.proj_target;
+        if (t >= 0 && t < numsbots && sbot[t].state == CS_ALIVE) {
+          serverbot_damage(sbot[t].cn, dmg, b.cn);
+        }
+      }
     }
 
     bool target_is_player = false;
@@ -1225,14 +1266,25 @@ void serverbot_update() {
           float fromx = b.x, fromy = b.y, fromz = b.z - 0.2f;
           send_bot_shot(b, shot_tx, shot_ty, shot_tz);
           int dmg = BOT_WEAPON_DAMAGES[b.gunselect];
-          if (target_is_player) {
-            if (shot_hits_player(fromx, fromy, fromz, shot_tx, shot_ty, shot_tz,
-                                 tx, ty, tz))
-              send_bot_damage_player(b, targetidx, dmg, lifeseq);
+          if (isprojectile(b.gunselect)) {
+            int ps = projspeed(b.gunselect);
+            if (ps > 0) {
+              b.proj_arrival = now + (enet_uint32)(realdist / ps * 1000.0f);
+              b.proj_target = targetidx;
+              b.proj_damage = dmg;
+              b.proj_lifeseq = lifeseq;
+              b.proj_target_is_player = target_is_player;
+            }
           } else {
-            if (shot_hits_bot(fromx, fromy, fromz, shot_tx, shot_ty, shot_tz,
-                              sbot[targetidx]))
-              serverbot_damage(sbot[targetidx].cn, dmg, b.cn);
+            if (target_is_player) {
+              if (shot_hits_player(fromx, fromy, fromz, shot_tx, shot_ty, shot_tz,
+                                   tx, ty, tz))
+                send_bot_damage_player(b, targetidx, dmg, lifeseq);
+            } else {
+              if (shot_hits_bot(fromx, fromy, fromz, shot_tx, shot_ty, shot_tz,
+                                sbot[targetidx]))
+                serverbot_damage(sbot[targetidx].cn, dmg, b.cn);
+            }
           }
         }
       }
