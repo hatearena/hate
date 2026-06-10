@@ -145,12 +145,12 @@ struct dynent // players & monsters
   bool attacking, ads;
   int adstime;
   int ammo[NUMGUNS];
-  int monsterstate;     // one of M_* below, M_NONE means human
-  int mtype;            // see monster.cpp
-  dynent *enemy;        // monster wants to kill this entity
-  float targetyaw;      // monster wants to look in this direction
-  bool blocked, moving; // used by physics to signal ai
-  bool walljump, walljumped; // wall jump state
+  int monsterstate;                 // one of M_* below, M_NONE means human
+  int mtype;                        // see monster.cpp
+  dynent *enemy;                    // monster wants to kill this entity
+  float targetyaw;                  // monster wants to look in this direction
+  bool blocked, moving;             // used by physics to signal ai
+  bool walljump, walljumped;        // wall jump state
   float wallnormal_x, wallnormal_y; // wall normal for wall jump push
   int boostmillis;
   int trigger; // millis at which transition to another monsterstate takes place
