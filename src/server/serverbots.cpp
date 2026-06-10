@@ -262,7 +262,7 @@ void serverbot_spawn(int count) {
     int i = numsbots;
     serverbot &b = sbot[i];
     b.cn = nextcn++;
-    strcpy_s(b.name, bnames[rnd(24)]);
+    strn0cpy(b.name, bnames[rnd(24)], 16);
     int si = rnd(numspawns);
     b.x = spawnx[si];
     b.y = spawny[si];
@@ -304,9 +304,9 @@ void serverbot_spawn(int count) {
           reds++;
       }
       if (mode == 12)
-        strcpy_s(b.team, blues <= reds ? "RES" : "INFD");
+        strn0cpy(b.team, blues <= reds ? "RES" : "INFD", 16);
       else
-        strcpy_s(b.team, blues <= reds ? "BLUE" : "RED");
+        strn0cpy(b.team, blues <= reds ? "BLUE" : "RED", 16);
     } else {
       b.team[0] = 0;
     }
@@ -336,7 +336,7 @@ void serverbot_reteam() {
         else
           reds++;
       }
-      strcpy_s(sbot[i].team, blues <= reds ? "BLUE" : "RED");
+      strn0cpy(sbot[i].team, blues <= reds ? "BLUE" : "RED", 16);
     }
   }
 }
@@ -509,6 +509,7 @@ void serverbot_sendinit(int cn) {
     *(ushort *)start = ENET_HOST_TO_NET_16(p - start);
     enet_packet_resize(pkt, p - start);
     enet_peer_send(clients[cn].peer, 0, pkt);
+    enet_packet_destroy(pkt);
   }
 }
 
