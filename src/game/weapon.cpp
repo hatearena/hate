@@ -445,6 +445,15 @@ void shoot(dynent *d, vec &targ) {
   };
   if (d->gunselect && !(m_noitems && m_noitemsrail && d->gunselect == GUN_RIFLE))
     d->ammo[d->gunselect]--;
+  int nextgun = -1;
+  if (!d->ammo[d->gunselect] && autoswitch) {
+    int s = d->gunselect;
+    for (int i = 1; i <= 6; i++) {
+      if (d->ammo[i]) { s = i; break; }
+    }
+    if (s == d->gunselect) s = GUN_CSAW;
+    if (s != d->gunselect) nextgun = s;
+  }
   vec from = d->o;
   vec to = targ;
   from.z -= 0.2f; // below eye
@@ -482,7 +491,14 @@ void shoot(dynent *d, vec &targ) {
            (int)(to.y * DMF), (int)(to.z * DMF));
   d->gunwait = guns[d->gunselect].attackdelay;
 
-  if (guns[d->gunselect].projspeed)
+  bool oldproj = guns[d->gunselect].projspeed != 0;
+  if (nextgun >= 0 && oldproj) {
+    d->gunselect = nextgun;
+    d->gunwait = guns[d->gunselect].attackdelay;
+    playsoundc(S_WEAPLOAD);
+    gunswitchtime = lastmillis;
+  }
+  if (oldproj)
     return;
 
   if (d->gunselect != GUN_SG && d->gunselect != GUN_CG &&
@@ -504,4 +520,10 @@ void shoot(dynent *d, vec &targ) {
 
   if (d->monsterstate)
     raydamage(player1, from, to, d, -1);
+  if (nextgun >= 0) {
+    d->gunselect = nextgun;
+    d->gunwait = guns[d->gunselect].attackdelay;
+    playsoundc(S_WEAPLOAD);
+    gunswitchtime = lastmillis;
+  }
 };
