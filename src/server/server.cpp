@@ -381,7 +381,7 @@ void process(ENetPacket *packet, int sender) {
           if (botcount > 0) {
             serverbot_spawn(botcount);
             loopv(clients) if (clients[i].type == ST_TCPIP)
-              serverbot_sendinit(i);
+                serverbot_sendinit(i);
           }
           sendservmsg("All bots have been kicked.");
           return;
@@ -477,7 +477,7 @@ void process(ENetPacket *packet, int sender) {
             if (botcount > 0) {
               serverbot_spawn(1);
               loopv(clients) if (clients[i].type == ST_TCPIP)
-                serverbot_sendinit(i);
+                  serverbot_sendinit(i);
             }
             return;
           };
@@ -900,7 +900,8 @@ void checkintermission() {
       extern int serverbot_teamscore(const char *);
       blue += serverbot_teamscore("BLUE") + serverbot_teamscore("RES");
       red += serverbot_teamscore("RED") + serverbot_teamscore("INFD");
-      sendservmsg((char *)(blue > red ? "BLUE team wins" : "RED team wins"));
+      sendservmsg((char *)(blue > red ? "Intermission: BLUE team wins"
+                                      : "Intermission: RED team wins"));
     }
   };
   send2(true, -1, SV_TIMEUP, minremain--);
