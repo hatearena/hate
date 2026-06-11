@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=HateArena
+Comment=Fast-paced arena FPS
+Exec=hate_client
+Icon=hatearena
+Terminal=false
+Categories=Game;ActionGame;
+Keywords=fps;shooter;arena;multiplayer;

@@ -29,3 +29,6 @@ CTestTestfile.cmake
 _deps
 CMakeUserPresets.json
 *heaptrack*
+build
+hate_client
+hate_server
