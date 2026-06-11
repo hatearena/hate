@@ -265,3 +265,52 @@ add_custom_command(TARGET ${SERVER_BIN} POST_BUILD
     "${CMAKE_SOURCE_DIR}/content/${SERVER_BIN}"
   COMMENT "Copying ${SERVER_BIN} to content/"
 )
+
+option(BUILD_APPIMAGE "Enable AppImage packaging" OFF)
+
+if(UNIX AND NOT APPLE AND BUILD_APPIMAGE)
+  install(PROGRAMS packaging/linux/AppRun
+    DESTINATION .
+  )
+  install(TARGETS ${CLIENT_BIN}
+    RUNTIME DESTINATION bin
+  )
+  install(DIRECTORY content/
+    DESTINATION share/hate
+    PATTERN "hate_client" EXCLUDE
+    PATTERN "hate_server" EXCLUDE
+  )
+  install(FILES packaging/linux/hatearena.desktop
+    DESTINATION share/applications
+  )
+  install(FILES packaging/linux/hatearena.png
+    DESTINATION share/icons/hicolor/192x192/apps
+  )
+  find_program(LINUXDEPLOY linuxdeploy linuxdeploy-x86_64.AppImage)
+  if(NOT LINUXDEPLOY)
+    set(LINUXDEPLOY "${CMAKE_BINARY_DIR}/linuxdeploy-x86_64.AppImage")
+    file(DOWNLOAD
+      "https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage"
+      "${LINUXDEPLOY}"
+      SHOW_PROGRESS
+    )
+    file(CHMOD "${LINUXDEPLOY}" PERMISSIONS
+      OWNER_READ OWNER_WRITE OWNER_EXECUTE
+      GROUP_READ GROUP_EXECUTE
+      WORLD_READ WORLD_EXECUTE
+    )
+  endif()
+
+  add_custom_target(appimage
+    COMMAND ${CMAKE_COMMAND} --install ${CMAKE_BINARY_DIR} --prefix ${CMAKE_BINARY_DIR}/AppDir/usr
+    COMMAND ${LINUXDEPLOY}
+      --appdir ${CMAKE_BINARY_DIR}/AppDir
+      --executable $<TARGET_FILE:${CLIENT_BIN}>
+      --desktop-file ${CMAKE_SOURCE_DIR}/packaging/linux/hatearena.desktop
+      --icon-file ${CMAKE_SOURCE_DIR}/packaging/linux/hatearena.png
+      --output appimage
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    DEPENDS ${CLIENT_BIN}
+    COMMENT "Building AppImage..."
+  )
+endif()
