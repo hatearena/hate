@@ -63,8 +63,7 @@ void renderclient(dynent *d, bool team, const char *mdlname, bool hellpig,
     mz -= 1.9f;
   };
   rendermodel(mdlname, frame[n], range[n], 0, 1.5f, d->o.x, mz, d->o.y,
-              d->yaw + 90, d->pitch / 2, team, scale, speed, 0, basetime,
-              0.25f);
+              d->yaw + 90, d->pitch / 2, team, scale, speed, 0, basetime, 0.9f);
 };
 
 extern int democlientnum;
@@ -72,8 +71,9 @@ extern int democlientnum;
 void renderclients() {
   dynent *d;
   loopv(players) if ((d = players[i]) &&
-                      (!demoplayback || i != democlientnum)) {
-    if (d->state == CS_DEAD) continue;
+                     (!demoplayback || i != democlientnum)) {
+    if (d->state == CS_DEAD)
+      continue;
     const char *mdl = "monster/player";
     if (m_teammode || m_infected) {
       if (d->team[0] && !strcmp(d->team, m_infected ? "RES" : "BLUE"))
@@ -92,7 +92,8 @@ int scoreboard_scroll = 0;
 void showscores(bool on) {
   scoreson = on;
   menuset(((int)on) - 1);
-  if (on) scoreboard_scroll = 0;
+  if (on)
+    scoreboard_scroll = 0;
 };
 
 struct sline {

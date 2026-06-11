@@ -203,7 +203,9 @@ void md2::render(vec &light, int frame, int range, float x, float y, float z,
 
     if (!verts1 || !verts2) {
       static int vcnt = 0;
-      if (++vcnt < 5) conoutf("rendermodel NULL verts: fr1=%d fr2=%d numFrames=%d", fr1, fr2, numFrames);
+      if (++vcnt < 5)
+        conoutf("rendermodel NULL verts: fr1=%d fr2=%d numFrames=%d", fr1, fr2,
+                numFrames);
       glPopMatrix();
       return;
     }
@@ -300,9 +302,9 @@ COMMAND(mapmodel, ARG_5STR);
 COMMAND(mapmodelreset, ARG_NONE);
 
 void preloadhudmodels() {
-  char *names[] = {"hudguns/hate_csaw",  "hudguns/hate_shotg",
-                   "hudguns/hate_cgun", "hudguns/hate_rocket",
-                   "hudguns/hate_rail",  "hudguns/hate_nailgun",
+  char *names[] = {"hudguns/hate_csaw",    "hudguns/hate_shotg",
+                   "hudguns/hate_cgun",    "hudguns/hate_rocket",
+                   "hudguns/hate_rail",    "hudguns/hate_nailgun",
                    "hudguns/hate_lightgun"};
 
   for (int i = 0; i < 7; i++) {
@@ -358,15 +360,15 @@ void rendermodel(const char *mdl, int frame, int range, int tex, float rad,
     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
     glDepthMask(GL_FALSE);
 
-    vec glowlight = {1.2f, 1.2f, 1.2f};
+    vec glowlight = {20.0f, 20.0f, 20.0f};
     if (teammate) {
       glowlight.x *= 0.6f;
       glowlight.y *= 0.7f;
       glowlight.z *= 1.2f;
     }
 
-    m->render(glowlight, frame, range, x, y, z, yaw, pitch, scale * 1.05f,
-              speed, snap, basetime, glow);
+    m->render(glowlight, frame, range, x, y, z, yaw, pitch, scale * 1.4f, speed,
+              snap, basetime, glow);
 
     glDepthMask(GL_TRUE);
     glDisable(GL_BLEND);
