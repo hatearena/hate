@@ -82,26 +82,26 @@ jobs:
         if: runner.os != 'Windows'
         shell: bash
         run: >
-          cmake -B ${{ steps.strings.outputs.build-output-dir }}
+          cmake -B '${{ steps.strings.outputs.build-output-dir }}'
           -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
           -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
-          -S ${{ github.workspace }}
+          -S '${{ github.workspace }}'
 
       - name: Configure CMake (Windows)
         if: runner.os == 'Windows'
         shell: bash
         run: >
           cmake -G "MinGW Makefiles"
-          -B ${{ steps.strings.outputs.build-output-dir }}
+          -B '${{ steps.strings.outputs.build-output-dir }}'
           -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
           -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
-          -S ${{ github.workspace }}
+          -S '${{ github.workspace }}'
 
       - name: Build
         shell: bash
-        run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }}
+        run: cmake --build '${{ steps.strings.outputs.build-output-dir }}' --config ${{ matrix.build_type }}
 
       - name: Test
         working-directory: ${{ steps.strings.outputs.build-output-dir }}
