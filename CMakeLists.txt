@@ -367,7 +367,7 @@ elseif(APPLE)
     "  <key>CFBundleInfoDictionaryVersion</key>\n"
     "  <string>6.0</string>\n"
     "  <key>CFBundleName</key>\n"
-    "  <string>Hate Arena</string>\n"
+    "  <string>HateArena</string>\n"
     "  <key>CFBundlePackageType</key>\n"
     "  <string>APPL</string>\n"
     "  <key>CFBundleShortVersionString</key>\n"
