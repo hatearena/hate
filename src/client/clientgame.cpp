@@ -134,7 +134,7 @@ void spawnstate(dynent *d) {
   d->timeinair = 0;
   d->walljump = false;
   d->walljumped = false;
-  d->health = 100;
+  d->health = 150;
   d->armour = 50;
   d->armourtype = A_BLUE;
   d->quadmillis = 0;
@@ -620,7 +620,7 @@ void spawnplayer(dynent *d) // place at random spawn. also used by monsters!
   d->state = CS_ALIVE;
   if (d == player1) {
     static int lastspawnsound = 0;
-    if (lastmillis - lastspawnsound >= 10000) {
+    if (!lastspawnsound || lastmillis - lastspawnsound >= 10000) {
       playsound(S_SPAWN, &d->o);
       lastspawnsound = lastmillis;
     }

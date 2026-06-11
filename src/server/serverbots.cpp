@@ -293,7 +293,7 @@ void serverbot_spawn(int count) {
     b.pitch = 0;
     b.roll = 0;
     b.state = CS_ALIVE;
-    b.health = 100;
+    b.health = 150;
     b.gunselect = (mode == 4 || mode == 5) ? GUN_RIFLE : 1 + rnd(6);
     loopk(NUMGUNS) b.ammo[k] = 100;
     b.ammo[GUN_CSAW] = 1;
@@ -1045,7 +1045,7 @@ void serverbot_update() {
         b.x = spawnx[si];
         b.y = spawny[si];
         b.z = spawnz[si] + BOT_EYEHEIGHT;
-        b.health = 100;
+        b.health = 150;
         b.state = CS_ALIVE;
         b.lastmove = 0;
         b.lastattack = 0;

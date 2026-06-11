@@ -92,7 +92,7 @@ struct itemstat {
 } itemstats[] = {
     10,   50,   S_ITEMAMMO,   20,  100,  S_ITEMAMMO,   5,   25,   S_ITEMAMMO,
     5,    25,   S_ITEMAMMO,   15,  75,   S_ITEMAMMO,   20,  180,  S_ITEMAMMO,
-    25,   100,  S_ITEMHEALTH, 50,  200,  S_ITEMHEALTH, 100, 100,  S_ITEMARMOUR,
+    25,   350,  S_ITEMHEALTH, 50,  350,  S_ITEMHEALTH, 100, 100,  S_ITEMARMOUR,
     150,  150,  S_ITEMARMOUR, 20000, 30000, S_ITEMPUP,
 };
 

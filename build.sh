@@ -4,6 +4,7 @@ set -e
 show_usage() {
     echo "Usage: $0 [ -client | -server | -appimage | -appbundle ]"
     echo "  -client     Build the client binary"
+    echo "  -brun       Build the client binary and run it"
     echo "  -server     Build the server binary"
     echo "  -appimage   Build client and create Linux AppImage"
     echo "  -appbundle  Build client and create MacOS .app bundle"
@@ -21,6 +22,13 @@ case "$1" in
         cmake -S . -B build -DCMAKE_BUILD_TYPE=Release \
             -DBUILD_APPIMAGE=OFF -DBUILD_APPBUNDLE=OFF
         cmake --build build --target hate_client -j$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 4)
+        ;;
+    -brun)
+        cmake -S . -B build -DCMAKE_BUILD_TYPE=Release \
+            -DBUILD_APPIMAGE=OFF -DBUILD_APPBUNDLE=OFF
+        cmake --build build --target hate_client -j$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 4)
+        cd content
+        ./hate_client
         ;;
     -server)
         cmake -S . -B build -DCMAKE_BUILD_TYPE=Release \
