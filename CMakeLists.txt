@@ -5,11 +5,15 @@ if(WIN32)
   if(MSVC)
     message(FATAL_ERROR "MSVC is not supported. Use MinGW instead.\n  Configure with: cmake --preset default\n  Or: cmake -G \"MinGW Makefiles\" .")
   endif()
-  set(CLIENT_BIN "hate_client.exe")
-  set(SERVER_BIN "hate_server.exe")
+  set(CLIENT_BIN "hate_client")
+  set(SERVER_BIN "hate_server")
+  set(CLIENT_OUT "hate_client.exe")
+  set(SERVER_OUT "hate_server.exe")
 else()
   set(CLIENT_BIN "hate_client")
   set(SERVER_BIN "hate_server")
+  set(CLIENT_OUT "hate_client")
+  set(SERVER_OUT "hate_server")
 endif()
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -fsigned-char -fomit-frame-pointer -fpermissive -w -Wno-write-strings -Wno-unused-variable -g")
@@ -412,9 +416,23 @@ endif()
 add_custom_command(TARGET ${CLIENT_BIN} POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_if_different
     "$<TARGET_FILE:${CLIENT_BIN}>"
-    "${CMAKE_SOURCE_DIR}/content/${CLIENT_BIN}"
-  COMMENT "Copying ${CLIENT_BIN} to content/"
+    "${CMAKE_SOURCE_DIR}/content/${CLIENT_OUT}"
+  COMMENT "Copying ${CLIENT_OUT} to content/"
 )
+if(WIN32)
+  file(GLOB _runtime_dlls "${CMAKE_SOURCE_DIR}/packaging/windows/*.dll")
+  if(_runtime_dlls)
+    add_custom_command(TARGET ${CLIENT_BIN} POST_BUILD
+      COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${_runtime_dlls}
+        "${CMAKE_BINARY_DIR}"
+      COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${_runtime_dlls}
+        "${CMAKE_SOURCE_DIR}/content/"
+      COMMENT "Copying runtime DLLs"
+    )
+  endif()
+endif()
 
 add_executable(${SERVER_BIN}
   $<TARGET_OBJECTS:standalone_obj>
@@ -453,9 +471,20 @@ endif()
 add_custom_command(TARGET ${SERVER_BIN} POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_if_different
     "$<TARGET_FILE:${SERVER_BIN}>"
-    "${CMAKE_SOURCE_DIR}/content/${SERVER_BIN}"
-  COMMENT "Copying ${SERVER_BIN} to content/"
+    "${CMAKE_SOURCE_DIR}/content/${SERVER_OUT}"
+  COMMENT "Copying ${SERVER_OUT} to content/"
 )
+if(WIN32)
+  add_custom_command(TARGET ${SERVER_BIN} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+      ${_runtime_dlls}
+      "${CMAKE_BINARY_DIR}"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+      ${_runtime_dlls}
+      "${CMAKE_SOURCE_DIR}/content/"
+    COMMENT "Copying runtime DLLs"
+  )
+endif()
 
 option(BUILD_APPIMAGE "Enable AppImage packaging" OFF)
 
