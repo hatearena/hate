@@ -16,7 +16,7 @@ else()
   set(SERVER_OUT "hate_server")
 endif()
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -fsigned-char -fomit-frame-pointer -fpermissive -w -Wno-write-strings -Wno-unused-variable -g")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -fsigned-char -fomit-frame-pointer -fpermissive -w -Wno-write-strings -Wno-unused-variable -Wno-c++11-narrowing -g")
 if(WIN32 AND NOT MSVC)
   add_compile_definitions(WIN32)
 endif()
