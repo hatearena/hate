@@ -305,7 +305,6 @@ if(UNIX AND NOT APPLE AND BUILD_APPIMAGE)
     COMMAND ${CMAKE_COMMAND} --install ${CMAKE_BINARY_DIR} --prefix ${CMAKE_BINARY_DIR}/AppDir/usr
     COMMAND ${LINUXDEPLOY}
       --appdir ${CMAKE_BINARY_DIR}/AppDir
-      --executable $<TARGET_FILE:${CLIENT_BIN}>
       --desktop-file ${CMAKE_SOURCE_DIR}/packaging/linux/hatearena.desktop
       --icon-file ${CMAKE_SOURCE_DIR}/packaging/linux/hatearena.png
       --output appimage
