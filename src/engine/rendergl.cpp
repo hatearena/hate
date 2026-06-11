@@ -488,10 +488,8 @@ void addgodrays(int w, int h) {
   glPushMatrix();
   glMatrixMode(GL_TEXTURE);
   glPushMatrix();
-
   glBindTexture(GL_TEXTURE_2D, grtex[0]);
   glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, w, h);
-
   glViewport(0, 0, bw, bh);
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
@@ -500,11 +498,9 @@ void addgodrays(int w, int h) {
   glLoadIdentity();
   glMatrixMode(GL_TEXTURE);
   glLoadIdentity();
-
   glDisable(GL_DEPTH_TEST);
   glDisable(GL_BLEND);
   glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-
   glColor3f(1, 1, 1);
   glBindTexture(GL_TEXTURE_2D, grtex[0]);
   glBegin(GL_QUADS);
@@ -520,14 +516,12 @@ void addgodrays(int w, int h) {
 
   glBindTexture(GL_TEXTURE_2D, grtex[1]);
   glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, bw, bh);
-
   glViewport(0, 0, w, h);
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
   glOrtho(0, w, 0, h, -1, 1);
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
-
   glDisable(GL_BLEND);
   glBindTexture(GL_TEXTURE_2D, grtex[0]);
   glColor3f(1, 1, 1);
