@@ -155,6 +155,13 @@ else()
   )
 endif()
 
+add_custom_command(TARGET ${CLIENT_BIN} POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    "$<TARGET_FILE:${CLIENT_BIN}>"
+    "${CMAKE_SOURCE_DIR}/content/${CLIENT_BIN}"
+  COMMENT "Copying ${CLIENT_BIN} to content/"
+)
+
 add_executable(${SERVER_BIN}
   $<TARGET_OBJECTS:standalone_obj>
   src/server/server.cpp
@@ -183,3 +190,10 @@ else()
   target_compile_options(${SERVER_BIN} PRIVATE ${ENET_CFLAGS})
   target_link_libraries(${SERVER_BIN} ${ENET_LIBRARIES})
 endif()
+
+add_custom_command(TARGET ${SERVER_BIN} POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    "$<TARGET_FILE:${SERVER_BIN}>"
+    "${CMAKE_SOURCE_DIR}/content/${SERVER_BIN}"
+  COMMENT "Copying ${SERVER_BIN} to content/"
+)
