@@ -1,0 +1,114 @@
+name: Release
+
+on:
+    push:
+        tags:
+            - "v*"
+
+jobs:
+    build-macos:
+        runs-on: macos-latest
+        steps:
+            - uses: actions/checkout@v4
+            - name: Install dependencies
+              run: brew update && brew install enet sdl2 sdl2_image sdl2_mixer sdl2_ttf
+            - name: Build
+              run: |
+                  cmake -B build -DCMAKE_BUILD_TYPE=Release -S .
+                  cmake --build build --config Release
+            - name: Package .app bundle
+              run: |
+                  cd build
+                  zip -r HateArena-macOS-${{ github.ref_name }}.zip HateArena-MacOS.app
+            - uses: actions/upload-artifact@v4
+              with:
+                  name: macos-release
+                  path: build/HateArena-macOS-${{ github.ref_name }}.zip
+
+    build-linux:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - name: Install dependencies
+              run: |
+                  sudo apt-get update
+                  sudo apt-get install -y --no-install-recommends \
+                    libenet-dev libsdl2-dev libsdl2-image-dev \
+                    libsdl2-mixer-dev libsdl2-ttf-dev zlib1g-dev \
+                    libgl1-mesa-dev libglu1-mesa-dev libx11-dev \
+                    libfuse2
+            - name: Build
+              run: |
+                  cmake -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_APPIMAGE=ON -S .
+                  cmake --build build --config Release
+            - name: Download linuxdeploy
+              run: |
+                  wget -q https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage \
+                    -O build/linuxdeploy-x86_64.AppImage
+                  chmod +x build/linuxdeploy-x86_64.AppImage
+            - name: Build AppImage
+              run: |
+                  cd build
+                  cmake --build . --target appimage
+                  mv HateArena*.AppImage HateArena-linux-${{ github.ref_name }}.AppImage
+            - uses: actions/upload-artifact@v4
+              with:
+                  name: linux-release
+                  path: build/HateArena-linux-${{ github.ref_name }}.AppImage
+
+    build-windows:
+        runs-on: windows-latest
+        steps:
+            - uses: actions/checkout@v4
+            - uses: msys2/setup-msys2@v2
+              with:
+                  msystem: MINGW64
+                  update: true
+                  install: >-
+                      mingw-w64-x86_64-gcc mingw-w64-x86_64-cmake
+                      mingw-w64-x86_64-make mingw-w64-x86_64-enet
+                      mingw-w64-x86_64-SDL2 mingw-w64-x86_64-SDL2_image
+                      mingw-w64-x86_64-SDL2_mixer mingw-w64-x86_64-SDL2_ttf
+                      mingw-w64-x86_64-zlib
+            - name: Build
+              shell: msys2 {0}
+              run: |
+                  cmake -G "MinGW Makefiles" -B build -DCMAKE_BUILD_TYPE=Release -S .
+                  cmake --build build --config Release
+            - name: Package zip
+              shell: pwsh
+              run: |
+                  $ver = "${{ github.ref_name }}"
+                  $out = "HateArena-windows-$ver"
+                  New-Item -ItemType Directory -Path $out
+                  Copy-Item build\*.exe $out\
+                  Copy-Item content\* $out\ -Recurse -ErrorAction SilentlyContinue
+                  $mingwBin = "C:\msys64\mingw64\bin"
+                  @("SDL2.dll","SDL2_image.dll","SDL2_mixer.dll","SDL2_ttf.dll",
+                    "libenet.dll","zlib1.dll","libgcc_s_seh-1.dll","libstdc++-6.dll",
+                    "libwinpthread-1.dll") | ForEach-Object {
+                    $src = Join-Path $mingwBin $_
+                    if (Test-Path $src) { Copy-Item $src $out\ }
+                  }
+                  Compress-Archive -Path $out -DestinationPath "$out.zip"
+            - uses: actions/upload-artifact@v4
+              with:
+                  name: windows-release
+                  path: HateArena-windows-${{ github.ref_name }}.zip
+
+    create-release:
+        needs: [build-macos, build-linux, build-windows]
+        runs-on: ubuntu-latest
+        permissions:
+            contents: write
+        steps:
+            - uses: actions/download-artifact@v4
+              with:
+                  path: release-assets
+                  merge-multiple: true
+            - name: Create GitHub Release
+              uses: softprops/action-gh-release@v2
+              with:
+                  tag_name: ${{ github.ref_name }}
+                  name: HateArena ${{ github.ref_name }}
+                  files: release-assets/*
