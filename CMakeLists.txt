@@ -32,13 +32,62 @@ else()
     pkg_check_modules(SDL2_TTF SDL2_ttf)
     pkg_check_modules(SDL2_MIXER SDL2_mixer)
   endif()
-  if(NOT ENET_FOUND)
-    find_path(ENET_INCLUDE_DIR enet/enet.h)
-    find_library(ENET_LIBRARY enet)
-    if(NOT ENET_LIBRARY)
-      message(FATAL_ERROR "enet not found")
+
+  macro(resolve_library PREFIX LIBNAME HEADER HEADER_PATH REQUIRED_FLAG)
+    if(NOT ${PREFIX}_FOUND)
+      find_path(${PREFIX}_INCLUDE_DIR ${HEADER}
+        HINTS /usr/local/include /opt/homebrew/include /usr/include
+        PATH_SUFFIXES ${HEADER_PATH}
+      )
+      find_library(${PREFIX}_LIBRARY_RESOLVED ${LIBNAME}
+        HINTS /usr/local/lib /opt/homebrew/lib /usr/lib
+      )
+      if(NOT ${PREFIX}_LIBRARY_RESOLVED)
+        if(${REQUIRED_FLAG})
+          message(FATAL_ERROR "${LIBNAME} not found. Install with: brew install ${LIBNAME} on MacOS or check your package manager.")
+        endif()
+      else()
+        set(${PREFIX}_LIBRARIES   ${${PREFIX}_LIBRARY_RESOLVED})
+        set(${PREFIX}_LIBRARY_DIRS "")
+        if(${PREFIX}_INCLUDE_DIR)
+          set(${PREFIX}_INCLUDE_DIRS ${${PREFIX}_INCLUDE_DIR})
+        endif()
+      endif()
+    else()
+      set(_resolved "")
+      foreach(_lib ${${PREFIX}_LIBRARIES})
+        if(EXISTS "${_lib}")
+          list(APPEND _resolved "${_lib}")
+        else()
+          find_library(_lib_path ${_lib}
+            HINTS ${${PREFIX}_LIBRARY_DIRS} /usr/local/lib /opt/homebrew/lib /usr/lib
+          )
+          if(_lib_path)
+            list(APPEND _resolved "${_lib_path}")
+          else()
+            list(APPEND _resolved "${_lib}")
+          endif()
+          unset(_lib_path CACHE)
+        endif()
+      endforeach()
+      set(${PREFIX}_LIBRARIES ${_resolved})
     endif()
-  endif()
+  endmacro()
+
+  resolve_library(ENET      enet       enet/enet.h  ""     TRUE)
+  resolve_library(SDL2      SDL2       SDL.h        SDL2   TRUE)
+  resolve_library(SDL2_IMAGE SDL2_image SDL_image.h SDL2   TRUE)
+  resolve_library(SDL2_TTF  SDL2_ttf   SDL_ttf.h   SDL2   TRUE)
+  resolve_library(SDL2_MIXER SDL2_mixer SDL_mixer.h SDL2   TRUE)
+
+  foreach(_prefix ENET SDL2 SDL2_IMAGE SDL2_TTF SDL2_MIXER)
+    if(${_prefix}_INCLUDE_DIRS AND NOT ${_prefix}_CFLAGS)
+      foreach(_inc ${${_prefix}_INCLUDE_DIRS})
+        list(APPEND ${_prefix}_CFLAGS "-I${_inc}")
+      endforeach()
+    endif()
+  endforeach()
+
   if(APPLE)
     find_library(OPENGL_FRAMEWORK OpenGL)
     find_library(COCOA_FRAMEWORK Cocoa)
@@ -98,6 +147,11 @@ set(SERVER_SOURCES
 add_library(standalone_obj OBJECT src/server/serverutil.cpp)
 target_compile_definitions(standalone_obj PRIVATE STANDALONE SDL_MAIN_HANDLED)
 target_include_directories(standalone_obj PRIVATE ${INCLUDE_DIRS})
+foreach(_inc_var ENET_INCLUDE_DIRS SDL2_INCLUDE_DIRS SDL2_IMAGE_INCLUDE_DIRS SDL2_TTF_INCLUDE_DIRS SDL2_MIXER_INCLUDE_DIRS)
+  if(${_inc_var})
+    target_include_directories(standalone_obj PRIVATE ${${_inc_var}})
+  endif()
+endforeach()
 
 set(CLIENT_ALL_SOURCES
   src/main.cpp
@@ -109,6 +163,11 @@ set(CLIENT_ALL_SOURCES
 
 add_executable(${CLIENT_BIN} ${CLIENT_ALL_SOURCES})
 target_include_directories(${CLIENT_BIN} PRIVATE ${INCLUDE_DIRS})
+foreach(_inc_var ENET_INCLUDE_DIRS SDL2_INCLUDE_DIRS SDL2_IMAGE_INCLUDE_DIRS SDL2_TTF_INCLUDE_DIRS SDL2_MIXER_INCLUDE_DIRS)
+  if(${_inc_var})
+    target_include_directories(${CLIENT_BIN} PRIVATE ${${_inc_var}})
+  endif()
+endforeach()
 
 target_link_libraries(${CLIENT_BIN}
   ZLIB::ZLIB
@@ -129,6 +188,10 @@ if(WIN32)
   )
   set_target_properties(${CLIENT_BIN} PROPERTIES LINK_FLAGS "-mconsole")
 elseif(APPLE)
+  target_compile_options(standalone_obj PRIVATE
+    ${ENET_CFLAGS}
+    ${SDL2_CFLAGS}
+  )
   target_compile_options(${CLIENT_BIN} PRIVATE
     ${ENET_CFLAGS}
     ${SDL2_CFLAGS} ${SDL2_IMAGE_CFLAGS} ${SDL2_TTF_CFLAGS} ${SDL2_MIXER_CFLAGS}
@@ -171,6 +234,11 @@ add_executable(${SERVER_BIN}
 )
 
 target_include_directories(${SERVER_BIN} PRIVATE ${INCLUDE_DIRS})
+foreach(_inc_var ENET_INCLUDE_DIRS SDL2_INCLUDE_DIRS)
+  if(${_inc_var})
+    target_include_directories(${SERVER_BIN} PRIVATE ${${_inc_var}})
+  endif()
+endforeach()
 target_compile_definitions(${SERVER_BIN} PRIVATE STANDALONE SDL_MAIN_HANDLED)
 
 target_link_libraries(${SERVER_BIN}
