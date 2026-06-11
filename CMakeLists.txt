@@ -204,6 +204,60 @@ elseif(APPLE)
     ${IOKIT_FRAMEWORK}
     ${COREVIDEO_FRAMEWORK}
   )
+
+  set(BUNDLE_DIR "${CMAKE_BINARY_DIR}/HateArena-MacOS.app")
+  set(LAUNCHER_SCRIPT "${CMAKE_BINARY_DIR}/hate_client_launcher.sh")
+  set(PLIST_FILE "${CMAKE_BINARY_DIR}/hate_client_Info.plist")
+
+  file(WRITE "${LAUNCHER_SCRIPT}"
+    "#!/bin/bash\n"
+    "cd \"$(dirname \"$0\")/../Resources\"\n"
+    "exec \"./${CLIENT_BIN}\"\n"
+  )
+
+  file(WRITE "${PLIST_FILE}"
+    "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+    "<!DOCTYPE plist PUBLIC \"-//Apple Computer//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
+    "<plist version=\"1.0\">\n"
+    "<dict>\n"
+    "  <key>CFBundleDevelopmentRegion</key>\n"
+    "  <string>English</string>\n"
+    "  <key>CFBundleExecutable</key>\n"
+    "  <string>${CLIENT_BIN}</string>\n"
+    "  <key>CFBundleIdentifier</key>\n"
+    "  <string>com.hatearena.${CLIENT_BIN}</string>\n"
+    "  <key>CFBundleInfoDictionaryVersion</key>\n"
+    "  <string>6.0</string>\n"
+    "  <key>CFBundleName</key>\n"
+    "  <string>Hate Arena</string>\n"
+    "  <key>CFBundlePackageType</key>\n"
+    "  <string>APPL</string>\n"
+    "  <key>CFBundleShortVersionString</key>\n"
+    "  <string>${PROJECT_VERSION}</string>\n"
+    "  <key>CFBundleVersion</key>\n"
+    "  <string>${PROJECT_VERSION}</string>\n"
+    "</dict>\n"
+    "</plist>\n"
+  )
+
+  add_custom_command(TARGET ${CLIENT_BIN} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E make_directory "${BUNDLE_DIR}/Contents/MacOS"
+    COMMAND ${CMAKE_COMMAND} -E make_directory "${BUNDLE_DIR}/Contents/Resources"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+      "$<TARGET_FILE:${CLIENT_BIN}>"
+      "${BUNDLE_DIR}/Contents/Resources/${CLIENT_BIN}"
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+      "${CMAKE_SOURCE_DIR}/content"
+      "${BUNDLE_DIR}/Contents/Resources"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+      "${LAUNCHER_SCRIPT}"
+      "${BUNDLE_DIR}/Contents/MacOS/${CLIENT_BIN}"
+    COMMAND chmod +x "${BUNDLE_DIR}/Contents/MacOS/${CLIENT_BIN}"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+      "${PLIST_FILE}"
+      "${BUNDLE_DIR}/Contents/Info.plist"
+    COMMENT "Creating macOS .app bundle"
+  )
 else()
   target_compile_options(${CLIENT_BIN} PRIVATE
     ${ENET_CFLAGS}
