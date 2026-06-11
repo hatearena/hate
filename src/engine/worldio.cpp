@@ -326,8 +326,11 @@ void load_world(char *mname) // still supports all map formats that have existed
   settagareas();
   int xs, ys;
   loopi(256) if (texuse) lookuptexture(i, xs, ys);
+  char *dot = strrchr(cgzname, '.');
+  if (dot) *dot = '\0';
   conoutf("Read map %s in %d milliseconds.", cgzname,
           SDL_GetTicks() - lastmillis);
+  if (dot) *dot = '.';
   conoutf("%s", hdr.maptitle);
   startmap(mname);
   loopl(256) {
