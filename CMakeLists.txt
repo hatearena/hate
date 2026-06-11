@@ -2,6 +2,9 @@ cmake_minimum_required(VERSION 3.10)
 project(hate VERSION 0.0.2 LANGUAGES CXX)
 
 if(WIN32)
+  if(MSVC)
+    message(FATAL_ERROR "MSVC is not supported. Use MinGW instead.\n  Configure with: cmake --preset default\n  Or: cmake -G \"MinGW Makefiles\" .")
+  endif()
   set(CLIENT_BIN "hate_client.exe")
   set(SERVER_BIN "hate_server.exe")
 else()
@@ -12,6 +15,26 @@ endif()
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -fsigned-char -fomit-frame-pointer -fpermissive -w -Wno-write-strings -Wno-unused-variable -g")
 set(INCLUDE_DIRS src/include)
 set(OpenGL_GL_PREFERENCE LEGACY)
+
+if(WIN32 AND NOT MSVC AND NOT CMAKE_PREFIX_PATH)
+  set(_msys2_candidates)
+  if(DEFINED ENV{SCOOP})
+    list(APPEND _msys2_candidates "$ENV{SCOOP}/apps/msys2/current/mingw64")
+  endif()
+  list(APPEND _msys2_candidates
+    "C:/msys64/mingw64"
+    "C:/msys2/mingw64"
+    "C:/msys64/ucrt64"
+    "C:/msys2/ucrt64"
+  )
+  foreach(_cand IN LISTS _msys2_candidates)
+    if(EXISTS "${_cand}/include/zlib.h" AND EXISTS "${_cand}/lib/libz.a")
+      set(CMAKE_PREFIX_PATH "${_cand}" ${CMAKE_PREFIX_PATH})
+      message(STATUS "Found MSYS2 at: ${_cand}")
+      break()
+    endif()
+  endforeach()
+endif()
 
 find_package(ZLIB REQUIRED)
 
