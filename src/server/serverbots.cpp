@@ -66,22 +66,28 @@ static const float BOT_HIT_RADIUS = 2.5f;
 static const float BOT_MAXSTEP = 1.0f;
 static const float BOT_ATTACK_RANGE = 80.0f;
 static const float BOT_ATTACK_RANGE_SQ = 6400.0f;
-static const int BOT_WEAPON_DELAYS[NUMGUNS] = {75,  500, 50,  400, 750, 50,
-                                               25,  100, 100, 100, 125};
+static const int BOT_WEAPON_DELAYS[NUMGUNS] = {75, 500, 50,  400, 750, 50,
+                                               25, 100, 100, 100, 125};
 static const int BOT_WEAPON_DAMAGES[NUMGUNS] = {20, 10, 30, 120, 100, 25,
                                                 15, 20, 40, 30,  50};
 
 static inline bool isprojectile(int gun) {
-    return gun == GUN_RL || gun == GUN_FIREBALL || gun == GUN_ICEBALL || gun == GUN_SLIMEBALL;
+  return gun == GUN_RL || gun == GUN_FIREBALL || gun == GUN_ICEBALL ||
+         gun == GUN_SLIMEBALL;
 }
 static inline int projspeed(int gun) {
-    switch(gun) {
-        case GUN_RL: return 80;
-        case GUN_FIREBALL: return 50;
-        case GUN_ICEBALL: return 30;
-        case GUN_SLIMEBALL: return 160;
-        default: return 0;
-    }
+  switch (gun) {
+  case GUN_RL:
+    return 80;
+  case GUN_FIREBALL:
+    return 50;
+  case GUN_ICEBALL:
+    return 30;
+  case GUN_SLIMEBALL:
+    return 160;
+  default:
+    return 0;
+  }
 }
 
 static float normyaw(float y) {
@@ -276,10 +282,13 @@ void serverbot_spawn(int count) {
     int si = rnd(numspawns);
     b.x = spawnx[si];
     b.y = spawny[si];
-    if (b.x < 1 || b.x >= mapsize - 1 || b.x == 0) b.x = mapsize >= 2 ? mapsize / 2.0f : 64;
-    if (b.y < 1 || b.y >= mapsize - 1 || b.y == 0) b.y = mapsize >= 2 ? mapsize / 2.0f : 64;
+    if (b.x < 1 || b.x >= mapsize - 1 || b.x == 0)
+      b.x = mapsize >= 2 ? mapsize / 2.0f : 64;
+    if (b.y < 1 || b.y >= mapsize - 1 || b.y == 0)
+      b.y = mapsize >= 2 ? mapsize / 2.0f : 64;
     b.z = spawnz[si] + BOT_EYEHEIGHT;
-    if (b.z < -999 || b.z > 999) b.z = spawnz[0] + BOT_EYEHEIGHT;
+    if (b.z < -999 || b.z > 999)
+      b.z = spawnz[0] + BOT_EYEHEIGHT;
     b.yaw = normyaw((float)rnd(360));
     b.pitch = 0;
     b.roll = 0;
@@ -340,7 +349,8 @@ void serverbot_reteam() {
     if ((mode & 1 && mode > 2) || mode == 12) {
       int blues = 0, reds = 0;
       loopj(numsbots) {
-        if (j >= i) break;
+        if (j >= i)
+          break;
         if (!strcmp(sbot[j].team, "BLUE") || !strcmp(sbot[j].team, "RES"))
           blues++;
         else
@@ -615,7 +625,8 @@ void serverbot_hitscan(int gun, vec &from, vec &to, int sender) {
       serverbot &b = sbot[i];
       if (b.state != CS_ALIVE)
         continue;
-      if (clients[sender].team[0] && b.team[0] && !strcmp(clients[sender].team, b.team))
+      if (clients[sender].team[0] && b.team[0] &&
+          !strcmp(clients[sender].team, b.team))
         continue;
       int totaldamage = 0;
       loopk(SGRAYS) {
@@ -646,7 +657,8 @@ void serverbot_hitscan(int gun, vec &from, vec &to, int sender) {
     serverbot &b = sbot[i];
     if (b.state != CS_ALIVE)
       continue;
-    if (clients[sender].team[0] && b.team[0] && !strcmp(clients[sender].team, b.team))
+    if (clients[sender].team[0] && b.team[0] &&
+        !strcmp(clients[sender].team, b.team))
       continue;
     if (intersect_bot(b, from, to)) {
       int damage = 10;
@@ -849,8 +861,10 @@ static bool try_move_bot(serverbot &b, int diff, int move, int strafe) {
     return false;
   b.x = nx;
   b.y = ny;
-  if (b.x < 1 || b.x >= mapsize - 1) b.x = mapsize >= 2 ? mapsize / 2.0f : 64;
-  if (b.y < 1 || b.y >= mapsize - 1) b.y = mapsize >= 2 ? mapsize / 2.0f : 64;
+  if (b.x < 1 || b.x >= mapsize - 1)
+    b.x = mapsize >= 2 ? mapsize / 2.0f : 64;
+  if (b.y < 1 || b.y >= mapsize - 1)
+    b.y = mapsize >= 2 ? mapsize / 2.0f : 64;
   float targetZ = targetfloor + BOT_EYEHEIGHT;
   if (targetZ < b.z - 0.01f) {
     b.fallvelocity += 600.0f * dt;
@@ -1057,7 +1071,8 @@ void serverbot_update() {
       int dmg = b.proj_damage;
       if (b.proj_target_is_player) {
         int t = b.proj_target;
-        if (t >= 0 && t < MAXCLIENTS && playerpos[t].active && playerpos[t].state == CS_ALIVE) {
+        if (t >= 0 && t < MAXCLIENTS && playerpos[t].active &&
+            playerpos[t].state == CS_ALIVE) {
           send_bot_damage_player(b, t, dmg, b.proj_lifeseq);
         }
       } else {
@@ -1075,7 +1090,8 @@ void serverbot_update() {
     loopj(MAXCLIENTS) {
       if (!playerpos[j].active || playerpos[j].state != CS_ALIVE)
         continue;
-      if (b.team[0] && j < clients.length() && clients[j].team[0] && !strcmp(b.team, clients[j].team))
+      if (b.team[0] && j < clients.length() && clients[j].team[0] &&
+          !strcmp(b.team, clients[j].team))
         continue;
       float dx = playerpos[j].x - b.x;
       float dy = playerpos[j].y - b.y;
@@ -1123,7 +1139,8 @@ void serverbot_update() {
       float realdist = sqrtf(bestdist);
 
       int acquiredelay = (101 - botskill) * 20;
-      if (acquiredelay < 20) acquiredelay = 20;
+      if (acquiredelay < 20)
+        acquiredelay = 20;
       if (!b.acquired) {
         if (b.acquiretime == 0)
           b.acquiretime = now;
@@ -1172,7 +1189,8 @@ void serverbot_update() {
 
       if (!in_escape_cooldown) {
         float skillturn = botskill / 100.0f;
-        if (skillturn < 0.1f) skillturn = 0.1f;
+        if (skillturn < 0.1f)
+          skillturn = 0.1f;
         float turnrate = diff * skillturn * 0.4f;
         float yd = yawd(enemyyaw, b.yaw);
         if (fabs(yd) > 135.0f)
@@ -1256,13 +1274,15 @@ void serverbot_update() {
             serverbot_damage(sbot[targetidx].cn, dmg, b.cn);
         } else if (b.gunselect != GUN_CSAW &&
                    (server_los(b.x, b.y, b.z - 0.2f, tx, ty, tz) ||
-                    server_los(b.x, b.y, b.z - 0.2f, tx, ty, tz + BOT_ABOVEEYE))) {
+                    server_los(b.x, b.y, b.z - 0.2f, tx, ty,
+                               tz + BOT_ABOVEEYE))) {
           b.lastattack = now;
           b.lastaction = now;
           if (b.ammo[b.gunselect])
             b.ammo[b.gunselect]--;
           float skillfactor = (101 - botskill) / 100.0f;
-          if (skillfactor < 0.01f) skillfactor = 0.01f;
+          if (skillfactor < 0.01f)
+            skillfactor = 0.01f;
           float inaccuracy = realdist * skillfactor * 0.12f;
           if (b.gunselect == GUN_RIFLE)
             inaccuracy *= 0.5f;
@@ -1283,8 +1303,8 @@ void serverbot_update() {
             }
           } else {
             if (target_is_player) {
-              if (shot_hits_player(fromx, fromy, fromz, shot_tx, shot_ty, shot_tz,
-                                   tx, ty, tz))
+              if (shot_hits_player(fromx, fromy, fromz, shot_tx, shot_ty,
+                                   shot_tz, tx, ty, tz))
                 send_bot_damage_player(b, targetidx, dmg, lifeseq);
             } else {
               if (shot_hits_bot(fromx, fromy, fromz, shot_tx, shot_ty, shot_tz,
