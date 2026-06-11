@@ -2,7 +2,7 @@
 set -e
 
 show_usage() {
-    echo "Usage: $0 [-client| -server| -appimage| -appbundle]"
+    echo "Usage: $0 [ -client | -server | -appimage | -appbundle ]"
     echo "  -client     Build the client binary"
     echo "  -server     Build the server binary"
     echo "  -appimage   Build client and create Linux AppImage"
