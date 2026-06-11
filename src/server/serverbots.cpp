@@ -190,15 +190,20 @@ static void loadspawns() {
   }
   walkinfo prevdata;
   bool hasprev = false;
+  bool walkdata_ok = true;
   int k = 0;
   while (k < total) {
     int type = gzgetc(f);
-    if (type < 0)
+    if (type < 0) {
+      walkdata_ok = false;
       break;
+    }
     if (type == 255) {
       int n = gzgetc(f);
-      if (n < 0)
+      if (n < 0) {
+        walkdata_ok = false;
         break;
+      }
       for (int r = 0; r < n && k < total; r++, k++) {
         if (hasprev)
           walkdata[k] = prevdata;
@@ -238,6 +243,11 @@ static void loadspawns() {
     k++;
   }
   gzclose(f);
+  if (!walkdata_ok) {
+    free(walkdata);
+    walkdata = NULL;
+    mapsize = 0;
+  }
 }
 
 int serverbot_count() { return numsbots; }
