@@ -5,7 +5,7 @@ This repo contains the source code for HATE, a free and open source multiplayer 
 - [Gameplay demo](https://www.youtube.com/watch?v=Y4KZWVmz86U)
 - [Discord](https://discord.gg/YQsTNMC3Fp)
 
-__
+---
 
 <img src=".github/screen.png">
 <img src=".github/screen2.png">
