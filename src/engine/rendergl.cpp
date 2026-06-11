@@ -750,6 +750,267 @@ void addlensflare(int w, int h) {
   glPopMatrix();
 };
 
+#ifndef GL_TEXTURE0
+#define GL_TEXTURE0 0x84C0
+#endif
+#ifndef GL_TEXTURE1
+#define GL_TEXTURE1 0x84C1
+#endif
+
+typedef void(APIENTRY *glActiveTexFunc)(GLenum);
+typedef void(APIENTRY *glMultiTexFunc)(GLenum, GLfloat, GLfloat);
+static glActiveTexFunc glActiveTex = NULL;
+static glMultiTexFunc glMultiTex = NULL;
+static int ssaoinit = 0;
+
+static int checkssao() {
+  if (!ssaoinit) {
+    ssaoinit = 1;
+    glActiveTex = (glActiveTexFunc)SDL_GL_GetProcAddress("glActiveTexture");
+    glMultiTex = (glMultiTexFunc)SDL_GL_GetProcAddress("glMultiTexCoord2f");
+    if (!glActiveTex)
+      glActiveTex =
+          (glActiveTexFunc)SDL_GL_GetProcAddress("glActiveTextureARB");
+    if (!glMultiTex)
+      glMultiTex =
+          (glMultiTexFunc)SDL_GL_GetProcAddress("glMultiTexCoord2fARB");
+  };
+  return glActiveTex && glMultiTex;
+};
+
+VARP(ssao, 0, 1, 1);
+VARP(ssaostrength, 0, 10, 100);
+VARP(ssaoradius, 1, 2, 10);
+
+static GLuint ssaotex[3] = {0, 0, 0};
+static int ssaow = 0, ssaoh = 0;
+
+void addssao(int w, int h) {
+  if (!ssao || !checkssao() || w < 8 || h < 8)
+    return;
+  if (!ssaotex[0])
+    glGenTextures(3, ssaotex);
+
+  int sw = max(8, w >> 2);
+  int sh = max(8, h >> 2);
+
+  glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+  loopi(3) {
+    glBindTexture(GL_TEXTURE_2D, ssaotex[i]);
+    if (ssaow != w || ssaoh != h)
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, i == 0 ? w : sw, i == 0 ? h : sh,
+                   0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  }
+  ssaow = w;
+  ssaoh = h;
+
+  glMatrixMode(GL_PROJECTION);
+  glPushMatrix();
+  glMatrixMode(GL_MODELVIEW);
+  glPushMatrix();
+  glMatrixMode(GL_TEXTURE);
+  glPushMatrix();
+  glBindTexture(GL_TEXTURE_2D, ssaotex[0]);
+  glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, w, h);
+  glViewport(0, 0, sw, sh);
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
+  glOrtho(0, sw, 0, sh, -1, 1);
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity();
+  glMatrixMode(GL_TEXTURE);
+  glLoadIdentity();
+
+  glDisable(GL_DEPTH_TEST);
+  glDisable(GL_BLEND);
+  glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+
+  glColor3f(1, 1, 1);
+  glBindTexture(GL_TEXTURE_2D, ssaotex[0]);
+  glBegin(GL_QUADS);
+  glTexCoord2f(0, 0);
+  glVertex2i(0, 0);
+  glTexCoord2f(1, 0);
+  glVertex2i(sw, 0);
+  glTexCoord2f(1, 1);
+  glVertex2i(sw, sh);
+  glTexCoord2f(0, 1);
+  glVertex2i(0, sh);
+  glEnd();
+  glBindTexture(GL_TEXTURE_2D, ssaotex[1]);
+  glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, sw, sh);
+  glClearColor(0, 0, 0, 0);
+  glClear(GL_COLOR_BUFFER_BIT);
+  glClearColor(0, 0, 0, 0);
+
+  float radius = ssaoradius / (float)sw;
+  float dirs[4][2] = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
+
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_ONE, GL_ONE);
+
+  loopi(4) {
+    glActiveTex(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, ssaotex[1]);
+    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+    glActiveTex(GL_TEXTURE1);
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, ssaotex[1]);
+    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
+    glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB, GL_SUBTRACT);
+    glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_RGB, GL_TEXTURE);
+    glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_RGB, GL_SRC_COLOR);
+    glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE1_RGB, GL_PREVIOUS);
+    glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND1_RGB, GL_SRC_COLOR);
+    glMatrixMode(GL_TEXTURE);
+    glLoadIdentity();
+    glTranslatef(dirs[i][0] * radius, dirs[i][1] * radius, 0);
+    glBegin(GL_QUADS);
+    glMultiTex(GL_TEXTURE0, 0, 0);
+    glMultiTex(GL_TEXTURE1, 0, 0);
+    glVertex2i(0, 0);
+    glMultiTex(GL_TEXTURE0, 1, 0);
+    glMultiTex(GL_TEXTURE1, 1, 0);
+    glVertex2i(sw, 0);
+    glMultiTex(GL_TEXTURE0, 1, 1);
+    glMultiTex(GL_TEXTURE1, 1, 1);
+    glVertex2i(sw, sh);
+    glMultiTex(GL_TEXTURE0, 0, 1);
+    glMultiTex(GL_TEXTURE1, 0, 1);
+    glVertex2i(0, sh);
+    glEnd();
+  }
+
+  glActiveTex(GL_TEXTURE1);
+  glDisable(GL_TEXTURE_2D);
+  glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+  glActiveTex(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, ssaotex[2]);
+  glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, sw, sh);
+
+  glViewport(0, 0, w, h);
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
+  glOrtho(0, w, 0, h, -1, 1);
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity();
+  glMatrixMode(GL_TEXTURE);
+  glLoadIdentity();
+
+  glDisable(GL_BLEND);
+  glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+  glBindTexture(GL_TEXTURE_2D, ssaotex[0]);
+  glColor3f(1, 1, 1);
+  glBegin(GL_QUADS);
+  glTexCoord2f(0, 0);
+  glVertex2i(0, 0);
+  glTexCoord2f(1, 0);
+  glVertex2i(w, 0);
+  glTexCoord2f(1, 1);
+  glVertex2i(w, h);
+  glTexCoord2f(0, 1);
+  glVertex2i(0, h);
+  glEnd();
+  glEnable(GL_BLEND);
+  float strength = ssaostrength / 100.0f;
+  glColor3f(strength, strength, strength);
+  glBindTexture(GL_TEXTURE_2D, ssaotex[2]);
+  glBlendFunc(GL_ZERO, GL_ONE_MINUS_SRC_COLOR);
+  glBegin(GL_QUADS);
+  glTexCoord2f(0, 0);
+  glVertex2i(0, 0);
+  glTexCoord2f(1, 0);
+  glVertex2i(w, 0);
+  glTexCoord2f(1, 1);
+  glVertex2i(w, h);
+  glTexCoord2f(0, 1);
+  glVertex2i(0, h);
+  glEnd();
+  glDisable(GL_BLEND);
+  glMatrixMode(GL_TEXTURE);
+  glPopMatrix();
+  glMatrixMode(GL_PROJECTION);
+  glPopMatrix();
+  glMatrixMode(GL_MODELVIEW);
+  glPopMatrix();
+  glEnable(GL_DEPTH_TEST);
+};
+
+VARP(vignette, 0, 1, 1);
+VARP(vignettestrength, 0, 10, 100);
+
+static GLuint vigtex = 0;
+
+void genvigtex() {
+  const int S = 256;
+  unsigned char pixels[S * S * 4];
+  float c = (S - 1) * 0.5f;
+  for (int y = 0; y < S; y++)
+    for (int x = 0; x < S; x++) {
+      float dx = (x - c) / c;
+      float dy = (y - c) / c;
+      float d = sqrtf(dx * dx + dy * dy);
+      float a = d < 1 ? d * d : 1;
+      int i = (y * S + x) * 4;
+      pixels[i] = pixels[i + 1] = pixels[i + 2] = (uchar)(a * 255);
+      pixels[i + 3] = 255;
+    };
+  glGenTextures(1, &vigtex);
+  glBindTexture(GL_TEXTURE_2D, vigtex);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, S, S, 0, GL_RGBA, GL_UNSIGNED_BYTE,
+               pixels);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+};
+
+void addvignette(int w, int h) {
+  if (!vignette)
+    return;
+  if (!vigtex)
+    genvigtex();
+
+  glMatrixMode(GL_PROJECTION);
+  glPushMatrix();
+  glMatrixMode(GL_MODELVIEW);
+  glPushMatrix();
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
+  glOrtho(0, w, 0, h, -1, 1);
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity();
+  glDisable(GL_DEPTH_TEST);
+  glEnable(GL_BLEND);
+
+  float strength = vignettestrength / 100.0f;
+  glColor3f(strength, strength, strength);
+  glBindTexture(GL_TEXTURE_2D, vigtex);
+  glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+  glBlendFunc(GL_ZERO, GL_ONE_MINUS_SRC_COLOR);
+  glBegin(GL_QUADS);
+  glTexCoord2f(0, 0);
+  glVertex2i(0, 0);
+  glTexCoord2f(1, 0);
+  glVertex2i(w, 0);
+  glTexCoord2f(1, 1);
+  glVertex2i(w, h);
+  glTexCoord2f(0, 1);
+  glVertex2i(0, h);
+  glEnd();
+  glDisable(GL_BLEND);
+  glEnable(GL_DEPTH_TEST);
+  glMatrixMode(GL_PROJECTION);
+  glPopMatrix();
+  glMatrixMode(GL_MODELVIEW);
+  glPopMatrix();
+};
+
 VAR(fog, 64, 180, 1024);
 VAR(fogcolour, 0, 0x8099B3, 0xFFFFFF);
 VARP(hudgun, 0, 1, 1);
@@ -1024,9 +1285,11 @@ void gl_drawframe(int w, int h, float curfps) {
   render_particles(curtime);
   overbright(1);
 
+  addssao(w, h);
   addbloom(w, h);
   addgodrays(w, h);
   addlensflare(w, h);
+  addvignette(w, h);
 
   glDisable(GL_FOG);
   glDisable(GL_TEXTURE_2D);
