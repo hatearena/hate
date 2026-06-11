@@ -224,6 +224,8 @@ elseif(APPLE)
     "  <string>English</string>\n"
     "  <key>CFBundleExecutable</key>\n"
     "  <string>${CLIENT_BIN}</string>\n"
+    "  <key>CFBundleIconFile</key>\n"
+    "  <string>hatearena</string>\n"
     "  <key>CFBundleIdentifier</key>\n"
     "  <string>com.hatearena.${CLIENT_BIN}</string>\n"
     "  <key>CFBundleInfoDictionaryVersion</key>\n"
@@ -256,6 +258,9 @@ elseif(APPLE)
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
       "${PLIST_FILE}"
       "${BUNDLE_DIR}/Contents/Info.plist"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+      "${CMAKE_SOURCE_DIR}/packaging/darwin/hatearena.icns"
+      "${BUNDLE_DIR}/Contents/Resources/hatearena.icns"
     COMMENT "Creating macOS .app bundle"
   )
 else()

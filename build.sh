@@ -3,18 +3,15 @@ set -e
 
 UNAME_S=$(uname -s)
 
-mkdir -p build
-cd build
-
 if [ "$UNAME_S" = "Darwin" ]; then
-    echo "Building for MacOS..."
-    cmake .. -DCMAKE_BUILD_TYPE=Release
-    make -j$(sysctl -n hw.ncpu)
-    echo "Build complete."
+    echo "Building for macOS..."
+    cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+    cmake --build build -j$(sysctl -n hw.ncpu)
+    echo "Build complete. .app bundle: build/HateArena-MacOS.app"
 else
     echo "Building for Linux with AppImage..."
-    cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_APPIMAGE=ON
-    make -j$(nproc)
-    make appimage
+    cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_APPIMAGE=ON
+    cmake --build build -j$(nproc)
+    cmake --build build --target appimage
     echo "Build complete. AppImage is in build/"
 fi
