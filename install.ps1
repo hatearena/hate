@@ -6,6 +6,7 @@ $mingwShim = (Get-Command mingw -ErrorAction Stop).Source
 Write-Host "Installing dependencies..."
 $deps = @(
     "make"
+    "mingw-w64-x86_64-cmake"
     "mingw-w64-x86_64-gcc"
     "mingw-w64-x86_64-enet"
     "mingw-w64-x86_64-SDL2"
@@ -21,23 +22,27 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 $projectRoot = Split-Path -Parent $PSCommandPath
-$srcDir = Join-Path $projectRoot "src"
-$msysPath = $srcDir.Replace('\','/')
-$msysPath = $msysPath -replace '^([A-Za-z]):','/$1'
+$msysRoot = $projectRoot.Replace('\','/') -replace '^([A-Za-z]):','/$1'
+
+Write-Host "Configuring..."
+& $mingwShim -lc "cd '$msysRoot' && cmake --preset msys2"
+if ($LASTEXITCODE -ne 0) {
+    throw "Configuration failed"
+}
 
 Write-Host "Building..."
-& $mingwShim -lc "cd '$msysPath' && make"
+& $mingwShim -lc "cd '$msysRoot' && cmake --build --preset msys2"
 if ($LASTEXITCODE -ne 0) {
     throw "Build failed"
 }
 
-$client = Join-Path $srcDir "hate_client.exe"
-$server = Join-Path $srcDir "hate_server.exe"
+$client = Join-Path $projectRoot "content" "hate_client.exe"
+$server = Join-Path $projectRoot "content" "hate_server.exe"
 if (!(Test-Path $client)) {
-    throw "Client exe not created"
+    throw "Client exe not created at $client"
 }
 if (!(Test-Path $server)) {
-    throw "Server exe not created"
+    throw "Server exe not created at $server"
 }
 
 Write-Host ""

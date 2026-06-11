@@ -6,13 +6,25 @@
       "displayName": "MinGW (MSYS2)",
       "description": "Configure with MSYS2 MinGW-w64 toolchain",
       "generator": "MinGW Makefiles",
+      "binaryDir": "${sourceDir}/build"
+    },
+    {
+      "name": "msys2",
+      "displayName": "MinGW (MSYS2 shell)",
+      "description": "Configure from an MSYS2 MINGW64/UCRT64/CLANG64 shell",
+      "generator": "MinGW Makefiles",
       "binaryDir": "${sourceDir}/build",
+      "condition": {
+        "type": "notEquals",
+        "lhs": "$env{MINGW_PREFIX}",
+        "rhs": ""
+      },
       "environment": {
-        "PATH": "$penv{SCOOP}/apps/msys2/current/mingw64/bin;$penv{PATH}"
+        "PATH": "$env{MINGW_PREFIX}/bin;$penv{PATH}"
       },
       "cacheVariables": {
-        "CMAKE_CXX_COMPILER": "$penv{SCOOP}/apps/msys2/current/mingw64/bin/g++.exe",
-        "CMAKE_PREFIX_PATH": "$penv{SCOOP}/apps/msys2/current/mingw64"
+        "CMAKE_CXX_COMPILER": "$env{MINGW_PREFIX}/bin/g++.exe",
+        "CMAKE_PREFIX_PATH": "$env{MINGW_PREFIX}"
       }
     }
   ],
@@ -20,6 +32,10 @@
     {
       "name": "default",
       "configurePreset": "default"
+    },
+    {
+      "name": "msys2",
+      "configurePreset": "msys2"
     }
   ]
 }
