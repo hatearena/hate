@@ -11,6 +11,7 @@ endif()
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -fsigned-char -fomit-frame-pointer -fpermissive -w -Wno-write-strings -Wno-unused-variable -g")
 set(INCLUDE_DIRS src/include)
+set(OpenGL_GL_PREFERENCE LEGACY)
 
 find_package(ZLIB REQUIRED)
 
