@@ -527,6 +527,7 @@ if(UNIX AND NOT APPLE AND BUILD_APPIMAGE)
       --appdir ${CMAKE_BINARY_DIR}/AppDir
       --desktop-file ${CMAKE_SOURCE_DIR}/packaging/linux/hatearena.desktop
       --icon-file ${CMAKE_SOURCE_DIR}/packaging/linux/hatearena.png
+      --custom-apprun ${CMAKE_SOURCE_DIR}/packaging/linux/AppRun
       --output appimage
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
     DEPENDS ${CLIENT_BIN}
