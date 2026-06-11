@@ -247,6 +247,11 @@ void playsound(int n, vec *loc) {
     return;
   if (editmode)
     return;
+  if (n == S_ITEMSPAWN) {
+    static int itemspawntime = 0;
+    if (!itemspawntime) itemspawntime = lastmillis;
+    if (lastmillis - itemspawntime < 10000) return;
+  }
   if (lastmillis == lastsoundmillis)
     soundsatonce++;
   else
