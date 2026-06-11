@@ -7,7 +7,11 @@
       "description": "Configure with MSYS2 MinGW-w64 toolchain",
       "generator": "MinGW Makefiles",
       "binaryDir": "${sourceDir}/build",
+      "environment": {
+        "PATH": "$penv{SCOOP}/apps/msys2/current/mingw64/bin;$penv{PATH}"
+      },
       "cacheVariables": {
+        "CMAKE_CXX_COMPILER": "$penv{SCOOP}/apps/msys2/current/mingw64/bin/g++.exe",
         "CMAKE_PREFIX_PATH": "$penv{SCOOP}/apps/msys2/current/mingw64"
       }
     }
