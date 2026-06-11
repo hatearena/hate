@@ -341,64 +341,67 @@ elseif(APPLE)
     ${COREVIDEO_FRAMEWORK}
   )
 
-  set(BUNDLE_DIR "${CMAKE_BINARY_DIR}/HateArena-MacOS.app")
-  set(LAUNCHER_SCRIPT "${CMAKE_BINARY_DIR}/hate_client_launcher.sh")
-  set(PLIST_FILE "${CMAKE_BINARY_DIR}/hate_client_Info.plist")
+  if(BUILD_APPBUNDLE)
+    set(BUNDLE_DIR "${CMAKE_BINARY_DIR}/HateArena-MacOS.app")
+    set(LAUNCHER_SCRIPT "${CMAKE_BINARY_DIR}/hate_client_launcher.sh")
+    set(PLIST_FILE "${CMAKE_BINARY_DIR}/hate_client_Info.plist")
 
-  file(WRITE "${LAUNCHER_SCRIPT}"
-    "#!/bin/bash\n"
-    "cd \"$(dirname \"$0\")/../Resources\"\n"
-    "exec \"./${CLIENT_BIN}\"\n"
-  )
+    file(WRITE "${LAUNCHER_SCRIPT}"
+      "#!/bin/bash\n"
+      "cd \"$(dirname \"$0\")/../Resources\"\n"
+      "exec \"./${CLIENT_BIN}\"\n"
+    )
 
-  file(WRITE "${PLIST_FILE}"
-    "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-    "<!DOCTYPE plist PUBLIC \"-//Apple Computer//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
-    "<plist version=\"1.0\">\n"
-    "<dict>\n"
-    "  <key>CFBundleDevelopmentRegion</key>\n"
-    "  <string>English</string>\n"
-    "  <key>CFBundleExecutable</key>\n"
-    "  <string>${CLIENT_BIN}</string>\n"
-    "  <key>CFBundleIconFile</key>\n"
-    "  <string>hatearena</string>\n"
-    "  <key>CFBundleIdentifier</key>\n"
-    "  <string>com.hatearena.${CLIENT_BIN}</string>\n"
-    "  <key>CFBundleInfoDictionaryVersion</key>\n"
-    "  <string>6.0</string>\n"
-    "  <key>CFBundleName</key>\n"
-    "  <string>HateArena</string>\n"
-    "  <key>CFBundlePackageType</key>\n"
-    "  <string>APPL</string>\n"
-    "  <key>CFBundleShortVersionString</key>\n"
-    "  <string>${PROJECT_VERSION}</string>\n"
-    "  <key>CFBundleVersion</key>\n"
-    "  <string>${PROJECT_VERSION}</string>\n"
-    "</dict>\n"
-    "</plist>\n"
-  )
+    file(WRITE "${PLIST_FILE}"
+      "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+      "<!DOCTYPE plist PUBLIC \"-//Apple Computer//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
+      "<plist version=\"1.0\">\n"
+      "<dict>\n"
+      "  <key>CFBundleDevelopmentRegion</key>\n"
+      "  <string>English</string>\n"
+      "  <key>CFBundleExecutable</key>\n"
+      "  <string>${CLIENT_BIN}</string>\n"
+      "  <key>CFBundleIconFile</key>\n"
+      "  <string>hatearena</string>\n"
+      "  <key>CFBundleIdentifier</key>\n"
+      "  <string>com.hatearena.${CLIENT_BIN}</string>\n"
+      "  <key>CFBundleInfoDictionaryVersion</key>\n"
+      "  <string>6.0</string>\n"
+      "  <key>CFBundleName</key>\n"
+      "  <string>HateArena</string>\n"
+      "  <key>CFBundlePackageType</key>\n"
+      "  <string>APPL</string>\n"
+      "  <key>CFBundleShortVersionString</key>\n"
+      "  <string>${PROJECT_VERSION}</string>\n"
+      "  <key>CFBundleVersion</key>\n"
+      "  <string>${PROJECT_VERSION}</string>\n"
+      "</dict>\n"
+      "</plist>\n"
+    )
 
-  add_custom_command(TARGET ${CLIENT_BIN} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E make_directory "${BUNDLE_DIR}/Contents/MacOS"
-    COMMAND ${CMAKE_COMMAND} -E make_directory "${BUNDLE_DIR}/Contents/Resources"
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-      "$<TARGET_FILE:${CLIENT_BIN}>"
-      "${BUNDLE_DIR}/Contents/Resources/${CLIENT_BIN}"
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-      "${CMAKE_SOURCE_DIR}/content"
-      "${BUNDLE_DIR}/Contents/Resources"
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-      "${LAUNCHER_SCRIPT}"
-      "${BUNDLE_DIR}/Contents/MacOS/${CLIENT_BIN}"
-    COMMAND chmod +x "${BUNDLE_DIR}/Contents/MacOS/${CLIENT_BIN}"
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-      "${PLIST_FILE}"
-      "${BUNDLE_DIR}/Contents/Info.plist"
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-      "${CMAKE_SOURCE_DIR}/packaging/darwin/hatearena.icns"
-      "${BUNDLE_DIR}/Contents/Resources/hatearena.icns"
-    COMMENT "Creating macOS .app bundle"
-  )
+    add_custom_target(appbundle
+      COMMAND ${CMAKE_COMMAND} -E make_directory "${BUNDLE_DIR}/Contents/MacOS"
+      COMMAND ${CMAKE_COMMAND} -E make_directory "${BUNDLE_DIR}/Contents/Resources"
+      COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "$<TARGET_FILE:${CLIENT_BIN}>"
+        "${BUNDLE_DIR}/Contents/Resources/${CLIENT_BIN}"
+      COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${CMAKE_SOURCE_DIR}/content"
+        "${BUNDLE_DIR}/Contents/Resources"
+      COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${LAUNCHER_SCRIPT}"
+        "${BUNDLE_DIR}/Contents/MacOS/${CLIENT_BIN}"
+      COMMAND chmod +x "${BUNDLE_DIR}/Contents/MacOS/${CLIENT_BIN}"
+      COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${PLIST_FILE}"
+        "${BUNDLE_DIR}/Contents/Info.plist"
+      COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${CMAKE_SOURCE_DIR}/packaging/darwin/hatearena.icns"
+        "${BUNDLE_DIR}/Contents/Resources/hatearena.icns"
+      DEPENDS ${CLIENT_BIN}
+      COMMENT "Creating macOS .app bundle"
+    )
+  endif()
 else()
   target_compile_options(${CLIENT_BIN} PRIVATE
     ${ENET_CFLAGS}
@@ -487,6 +490,7 @@ if(WIN32)
 endif()
 
 option(BUILD_APPIMAGE "Enable AppImage packaging" OFF)
+option(BUILD_APPBUNDLE "Enable macOS .app bundle packaging" OFF)
 
 if(UNIX AND NOT APPLE AND BUILD_APPIMAGE)
   install(PROGRAMS packaging/linux/AppRun
@@ -534,3 +538,4 @@ if(UNIX AND NOT APPLE AND BUILD_APPIMAGE)
     COMMENT "Building AppImage..."
   )
 endif()
+
