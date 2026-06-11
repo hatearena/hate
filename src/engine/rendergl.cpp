@@ -40,7 +40,7 @@ void purgetextures();
 GLUquadricObj *qsphere = NULL;
 int glmaxtexsize = 256;
 
-VARFP(fsaa, 0, 0, 16,
+VARFP(fsaa, 0, 8, 16,
       { conoutf("Anti-aliasing will take effect on next restart"); });
 
 void gl_init(int w, int h) {
