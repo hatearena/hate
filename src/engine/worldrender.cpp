@@ -3,29 +3,33 @@
 void render_wall(sqr *o, sqr *s, int x1, int y1, int x2, int y2, int mip,
                  sqr *d1, sqr *d2, bool topleft) {
   if (SOLID(o) || o->type == SEMISOLID) {
-    float c1 = o->floor;
-    float c2 = o->floor;
-    float f1 = o->ceil;
-    float f2 = o->ceil;
-    float sf1 = s->floor;
-    float sf2 = s->floor;
+    float nf1 = s->floor;
+    float nf2 = s->floor;
     if (s->type == FHF) {
-      sf1 -= d1->vdelta / 4.0f;
-      sf2 -= d2->vdelta / 4.0f;
+      nf1 -= d1->vdelta / 4.0f;
+      nf2 -= d2->vdelta / 4.0f;
     };
-    if (sf1 > c1) c1 = sf1;
-    if (sf2 > c2) c2 = sf2;
-    float cf1 = s->ceil;
-    float cf2 = s->ceil;
+    float nc1 = s->ceil;
+    float nc2 = s->ceil;
     if (s->type == CHF) {
-      cf1 += d1->vdelta / 4.0f;
-      cf2 += d2->vdelta / 4.0f;
+      nc1 += d1->vdelta / 4.0f;
+      nc2 += d2->vdelta / 4.0f;
     };
-    if (cf1 < f1) f1 = cf1;
-    if (cf2 < f2) f2 = cf2;
-    if (f1 - c1 <= 0 && f2 - c2 <= 0) return;
-    render_square(o->wtex, c1, c2, f1, f2, x1 << mip, y1 << mip, x2 << mip,
-                  y2 << mip, 1 << mip, d1, d2, topleft);
+    float of = o->floor;
+    float oc = o->ceil;
+    float bc1 = nf1 > of ? nf1 : of;
+    float bc2 = nf2 > of ? nf2 : of;
+    float bf1 = nc1 < oc ? nc1 : oc;
+    float bf2 = nc2 < oc ? nc2 : oc;
+    if (nf1 < bc1 - 0.01f || nf2 < bc2 - 0.01f)
+      render_square(o->wtex, nf1, nf2, bc1, bc2, x1 << mip, y1 << mip, x2 << mip,
+                    y2 << mip, 1 << mip, d1, d2, topleft);
+    if (bf1 > bc1 + 0.01f || bf2 > bc2 + 0.01f)
+      render_square(o->wtex, bc1, bc2, bf1, bf2, x1 << mip, y1 << mip, x2 << mip,
+                    y2 << mip, 1 << mip, d1, d2, topleft);
+    if (nc1 > bf1 + 0.01f || nc2 > bf2 + 0.01f)
+      render_square(o->wtex, bf1, bf2, nc1, nc2, x1 << mip, y1 << mip, x2 << mip,
+                    y2 << mip, 1 << mip, d1, d2, topleft);
     return;
   };
   {
@@ -180,7 +184,7 @@ void render_seg_new(float vx, float vy, float vh, int mip, int x, int y, int xs,
   stats[mip]++;
   LOOPD
   if ((s->type == SOLID || s->type == SPACE || s->type == FHF) && s->ceil >= vh && render_ceil)
-    render_flat(s->ctex, xx << mip, yy << mip, 1 << mip, s->ceil, s, t, u, v,
+    render_flat(s->type == SOLID ? s->wtex : s->ctex, xx << mip, yy << mip, 1 << mip, s->ceil, s, t, u, v,
                 true);
   if (s->type == CHF) // if(s->ceil>=vh)
     render_flatdelta(s->ctex, xx << mip, yy << mip, 1 << mip, dc(s), dc(t),
@@ -192,7 +196,7 @@ void render_seg_new(float vx, float vy, float vh, int mip, int x, int y, int xs,
 LOOPH continue; // floors
 LOOPD
 if ((s->type == SOLID || s->type == SPACE || s->type == CHF) && s->floor <= vh && render_floor) {
-  render_flat(s->ftex, xx << mip, yy << mip, 1 << mip, s->floor, s, t, u, v,
+  render_flat(s->type == SOLID ? s->wtex : s->ftex, xx << mip, yy << mip, 1 << mip, s->floor, s, t, u, v,
               false);
   if (s->floor < hdr.waterlevel && !SOLID(s))
     addwaterquad(xx << mip, yy << mip, 1 << mip);

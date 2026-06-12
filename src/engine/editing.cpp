@@ -473,19 +473,26 @@ void solids(int t) { edittype(t == 0 ? SPACE : SOLID); };
 void corner() { edittype(CORNER); };
 
 void midairplace() {
-  if (noteditmode() || !midair || OUTBORD(cx, cy)) return;
+  if (noteditmode() || !midair) return;
+  block b;
+  if (selset) {
+    b = sel;
+  } else if (!OUTBORD(cx, cy)) {
+    b.x = cx; b.y = cy; b.xs = 1; b.ys = 1;
+  } else {
+    return;
+  }
   block oldsel = sel;
   bool oldselset = selset;
-  sel.x = cx;
-  sel.y = cy;
-  sel.xs = 1;
-  sel.ys = 1;
+  sel = b;
   selset = true;
   makeundo();
-  sqr *s = S(cx, cy);
-  s->type = SOLID;
-  s->floor = midairz;
-  s->ceil = midairz + 1;
+  loop(x, sel.xs) loop(y, sel.ys) {
+    sqr *s = S(sel.x + x, sel.y + y);
+    s->type = SOLID;
+    s->floor = midairz;
+    s->ceil = midairz + 1;
+  };
   remip(sel);
   addmsg(1, 6, SV_EDITS, sel.x, sel.y, sel.xs, sel.ys, SOLID);
   sel = oldsel;

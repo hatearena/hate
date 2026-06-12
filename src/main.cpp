@@ -497,12 +497,8 @@ int main(int argc, char **argv) {
         if (lasttype == event.type && lastbut == event.button.button)
           break;
         if (editmode && event.button.button == 1) {
-          if (midair && event.button.state != 0) {
-            execute("midairplace");
-          } else {
-            extern void editdrag(bool);
-            editdrag(event.button.state != 0);
-          };
+          extern void editdrag(bool);
+          editdrag(event.button.state != 0);
         } else {
           keypress(-event.button.button, event.button.state != 0, false, 0);
         };
