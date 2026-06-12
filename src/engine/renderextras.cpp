@@ -796,11 +796,25 @@ skiphud:
 
   if (editmode && !screenshotmode) {
     extern int closestent();
+    extern int lasttype, lasttex;
+    extern string mapname[256][2];
     int e = closestent();
     glPushMatrix();
     glOrtho(0, VIRTW, VIRTH, 0, -1, 1);
     glEnable(GL_TEXTURE_2D);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glColor4ub(10, 10, 10, 160);
+    roundedbox(20, 1570, VIRTW - 20, 1650, 10);
+    glColor4ub(255, 255, 255, 255);
+    {
+      char *texnames[] = {"floor", "wall", "ceiling", "upper"};
+      char *tname = texnames[lasttype < 0 || lasttype > 3 ? 0 : lasttype];
+      char *fname = mapname[lasttex][0];
+      if (fname[0])
+        draw_textf("Texture [%s #%d]: %s", 30, 1570, 2, tname, lasttex, fname);
+      else
+        draw_textf("Texture [%s #%d]", 30, 1570, 2, tname, lasttex);
+    }
     glColor4ub(10, 10, 10, 160);
     roundedbox(20, 1660, VIRTW - 20, 1760, 10);
     glColor4ub(255, 255, 255, 255);
