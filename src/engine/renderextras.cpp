@@ -805,7 +805,7 @@ skiphud:
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glDisable(GL_TEXTURE_2D);
     glColor4ub(10, 10, 10, 180);
-    roundedbox(20, 1570, VIRTW - 20, 1650, 10);
+    roundedbox(20, 1550, VIRTW - 20, 1650, 10);
     glEnable(GL_TEXTURE_2D);
     glColor4ub(255, 255, 255, 255);
     {
@@ -813,9 +813,9 @@ skiphud:
       char *tname = texnames[lasttype < 0 || lasttype > 3 ? 0 : lasttype];
       char *fname = mapname[lasttex][0];
       if (fname[0])
-        draw_textf("[tex %s #%d]: %s", 30, 1572, 2, tname, lasttex, fname);
+        draw_textf("[tex %s #%d]: %s", 30, 1562, 2, tname, lasttex, fname);
       else
-        draw_textf("[tex %s #%d]", 30, 1572, 2, tname, lasttex);
+        draw_textf("[tex %s #%d]", 30, 1562, 2, tname, lasttex);
     }
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glDisable(GL_TEXTURE_2D);
