@@ -3,19 +3,27 @@
 void render_wall(sqr *o, sqr *s, int x1, int y1, int x2, int y2, int mip,
                  sqr *d1, sqr *d2, bool topleft) {
   if (SOLID(o) || o->type == SEMISOLID) {
-    float c1 = s->floor;
-    float c2 = s->floor;
+    float c1 = o->floor;
+    float c2 = o->floor;
+    float f1 = o->ceil;
+    float f2 = o->ceil;
+    float sf1 = s->floor;
+    float sf2 = s->floor;
     if (s->type == FHF) {
-      c1 -= d1->vdelta / 4.0f;
-      c2 -= d2->vdelta / 4.0f;
+      sf1 -= d1->vdelta / 4.0f;
+      sf2 -= d2->vdelta / 4.0f;
     };
-    float f1 = s->ceil;
-    float f2 = s->ceil;
+    if (sf1 > c1) c1 = sf1;
+    if (sf2 > c2) c2 = sf2;
+    float cf1 = s->ceil;
+    float cf2 = s->ceil;
     if (s->type == CHF) {
-      f1 += d1->vdelta / 4.0f;
-      f2 += d2->vdelta / 4.0f;
+      cf1 += d1->vdelta / 4.0f;
+      cf2 += d2->vdelta / 4.0f;
     };
-    // if(f1-c1<=0 && f2-c2<=0) return;
+    if (cf1 < f1) f1 = cf1;
+    if (cf2 < f2) f2 = cf2;
+    if (f1 - c1 <= 0 && f2 - c2 <= 0) return;
     render_square(o->wtex, c1, c2, f1, f2, x1 << mip, y1 << mip, x2 << mip,
                   y2 << mip, 1 << mip, d1, d2, topleft);
     return;
@@ -171,7 +179,7 @@ void render_seg_new(float vx, float vy, float vh, int mip, int x, int y, int xs,
   };
   stats[mip]++;
   LOOPD
-  if ((s->type == SPACE || s->type == FHF) && s->ceil >= vh && render_ceil)
+  if ((s->type == SOLID || s->type == SPACE || s->type == FHF) && s->ceil >= vh && render_ceil)
     render_flat(s->ctex, xx << mip, yy << mip, 1 << mip, s->ceil, s, t, u, v,
                 true);
   if (s->type == CHF) // if(s->ceil>=vh)
@@ -183,7 +191,7 @@ void render_seg_new(float vx, float vy, float vh, int mip, int x, int y, int xs,
 
 LOOPH continue; // floors
 LOOPD
-if ((s->type == SPACE || s->type == CHF) && s->floor <= vh && render_floor) {
+if ((s->type == SOLID || s->type == SPACE || s->type == CHF) && s->floor <= vh && render_floor) {
   render_flat(s->ftex, xx << mip, yy << mip, 1 << mip, s->floor, s, t, u, v,
               false);
   if (s->floor < hdr.waterlevel && !SOLID(s))

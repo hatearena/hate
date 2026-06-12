@@ -2,6 +2,8 @@
 #include "../include/protos.h"
 
 bool editmode = false;
+bool midair = false;
+int midairz = 0;
 
 block sel = {
     variable("selx", 0, 0, 4096, &sel.x, NULL, false),
@@ -164,6 +166,22 @@ void cursorupdate() {
 
   if (OUTBORD(cx, cy))
     return;
+
+  if (midair) {
+    ch = midairz;
+    const float GRIDS = 2.0f;
+    linestyle(GRIDS, 0x00, 0xFF, 0x00);
+    block b = {cx, cy, 1, 1};
+    box(b, (float)midairz, (float)midairz, (float)midairz, (float)midairz);
+    linestyle(GRIDS, 0x00, 0xFF, 0x00);
+    dot(cx, cy, (float)midairz);
+    if (selset) {
+      linestyle(GRIDS, 0xFF, 0x40, 0x40);
+      box(sel, (float)selh, (float)selh, (float)selh, (float)selh);
+    };
+    return;
+  };
+
   sqr *s = S(cx, cy);
 
   if (fabs(sheight(s, s, z) - z) > 1) {
@@ -453,6 +471,28 @@ void edittype(int type) {
 void heightfield(int t) { edittype(t == 0 ? FHF : CHF); };
 void solids(int t) { edittype(t == 0 ? SPACE : SOLID); };
 void corner() { edittype(CORNER); };
+
+void midairplace() {
+  if (noteditmode() || !midair || OUTBORD(cx, cy)) return;
+  block oldsel = sel;
+  bool oldselset = selset;
+  sel.x = cx;
+  sel.y = cy;
+  sel.xs = 1;
+  sel.ys = 1;
+  selset = true;
+  makeundo();
+  sqr *s = S(cx, cy);
+  s->type = SOLID;
+  s->floor = midairz;
+  s->ceil = midairz + 1;
+  remip(sel);
+  addmsg(1, 6, SV_EDITS, sel.x, sel.y, sel.xs, sel.ys, SOLID);
+  sel = oldsel;
+  selset = oldselset;
+};
+
+COMMANDN(midairplace, midairplace, ARG_NONE);
 
 COMMAND(heightfield, ARG_1INT);
 COMMANDN(solid, solids, ARG_1INT);

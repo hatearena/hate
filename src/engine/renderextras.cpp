@@ -349,6 +349,21 @@ void readmatrices() {
 float depthcorrect(float d) { return (d <= 1 / 256.0f) ? d * 256 : d; };
 
 void readdepth(int w, int h) {
+  if (midair) {
+    float yawrad = player1->yaw * (PI / 180.0f);
+    float pitchrad = player1->pitch * (PI / 180.0f);
+    float cp = cosf(pitchrad);
+    float dist = 8.0f;
+    float vx, vy, vz;
+    getcamerapos(vx, vy, vz);
+    worldpos.x = vx + dist * sinf(yawrad) * cp;
+    worldpos.y = vy - dist * cosf(yawrad) * cp;
+    worldpos.z = (float)midairz;
+    vec r = {(float)mm[0], (float)mm[4], (float)mm[8]};
+    vec u = {(float)mm[1], (float)mm[5], (float)mm[9]};
+    setorient(r, u);
+    return;
+  }
   glReadPixels(w / 2, h / 2, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &cursordepth);
   double worldx = 0, worldy = 0, worldz = 0;
   gluUnProject(w / 2, h / 2, depthcorrect(cursordepth), mm, pm, viewport,

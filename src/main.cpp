@@ -354,6 +354,13 @@ int main(int argc, char **argv) {
     float vx, vy, vz;
     getcamerapos(vx, vy, vz);
     computeraytable(vx, vy);
+    {
+      const Uint8 *ks = SDL_GetKeyboardState(NULL);
+      bool newmidair = editmode && (ks[SDL_SCANCODE_LALT] || ks[SDL_SCANCODE_RALT]) && (ks[SDL_SCANCODE_LSHIFT] || ks[SDL_SCANCODE_RSHIFT]);
+      if (newmidair && !midair)
+        midairz = (int)vz;
+      midair = newmidair;
+    }
     readdepth(scr_w, scr_h);
     SDL_GL_SwapWindow(window);
     extern void updatevol();
@@ -427,8 +434,10 @@ int main(int argc, char **argv) {
               handled = false;
             break;
           case SDLK_g:
-            if ((event.key.keysym.mod & KMOD_CTRL) &&
-                (event.key.keysym.mod & KMOD_SHIFT))
+            if (midair)
+              execute("midairplace");
+            else if ((event.key.keysym.mod & KMOD_CTRL) &&
+                     (event.key.keysym.mod & KMOD_SHIFT))
               execute("edittex 0 1");
             else
               execute("solid 1");
@@ -488,8 +497,12 @@ int main(int argc, char **argv) {
         if (lasttype == event.type && lastbut == event.button.button)
           break;
         if (editmode && event.button.button == 1) {
-          extern void editdrag(bool);
-          editdrag(event.button.state != 0);
+          if (midair && event.button.state != 0) {
+            execute("midairplace");
+          } else {
+            extern void editdrag(bool);
+            editdrag(event.button.state != 0);
+          };
         } else {
           keypress(-event.button.button, event.button.state != 0, false, 0);
         };
@@ -500,7 +513,12 @@ int main(int argc, char **argv) {
       case SDL_MOUSEWHEEL:
         if (editmode) {
           const Uint8 *k = SDL_GetKeyboardState(NULL);
-          if (k[SDL_SCANCODE_Q]) {
+          if (midair) {
+            if (event.wheel.y > 0)
+              midairz = min(midairz + 1, 126);
+            else if (event.wheel.y < 0)
+              midairz = max(midairz - 1, -127);
+          } else if (k[SDL_SCANCODE_Q]) {
             if (event.wheel.y > 0)
               execute("vdelta 1");
             else if (event.wheel.y < 0)

@@ -329,6 +329,8 @@ extern dynent
     *player1; // special client ent that receives input and acts as camera
 extern dvector players; // all the other clients (in multiplayer)
 extern bool editmode;
+extern bool midair;
+extern int midairz;
 extern int noclip;
 extern int screenshotmode;
 extern bool menutextinput;

@@ -120,6 +120,10 @@ void remip(block &b, int level) {
           if (ch > ceil)
             ceil = ch;
         };
+        loopi(4) if (SOLID(o[i])) {
+          if (o[i]->floor < floor) floor = o[i]->floor;
+          if (o[i]->ceil > ceil) ceil = o[i]->ceil;
+        };
         r->floor = floor;
         r->ceil = ceil;
       };
