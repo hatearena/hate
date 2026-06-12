@@ -219,6 +219,7 @@ extern void stopchan(int chan);
 extern void stopsounds();
 extern void initsound();
 extern void cleansound();
+extern void resetitemsoundtimer();
 
 // rendermd2
 extern void preloadhudmodels();

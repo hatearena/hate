@@ -854,6 +854,7 @@ void startmap(char *name) // called just after a map load
     players[i]->suicides = 0;
   }
   resetspawns();
+  resetitemsoundtimer();
   strcpy_s(clientmap, name);
   setvar("gamespeed", 100);
   setvar("fog", 180);

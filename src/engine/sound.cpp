@@ -239,6 +239,9 @@ void playsoundmax(int n) {
 };
 
 int soundsatonce = 0, lastsoundmillis = 0;
+static int itemspawntime = 0;
+
+void resetitemsoundtimer() { itemspawntime = 0; };
 
 void playsound(int n, vec *loc) {
   if (nosound)
@@ -248,7 +251,6 @@ void playsound(int n, vec *loc) {
   if (editmode)
     return;
   if (n == S_ITEMSPAWN) {
-    static int itemspawntime = 0;
     if (!itemspawntime) itemspawntime = lastmillis;
     if (lastmillis - itemspawntime < 10000) return;
   }
