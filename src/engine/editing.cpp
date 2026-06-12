@@ -565,7 +565,7 @@ VARF(
       if (noteditmode())
         return;
       loopi(mipsize) world[i].r = world[i].g = world[i].b = 176;
-    };);
+    } else calclight(););
 
 void edittag(int tag) {
   EDITSELMP;
