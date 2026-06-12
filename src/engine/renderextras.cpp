@@ -297,7 +297,7 @@ char *entnames[] = {
     "shells",
     "bullets",
     "rockets",
-    "riflerounds",
+    "railgunammo",
     "nails",
     "energy",
     "health",
