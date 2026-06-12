@@ -803,8 +803,10 @@ skiphud:
     glOrtho(0, VIRTW, VIRTH, 0, -1, 1);
     glEnable(GL_TEXTURE_2D);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glColor4ub(10, 10, 10, 160);
+    glDisable(GL_TEXTURE_2D);
+    glColor4ub(10, 10, 10, 180);
     roundedbox(20, 1570, VIRTW - 20, 1650, 10);
+    glEnable(GL_TEXTURE_2D);
     glColor4ub(255, 255, 255, 255);
     {
       char *texnames[] = {"floor", "wall", "ceiling", "upper"};
@@ -815,8 +817,11 @@ skiphud:
       else
         draw_textf("[tex %s #%d]", 30, 1572, 2, tname, lasttex);
     }
-    glColor4ub(10, 10, 10, 160);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glDisable(GL_TEXTURE_2D);
+    glColor4ub(10, 10, 10, 180);
     roundedbox(20, 1660, VIRTW - 20, 1760, 10);
+    glEnable(GL_TEXTURE_2D);
     glColor4ub(255, 255, 255, 255);
     if (e >= 0) {
       entity &ent = ents[e];
