@@ -1205,9 +1205,19 @@ char *hudgunnames[] = {"hudguns/hate_csaw",    "hudguns/hate_shotg",
                        "hudguns/hate_lightgun"};
 
 void drawhudmodel(int start, int end, float speed, int base) {
+  float target_intensity = (viewbob && player1->onfloor && (player1->move || player1->strafe)) ? 1.0f : 0.0f;
+  static float bob_intensity = 0.0f;
+  if (target_intensity > bob_intensity) {
+    bob_intensity += curtime * 0.008f;
+    if (bob_intensity > target_intensity) bob_intensity = target_intensity;
+  } else if (target_intensity < bob_intensity) {
+    bob_intensity -= curtime * 0.04f;
+    if (bob_intensity < target_intensity) bob_intensity = target_intensity;
+  }
+
   float bx = 0, bz = 0;
-  if (viewbob && player1->onfloor && (player1->move || player1->strafe)) {
-    float bobamp = viewbobamp * 0.004f;
+  if (bob_intensity > 0.0f) {
+    float bobamp = viewbobamp * 0.004f * bob_intensity;
     float bobphase = lastmillis * 0.008f;
     bz = sinf(bobphase * 2.0f) * bobamp;
     bx = sinf(bobphase) * bobamp * 0.3f;
