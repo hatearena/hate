@@ -812,9 +812,17 @@ skiphud:
       char *texnames[] = {"floor", "wall", "ceiling", "upper"};
       char *tname = texnames[lasttype < 0 || lasttype > 3 ? 0 : lasttype];
       char *fname = mapname[lasttex][0];
-      if (fname[0])
-        draw_textf("[tex %s #%d]: %s", 30, 1562, 2, tname, lasttex, fname);
-      else
+      if (fname[0]) {
+        string displayname;
+        strcpy_s(displayname, fname);
+        char *dot = strrchr(displayname, '.');
+        if (dot) {
+          *dot = '\0';
+          strcat_s(displayname, ".dds");
+        }
+        draw_textf("[tex %s #%d]: %s", 30, 1562, 2, tname, lasttex,
+                   displayname);
+      } else
         draw_textf("[tex %s #%d]", 30, 1562, 2, tname, lasttex);
     }
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
