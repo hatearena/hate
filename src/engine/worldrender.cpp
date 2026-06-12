@@ -152,8 +152,7 @@ void render_seg_new(float vx, float vy, float vh, int mip, int x, int y, int xs,
         sqr *s = SWS(w, xx, yy, sz);                                           \
         if (s->occluded == 1)                                                  \
           continue;                                                            \
-        if (s->defer && !s->occluded && mip && xx >= lx && xx < rx &&          \
-            yy >= ly && yy < ry)
+        if (s->defer && !s->occluded && mip)
 #define LOOPD                                                                  \
   sqr *t = SWS(s, 1, 0, sz);                                                   \
   sqr *u = SWS(s, 1, 1, sz);                                                   \
