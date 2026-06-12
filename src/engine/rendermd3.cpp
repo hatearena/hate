@@ -349,8 +349,4 @@ void rendermodel_md3(char *mdl, int frame, int range, int tex, float rad,
             basetime);
 }
 
-void preloadhudmodel_md3() {
-  md3 *m = loadmodel_md3("hudguns/hate_rifle");
-  delayedload_md3(m);
-  md3tex(m->loadname);
-}
+void preloadhudmodel_md3() {}
