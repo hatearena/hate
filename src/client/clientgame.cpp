@@ -859,6 +859,7 @@ void startmap(char *name) // called just after a map load
   setvar("fog", 180);
   setvar("fogcolour", 0x8099B3);
   setvar("godraysintensity", 20);
+  setvar("bloom", 1);
   showscores(false);
   intermission = false;
   framesinmap = 0;
