@@ -10,6 +10,22 @@ if [ "$1" = "-clean" ]; then
   exit 0
 fi
 
+if [ "$1" = "-prune" ]; then
+  echo "Removing source images that have a DDS counterpart..."
+  find "$root/packages" "$root/data" -name '*.dds' | while read -r dds; do
+    base="${dds%.*}"
+    for ext in jpg jpeg png; do
+      src="${base}.${ext}"
+      if [ -f "$src" ]; then
+        echo "  pruning $src"
+        rm "$src"
+      fi
+    done
+  done
+  echo "Done."
+  exit 0
+fi
+
 min_side() {
   local f="$1"
   if command -v identify &>/dev/null; then
