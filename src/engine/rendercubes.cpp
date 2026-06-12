@@ -42,7 +42,7 @@ void reallocv() {
   { vertf((float)(v1), (float)(v2), (float)(v3), ls, t1, t2); }
 
 int nquads;
-const float TEXTURESCALE = 32.0f;
+const float TEXTURESCALE = 128.0f;
 bool floorstrip = false, deltastrip = false;
 int oh, oy, ox, ogltex; // the o* vars are used by the stripification
 int ol3r, ol3g, ol3b, ol4r, ol4g, ol4b;

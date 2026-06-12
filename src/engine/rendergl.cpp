@@ -38,7 +38,7 @@ bool hasoverbright = false;
 void purgetextures();
 
 GLUquadricObj *qsphere = NULL;
-int glmaxtexsize = 256;
+int glmaxtexsize = 1024;
 
 VARFP(fsaa, 0, 8, 16,
       { conoutf("Anti-aliasing will take effect on next restart"); });
