@@ -324,7 +324,7 @@ void loadsky(char *basename) {
   char *side[] = {"ft", "bk", "lf", "rt", "dn", "up"};
   int texnum = 14;
   loopi(6) {
-    sprintf_sd(name)("packages/%s_%s.jpg", basename, side[i]);
+    sprintf_sd(name)("packages/%s_%s.dds", basename, side[i]);
     int xs, ys;
     if (!installtex(texnum + i, path(name), xs, ys, true))
       conoutf("could not load sky textures");

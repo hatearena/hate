@@ -161,6 +161,49 @@ static bool loaddds(GLenum tnum, char *name, int &xs, int &ys, bool clamp) {
   } else if (memcmp(fourcc, "DXT5", 4) == 0) {
     glfmt = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
     blocksize = 16;
+  } else if (pfflags & 0x40) {
+    int bpp = bitcnt / 8;
+    if (bitcnt != 24 && bitcnt != 32) {
+      fclose(f);
+      return false;
+    };
+    GLenum fmt = GL_BGR, ifmt = GL_RGB;
+    if (bitcnt == 32) {
+      fmt = (amask == 0x000000ff) ? GL_RGBA : GL_BGRA;
+      ifmt = GL_RGBA;
+    } else {
+      fmt = (rmask == 0x000000ff) ? GL_RGB : GL_BGR;
+    };
+
+    glBindTexture(GL_TEXTURE_2D, tnum);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,
+                    clamp ? GL_CLAMP_TO_EDGE : GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,
+                    clamp ? GL_CLAMP_TO_EDGE : GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
+                    mips > 0 ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR);
+    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+
+    xs = w;
+    ys = h;
+
+    int lw = w, lh = h;
+    int levels = mips > 0 ? mips : 1;
+    loopi(levels) {
+      int size = lw * lh * bpp;
+      void *data = alloc(size);
+      fread(data, 1, size, f);
+      glTexImage2D(GL_TEXTURE_2D, i, ifmt, lw, lh, 0, fmt,
+                   GL_UNSIGNED_BYTE, data);
+      free(data);
+      lw = max(1, lw >> 1);
+      lh = max(1, lh >> 1);
+    };
+
+    fclose(f);
+    return true;
   } else {
     fclose(f);
     return false;
