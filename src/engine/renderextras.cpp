@@ -797,7 +797,7 @@ skiphud:
   if (editmode && !screenshotmode) {
     extern int closestent();
     extern int lasttype, lasttex;
-    extern string mapname[256][2];
+    extern string mapname[2048][2];
     int e = closestent();
     glPushMatrix();
     glOrtho(0, VIRTW, VIRTH, 0, -1, 1);

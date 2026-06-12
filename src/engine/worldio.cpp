@@ -192,7 +192,7 @@ void save_world(char *mname) {
       } else {
         spurge;
         gzputc(f, s->type);
-        gzputc(f, s->wtex);
+        gzwrite(f, &s->wtex, sizeof(ushort));
         gzputc(f, s->vdelta);
       };
     } else {
@@ -204,11 +204,11 @@ void save_world(char *mname) {
         gzputc(f, s->type);
         gzputc(f, s->floor);
         gzputc(f, s->ceil);
-        gzputc(f, s->wtex);
-        gzputc(f, s->ftex);
-        gzputc(f, s->ctex);
+        gzwrite(f, &s->wtex, sizeof(ushort));
+        gzwrite(f, &s->ftex, sizeof(ushort));
+        gzwrite(f, &s->ctex, sizeof(ushort));
         gzputc(f, s->vdelta);
-        gzputc(f, s->utex);
+        gzwrite(f, &s->utex, sizeof(ushort));
         gzputc(f, s->tag);
       };
     };
@@ -232,12 +232,19 @@ void load_world(char *mname) {
     conoutf("Could not read map %s", cgzname);
     return;
   };
-  gzread(f, &hdr, sizeof(header) - sizeof(int) * 16);
+  gzread(f, &hdr, (char *)&hdr.texlists - (char *)&hdr);
   endianswap(&hdr.version, sizeof(int), 4);
   if (strncmp(hdr.head, "CUBE", 4) != 0)
     fatal("While reading map: header malformatted");
   if (hdr.version > MAPVERSION)
     fatal("This map requires a newer version of Cube/HATE.");
+  if (hdr.version >= 6) {
+    gzread(f, hdr.texlists, sizeof(ushort) * 3 * 2048);
+  } else {
+    uchar oldtex[3][256];
+    gzread(f, oldtex, 3 * 256);
+    loopk(3) { loopi(256) hdr.texlists[k][i] = oldtex[k][i]; for (int i = 256; i < 2048; i++) hdr.texlists[k][i] = i; };
+  };
   if (sfactor < SMALLEST_FACTOR || sfactor > LARGEST_FACTOR)
     fatal("Illegal map size");
   if (hdr.version >= 4) {
@@ -261,8 +268,8 @@ void load_world(char *mname) {
   };
   free(world);
   setupworld(hdr.sfactor);
-  char texuse[256];
-  loopi(256) texuse[i] = 0;
+  char texuse[2048];
+  loopi(2048) texuse[i] = 0;
   sqr *t = NULL;
   loopk(cubicsize) {
     sqr *s = &world[k];
@@ -284,7 +291,10 @@ void load_world(char *mname) {
     };
     case SOLID: {
       s->type = SOLID;
-      s->wtex = gzgetc(f);
+      if (hdr.version >= 6)
+        gzread(f, &s->wtex, sizeof(ushort));
+      else
+        s->wtex = gzgetc(f);
       s->vdelta = gzgetc(f);
       if (hdr.version <= 2) {
         gzgetc(f);
@@ -308,15 +318,25 @@ void load_world(char *mname) {
       s->ceil = gzgetc(f);
       if (s->floor >= s->ceil)
         s->floor = s->ceil - 1;
-      s->wtex = gzgetc(f);
-      s->ftex = gzgetc(f);
-      s->ctex = gzgetc(f);
+      if (hdr.version >= 6) {
+        gzread(f, &s->wtex, sizeof(ushort));
+        gzread(f, &s->ftex, sizeof(ushort));
+        gzread(f, &s->ctex, sizeof(ushort));
+      } else {
+        s->wtex = gzgetc(f);
+        s->ftex = gzgetc(f);
+        s->ctex = gzgetc(f);
+      };
       if (hdr.version <= 2) {
         gzgetc(f);
         gzgetc(f);
       };
       s->vdelta = gzgetc(f);
-      s->utex = (hdr.version >= 2) ? gzgetc(f) : s->wtex;
+      if (hdr.version >= 6) {
+        gzread(f, &s->utex, sizeof(ushort));
+      } else {
+        s->utex = (hdr.version >= 2) ? gzgetc(f) : s->wtex;
+      };
       s->tag = (hdr.version >= 5) ? gzgetc(f) : 0;
       s->type = type;
     };
@@ -331,7 +351,7 @@ void load_world(char *mname) {
   calclight();
   settagareas();
   int xs, ys;
-  loopi(256) if (texuse) lookuptexture(i, xs, ys);
+  loopi(2048) if (texuse[i]) lookuptexture(i, xs, ys);
   char *dot = strrchr(cgzname, '.');
   if (dot)
     *dot = '\0';

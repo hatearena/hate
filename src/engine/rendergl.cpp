@@ -336,10 +336,10 @@ int curtex = 0;
 const int FIRSTTEX = 1000; // opengl id = loaded id + FIRSTTEX
 const int MAXFRAMES = 2;   // increase to allow more complex shader defs
 
-int mapping[256][MAXFRAMES]; // ( cube texture, frame ) -> ( opengl id, name )
-string mapname[256][MAXFRAMES];
+int mapping[2048][MAXFRAMES]; // ( cube texture, frame ) -> ( opengl id, name )
+string mapname[2048][MAXFRAMES];
 
-void purgetextures() { loopi(256) loop(j, MAXFRAMES) mapping[i][j] = 0; };
+void purgetextures() { loopi(2048) loop(j, MAXFRAMES) mapping[i][j] = 0; };
 
 int curtexnum = 0;
 
@@ -347,7 +347,7 @@ void texturereset() { curtexnum = 0; };
 
 void texture(char *aframe, char *name) {
   int num = curtexnum++, frame = atoi(aframe);
-  if (num < 0 || num >= 256 || frame < 0 || frame >= MAXFRAMES)
+  if (num < 0 || num >= 2048 || frame < 0 || frame >= MAXFRAMES)
     return;
   mapping[num][frame] = 1;
   char *n = mapname[num][frame];

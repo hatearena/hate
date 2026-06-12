@@ -166,11 +166,17 @@ static void loadspawns() {
   if (!f)
     return;
   header hdr;
-  gzread(f, &hdr, sizeof(header) - sizeof(int) * 16);
+  gzread(f, &hdr, (char *)&hdr.texlists - (char *)&hdr);
   endianswap(&hdr.version, sizeof(int), 4);
   if (strncmp(hdr.head, "CUBE", 4) != 0 || hdr.version > MAPVERSION) {
     gzclose(f);
     return;
+  };
+  if (hdr.version >= 6) {
+    gzread(f, hdr.texlists, sizeof(ushort) * 3 * 2048);
+  } else {
+    uchar oldtex[3][256];
+    gzread(f, oldtex, 3 * 256);
   };
   mapsize = 1 << hdr.sfactor;
   if (hdr.version >= 4) {

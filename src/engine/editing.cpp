@@ -293,7 +293,7 @@ void tofronttex() {
   loopi(3) {
     int c = curedittex[i];
     if (c >= 0) {
-      uchar *p = hdr.texlists[i];
+      ushort *p = hdr.texlists[i];
       int t = p[c];
       for (int a = c - 1; a >= 0; a--)
         p[a + 1] = p[a];
@@ -404,7 +404,7 @@ void edittex(int type, int dir) {
   int atype = type == 3 ? 1 : type;
   int i = curedittex[atype];
   i = i < 0 ? 0 : i + dir;
-  curedittex[atype] = i = min(max(i, 0), 255);
+  curedittex[atype] = i = min(max(i, 0), 2047);
   int t = lasttex = hdr.texlists[atype][i];
   edittexxy(type, t, sel);
   addmsg(1, 7, SV_EDITT, sel.x, sel.y, sel.xs, sel.ys, type, t);
