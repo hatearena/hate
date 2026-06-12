@@ -198,7 +198,7 @@ bool installtex(int tnum, char *texname, int &xs, int &ys, bool clamp) {
   if (hass3tc()) {
     char *dot = strrchr(texname, '.');
     if (dot) {
-      char ddsname[256];
+      string ddsname;
       strcpy_s(ddsname, texname);
       ddsname[dot - texname] = '\0';
       strcat_s(ddsname, ".dds");
