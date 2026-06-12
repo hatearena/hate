@@ -98,6 +98,10 @@ void cleangl() {
     gluDeleteQuadric(qsphere);
 };
 
+typedef void (APIENTRY *glCompressedTexImage2DFunc)(GLenum, GLint, GLenum, GLsizei, GLsizei, GLint, GLsizei, const GLvoid *);
+static glCompressedTexImage2DFunc glCompressedTexImage2D_ = NULL;
+static int glCompressedTexImage2DInit = 0;
+
 static int s3tcsupport = -1;
 
 static bool hass3tc() {
@@ -213,6 +217,14 @@ static bool loaddds(GLenum tnum, char *name, int &xs, int &ys, bool clamp) {
     return false;
   };
 
+  if (!glCompressedTexImage2DInit) {
+    glCompressedTexImage2DInit = 1;
+    glCompressedTexImage2D_ =
+        (glCompressedTexImage2DFunc)SDL_GL_GetProcAddress("glCompressedTexImage2D");
+    if (!glCompressedTexImage2D_)
+      glCompressedTexImage2D_ = (glCompressedTexImage2DFunc)SDL_GL_GetProcAddress("glCompressedTexImage2DARB");
+  }
+
   glBindTexture(GL_TEXTURE_2D, tnum);
   glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,
@@ -231,7 +243,8 @@ static bool loaddds(GLenum tnum, char *name, int &xs, int &ys, bool clamp) {
     int size = ((lw + 3) / 4) * ((lh + 3) / 4) * blocksize;
     void *data = alloc(size);
     fread(data, 1, size, f);
-    glCompressedTexImage2D(GL_TEXTURE_2D, i, glfmt, lw, lh, 0, size, data);
+    if (glCompressedTexImage2D_)
+      glCompressedTexImage2D_(GL_TEXTURE_2D, i, glfmt, lw, lh, 0, size, data);
     free(data);
     lw = max(1, lw >> 1);
     lh = max(1, lh >> 1);
