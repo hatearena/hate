@@ -81,8 +81,7 @@ void topt(sqr *s, bool &wf, bool &uf, int &wt, int &ut) {
   };
 };
 
-void toptimize() // FIXME: only does 2x2, make atleast for 4x4 also
-{
+void toptimize() {
   bool wf[4], uf[4];
   sqr *s[4];
   for (int x = 2; x < ssize - 4; x += 2)
@@ -109,11 +108,17 @@ void writemap(char *mname, int msize, uchar *mdata) {
   backup(cgzname, bakname);
   FILE *f = fopen(cgzname, "wb");
   if (!f) {
+    char *dot = strrchr(cgzname, '.');
+    if (dot)
+      *dot = '\0';
     conoutf("Could not write map to %s", cgzname);
     return;
   };
   fwrite(mdata, 1, msize, f);
   fclose(f);
+  char *dot = strrchr(cgzname, '.');
+  if (dot)
+    *dot = '\0';
   conoutf("Wrote map %s as file %s", mname, cgzname);
 }
 
@@ -211,13 +216,14 @@ void save_world(char *mname) {
   };
   spurge;
   gzclose(f);
+  char *dot = strrchr(cgzname, '.');
+  if (dot)
+    *dot = '\0';
   conoutf("Wrote map file %s", cgzname);
   settagareas();
 };
 
-void load_world(char *mname) // still supports all map formats that have existed
-                             // since the earliest cube betas!
-{
+void load_world(char *mname) {
   stopifrecording();
   cleardlights();
   setnames(mname);
@@ -327,10 +333,12 @@ void load_world(char *mname) // still supports all map formats that have existed
   int xs, ys;
   loopi(256) if (texuse) lookuptexture(i, xs, ys);
   char *dot = strrchr(cgzname, '.');
-  if (dot) *dot = '\0';
+  if (dot)
+    *dot = '\0';
   conoutf("Read map %s in %d milliseconds.", cgzname,
           SDL_GetTicks() - lastmillis);
-  if (dot) *dot = '.';
+  if (dot)
+    *dot = '.';
   conoutf("%s", hdr.maptitle);
   startmap(mname);
   loopl(256) {
