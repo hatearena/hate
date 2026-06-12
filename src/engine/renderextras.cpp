@@ -811,9 +811,9 @@ skiphud:
       char *tname = texnames[lasttype < 0 || lasttype > 3 ? 0 : lasttype];
       char *fname = mapname[lasttex][0];
       if (fname[0])
-        draw_textf("Texture [%s #%d]: %s", 30, 1570, 2, tname, lasttex, fname);
+        draw_textf("[tex %s #%d]: %s", 30, 1572, 2, tname, lasttex, fname);
       else
-        draw_textf("Texture [%s #%d]", 30, 1570, 2, tname, lasttex);
+        draw_textf("[tex %s #%d]", 30, 1572, 2, tname, lasttex);
     }
     glColor4ub(10, 10, 10, 160);
     roundedbox(20, 1660, VIRTW - 20, 1760, 10);
