@@ -37,8 +37,12 @@ bool hasoverbright = false;
 
 void purgetextures();
 
-GLUquadricObj *qsphere = NULL;
+  GLUquadricObj *qsphere = NULL;
 int glmaxtexsize = 1024;
+
+typedef void (APIENTRY *glGenMipmapFunc)(GLenum);
+static glGenMipmapFunc glGenMipmap_ = NULL;
+static int genmipinit = 0;
 
 VARFP(fsaa, 0, 8, 16,
       { conoutf("Anti-aliasing will take effect on next restart"); });
@@ -90,7 +94,119 @@ void cleangl() {
     gluDeleteQuadric(qsphere);
 };
 
+static int s3tcsupport = -1;
+
+static bool hass3tc() {
+  if (s3tcsupport < 0) {
+    const char *exts = (const char *)glGetString(GL_EXTENSIONS);
+    s3tcsupport =
+        exts && strstr(exts, "GL_EXT_texture_compression_s3tc") ? 1 : 0;
+  };
+  return s3tcsupport != 0;
+};
+
+static bool loaddds(GLenum tnum, char *name, int &xs, int &ys, bool clamp) {
+  FILE *f = fopen(name, "rb");
+  if (!f)
+    return false;
+
+  char magic[4];
+  if (fread(magic, 1, 4, f) != 4 || memcmp(magic, "DDS ", 4) != 0) {
+    fclose(f);
+    return false;
+  };
+
+  unsigned int hdrsz, flags, h, w, pitch, depth, mips;
+  unsigned int rsv1[11];
+  unsigned int pfsz, pfflags;
+  char fourcc[4];
+  unsigned int bitcnt, rmask, gmask, bmask, amask;
+  unsigned int caps, caps2, caps3, caps4, rsv2;
+
+  fread(&hdrsz, 4, 1, f);
+  fread(&flags, 4, 1, f);
+  fread(&h, 4, 1, f);
+  fread(&w, 4, 1, f);
+  fread(&pitch, 4, 1, f);
+  fread(&depth, 4, 1, f);
+  fread(&mips, 4, 1, f);
+  fread(rsv1, 4, 11, f);
+  fread(&pfsz, 4, 1, f);
+  fread(&pfflags, 4, 1, f);
+  fread(fourcc, 1, 4, f);
+  fread(&bitcnt, 4, 1, f);
+  fread(&rmask, 4, 1, f);
+  fread(&gmask, 4, 1, f);
+  fread(&bmask, 4, 1, f);
+  fread(&amask, 4, 1, f);
+  fread(&caps, 4, 1, f);
+  fread(&caps2, 4, 1, f);
+  fread(&caps3, 4, 1, f);
+  fread(&caps4, 4, 1, f);
+  fread(&rsv2, 4, 1, f);
+
+  xs = w;
+  ys = h;
+
+  GLenum glfmt = 0;
+  int blocksize = 0;
+
+  if (memcmp(fourcc, "DXT1", 4) == 0) {
+    glfmt = amask ? GL_COMPRESSED_RGBA_S3TC_DXT1_EXT
+                  : GL_COMPRESSED_RGB_S3TC_DXT1_EXT;
+    blocksize = 8;
+  } else if (memcmp(fourcc, "DXT3", 4) == 0) {
+    glfmt = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
+    blocksize = 16;
+  } else if (memcmp(fourcc, "DXT5", 4) == 0) {
+    glfmt = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
+    blocksize = 16;
+  } else {
+    fclose(f);
+    return false;
+  };
+
+  glBindTexture(GL_TEXTURE_2D, tnum);
+  glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,
+                  clamp ? GL_CLAMP_TO_EDGE : GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,
+                  clamp ? GL_CLAMP_TO_EDGE : GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
+                  mips > 0 ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR);
+  glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+
+  int lw = w, lh = h;
+  int levels = mips > 0 ? mips : 1;
+
+  loopi(levels) {
+    int size = ((lw + 3) / 4) * ((lh + 3) / 4) * blocksize;
+    void *data = alloc(size);
+    fread(data, 1, size, f);
+    glCompressedTexImage2D(GL_TEXTURE_2D, i, glfmt, lw, lh, 0, size, data);
+    free(data);
+    lw = max(1, lw >> 1);
+    lh = max(1, lh >> 1);
+  };
+
+  fclose(f);
+  return true;
+};
+
 bool installtex(int tnum, char *texname, int &xs, int &ys, bool clamp) {
+  if (hass3tc()) {
+    char *dot = strrchr(texname, '.');
+    if (dot) {
+      char ddsname[256];
+      strcpy_s(ddsname, texname);
+      ddsname[dot - texname] = '\0';
+      strcat_s(ddsname, ".dds");
+      if (loaddds(tnum, ddsname, xs, ys, clamp))
+        return true;
+    };
+  };
+
   SDL_Surface *s = IMG_Load(texname);
   if (!s) {
     conoutf("Couldn't load texture %s", texname);
@@ -130,8 +246,17 @@ bool installtex(int tnum, char *texname, int &xs, int &ys, bool clamp) {
     gluScaleImage(fmt, s->w, s->h, GL_UNSIGNED_BYTE, s->pixels, xs, ys,
                   GL_UNSIGNED_BYTE, scaledimg);
   };
-  if (gluBuild2DMipmaps(GL_TEXTURE_2D, ifmt, xs, ys, fmt, GL_UNSIGNED_BYTE,
-                        scaledimg))
+  if (!genmipinit) {
+    genmipinit = 1;
+    glGenMipmap_ =
+        (glGenMipmapFunc)SDL_GL_GetProcAddress("glGenerateMipmap");
+  };
+  if (glGenMipmap_) {
+    glTexImage2D(GL_TEXTURE_2D, 0, ifmt, xs, ys, 0, fmt, GL_UNSIGNED_BYTE,
+                 scaledimg);
+    glGenMipmap_(GL_TEXTURE_2D);
+  } else if (gluBuild2DMipmaps(GL_TEXTURE_2D, ifmt, xs, ys, fmt,
+                               GL_UNSIGNED_BYTE, scaledimg))
     fatal("could not build mipmaps");
   if (xs != s->w)
     free(scaledimg);
