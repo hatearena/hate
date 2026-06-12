@@ -105,6 +105,7 @@ struct block {
 struct mapmodelinfo {
   int rad, h, zoff, snap;
   char *name;
+  int animrange;
 };
 
 enum {

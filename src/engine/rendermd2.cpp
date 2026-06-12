@@ -262,6 +262,7 @@ void delayedload(md2 *m) {
     int xs, ys;
     installtex(FIRSTMDL + m->mdlnum, path(name2), xs, ys);
     m->loaded = true;
+    m->mmi.animrange = m->numFrames;
   };
 };
 
