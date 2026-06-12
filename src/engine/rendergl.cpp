@@ -1,5 +1,9 @@
 #include "../include/cube.h"
 
+#ifndef APIENTRY
+#define APIENTRY
+#endif
+
 #ifdef DARWIN
 #define GL_COMBINE_EXT GL_COMBINE_ARB
 #define GL_COMBINE_RGB_EXT GL_COMBINE_RGB_ARB
