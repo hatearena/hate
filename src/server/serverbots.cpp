@@ -161,7 +161,7 @@ static void loadspawns() {
     strn0cpy(pakname, "base", 64);
     strn0cpy(mapname, smapname, 64);
   };
-  sprintf_s(cgzname)("packages/%s/%s.cgz", pakname, mapname);
+  sprintf_s(cgzname)("packages/%s/%s.hmap", pakname, mapname);
   gzFile f = gzopen(cgzname, "rb");
   if (!f)
     return;

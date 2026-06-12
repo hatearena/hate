@@ -6,6 +6,7 @@ content/servers.cfg
 *.DS_Store
 *_orig.cpp
 *.BAK
+*.hmapbak
 *config.cfg
 *.o
 *.exe

@@ -17,8 +17,8 @@ void setnames(char *name) {
     strcpy_s(pakname, "base");
     strcpy_s(mapname, name);
   };
-  sprintf_s(cgzname)("packages/%s/%s.cgz", pakname, mapname);
-  sprintf_s(bakname)("packages/%s/%s_%d.BAK", pakname, mapname, lastmillis);
+  sprintf_s(cgzname)("packages/%s/%s.hmap", pakname, mapname);
+  sprintf_s(bakname)("packages/%s/%s_%d.hmapbak", pakname, mapname, lastmillis);
   sprintf_s(pcfname)("packages/%s/package.cfg", pakname);
   sprintf_s(mcfname)("packages/%s/%s.cfg", pakname, mapname);
 
@@ -132,7 +132,7 @@ uchar *readmap(char *mname, int *msize) {
   return mdata;
 }
 
-// save map as .cgz file. uses 2 layers of compression: first does simple
+// save map as .hmap file. uses 2 layers of compression: first does simple
 // run-length encoding and leaves out data for certain kinds of cubes, then zlib
 // removes the last bits of redundancy. Both passes contribute greatly to the
 // miniscule map sizes.
