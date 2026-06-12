@@ -406,7 +406,7 @@ void damageblend(int n) {
   lastdamage = lastmillis;
 };
 
-VARP(show_stats, 0, 1, 1);
+VARP(show_stats, 0, 0, 1);
 VARP(crosshairfx, 0, 1, 1);
 
 VARP(crosshair_r, 0, 255, 255);
