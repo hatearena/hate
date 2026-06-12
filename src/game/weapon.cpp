@@ -432,8 +432,10 @@ void shoot(dynent *d, vec &targ) {
       if (s == d->gunselect) s = GUN_CSAW;
       if (s != d->gunselect) {
         d->gunselect = s;
-        playsoundc(S_WEAPLOAD);
-        gunswitchtime = lastmillis;
+        if (d == player1) {
+          playsoundc(S_WEAPLOAD);
+          gunswitchtime = lastmillis;
+        }
       }
       d->gunwait = guns[d->gunselect].attackdelay;
     } else {
@@ -495,8 +497,10 @@ void shoot(dynent *d, vec &targ) {
   if (nextgun >= 0 && oldproj) {
     d->gunselect = nextgun;
     d->gunwait = guns[d->gunselect].attackdelay;
-    playsoundc(S_WEAPLOAD);
-    gunswitchtime = lastmillis;
+    if (d == player1) {
+      playsoundc(S_WEAPLOAD);
+      gunswitchtime = lastmillis;
+    }
   }
   if (oldproj)
     return;
@@ -523,7 +527,9 @@ void shoot(dynent *d, vec &targ) {
   if (nextgun >= 0) {
     d->gunselect = nextgun;
     d->gunwait = guns[d->gunselect].attackdelay;
-    playsoundc(S_WEAPLOAD);
-    gunswitchtime = lastmillis;
+    if (d == player1) {
+      playsoundc(S_WEAPLOAD);
+      gunswitchtime = lastmillis;
+    }
   }
 };

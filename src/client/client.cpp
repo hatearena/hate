@@ -1,5 +1,7 @@
 #include "../include/cube.h"
 
+extern int numbots;
+
 ENetHost *clienthost = NULL;
 int connecting = 0;
 int connattempts = 0;
@@ -148,10 +150,29 @@ COMMANDN(connect, connects, ARG_1STR);
 COMMANDN(disconnect, trydisconnect, ARG_NONE);
 
 void kickcmd(char *name) {
-  sprintf_sd(buf)("/kick %s", name);
-  strn0cpy(ctext, buf, 80);
+  if (clienthost) {
+    sprintf_sd(buf)("/kick %s", name);
+    strn0cpy(ctext, buf, 80);
+    return;
+  }
+  dvector &bv = getbots();
+  loopv(bv) if (!strcmp(bv[i]->name, name)) {
+    gp()->dealloc(bv[i], sizeof(dynent));
+    bv.remove(i);
+    numbots--;
+    conoutf("Bot %s kicked.", name);
+    return;
+  };
+  conoutf("Could not find bot \"%s\"", name);
 };
-void kickallcmd() { strn0cpy(ctext, "/kick_all_bots", 80); };
+void kickallcmd() {
+  if (clienthost) {
+    strn0cpy(ctext, "/kick_all_bots", 80);
+    return;
+  }
+  botclear();
+  conoutf("All bots have been kicked.");
+};
 COMMANDN(kick, kickcmd, ARG_1STR);
 COMMANDN(kick_all_bots, kickallcmd, ARG_NONE);
 
