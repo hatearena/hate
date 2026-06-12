@@ -85,20 +85,20 @@ void screenshot() {
       if (home) {
         sprintf_sd(hatedir)("%s/.hate", home);
         path(hatedir);
-        #ifdef _WIN32
-          mkdir(hatedir);
-        #else
-          mkdir(hatedir, 0755);
-        #endif
-        
+#ifdef _WIN32
+        mkdir(hatedir);
+#else
+        mkdir(hatedir, 0755);
+#endif
+
         sprintf_sd(dir)("%s/.hate/screenshots", home);
         path(dir);
-        #ifdef _WIN32
-          mkdir(dir);
-        #else
-          mkdir(dir, 0755);
-        #endif
-        
+#ifdef _WIN32
+        mkdir(dir);
+#else
+        mkdir(dir, 0755);
+#endif
+
         sprintf_sd(buf)("%s/.hate/screenshots/screenshot_%d.png", home,
                         lastmillis);
         path(buf);
@@ -287,10 +287,10 @@ int main(int argc, char **argv) {
       !installtex(8, path(newstring("data/martin/ball2.png")), xs, ys) ||
       !installtex(9, path(newstring("data/martin/ball3.png")), xs, ys) ||
       !installtex(4, path(newstring("data/explosion.jpg")), xs, ys) ||
-      !installtex(5, path(newstring("data/items.png")), xs, ys) ||
-      !installtex(1, path(newstring("data/crosshair.png")), xs, ys))
-    fatal("Could not find core textures (hint: run HATE from the parent of the "
-          "bin directory)");
+      !installtex(5, path(newstring("data/items.png")), xs, ys))
+    fatal(
+        "Could not find core textures\n(Hint: Run HATE from the parent of the "
+        "binary directory)");
   installtex(10, path(newstring("data/boost.png")), xs, ys);
   installtex(11, path(newstring("data/nailgun.png")), xs, ys);
   installtex(12, path(newstring("data/energy.png")), xs, ys);
@@ -520,8 +520,10 @@ int main(int argc, char **argv) {
         } else if (scoreson) {
           const Uint8 *k = SDL_GetKeyboardState(NULL);
           if (k[SDL_SCANCODE_LSHIFT] || k[SDL_SCANCODE_RSHIFT]) {
-            if (event.wheel.y < 0) scoreboard_scroll++;
-            else if (event.wheel.y > 0 && scoreboard_scroll > 0) scoreboard_scroll--;
+            if (event.wheel.y < 0)
+              scoreboard_scroll++;
+            else if (event.wheel.y > 0 && scoreboard_scroll > 0)
+              scoreboard_scroll--;
           };
         } else if (spectator) {
           if (event.wheel.y > 0)
