@@ -41,10 +41,10 @@ bool hasoverbright = false;
 
 void purgetextures();
 
-  GLUquadricObj *qsphere = NULL;
+GLUquadricObj *qsphere = NULL;
 int glmaxtexsize = 1024;
 
-typedef void (APIENTRY *glGenMipmapFunc)(GLenum);
+typedef void(APIENTRY *glGenMipmapFunc)(GLenum);
 static glGenMipmapFunc glGenMipmap_ = NULL;
 static int genmipinit = 0;
 
@@ -98,7 +98,9 @@ void cleangl() {
     gluDeleteQuadric(qsphere);
 };
 
-typedef void (APIENTRY *glCompressedTexImage2DFunc)(GLenum, GLint, GLenum, GLsizei, GLsizei, GLint, GLsizei, const GLvoid *);
+typedef void(APIENTRY *glCompressedTexImage2DFunc)(GLenum, GLint, GLenum,
+                                                   GLsizei, GLsizei, GLint,
+                                                   GLsizei, const GLvoid *);
 static glCompressedTexImage2DFunc glCompressedTexImage2D_ = NULL;
 static int glCompressedTexImage2DInit = 0;
 
@@ -203,8 +205,8 @@ static bool loaddds(GLenum tnum, char *name, int &xs, int &ys, bool clamp) {
       int size = lw * lh * bpp;
       void *data = alloc(size);
       fread(data, 1, size, f);
-      glTexImage2D(GL_TEXTURE_2D, i, ifmt, lw, lh, 0, fmt,
-                   GL_UNSIGNED_BYTE, data);
+      glTexImage2D(GL_TEXTURE_2D, i, ifmt, lw, lh, 0, fmt, GL_UNSIGNED_BYTE,
+                   data);
       free(data);
       lw = max(1, lw >> 1);
       lh = max(1, lh >> 1);
@@ -219,10 +221,12 @@ static bool loaddds(GLenum tnum, char *name, int &xs, int &ys, bool clamp) {
 
   if (!glCompressedTexImage2DInit) {
     glCompressedTexImage2DInit = 1;
-    glCompressedTexImage2D_ =
-        (glCompressedTexImage2DFunc)SDL_GL_GetProcAddress("glCompressedTexImage2D");
+    glCompressedTexImage2D_ = (glCompressedTexImage2DFunc)SDL_GL_GetProcAddress(
+        "glCompressedTexImage2D");
     if (!glCompressedTexImage2D_)
-      glCompressedTexImage2D_ = (glCompressedTexImage2DFunc)SDL_GL_GetProcAddress("glCompressedTexImage2DARB");
+      glCompressedTexImage2D_ =
+          (glCompressedTexImage2DFunc)SDL_GL_GetProcAddress(
+              "glCompressedTexImage2DARB");
   }
 
   glBindTexture(GL_TEXTURE_2D, tnum);
@@ -308,8 +312,7 @@ bool installtex(int tnum, char *texname, int &xs, int &ys, bool clamp) {
   };
   if (!genmipinit) {
     genmipinit = 1;
-    glGenMipmap_ =
-        (glGenMipmapFunc)SDL_GL_GetProcAddress("glGenerateMipmap");
+    glGenMipmap_ = (glGenMipmapFunc)SDL_GL_GetProcAddress("glGenerateMipmap");
   };
   if (glGenMipmap_) {
     glTexImage2D(GL_TEXTURE_2D, 0, ifmt, xs, ys, 0, fmt, GL_UNSIGNED_BYTE,

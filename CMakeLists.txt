@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(hate VERSION 0.0.2 LANGUAGES CXX)
+project(hate VERSION 0.0.3 LANGUAGES CXX)
 
 if(WIN32)
   if(MSVC)

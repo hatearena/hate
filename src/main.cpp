@@ -255,7 +255,7 @@ int main(int argc, char **argv) {
       fclose(cfg);
     }
   }
-  window = SDL_CreateWindow("HATE v0.0.2", SDL_WINDOWPOS_CENTERED,
+  window = SDL_CreateWindow("HATE v0.0.3", SDL_WINDOWPOS_CENTERED,
                             SDL_WINDOWPOS_CENTERED, scr_w, scr_h,
                             SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
   if (window == NULL)
