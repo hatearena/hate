@@ -277,6 +277,14 @@ int main(int argc, char **argv) {
 
   SDL_GL_SetSwapInterval(0);
 
+  if (maxfps <= 0) {
+    SDL_DisplayMode mode;
+    if (SDL_GetCurrentDisplayMode(0, &mode) == 0 && mode.refresh_rate > 0)
+      maxfps = mode.refresh_rate;
+    else
+      maxfps = 144;
+  }
+
   log("video: misc");
   SDL_SetRelativeMouseMode(SDL_TRUE);
   SDL_ShowCursor(0);
@@ -345,8 +353,8 @@ int main(int argc, char **argv) {
       lastmillis = millis - 200;
     else if (millis - lastmillis < 1)
       lastmillis = millis - 1;
-    if (maxfps > 0) {
-      int maxfpsdelay = 1000 / maxfps;
+    {
+      int maxfpsdelay = 1000 / max(maxfps, 250);
       if (millis - lastmillis < maxfpsdelay)
         SDL_Delay(maxfpsdelay - (millis - lastmillis));
     }
@@ -358,16 +366,24 @@ int main(int argc, char **argv) {
     fps = (1000.0f / curtime + fps * 50) / 51;
     float vx, vy, vz;
     getcamerapos(vx, vy, vz);
-    computeraytable(vx, vy);
+    {
+      static float last_vx = -1e10f, last_vy = -1e10f;
+      static float last_yaw = -1e10f, last_pitch = -1e10f;
+      float yaw = player1->yaw, pitch = player1->pitch;
+      if (fabs(vx - last_vx) > 1.5f || fabs(vy - last_vy) > 1.5f ||
+          fabs(yaw - last_yaw) > 3.0f || fabs(pitch - last_pitch) > 3.0f) {
+        computeraytable(vx, vy);
+        last_vx = vx;
+        last_vy = vy;
+        last_yaw = yaw;
+        last_pitch = pitch;
+      }
+    }
     readdepth(scr_w, scr_h);
     SDL_GL_SwapWindow(window);
     extern void updatevol();
     updatevol();
-    if (framesinmap++ < 5) {
-      player1->yaw += 5;
-      gl_drawframe(scr_w, scr_h, fps);
-      player1->yaw -= 5;
-    };
+    framesinmap++;
     gl_drawframe(scr_w, scr_h, fps);
     SDL_Event event;
     int lasttype = 0, lastbut = 0;
