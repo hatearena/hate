@@ -372,3 +372,4 @@ void load_world(char *mname) {
 };
 
 COMMANDN(savemap, save_world, ARG_1STR);
+static int __ad_savemap = (addcommanddetail("savemap", "Saves the current map to a file"), 0);

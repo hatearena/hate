@@ -1,18 +1,5 @@
 #include "../include/cube.h"
 
-enum { ID_VAR, ID_COMMAND, ID_ALIAS };
-
-struct ident {
-  int type;      // One of ID_* above
-  char *name;    // The identifier name
-  int min, max;  // ID_VAR
-  int *storage;  // ID_VAR
-  void (*fun)(); // ID_VAR, ID_COMMAND
-  int narg;      // ID_VAR, ID_COMMAND
-  char *action;  // ID_ALIAS
-  bool persist;
-};
-
 void itoa(char *s, int i) { sprintf_s(s)("%d", i); };
 char *exchangestr(char *o, char *n) {
   gp()->deallocstr(o);
@@ -26,7 +13,7 @@ void alias(char *name, char *action) {
   ident *b = idents->access(name);
   if (!b) {
     name = newstring(name);
-    ident b = {ID_ALIAS, name, 0, 0, 0, 0, 0, newstring(action), true};
+    ident b = {ID_ALIAS, name, 0, 0, 0, 0, 0, newstring(action), true, NULL};
     idents->access(name, &b);
   } else {
     if (b->type == ID_ALIAS)
@@ -37,13 +24,14 @@ void alias(char *name, char *action) {
 };
 
 COMMAND(alias, ARG_2STR);
+static int __ad_alias = (addcommanddetail("alias", "Creates or modifies an alias"), 0);
 
 /// Variables and commands are registered through globals, see cube.h
 int variable(char *name, int min, int cur, int max, int *storage, void (*fun)(),
              bool persist) {
   if (!idents)
     idents = new hashtable<ident>;
-  ident v = {ID_VAR, name, min, max, storage, fun, 0, 0, persist};
+  ident v = {ID_VAR, name, min, max, storage, fun, 0, 0, persist, NULL};
   idents->access(name, &v);
   return cur;
 };
@@ -60,10 +48,67 @@ char *getalias(char *name) {
 bool addcommand(char *name, void (*fun)(), int narg) {
   if (!idents)
     idents = new hashtable<ident>;
-  ident c = {ID_COMMAND, name, 0, 0, 0, fun, narg, 0, false};
+  ident c = {ID_COMMAND, name, 0, 0, 0, fun, narg, 0, false, NULL};
   idents->access(name, &c);
   return false;
 };
+
+void addcommanddetail(const char *name, const char *detail) {
+  if (!idents) return;
+  ident *id = idents->access((char *)name);
+  if (id) {
+    if (id->detail) gp()->deallocstr(id->detail);
+    id->detail = newstring(detail);
+  }
+}
+
+const char *getargsig(const ident *id) {
+  static string buf;
+  if (id->type == ID_VAR) {
+    if (id->min > id->max) {
+      sprintf_s(buf)("(int) read-only");
+    } else {
+      sprintf_s(buf)("(int) %d..%d", id->min, id->max);
+    }
+    return buf;
+  }
+  if (id->type == ID_ALIAS) {
+    buf[0] = 0;
+    return buf;
+  }
+  switch (id->narg) {
+    case ARG_1INT: strcpy_s(buf, "(int)"); break;
+    case ARG_2INT: strcpy_s(buf, "(int, int)"); break;
+    case ARG_3INT: strcpy_s(buf, "(int, int, int)"); break;
+    case ARG_4INT: strcpy_s(buf, "(int, int, int, int)"); break;
+    case ARG_NONE: buf[0] = 0; break;
+    case ARG_1STR: strcpy_s(buf, "(str)"); break;
+    case ARG_2STR: strcpy_s(buf, "(str, str)"); break;
+    case ARG_3STR: strcpy_s(buf, "(str, str, str)"); break;
+    case ARG_5STR: strcpy_s(buf, "(str, str, str, str, str)"); break;
+    case ARG_DOWN: strcpy_s(buf, "(key)"); break;
+    case ARG_DWN1: strcpy_s(buf, "(key, str)"); break;
+    case ARG_1EXP: strcpy_s(buf, "(exp)"); break;
+    case ARG_2EXP: strcpy_s(buf, "(exp, exp)"); break;
+    case ARG_1EST: strcpy_s(buf, "(str)"); break;
+    case ARG_2EST: strcpy_s(buf, "(str, str)"); break;
+    case ARG_VARI: strcpy_s(buf, "(...)"); break;
+    default: buf[0] = 0; break;
+  }
+  return buf;
+}
+
+const char *getargsig_byname(const char *name) {
+  if (!idents) return NULL;
+  ident *id = idents->access((char *)name);
+  return id ? getargsig(id) : NULL;
+}
+
+const char *getdetail(const char *name) {
+  if (!idents) return NULL;
+  ident *id = idents->access((char *)name);
+  return id ? id->detail : NULL;
+}
 
 char *parseexp(char *&p, int right) // parse any nested set of () or []
 {
@@ -382,6 +427,7 @@ void writecfg() {
 };
 
 COMMAND(writecfg, ARG_NONE);
+static int __ad_writecfg = (addcommanddetail("writecfg", "Saves current configuration to config.cfg"), 0);
 
 void intset(char *name, int v) {
   string b;
@@ -438,37 +484,57 @@ void at(char *s, char *pos) {
 };
 
 COMMANDN(loop, loopa, ARG_2STR);
+static int __ad_loop = (addcommanddetail("loop", "Loops body expression a given number of times"), 0);
 COMMANDN(while, whilea, ARG_2STR);
+static int __ad_while = (addcommanddetail("while", "Repeatedly executes body while condition is true"), 0);
 COMMANDN(if, ifthen, ARG_3STR);
+static int __ad_if = (addcommanddetail("if", "Conditional execution with then/else branches"), 0);
 COMMAND(onrelease, ARG_DWN1);
+static int __ad_onrelease = (addcommanddetail("onrelease", "Executes body when key is released"), 0);
 COMMAND(exec, ARG_1STR);
+static int __ad_exec = (addcommanddetail("exec", "Executes a script file"), 0);
 COMMAND(concat, ARG_VARI);
+static int __ad_concat = (addcommanddetail("concat", "Concatenates arguments into a single string"), 0);
 COMMAND(concatword, ARG_VARI);
+static int __ad_concatword = (addcommanddetail("concatword", "Concatenates arguments removing spaces"), 0);
 COMMAND(at, ARG_2STR);
+static int __ad_at = (addcommanddetail("at", "Gets the nth word from a string"), 0);
 COMMAND(listlen, ARG_1EST);
+static int __ad_listlen = (addcommanddetail("listlen", "Returns number of words in a string"), 0);
 
 int add(int a, int b) { return a + b; };
 COMMANDN(+, add, ARG_2EXP);
+static int __ad_add = (addcommanddetail("+", "Adds two expressions"), 0);
 int mul(int a, int b) { return a * b; };
 COMMANDN(*, mul, ARG_2EXP);
+static int __ad_mul = (addcommanddetail("*", "Multiplies two expressions"), 0);
 int sub(int a, int b) { return a - b; };
 COMMANDN(-, sub, ARG_2EXP);
+static int __ad_sub = (addcommanddetail("-", "Subtracts two expressions"), 0);
 int divi(int a, int b) { return b ? a / b : 0; };
 COMMANDN(div, divi, ARG_2EXP);
+static int __ad_div = (addcommanddetail("div", "Divides two expressions"), 0);
 int mod(int a, int b) { return b ? a % b : 0; };
 COMMAND(mod, ARG_2EXP);
+static int __ad_mod = (addcommanddetail("mod", "Modulo of two expressions"), 0);
 int equal(int a, int b) { return (int)(a == b); };
 COMMANDN(=, equal, ARG_2EXP);
+static int __ad_equal = (addcommanddetail("=", "Checks if two expressions are equal"), 0);
 int lt(int a, int b) { return (int)(a < b); };
 COMMANDN(<, lt, ARG_2EXP);
+static int __ad_lt = (addcommanddetail("<", "Checks if first expression is less than second"), 0);
 int gt(int a, int b) { return (int)(a > b); };
 COMMANDN(>, gt, ARG_2EXP);
+static int __ad_gt = (addcommanddetail(">", "Checks if first expression is greater than second"), 0);
 
 int strcmpa(char *a, char *b) { return strcmp(a, b) == 0; };
 COMMANDN(strcmp, strcmpa, ARG_2EST);
+static int __ad_strcmp = (addcommanddetail("strcmp", "Compares two strings for equality"), 0);
 
 int rndn(int a) { return a > 0 ? rnd(a) : 0; };
 COMMANDN(rnd, rndn, ARG_1EXP);
+static int __ad_rnd = (addcommanddetail("rnd", "Returns random integer less than the given number"), 0);
 
 int explastmillis() { return lastmillis; };
 COMMANDN(millis, explastmillis, ARG_1EXP);
+static int __ad_millis = (addcommanddetail("millis", "Returns current time in milliseconds"), 0);

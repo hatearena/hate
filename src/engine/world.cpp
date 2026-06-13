@@ -57,6 +57,7 @@ void trigger(int tag, int type, bool savegame) {
 };
 
 COMMAND(trigger, ARG_2INT);
+static int __ad_trigger = (addcommanddetail("trigger", "Triggers a map event by tag"), 0);
 
 // main geometric mipmapping routine, recursively rebuild mipmaps within block
 // b. tries to produce cube out of 4 lower level mips as well as possible, sets
@@ -294,6 +295,7 @@ void clearents(char *name) {
 };
 
 COMMAND(clearents, ARG_1STR);
+static int __ad_clearents = (addcommanddetail("clearents", "Removes entities by type"), 0);
 
 void scalecomp(uchar &c, int intens) {
   int n = c * intens / 100;
@@ -322,6 +324,7 @@ void scalelights(int f, int intens) {
 };
 
 COMMAND(scalelights, ARG_2INT);
+static int __ad_scalelights = (addcommanddetail("scalelights", "Scales light intensity"), 0);
 
 int findentity(int type, int index) {
   for (int i = index; i < ents.length(); i++)
@@ -414,7 +417,12 @@ void mapenlarge() { empty_world(-1, false); };
 void newmap(int i) { empty_world(i, false); };
 
 COMMAND(mapenlarge, ARG_NONE);
+static int __ad_mapenlarge = (addcommanddetail("mapenlarge", "Enlarges the map"), 0);
 COMMAND(newmap, ARG_1INT);
+static int __ad_newmap = (addcommanddetail("newmap", "Creates a new empty map"), 0);
 COMMANDN(recalc, calclight, ARG_NONE);
+static int __ad_recalc = (addcommanddetail("recalc", "Recalculates map lighting"), 0);
 COMMAND(delent, ARG_NONE);
+static int __ad_delent = (addcommanddetail("delent", "Deletes the nearest entity"), 0);
 COMMAND(entproperty, ARG_2INT);
+static int __ad_entproperty = (addcommanddetail("entproperty", "Sets an entity property"), 0);

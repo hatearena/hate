@@ -333,6 +333,8 @@ void loadsky(char *basename) {
 };
 
 COMMAND(loadsky, ARG_1STR);
+static int __ad_loadsky =
+    (addcommanddetail("loadsky", "Loads a skybox texture set"), 0);
 
 float cursordepth = 0.9f;
 GLint viewport[4];
@@ -393,6 +395,8 @@ void invertperspective() {
 };
 
 VARP(crosshairsize, 0, 15, 50);
+static int __ad_crosshairsize =
+    (addcommanddetail("crosshairsize", "Crosshair size in pixels"), 0);
 
 int dblend = 0;
 int lastdamage = 0;
@@ -407,12 +411,24 @@ void damageblend(int n) {
 };
 
 VARP(show_stats, 0, 0, 1);
+static int __ad_show_stats =
+    (addcommanddetail("show_stats", "Toggles performance stats display"), 0);
 VARP(crosshairfx, 0, 1, 1);
+static int __ad_crosshairfx =
+    (addcommanddetail("crosshairfx", "Toggles crosshair dynamic effects"), 0);
 
 VARP(crosshair_r, 0, 255, 255);
+static int __ad_crosshair_r =
+    (addcommanddetail("crosshair_r", "Crosshair red color component"), 0);
 VARP(crosshair_g, 0, 255, 255);
+static int __ad_crosshair_g =
+    (addcommanddetail("crosshair_g", "Crosshair green color component"), 0);
 VARP(crosshair_b, 0, 255, 255);
+static int __ad_crosshair_b =
+    (addcommanddetail("crosshair_b", "Crosshair blue color component"), 0);
 VARP(crosshair_a, 0, 255, 255);
+static int __ad_crosshair_a =
+    (addcommanddetail("crosshair_a", "Crosshair alpha transparency"), 0);
 void crosshair(int r, int g, int b, int a) {
   setvar("crosshair_r", r);
   setvar("crosshair_g", g);
@@ -420,6 +436,8 @@ void crosshair(int r, int g, int b, int a) {
   setvar("crosshair_a", a);
 };
 COMMAND(crosshair, ARG_4INT);
+static int __ad_crosshair =
+    (addcommanddetail("crosshair", "Sets crosshair color (r, g, b, a)"), 0);
 
 void roundedbox(int x1, int y1, int x2, int y2, int r) {
   int segs = 6;
@@ -588,6 +606,109 @@ void gl_drawhud(int w, int h, int curfps, int nquads, int curvert,
       glEnd();
       glEnable(GL_TEXTURE_2D);
     };
+
+    if (saycommandon) {
+      int ns = get_numsuggestions();
+      int sel = get_sel_suggestion();
+
+      const char *help_name = NULL;
+      if (ns > 0 && sel >= 0) {
+        help_name = get_suggestion(sel);
+      } else {
+        help_name = get_command_word();
+      }
+
+      if (ns > 0) {
+        int visible =
+            ns > MAX_VISIBLE_SUGGESTIONS ? MAX_VISIBLE_SUGGESTIONS : ns;
+        int vis_start = 0;
+        if (sel >= MAX_VISIBLE_SUGGESTIONS)
+          vis_start = sel - MAX_VISIBLE_SUGGESTIONS + 1;
+
+        int max_w = 0;
+        loopi(visible) {
+          string sugline;
+          sprintf_s(sugline)("/%s", get_suggestion(vis_start + i));
+          int w = text_width(sugline);
+          if (w > max_w)
+            max_w = w;
+        }
+        max_w += 20;
+
+        int item_h = FONTH + 8;
+        int total_h = visible * item_h + 8;
+        int sx = 20;
+        int sy = 1388 - total_h;
+
+        glDisable(GL_TEXTURE_2D);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glColor4ub(0, 0, 0, showbg);
+        roundedbox(sx - 8, sy, sx + max_w + 8, sy + total_h, 6);
+
+        loopi(visible) {
+          int item_y = sy + 4 + i * item_h;
+          if (vis_start + i == sel) {
+            glColor4ub(60, 120, 200, showbg);
+            roundedbox(sx - 4, item_y, sx + max_w + 4, item_y + item_h, 4);
+          }
+          glEnable(GL_TEXTURE_2D);
+          draw_textf("/%s", sx, item_y + 4, 2, get_suggestion(vis_start + i));
+          glDisable(GL_TEXTURE_2D);
+        }
+        glEnable(GL_TEXTURE_2D);
+
+        if (help_name) {
+          const char *sig = getargsig_byname(help_name);
+          const char *detail = getdetail(help_name);
+          string help_line;
+          help_line[0] = 0;
+          if (detail) {
+            if (sig && sig[0])
+              sprintf_s(help_line)("/%s %s  %s", help_name, sig, detail);
+            else
+              sprintf_s(help_line)("/%s  %s", help_name, detail);
+          } else if (sig && sig[0]) {
+            sprintf_s(help_line)("/%s %s", help_name, sig);
+          }
+          if (help_line[0]) {
+            int help_y = sy - FONTH - 12;
+            if (help_y < 0)
+              help_y = 0;
+            int help_w = text_width(help_line) + 16;
+            glDisable(GL_TEXTURE_2D);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            glColor4ub(0, 0, 0, showbg);
+            roundedbox(12, help_y, 12 + help_w, help_y + FONTH + 8, 6);
+            glEnable(GL_TEXTURE_2D);
+            draw_text(help_line, 20, help_y + 4, 2, 255);
+          }
+        }
+      } else if (help_name) {
+        const char *sig = getargsig_byname(help_name);
+        const char *detail = getdetail(help_name);
+        if ((sig && sig[0]) || detail) {
+          string help_line;
+          if (detail) {
+            if (sig && sig[0])
+              sprintf_s(help_line)("/%s %s  %s", help_name, sig, detail);
+            else
+              sprintf_s(help_line)("/%s  %s", help_name, detail);
+          } else {
+            sprintf_s(help_line)("/%s %s", help_name, sig);
+          }
+          int help_y = 1388 - FONTH - 12;
+          if (help_y < 0)
+            help_y = 0;
+          int help_w = text_width(help_line) + 16;
+          glDisable(GL_TEXTURE_2D);
+          glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+          glColor4ub(0, 0, 0, showbg);
+          roundedbox(12, help_y, 12 + help_w, help_y + FONTH + 8, 6);
+          glEnable(GL_TEXTURE_2D);
+          draw_text(help_line, 20, help_y + 4, 2, 255);
+        }
+      }
+    }
   }
 
   renderscores();

@@ -36,6 +36,7 @@ void quit() {
 
 static bool __dummy_quit =
     addcommand((char *)"Exit", (void (*)())quit, ARG_NONE);
+static int __ad_Exit = (addcommanddetail("Exit", "Quits the game"), 0);
 
 void fatal(const char *s, const char *o) {
   sprintf_sd(msg)("%s%s (%s)\n", s, o, SDL_GetError());
@@ -53,7 +54,9 @@ void *alloc(int s) {
 
 void setresolution();
 VARFP(scr_w, 320, 1366, 7680, setresolution());
+static int __ad_scr_w = (addcommanddetail("scr_w", "Screen width in pixels"), 0);
 VARFP(scr_h, 240, 768, 4320, setresolution());
+static int __ad_scr_h = (addcommanddetail("scr_h", "Screen height in pixels"), 0);
 void setresolution() {
   if (window) {
     SDL_SetWindowSize(window, scr_w, scr_h);
@@ -65,6 +68,7 @@ VARFP(fullscreen, 0, 0, 1, {
   conoutf("Restart the game for fullscreen change to take effect");
   writecfg();
 });
+static int __ad_fullscreen = (addcommanddetail("fullscreen", "Toggles fullscreen mode"), 0);
 
 void screenshot() {
   SDL_Surface *image;
@@ -113,6 +117,7 @@ void screenshot() {
   };
 };
 COMMAND(screenshot, ARG_NONE);
+static int __ad_screenshot = (addcommanddetail("screenshot", "Takes a screenshot"), 0);
 
 void var_gamespeed();
 static int gamespeed = variable((char *)"gamespeed", 10, 100, 1000, &gamespeed,

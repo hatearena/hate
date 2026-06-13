@@ -3,7 +3,9 @@
 #define USE_MIXER
 
 VARP(soundvol, 0, 255, 255);
+static int __ad_soundvol = (addcommanddetail("soundvol", "Sound effects volume"), 0);
 VARP(musicvol, 0, 128, 255);
+static int __ad_musicvol = (addcommanddetail("musicvol", "Music volume"), 0);
 bool nosound = false;
 
 #define MAXCHAN 32
@@ -18,6 +20,7 @@ int soundchan[MAXCHAN];
 int chanprio[MAXCHAN];
 vector<int> soundmax;
 VAR(maxsamesound, 0, 0, 8);
+static int __ad_maxsamesound = (addcommanddetail("maxsamesound", "Max simultaneous instances of same sound"), 0);
 
 static bool isgunshot(int n) {
   switch (n) {
@@ -69,6 +72,7 @@ void stopsound() {
 };
 
 VAR(soundbufferlen, 128, 1024, 4096);
+static int __ad_soundbufferlen = (addcommanddetail("soundbufferlen", "Sound buffer length"), 0);
 
 void initsound() {
   memset(soundlocs, 0, sizeof(soundloc) * MAXCHAN);
@@ -124,6 +128,7 @@ void music(char *name) {
 };
 
 COMMAND(music, ARG_1STR);
+static int __ad_music = (addcommanddetail("music", "Plays a music file"), 0);
 
 #ifdef USE_MIXER
 vector<Mix_Chunk *> samples;
@@ -147,8 +152,10 @@ void setsoundmax(int n, int max) {
 };
 
 COMMAND(setsoundmax, ARG_2INT);
+static int __ad_setsoundmax = (addcommanddetail("setsoundmax", "Sets maximum concurrent sounds"), 0);
 
 COMMAND(registersound, ARG_1EST);
+static int __ad_registersound = (addcommanddetail("registersound", "Registers a sound effect"), 0);
 
 void cleansound() {
   if (nosound)
@@ -162,6 +169,7 @@ void cleansound() {
 };
 
 VAR(stereo, 0, 1, 1);
+static int __ad_stereo = (addcommanddetail("stereo", "Toggles stereo sound"), 0);
 
 void updatechanvol(int chan, vec *loc) {
   int vol = soundvol, pan = 255 / 2;
@@ -466,3 +474,4 @@ void preloadweaponsounds() {
 
 void sound(int n) { playsound(n, NULL); };
 COMMAND(sound, ARG_1INT);
+static int __ad_sound = (addcommanddetail("sound", "Plays a sound by ID"), 0);

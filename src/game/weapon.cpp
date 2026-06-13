@@ -17,6 +17,7 @@ int gunswitchtime = 0;
 int gunidletime = 0;
 
 VARP(autoswitch, 0, 1, 1);
+static int __ad_autoswitch = (addcommanddetail("autoswitch", "Toggles automatic weapon switching"), 0);
 
 guninfo guns[NUMGUNS] = {
     {S_CSAW, 150, 20, 0, 0, 3, "chainsaw"},
@@ -73,6 +74,7 @@ void weapon(char *a1, char *a2, char *a3) {
 };
 
 COMMAND(weapon, ARG_3STR);
+static int __ad_weapon = (addcommanddetail("weapon", "Selects a weapon by name"), 0);
 
 void nextweapon() {
   int s = player1->gunselect;

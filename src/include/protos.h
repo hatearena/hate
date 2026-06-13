@@ -15,6 +15,9 @@ extern void complete(char *s);
 extern void alias(char *name, char *action);
 extern char *getalias(char *name);
 extern void writecfg();
+extern void addcommanddetail(const char *name, const char *detail);
+extern const char *getargsig_byname(const char *name);
+extern const char *getdetail(const char *name);
 
 // console
 extern void keypress(int code, bool isdown, bool textinput, char text[32]);
@@ -22,6 +25,10 @@ extern void renderconsole();
 extern void conoutf(const char *s, ...);
 extern char *getcurcommand();
 extern void writebinds(FILE *f);
+extern int get_numsuggestions();
+extern const char *get_suggestion(int i);
+extern int get_sel_suggestion();
+extern const char *get_command_word();
 
 // menus
 extern bool rendermenu();

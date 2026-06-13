@@ -33,6 +33,7 @@ particle particles[MAXPARTICLES], *parlist = NULL, *parempty = NULL;
 bool parinit = false;
 
 VARP(maxparticles, 100, 2000, MAXPARTICLES - 500);
+static int __ad_maxparticles = (addcommanddetail("maxparticles", "Maximum number of particles"), 0);
 
 void newparticlecol(vec &o, vec &d, int fade, int type, uchar r, uchar g,
                     uchar b) {
@@ -67,7 +68,9 @@ void newparticle(vec &o, vec &d, int fade, int type) {
 };
 
 VAR(demotracking, 0, 0, 1);
+static int __ad_demotracking = (addcommanddetail("demotracking", "Toggles demo particle tracking"), 0);
 VARP(particlesize, 20, 100, 500);
+static int __ad_particlesize = (addcommanddetail("particlesize", "Particle size scale"), 0);
 
 vec right, up;
 

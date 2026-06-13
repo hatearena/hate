@@ -31,8 +31,11 @@ int lasttype = 0, lasttex = 0;
 sqr rtex;
 
 VAR(editing, 0, 0, 1);
+static int __ad_editing = (addcommanddetail("editing", "Current edit mode state"), 0);
 VAR(noclip, 0, 0, 1);
+static int __ad_noclip = (addcommanddetail("noclip", "Noclip mode (fly through walls)"), 0);
 VAR(screenshotmode, 0, 0, 1);
+static int __ad_screenshotmode = (addcommanddetail("screenshotmode", "Screenshot mode state"), 0);
 
 void toggleedit() {
   if (player1->state == CS_DEAD)
@@ -81,8 +84,10 @@ void togglescreenshotmode() {
 };
 
 COMMANDN(screenshotmodetoggle, togglescreenshotmode, ARG_NONE);
+static int __ad_screenshotmodetoggle = (addcommanddetail("screenshotmodetoggle", "Toggles screenshot mode"), 0);
 
 COMMANDN(edittoggle, toggleedit, ARG_NONE);
+static int __ad_edittoggle = (addcommanddetail("edittoggle", "Toggles edit mode"), 0);
 
 bool allowedittoggle() {
   if (multiplayer())
@@ -145,6 +150,7 @@ void makesel() {
 };
 
 VAR(flrceil, 0, 0, 2);
+static int __ad_flrceil = (addcommanddetail("flrceil", "Floor/ceiling editing selection"), 0);
 
 float sheight(sqr *s, sqr *t, float z) {
   return !flrceil
@@ -235,6 +241,7 @@ void cursorupdate() {
 
 vector<block *> undos;
 VARP(undomegs, 0, 1, 10);
+static int __ad_undomegs = (addcommanddetail("undomegs", "Number of megabytes for undo history"), 0);
 
 void pruneundos(int maxremain) {
   int t = 0;
@@ -331,7 +338,9 @@ void eyedropperpaste() {
 };
 
 COMMAND(eyedropper, ARG_NONE);
+static int __ad_eyedropper = (addcommanddetail("eyedropper", "Picks a texture from the map"), 0);
 COMMAND(eyedropperpaste, ARG_NONE);
+static int __ad_eyedropperpaste = (addcommanddetail("eyedropperpaste", "Pastes the picked texture"), 0);
 
 void editdrag(bool isdown) {
   if (eyedroppermode && isdown) {
@@ -375,6 +384,7 @@ void editheight(int flr, int amount) {
 };
 
 COMMAND(editheight, ARG_2INT);
+static int __ad_editheight = (addcommanddetail("editheight", "Changes floor or ceiling height"), 0);
 
 void edittexxy(int type, int t, block &sel) {
   loopselxy(switch (type) {
@@ -455,8 +465,11 @@ void solids(int t) { edittype(t == 0 ? SPACE : SOLID); };
 void corner() { edittype(CORNER); };
 
 COMMAND(heightfield, ARG_1INT);
+static int __ad_heightfield = (addcommanddetail("heightfield", "Creates a heightfield"), 0);
 COMMANDN(solid, solids, ARG_1INT);
+static int __ad_solid = (addcommanddetail("solid", "Sets cube type to solid"), 0);
 COMMAND(corner, ARG_NONE);
+static int __ad_corner = (addcommanddetail("corner", "Sets cube type to corner"), 0);
 
 void editequalisexy(bool isfloor, block &sel) {
   int low = 127, hi = -128;
@@ -484,6 +497,7 @@ void equalize(int flr) {
 };
 
 COMMAND(equalize, ARG_1INT);
+static int __ad_equalize = (addcommanddetail("equalize", "Equalizes heights of selected cubes"), 0);
 
 void setvdeltaxy(int delta, block &sel) {
   loopselxy(s->vdelta = max(s->vdelta + delta, 0));
@@ -566,6 +580,7 @@ VARF(
         return;
       loopi(mipsize) world[i].r = world[i].g = world[i].b = 176;
     } else calclight(););
+static int __ad_fullbright = (addcommanddetail("fullbright", "Disables map lighting when 1"), 0);
 
 void edittag(int tag) {
   EDITSELMP;
@@ -615,17 +630,32 @@ void smapmodel(char *name) {
 };
 
 COMMANDN(select, selectpos, ARG_4INT);
+static int __ad_select = (addcommanddetail("select", "Selects a region for editing"), 0);
 COMMAND(edittag, ARG_1INT);
+static int __ad_edittag = (addcommanddetail("edittag", "Sets entity tag value"), 0);
 COMMAND(replace, ARG_NONE);
+static int __ad_replace = (addcommanddetail("replace", "Replaces selected cubes with new type"), 0);
 COMMAND(archvertex, ARG_3INT);
+static int __ad_archvertex = (addcommanddetail("archvertex", "Creates a vertex arch"), 0);
 COMMAND(arch, ARG_2INT);
+static int __ad_arch = (addcommanddetail("arch", "Creates an arch"), 0);
 COMMAND(slope, ARG_2INT);
+static int __ad_slope = (addcommanddetail("slope", "Creates a slope"), 0);
 COMMANDN(vdelta, setvdelta, ARG_1INT);
+static int __ad_vdelta = (addcommanddetail("vdelta", "Sets vertex delta value"), 0);
 COMMANDN(undo, editundo, ARG_NONE);
+static int __ad_undo = (addcommanddetail("undo", "Undoes the last edit"), 0);
 COMMAND(copy, ARG_NONE);
+static int __ad_copy = (addcommanddetail("copy", "Copies selected region"), 0);
 COMMAND(paste, ARG_NONE);
+static int __ad_paste = (addcommanddetail("paste", "Pastes copied region"), 0);
 COMMAND(edittex, ARG_2INT);
+static int __ad_edittex = (addcommanddetail("edittex", "Sets texture for editing"), 0);
 COMMANDN(editdrag, editdrag, ARG_DOWN);
+static int __ad_editdrag = (addcommanddetail("editdrag", "Drags selection while holding key"), 0);
 COMMAND(newent, ARG_5STR);
+static int __ad_newent = (addcommanddetail("newent", "Creates a new entity"), 0);
 COMMANDN(smapmodel, smapmodel, ARG_1STR);
+static int __ad_smapmodel = (addcommanddetail("smapmodel", "Selects a map model"), 0);
 COMMAND(perlin, ARG_3INT);
+static int __ad_perlin = (addcommanddetail("perlin", "Generates Perlin noise terrain"), 0);

@@ -9,6 +9,7 @@ vector<cline> conlines;
 
 const int WORDWRAP = 256;
 VARP(msglimit, 1, 8, 50);
+static int __ad_msglimit = (addcommanddetail("msglimit", "Number of visible console messages"), 0);
 int conskip = 0;
 
 bool saycommandon = false;
@@ -24,6 +25,7 @@ void setconskip(int n) {
 };
 
 COMMANDN(conskip, setconskip, ARG_1INT);
+static int __ad_conskip = (addcommanddetail("conskip", "Scrolls console messages"), 0);
 
 void conline(const char *sf, bool highlight) // add a line to the console buffer
 {
@@ -119,6 +121,7 @@ void keymap(char *code, char *key) {
 };
 
 COMMAND(keymap, ARG_2STR);
+static int __ad_keymap = (addcommanddetail("keymap", "Maps a key code to a name"), 0);
 
 void bindkey(char *key, char *action) {
   for (char *x = key; *x; x++)
@@ -131,6 +134,7 @@ void bindkey(char *key, char *action) {
 };
 
 COMMANDN(bind, bindkey, ARG_2STR);
+static int __ad_bind = (addcommanddetail("bind", "Binds an action to a key"), 0);
 
 bool dont_query_next_key = false;
 
@@ -154,7 +158,9 @@ void saycommand(char *init) // turns input to the command line on or off
 void mapmsg(char *s) { strn0cpy(hdr.maptitle, s, 128); };
 
 COMMAND(saycommand, ARG_VARI);
+static int __ad_saycommand = (addcommanddetail("saycommand", "Opens the command input console"), 0);
 COMMAND(mapmsg, ARG_1STR);
+static int __ad_mapmsg = (addcommanddetail("mapmsg", "Sets the map description message"), 0);
 
 #if 0
 #ifndef WIN32
@@ -199,6 +205,58 @@ void pasteconsole()
 cvector vhistory;
 int histpos = 0;
 
+static char *suggestions[MAX_SUGGESTIONS];
+static int numsuggestions = 0;
+static int sel_suggestion = -1;
+
+int get_numsuggestions() { return numsuggestions; }
+const char *get_suggestion(int i) { return (i >= 0 && i < numsuggestions) ? suggestions[i] : NULL; }
+int get_sel_suggestion() { return sel_suggestion; }
+
+static void clear_suggestions() {
+  numsuggestions = 0;
+  sel_suggestion = -1;
+}
+
+static void build_suggestions() {
+  clear_suggestions();
+  if (!saycommandon || commandbuf[0] != '/' || !commandbuf[1]) return;
+
+  const char *prefix = commandbuf + 1;
+  int plen = strlen(prefix);
+  if (plen == 0) return;
+
+  enumerate(idents, ident *, id,
+    if (strncmp(id->name, prefix, plen) == 0) {
+      if (numsuggestions < MAX_SUGGESTIONS) {
+        suggestions[numsuggestions++] = id->name;
+      }
+    }
+  );
+
+  if (numsuggestions > 1) {
+    loopi(numsuggestions - 1) loopj(numsuggestions - i - 1) {
+      if (strcmp(suggestions[j], suggestions[j + 1]) > 0) {
+        char *tmp = suggestions[j];
+        suggestions[j] = suggestions[j + 1];
+        suggestions[j + 1] = tmp;
+      }
+    }
+  }
+
+  if (numsuggestions > 0) sel_suggestion = 0;
+}
+
+const char *get_command_word() {
+  static string word;
+  if (!saycommandon || commandbuf[0] != '/') return NULL;
+  const char *p = commandbuf + 1;
+  int len = strcspn(p, " \t\r\n\0");
+  if (len == 0) return NULL;
+  strn0cpy(word, p, len + 1);
+  return word;
+}
+
 void history(int n) {
   static bool rec = false;
   if (!rec && n >= 0 && n < vhistory.length()) {
@@ -209,6 +267,7 @@ void history(int n) {
 };
 
 COMMAND(history, ARG_1INT);
+static int __ad_history = (addcommanddetail("history", "Shows command history"), 0);
 
 extern bool menutextinput;
 extern char menutextbuf[];
@@ -219,7 +278,6 @@ void keypress(int code, bool isdown, bool textinput, char text[32]) {
     if (dont_query_next_key)
       dont_query_next_key = false;
     else {
-      resetcomplete();
       int len = strlen(commandbuf);
       if (len + 1 < _MAXDEFSTR) {
         memmove(commandbuf + commandpos + 1, commandbuf + commandpos,
@@ -227,6 +285,7 @@ void keypress(int code, bool isdown, bool textinput, char text[32]) {
         commandbuf[commandpos] = text[0];
         commandpos++;
       }
+      build_suggestions();
       return;
     }
   }
@@ -282,7 +341,7 @@ void keypress(int code, bool isdown, bool textinput, char text[32]) {
                   strlen(commandbuf) - commandpos + 1);
           commandpos--;
         }
-        resetcomplete();
+        build_suggestions();
         break;
       };
 
@@ -291,7 +350,7 @@ void keypress(int code, bool isdown, bool textinput, char text[32]) {
           memmove(commandbuf + commandpos, commandbuf + commandpos + 1,
                   strlen(commandbuf) - commandpos);
         }
-        resetcomplete();
+        build_suggestions();
         break;
       };
 
@@ -314,20 +373,35 @@ void keypress(int code, bool isdown, bool textinput, char text[32]) {
         break;
 
       case SDLK_UP:
-        if (histpos)
+        if (numsuggestions > 0) {
+          sel_suggestion--;
+          if (sel_suggestion < 0) sel_suggestion = numsuggestions - 1;
+        } else if (histpos) {
           strcpy_s(commandbuf, vhistory[--histpos]);
-        commandpos = strlen(commandbuf);
+          commandpos = strlen(commandbuf);
+        }
         break;
 
       case SDLK_DOWN:
-        if (histpos < vhistory.length())
+        if (numsuggestions > 0) {
+          sel_suggestion++;
+          if (sel_suggestion >= numsuggestions) sel_suggestion = 0;
+        } else if (histpos < vhistory.length()) {
           strcpy_s(commandbuf, vhistory[histpos++]);
-        commandpos = strlen(commandbuf);
+          commandpos = strlen(commandbuf);
+        }
         break;
 
       case SDLK_TAB:
-        complete(commandbuf);
-        commandpos = strlen(commandbuf);
+        if (numsuggestions > 0 && sel_suggestion >= 0) {
+          strcpy_s(commandbuf, "/");
+          strcat_s(commandbuf, suggestions[sel_suggestion]);
+          commandpos = strlen(commandbuf);
+          clear_suggestions();
+        } else {
+          complete(commandbuf);
+          commandpos = strlen(commandbuf);
+        }
         break;
 
 #if 0
@@ -335,14 +409,15 @@ void keypress(int code, bool isdown, bool textinput, char text[32]) {
 					if(SDL_GetModState()&(KMOD_LCTRL|KMOD_RCTRL)) { pasteconsole(); return; };
 #endif
       default:
-        resetcomplete();
+        build_suggestions();
         break;
       };
     } else {
       if (code == SDLK_RETURN) {
+        clear_suggestions();
         if (commandbuf[0]) {
           if (vhistory.empty() || strcmp(vhistory.last(), commandbuf)) {
-            vhistory.add(newstring(commandbuf)); // cap this?
+            vhistory.add(newstring(commandbuf));
           };
           histpos = vhistory.length();
           if (commandbuf[0] == '/')
@@ -352,6 +427,7 @@ void keypress(int code, bool isdown, bool textinput, char text[32]) {
         };
         saycommand(NULL);
       } else if (code == SDLK_ESCAPE) {
+        clear_suggestions();
         saycommand(NULL);
       };
     };

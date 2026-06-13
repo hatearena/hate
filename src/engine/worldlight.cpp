@@ -3,7 +3,9 @@
 extern bool hasoverbright;
 
 VAR(lightscale, 1, 4, 100);
+static int __ad_lightscale = (addcommanddetail("lightscale", "Lighting calculation scale"), 0);
 VARP(ambient, 0, 3, 255);
+static int __ad_ambient = (addcommanddetail("ambient", "Ambient light level"), 0);
 
 void lightray(float bx, float by,
               persistent_entity &light) // done in realtime, needs to be fast
@@ -168,6 +170,7 @@ void calclight() {
 };
 
 VARP(dynlight, 0, 16, 32);
+static int __ad_dynlight = (addcommanddetail("dynlight", "Dynamic light update rate"), 0);
 
 vector<block *> dlights;
 

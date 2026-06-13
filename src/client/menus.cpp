@@ -7,19 +7,6 @@ extern int teamscore_split;
 static int timelimitreg =
     variable("timelimit", 0, 10, 60, &timelimit, NULL, true);
 
-enum { ID_VAR, ID_COMMAND, ID_ALIAS };
-struct ident {
-  int type;
-  char *name;
-  int min, max;
-  int *storage;
-  void (*fun)();
-  int narg;
-  char *action;
-  bool persist;
-};
-extern hashtable<ident> *idents;
-
 struct mitem {
   char *text, *action;
   bool checkbox;
@@ -252,7 +239,8 @@ bool rendermenu() {
 
     loopi(min(servers.length(), MAXROWS)) {
       serverinfo &si = servers[i];
-      if (si.ping == 9999) continue;
+      if (si.ping == 9999)
+        continue;
       servermap[servercount++] = i;
       sprintf_s(rows_text[ndisp][0])("%d", si.ping);
       sprintf_s(rows_text[ndisp][1])("%d", si.numplayers);
@@ -813,13 +801,29 @@ void showentities() {
 };
 
 COMMAND(showmapmodels, ARG_NONE);
+static int __ad_showmapmodels =
+    (addcommanddetail("showmapmodels", "Shows the map model list"), 0);
 COMMAND(showentities, ARG_NONE);
+static int __ad_showentities =
+    (addcommanddetail("showentities", "Shows the entity list"), 0);
 COMMAND(menuitem, ARG_2STR);
+static int __ad_menuitem =
+    (addcommanddetail("menuitem", "Adds a menu item"), 0);
 COMMANDN(menuitem_checkbox, menuitem_checkbox, ARG_2STR);
+static int __ad_menuitem_checkbox =
+    (addcommanddetail("menuitem_checkbox", "Adds a checkbox menu item"), 0);
 COMMANDN(menuitem_slider, menuitem_slider, ARG_2STR);
+static int __ad_menuitem_slider =
+    (addcommanddetail("menuitem_slider", "Adds a slider menu item"), 0);
 COMMAND(showmenu, ARG_1STR);
+static int __ad_showmenu =
+    (addcommanddetail("showmenu", "Opens a menu by name"), 0);
 COMMAND(newmenu, ARG_1STR);
+static int __ad_newmenu =
+    (addcommanddetail("newmenu", "Creates a new menu"), 0);
 COMMANDN(menuitem_text, menuitem_text, ARG_2STR);
+static int __ad_menuitem_text =
+    (addcommanddetail("menuitem_text", "Adds a text input menu item"), 0);
 
 bool menukey(int code, bool isdown) {
   if (vmenu <= 0)

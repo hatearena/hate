@@ -7,7 +7,9 @@ dvector bots;
 int numbots = 0;
 
 VAR(botdifficulty, -1, 4, 4);
+static int __ad_botdifficulty = (addcommanddetail("botdifficulty", "Bot AI difficulty level"), 0);
 VAR(botamount, 1, 4, 16);
+static int __ad_botamount = (addcommanddetail("botamount", "Number of bots to spawn"), 0);
 
 static int botspawncycle = -1;
 
@@ -572,4 +574,6 @@ void addbotcmd(int n) {
 void addbotspawn() { addbotcmd(botamount); }
 
 COMMANDN(addbot, addbotcmd, ARG_1INT);
+static int __ad_addbot = (addcommanddetail("addbot", "Adds a bot to the game"), 0);
 COMMANDN(addbotspawn, addbotspawn, ARG_NONE);
+static int __ad_addbotspawn = (addcommanddetail("addbotspawn", "Spawns bot at current position"), 0);

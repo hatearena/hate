@@ -221,4 +221,6 @@ void getmap() {
 }
 
 COMMAND(sendmap, ARG_1STR);
+static int __ad_sendmap = (addcommanddetail("sendmap", "Sends the current map to clients"), 0);
 COMMAND(getmap, ARG_NONE);
+static int __ad_getmap = (addcommanddetail("getmap", "Requests the current map from server"), 0);

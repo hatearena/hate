@@ -193,6 +193,7 @@ bool collide(dynent *d, bool spawn, float drop, float rise) {
 float rad(float x) { return x * 3.14159f / 180; };
 
 VARP(maxroll, 0, 3, 20);
+static int __ad_maxroll = (addcommanddetail("maxroll", "Maximum player roll angle"), 0);
 
 int physicsfraction = 0, physicsrepeat = 0;
 const int MINFRAMETIME = 20; // physics always simulated at 50fps or better

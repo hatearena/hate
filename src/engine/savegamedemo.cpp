@@ -243,6 +243,7 @@ void stopreset() {
 };
 
 VAR(demoplaybackspeed, 10, 100, 1000);
+static int __ad_demoplaybackspeed = (addcommanddetail("demoplaybackspeed", "Demo playback speed percent"), 0);
 int scaletime(int t) {
   return (int)(t * (100.0f / demoplaybackspeed)) + starttime;
 };
@@ -267,6 +268,7 @@ void startdemo() {
 };
 
 VAR(demodelaymsec, 0, 120, 500);
+static int __ad_demodelaymsec = (addcommanddetail("demodelaymsec", "Demo playback delay in ms"), 0);
 
 void catmulrom(vec &z, vec &a, vec &b, vec &c, float s,
                vec &dest) // spline interpolation
@@ -402,8 +404,13 @@ void stopn() {
 };
 
 COMMAND(record, ARG_1STR);
+static int __ad_record = (addcommanddetail("record", "Records a demo to a file"), 0);
 COMMAND(demo, ARG_1STR);
+static int __ad_demo = (addcommanddetail("demo", "Plays back a demo file"), 0);
 COMMANDN(stop, stopn, ARG_NONE);
+static int __ad_stop = (addcommanddetail("stop", "Stops demo playback or recording"), 0);
 
 COMMAND(savegame, ARG_1STR);
+static int __ad_savegame = (addcommanddetail("savegame", "Saves the current game"), 0);
 COMMAND(loadgame, ARG_1STR);
+static int __ad_loadgame = (addcommanddetail("loadgame", "Loads a saved game"), 0);

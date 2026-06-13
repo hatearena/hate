@@ -279,8 +279,11 @@ void updatefrommaster() {
 };
 
 COMMAND(addserver, ARG_1STR);
+static int __ad_addserver = (addcommanddetail("addserver", "Adds a server to the list"), 0);
 COMMAND(servermenu, ARG_NONE);
+static int __ad_servermenu = (addcommanddetail("servermenu", "Opens the server browser menu"), 0);
 COMMAND(updatefrommaster, ARG_NONE);
+static int __ad_updatefrommaster = (addcommanddetail("updatefrommaster", "Updates server list from master"), 0);
 
 void writeservercfg() {
   FILE *f = fopen("servers.cfg", "w");

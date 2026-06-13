@@ -300,7 +300,9 @@ mapmodelinfo &getmminfo(int i) {
 int nummapmodels() { return mapmodels.length(); };
 
 COMMAND(mapmodel, ARG_5STR);
+static int __ad_mapmodel = (addcommanddetail("mapmodel", "Registers a map model"), 0);
 COMMAND(mapmodelreset, ARG_NONE);
+static int __ad_mapmodelreset = (addcommanddetail("mapmodelreset", "Resets all map models"), 0);
 
 void preloadhudmodels() {
   char *names[] = {"hudguns/hate_csaw",    "hudguns/hate_shotg",

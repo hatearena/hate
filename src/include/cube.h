@@ -1,6 +1,6 @@
 #include "tools.h"
 
-enum // block types, order matters!
+enum // block types, order matters here.
 {
   SOLID = 0, // entirely solid cube [only specifies wtex]
   CORNER,    // half full corner of a wall
@@ -12,14 +12,14 @@ enum // block types, order matters!
 };
 
 struct sqr {
-  uchar type;             // one of the above
-  char floor, ceil;       // height, in cubes
+  uchar type;              // one of the above
+  char floor, ceil;        // height, in cubes
   ushort wtex, ftex, ctex; // wall/floor/ceil texture ids
-  uchar r, g, b;          // light value at upper left vertex
-  uchar vdelta;           // vertex delta, used for heightfield cubes
+  uchar r, g, b;           // light value at upper left vertex
+  uchar vdelta;            // vertex delta, used for heightfield cubes
   char defer;    // used in mipmapping, when true this cube is not a perfect mip
   char occluded; // true when occluded
-  ushort utex;    // upper wall tex id
+  ushort utex;   // upper wall tex id
   uchar tag;     // used by triggers
 };
 
@@ -308,8 +308,7 @@ enum {
   S_SPAWN = 61,
 };
 
-// vertex array format
-
+/// Vertex array format
 struct vertex {
   float u, v, x, y, z;
   uchar r, g, b, a;
@@ -319,7 +318,7 @@ typedef vector<dynent *> dvector;
 typedef vector<char *> cvector;
 typedef vector<int> ivector;
 
-// globals ooh naughty
+// Globals.
 
 extern sqr *world,
     *wmip[];       // map data, the mips are sequential 2D arrays in memory
@@ -490,3 +489,22 @@ enum // function signatures for script functions, see command.cpp
 #include <zlib.h>
 
 #include "protos.h" // external function decls
+
+enum { ID_VAR, ID_COMMAND, ID_ALIAS };
+
+struct ident {
+  int type;      // One of ID_* above
+  char *name;    // The identifier name
+  int min, max;  // ID_VAR
+  int *storage;  // ID_VAR
+  void (*fun)(); // ID_VAR, ID_COMMAND
+  int narg;      // ID_VAR, ID_COMMAND
+  char *action;  // ID_ALIAS
+  bool persist;  // Persist or not
+  char *detail;  // ID_VAR, ID_COMMAND: help/description text
+};
+
+extern hashtable<ident> *idents;
+
+#define MAX_SUGGESTIONS 64
+#define MAX_VISIBLE_SUGGESTIONS 10

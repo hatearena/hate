@@ -4,6 +4,7 @@ dvector monsters;
 int nextmonster, spawnremain, numkilled, monstertotal, mtimestart;
 
 VARF(skill, 1, 3, 10, conoutf("skill is now %d", skill));
+static int __ad_skill = (addcommanddetail("skill", "Game difficulty skill level"), 0);
 
 dvector &getmonsters() { return monsters; };
 void restoremonsterstate() {

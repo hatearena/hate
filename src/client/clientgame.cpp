@@ -3,6 +3,7 @@
 int nextmode = 0;
 int infected_picktime = 0;
 VAR(gamemode, 1, 0, 0);
+static int __ad_gamemode = (addcommanddetail("gamemode", "Current game mode identifier"), 0);
 
 extern vec bot_target[MAXBOTS];
 extern float bot_yaw_target[MAXBOTS];
@@ -10,6 +11,7 @@ extern int bot_target_time[MAXBOTS];
 
 void mode(int n) { addmsg(1, 2, SV_GAMEMODE, nextmode = n); };
 COMMAND(mode, ARG_1INT);
+static int __ad_mode = (addcommanddetail("mode", "Sets the game mode"), 0);
 
 bool intermission = false;
 int intermissiontimer = 0;
@@ -18,9 +20,13 @@ dynent *player1 = newdynent(); // our client
 dvector players;               // other clients
 
 VARP(sensitivity, 0, 10, 10000);
+static int __ad_sensitivity = (addcommanddetail("sensitivity", "Mouse sensitivity"), 0);
 VARP(sensitivityscale, 1, 1, 10000);
+static int __ad_sensitivityscale = (addcommanddetail("sensitivityscale", "Mouse sensitivity scale"), 0);
 VARP(invmouse, 0, 0, 1);
+static int __ad_invmouse = (addcommanddetail("invmouse", "Inverts mouse Y axis"), 0);
 VARP(thirdperson, 0, 0, 1);
+static int __ad_thirdperson = (addcommanddetail("thirdperson", "Toggles third-person camera"), 0);
 
 bool spectator = false;
 int spectarget = 0;
@@ -332,6 +338,7 @@ void sleepf(char *msec, char *cmd) {
   strcpy_s(sleepcmd, cmd);
 };
 COMMANDN(sleep, sleepf, ARG_2STR);
+static int __ad_sleep = (addcommanddetail("sleep", "Executes a command after a delay"), 0);
 
 void updateworld(int millis) // main game update loop
 {
@@ -660,11 +667,17 @@ void jumpn(bool on) {
 };
 
 COMMAND(backward, ARG_DOWN);
+static int __ad_backward = (addcommanddetail("backward", "Moves the player backward"), 0);
 COMMAND(forward, ARG_DOWN);
+static int __ad_forward = (addcommanddetail("forward", "Moves the player forward"), 0);
 COMMAND(left, ARG_DOWN);
+static int __ad_left = (addcommanddetail("left", "Strafes the player left"), 0);
 COMMAND(right, ARG_DOWN);
+static int __ad_right = (addcommanddetail("right", "Strafes the player right"), 0);
 COMMANDN(jump, jumpn, ARG_DOWN);
+static int __ad_jump = (addcommanddetail("jump", "Makes the player jump"), 0);
 COMMAND(attack, ARG_DOWN);
+static int __ad_attack = (addcommanddetail("attack", "Fires the current weapon"), 0);
 
 void ads(bool on) {
   if (intermission)
@@ -677,6 +690,7 @@ void ads(bool on) {
 };
 
 COMMANDN(ads, ads, ARG_DOWN);
+static int __ad_ads = (addcommanddetail("ads", "Aims down sights"), 0);
 
 extern bool editmode;
 
@@ -694,7 +708,9 @@ void boostn(bool on) {
 };
 
 COMMANDN(boost, boostn, ARG_DOWN);
+static int __ad_boost = (addcommanddetail("boost", "Activates health boost"), 0);
 COMMAND(showscores, ARG_DOWN);
+static int __ad_showscores = (addcommanddetail("showscores", "Toggles the scoreboard"), 0);
 
 void fixplayer1range() {
   const float MAXPITCH = 90.0f;
@@ -876,8 +892,14 @@ void toggletp() {
 };
 
 COMMAND(toggletp, ARG_NONE);
+static int __ad_toggletp = (addcommanddetail("toggletp", "Toggles third-person view"), 0);
 COMMAND(togglespectate, ARG_NONE);
+static int __ad_togglespectate = (addcommanddetail("togglespectate", "Toggles spectator mode"), 0);
 COMMAND(togglespeclook, ARG_NONE);
+static int __ad_togglespeclook = (addcommanddetail("togglespeclook", "Toggles free-look in spectator"), 0);
 COMMAND(spectate_next, ARG_NONE);
+static int __ad_spectate_next = (addcommanddetail("spectate_next", "Spectates the next player"), 0);
 COMMAND(spectate_prev, ARG_NONE);
+static int __ad_spectate_prev = (addcommanddetail("spectate_prev", "Spectates the previous player"), 0);
 COMMANDN(map, changemap, ARG_1STR);
+static int __ad_map = (addcommanddetail("map", "Changes to a map"), 0);

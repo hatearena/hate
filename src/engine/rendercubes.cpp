@@ -50,12 +50,14 @@ int firstindex;
 bool showm = false;
 
 void showmip() { showm = !showm; };
+
 void mipstats(int a, int b, int c) {
   if (showm)
     conoutf("1x1/2x2/4x4: %d / %d / %d", a, b, c);
 };
 
 COMMAND(showmip, ARG_NONE);
+static int __ad_showmip = (addcommanddetail("showmip", "Toggles mip level display"), 0);
 
 #define stripend()                                                             \
   {                                                                            \
@@ -68,6 +70,7 @@ void finishstrips() { stripend(); };
 
 sqr sbright, sdark;
 VAR(lighterror, 1, 8, 100);
+static int __ad_lighterror = (addcommanddetail("lighterror", "Maximum lighting error tolerance"), 0);
 
 void render_flat(int wtex, int x, int y, int size, int h, sqr *l1, sqr *l2,
                  sqr *l3, sqr *l4, bool isceil) // floor/ceil quads
@@ -281,13 +284,20 @@ void render_square(int wtex, float floor1, float floor2, float ceil1,
 int wx1, wy1, wx2, wy2;
 
 VAR(watersubdiv, 1, 4, 64);
+static int __ad_watersubdiv = (addcommanddetail("watersubdiv", "Water surface subdivision level"), 0);
 VARF(waterlevel, -128, -128, 127,
      if (!noteditmode()) hdr.waterlevel = waterlevel);
+static int __ad_waterlevel = (addcommanddetail("waterlevel", "Water level height"), 0);
 VARP(waterspec, 0, 40, 255);
+static int __ad_waterspec = (addcommanddetail("waterspec", "Water specular reflection amount"), 0);
 VARP(wateralpha, 0, 200, 255);
+static int __ad_wateralpha = (addcommanddetail("wateralpha", "Water transparency alpha"), 0);
 VARP(waterr, 0, 80, 255);
+static int __ad_waterr = (addcommanddetail("waterr", "Water red color component"), 0);
 VARP(waterg, 0, 160, 255);
+static int __ad_waterg = (addcommanddetail("waterg", "Water green color component"), 0);
 VARP(waterb, 0, 200, 255);
+static int __ad_waterb = (addcommanddetail("waterb", "Water blue color component"), 0);
 
 inline void vertw(int v1, float v2, int v3, sqr *c, float tu, float tv,
                   float wavetime, float shimmertime) {

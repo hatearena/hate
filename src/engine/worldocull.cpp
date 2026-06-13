@@ -9,6 +9,7 @@ float odist = 256;
 void toggleocull() { ocull = !ocull; };
 
 COMMAND(toggleocull, ARG_NONE);
+static int __ad_toggleocull = (addcommanddetail("toggleocull", "Toggles occlusion culling"), 0);
 
 void computeraytable(float vx, float vy) {
   if (!ocull)
