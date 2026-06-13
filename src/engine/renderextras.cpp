@@ -633,26 +633,26 @@ void gl_drawhud(int w, int h, int curfps, int nquads, int curvert,
           if (w > max_w)
             max_w = w;
         }
-        max_w += 20;
+        max_w += 24;
 
-        int item_h = FONTH + 8;
-        int total_h = visible * item_h + 8;
-        int sx = 20;
+        int item_h = FONTH + 24;
+        int total_h = visible * item_h + 12;
+        int sx = 18;
         int sy = 1388 - total_h;
 
         glDisable(GL_TEXTURE_2D);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glColor4ub(0, 0, 0, showbg);
-        roundedbox(sx - 8, sy, sx + max_w + 8, sy + total_h, 6);
+        roundedbox(10, sy, sx + max_w + 8, sy + total_h, 6);
 
         loopi(visible) {
-          int item_y = sy + 4 + i * item_h;
+          int item_y = sy + 6 + i * item_h;
           if (vis_start + i == sel) {
             glColor4ub(60, 120, 200, showbg);
-            roundedbox(sx - 4, item_y, sx + max_w + 4, item_y + item_h, 4);
+            roundedbox(12, item_y, sx + max_w + 4, item_y + item_h, 4);
           }
           glEnable(GL_TEXTURE_2D);
-          draw_textf("/%s", sx, item_y + 4, 2, get_suggestion(vis_start + i));
+          draw_textf("/%s", sx + 2, item_y + 12, 2, get_suggestion(vis_start + i));
           glDisable(GL_TEXTURE_2D);
         }
         glEnable(GL_TEXTURE_2D);
@@ -671,16 +671,16 @@ void gl_drawhud(int w, int h, int curfps, int nquads, int curvert,
             sprintf_s(help_line)("/%s %s", help_name, sig);
           }
           if (help_line[0]) {
-            int help_y = sy - FONTH - 12;
+            int help_y = sy - FONTH - 24;
             if (help_y < 0)
               help_y = 0;
-            int help_w = text_width(help_line) + 16;
+            int help_w = text_width(help_line) + 24;
             glDisable(GL_TEXTURE_2D);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             glColor4ub(0, 0, 0, showbg);
-            roundedbox(12, help_y, 12 + help_w, help_y + FONTH + 8, 6);
+            roundedbox(10, help_y, 12 + help_w, help_y + FONTH + 24, 6);
             glEnable(GL_TEXTURE_2D);
-            draw_text(help_line, 20, help_y + 4, 2, 255);
+            draw_text(help_line, 18, help_y + 12, 2, 255);
           }
         }
       } else if (help_name) {
@@ -696,16 +696,16 @@ void gl_drawhud(int w, int h, int curfps, int nquads, int curvert,
           } else {
             sprintf_s(help_line)("/%s %s", help_name, sig);
           }
-          int help_y = 1388 - FONTH - 12;
+          int help_y = 1388 - FONTH - 24;
           if (help_y < 0)
             help_y = 0;
-          int help_w = text_width(help_line) + 16;
+          int help_w = text_width(help_line) + 24;
           glDisable(GL_TEXTURE_2D);
           glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
           glColor4ub(0, 0, 0, showbg);
-          roundedbox(12, help_y, 12 + help_w, help_y + FONTH + 8, 6);
+          roundedbox(10, help_y, 12 + help_w, help_y + FONTH + 24, 6);
           glEnable(GL_TEXTURE_2D);
-          draw_text(help_line, 20, help_y + 4, 2, 255);
+          draw_text(help_line, 18, help_y + 12, 2, 255);
         }
       }
     }
