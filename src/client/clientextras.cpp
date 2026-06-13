@@ -217,10 +217,12 @@ void getmap() {
   *(ushort *)start = ENET_HOST_TO_NET_16(p - start);
   enet_packet_resize(packet, p - start);
   sendpackettoserv(packet);
-  conoutf("requesting map from server...");
+  conoutf("Requesting map from server.");
 }
 
 COMMAND(sendmap, ARG_1STR);
-static int __ad_sendmap = (addcommanddetail("sendmap", "Sends the current map to clients"), 0);
+static int __ad_sendmap =
+    (addcommanddetail("sendmap", "Sends the current map to clients"), 0);
 COMMAND(getmap, ARG_NONE);
-static int __ad_getmap = (addcommanddetail("getmap", "Requests the current map from server"), 0);
+static int __ad_getmap =
+    (addcommanddetail("getmap", "Requests the current map from server"), 0);
