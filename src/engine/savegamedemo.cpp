@@ -77,7 +77,7 @@ void savestate(char *fn) {
 
 void savegame(char *name) {
   if (!m_classicsp) {
-    conoutf("[DEPRECATED] Can only save classic sp games");
+    conoutf("[DEPRECATED] Can only save classic SP games");
     return;
   };
   sprintf_sd(fn)("savegames/%s.csgz", name);
