@@ -53,7 +53,7 @@ void savestate(char *fn) {
   stop();
   f = gzopen(fn, "wb9");
   if (!f) {
-    conoutf("could not write %s", fn);
+    conoutf("Could not write %s", fn);
     return;
   };
   gzwrite(f, (void *)"CUBESAVE", 8);
@@ -83,7 +83,7 @@ void savegame(char *name) {
   sprintf_sd(fn)("savegames/%s.csgz", name);
   savestate(fn);
   stop();
-  conoutf("wrote %s", fn);
+  conoutf("Wrote %s", fn);
 };
 
 void loadstate(char *fn) {
@@ -92,7 +92,7 @@ void loadstate(char *fn) {
     return;
   f = gzopen(fn, "rb9");
   if (!f) {
-    conoutf("could not open %s", fn);
+    conoutf("Could not open %s", fn);
     return;
   };
 
@@ -112,7 +112,7 @@ void loadstate(char *fn) {
                       // server have updated
   return;
 out:
-  conoutf("aborting: savegame/demo from a different version of cube or cpu "
+  conoutf("Aborting: Savegame/demo from a different version of HATE or CPU "
           "architecture");
   stop();
 };
@@ -124,7 +124,8 @@ void loadgame(char *name) {
 
 void loadgameout() {
   stop();
-  conoutf("loadgame incomplete: savegame from a different version of this map");
+  conoutf(
+      "Loadgame incomplete: Savegame is from a different version of this map");
 };
 
 void loadgamerest() {
@@ -164,7 +165,7 @@ void loadgamerest() {
     gzread(f, d, sizeof(dynent));
   };
 
-  conoutf("savegame restored");
+  conoutf("Savegame restored");
   if (demoloading)
     startdemo();
   else
@@ -180,7 +181,7 @@ vec dorig;
 
 void record(char *name) {
   if (m_sp) {
-    conoutf("cannot record singleplayer games");
+    conoutf("Cannot record singleplayer games");
     return;
   };
   int cn = getclientnum();
@@ -189,7 +190,7 @@ void record(char *name) {
   sprintf_sd(fn)("demos/%s.cdgz", name);
   savestate(fn);
   gzputi(cn);
-  conoutf("started recording demo to %s", fn);
+  conoutf("Started recording demo to %s", fn);
   demorecording = true;
   starttime = lastmillis;
   ddamage = bdamage = 0;
@@ -236,14 +237,15 @@ void demo(char *name) {
 };
 
 void stopreset() {
-  conoutf("demo stopped (%d msec elapsed)", lastmillis - starttime);
+  conoutf("Demo stopped (%d msec elapsed)", lastmillis - starttime);
   stop();
   loopv(players) zapdynent(players[i]);
   disconnect(0, 0);
 };
 
 VAR(demoplaybackspeed, 10, 100, 1000);
-static int __ad_demoplaybackspeed = (addcommanddetail("demoplaybackspeed", "Demo playback speed percent"), 0);
+static int __ad_demoplaybackspeed =
+    (addcommanddetail("demoplaybackspeed", "Demo playback speed percent"), 0);
 int scaletime(int t) {
   return (int)(t * (100.0f / demoplaybackspeed)) + starttime;
 };
@@ -268,7 +270,8 @@ void startdemo() {
 };
 
 VAR(demodelaymsec, 0, 120, 500);
-static int __ad_demodelaymsec = (addcommanddetail("demodelaymsec", "Demo playback delay in ms"), 0);
+static int __ad_demodelaymsec =
+    (addcommanddetail("demodelaymsec", "Demo playback delay in ms"), 0);
 
 void catmulrom(vec &z, vec &a, vec &b, vec &c, float s,
                vec &dest) // spline interpolation
@@ -305,7 +308,7 @@ void demoplaybackstep() {
   while (demoplayback && lastmillis >= playbacktime) {
     int len = gzgeti();
     if (len < 1 || len > MAXTRANS) {
-      conoutf("error: huge packet during demo play (%d)", len);
+      conoutf("Error: Got huge packet during demo play (len = %d)", len);
       stopreset();
       return;
     };
@@ -404,13 +407,17 @@ void stopn() {
 };
 
 COMMAND(record, ARG_1STR);
-static int __ad_record = (addcommanddetail("record", "Records a demo to a file"), 0);
+static int __ad_record =
+    (addcommanddetail("record", "Records a demo to a file"), 0);
 COMMAND(demo, ARG_1STR);
 static int __ad_demo = (addcommanddetail("demo", "Plays back a demo file"), 0);
 COMMANDN(stop, stopn, ARG_NONE);
-static int __ad_stop = (addcommanddetail("stop", "Stops demo playback or recording"), 0);
+static int __ad_stop =
+    (addcommanddetail("stop", "Stops demo playback or recording"), 0);
 
 COMMAND(savegame, ARG_1STR);
-static int __ad_savegame = (addcommanddetail("savegame", "Saves the current game"), 0);
+static int __ad_savegame =
+    (addcommanddetail("savegame", "Saves the current game"), 0);
 COMMAND(loadgame, ARG_1STR);
-static int __ad_loadgame = (addcommanddetail("loadgame", "Loads a saved game"), 0);
+static int __ad_loadgame =
+    (addcommanddetail("loadgame", "Loads a saved game"), 0);
