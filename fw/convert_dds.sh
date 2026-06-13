@@ -1,7 +1,9 @@
 #!/bin/bash
 set -e
 
-root="$(dirname "$0")/content"
+cd "$(dirname "$0")/.."
+
+root="content"
 
 if [ "$1" = "-clean" ]; then
   echo "Removing all .dds files..."
