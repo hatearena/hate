@@ -187,7 +187,7 @@ void record(char *name) {
   int cn = getclientnum();
   if (cn < 0)
     return;
-  sprintf_sd(fn)("demos/%s.cdgz", name);
+  sprintf_sd(fn)("demos/%s.hdemo", name);
   savestate(fn);
   gzputi(cn);
   conoutf("Started recording demo to %s", fn);
@@ -231,7 +231,7 @@ void incomingdemodata(uchar *buf, int len, bool extras) {
 };
 
 void demo(char *name) {
-  sprintf_sd(fn)("demos/%s.cdgz", name);
+  sprintf_sd(fn)("demos/%s.hdemo", name);
   loadstate(fn);
   demoloading = true;
 };
