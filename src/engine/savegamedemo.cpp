@@ -10,7 +10,6 @@ dvector playerhistory;
 int democlientnum = 0;
 
 void startdemo();
-
 void gzput(int i) { gzputc(f, i); };
 void gzputi(int i) { gzwrite(f, &i, sizeof(int)); };
 void gzputv(vec &v) { gzwrite(f, &v, sizeof(vec)); };
@@ -19,15 +18,18 @@ void gzcheck(int a, int b) {
   if (a != b)
     fatal("Savegame file corrupt (short)");
 };
+
 int gzget() {
   char c = gzgetc(f);
   return c;
 };
+
 int gzgeti() {
   int i;
   gzcheck(gzread(f, &i, sizeof(int)), sizeof(int));
   return i;
 };
+
 void gzgetv(vec &v) { gzcheck(gzread(f, &v, sizeof(vec)), sizeof(vec)); };
 
 void stop() {
@@ -200,6 +202,7 @@ void demodamage(int damage, vec &o) {
   ddamage = damage;
   dorig = o;
 };
+
 void demoblend(int damage) { bdamage = damage; };
 
 void incomingdemodata(uchar *buf, int len, bool extras) {
