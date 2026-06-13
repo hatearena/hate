@@ -13,6 +13,7 @@ struct mitem {
   bool slider;
   char *slidervar;
   bool textinput;
+  bool separator;
 };
 
 bool menutextinput = false;
@@ -43,6 +44,13 @@ void menuset(int menu) {
     resetmovement(player1);
   if (vmenu == 1)
     menus[1].menusel = 0;
+  if (vmenu > 1) {
+    gmenu &gm = menus[vmenu];
+    while (gm.menusel < gm.items.length() && gm.items[gm.menusel].separator)
+      gm.menusel++;
+    if (gm.menusel >= gm.items.length() && gm.items.length() > 0)
+      gm.menusel = 0;
+  };
 };
 
 void showmenu(char *name) {
@@ -517,6 +525,7 @@ bool rendermenu() {
   int mdisp = m.items.length();
   int w = 0;
   loopi(mdisp) {
+    if (m.items[i].separator) continue;
     int tw = text_width(m.items[i].text);
     if (m.items[i].slider) {
       string buf;
@@ -591,6 +600,18 @@ bool rendermenu() {
       string buf;
       sprintf_s(buf)("%s: %d", m.items[idx].text, val);
       draw_text(buf, x, y, 2);
+    } else if (m.items[idx].separator) {
+      int ly = y + step / 2;
+      glDisable(GL_TEXTURE_2D);
+      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+      glColor4ub(160, 160, 160, 80);
+      glBegin(GL_QUADS);
+      glVertex2i(x, ly);
+      glVertex2i(x + w, ly);
+      glVertex2i(x + w, ly + 2);
+      glVertex2i(x, ly + 2);
+      glEnd();
+      glEnable(GL_TEXTURE_2D);
     } else if (m.items[idx].textinput) {
       string buf;
       if (menutextinput && idx == m.menusel)
@@ -638,6 +659,7 @@ void menuitem(char *text, char *action) {
   mi.checkbox = false;
   mi.slider = false;
   mi.textinput = false;
+  mi.separator = false;
 };
 
 void menuitem_checkbox(char *text, char *action) {
@@ -648,6 +670,7 @@ void menuitem_checkbox(char *text, char *action) {
   mi.checkbox = true;
   mi.slider = false;
   mi.textinput = false;
+  mi.separator = false;
 };
 
 void menuitem_slider(char *text, char *varname) {
@@ -659,6 +682,7 @@ void menuitem_slider(char *text, char *varname) {
   mi.slider = true;
   mi.textinput = false;
   mi.slidervar = newstring(varname);
+  mi.separator = false;
 };
 
 void menuitem_text(char *text, char *cmd) {
@@ -669,6 +693,7 @@ void menuitem_text(char *text, char *cmd) {
   mi.checkbox = false;
   mi.slider = false;
   mi.textinput = true;
+  mi.separator = false;
 };
 
 void showmapmodels() {
@@ -794,6 +819,7 @@ void showentities() {
     mi2.checkbox = false;
     mi2.slider = false;
     mi2.textinput = false;
+    mi2.separator = false;
   };
   if (menustack.empty())
     menustack.add(mi);
@@ -825,6 +851,20 @@ COMMANDN(menuitem_text, menuitem_text, ARG_2STR);
 static int __ad_menuitem_text =
     (addcommanddetail("menuitem_text", "Adds a text input menu item"), 0);
 
+void separatorcmd() {
+  mitem &m = menus.last().items.add();
+  m.text = NULL;
+  m.action = NULL;
+  m.checkbox = false;
+  m.slider = false;
+  m.slidervar = NULL;
+  m.textinput = false;
+  m.separator = true;
+};
+COMMANDN(separator, separatorcmd, ARG_NONE);
+static int __ad_separator =
+    (addcommanddetail("separator", "Adds a separator line to the current menu"), 0);
+
 bool menukey(int code, bool isdown) {
   if (vmenu <= 0)
     return false;
@@ -835,10 +875,16 @@ bool menukey(int code, bool isdown) {
       if (!menustack.empty())
         menuset(menustack.pop());
       return true;
-    } else if (code == SDLK_UP || code == -4)
+    } else if (code == SDLK_UP || code == -4) {
       menusel--;
-    else if (code == SDLK_DOWN || code == -5)
+      while (menusel > 0 && menus[vmenu].items[menusel].separator)
+        menusel--;
+    } else if (code == SDLK_DOWN || code == -5) {
       menusel++;
+      while (menusel < menus[vmenu].items.length() - 1 &&
+             menus[vmenu].items[menusel].separator)
+        menusel++;
+    }
     else if ((code == SDLK_LEFT || code == -1) &&
              menus[vmenu].items[menusel].slider) {
       mitem &mi = menus[vmenu].items[menusel];
@@ -877,6 +923,13 @@ bool menukey(int code, bool isdown) {
       gm.scrolloff = menusel;
     } else if (menusel >= gm.scrolloff + maxvis) {
       gm.scrolloff = menusel - maxvis + 1;
+    };
+    if (vmenu > 1) {
+      while (menusel < gm.items.length() && gm.items[menusel].separator)
+        menusel++;
+      if (menusel >= gm.items.length()) menusel = gm.items.length() - 1;
+      while (menusel > 0 && gm.items[menusel].separator)
+        menusel--;
     };
     menus[vmenu].menusel = menusel;
   } else {
