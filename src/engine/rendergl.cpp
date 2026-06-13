@@ -1195,6 +1195,7 @@ void addvignette(int w, int h) {
 
 VAR(fog, 64, 180, 1024);
 VAR(fogcolour, 0, 0x8099B3, 0xFFFFFF);
+
 VARP(hudgun, 0, 1, 1);
 VARP(viewbob, 0, 1, 1);
 VARP(viewbobamp, 0, 10, 50);
