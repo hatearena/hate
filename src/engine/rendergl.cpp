@@ -50,7 +50,8 @@ static int genmipinit = 0;
 
 VARFP(fsaa, 0, 8, 16,
       { conoutf("Anti-aliasing will take effect on next restart"); });
-static int __ad_fsaa = (addcommanddetail("fsaa", "Full-scene anti-aliasing samples"), 0);
+static int __ad_fsaa =
+    (addcommanddetail("fsaa", "Full-scene anti-aliasing samples"), 0);
 
 void gl_init(int w, int h) {
   glViewport(0, 0, w, h);
@@ -357,9 +358,11 @@ void texture(char *aframe, char *name) {
 };
 
 COMMAND(texturereset, ARG_NONE);
-static int __ad_texturereset = (addcommanddetail("texturereset", "Resets all textures"), 0);
+static int __ad_texturereset =
+    (addcommanddetail("texturereset", "Resets all textures"), 0);
 COMMAND(texture, ARG_2STR);
-static int __ad_texture = (addcommanddetail("texture", "Sets a texture by name"), 0);
+static int __ad_texture =
+    (addcommanddetail("texture", "Sets a texture by name"), 0);
 
 int lookuptexture(int tex, int &xs, int &ys) {
   int frame = 0; // other frames?
@@ -463,7 +466,8 @@ VARFP(gamma, 30, 100, 300, {
     conoutf("sdl: %s", SDL_GetError());
   };
 });
-static int __ad_gamma = (addcommanddetail("gamma", "Gamma correction level"), 0);
+static int __ad_gamma =
+    (addcommanddetail("gamma", "Gamma correction level"), 0);
 
 void getcamerapos(float &vx, float &vy, float &vz) {
   if (spectator && !speclook) {
@@ -530,7 +534,8 @@ void transplayer() {
 };
 
 VARP(fov, 10, 120, 150);
-static int __ad_fov = (addcommanddetail("fov", "Field of view angle in degrees"), 0);
+static int __ad_fov =
+    (addcommanddetail("fov", "Field of view angle in degrees"), 0);
 
 int xtraverts;
 
@@ -538,9 +543,11 @@ static GLuint bloomtex[2] = {0, 0};
 static int bloomw = 0, bloomh = 0;
 
 VARP(bloom, 0, 1, 1);
-static int __ad_bloom = (addcommanddetail("bloom", "Toggles bloom post-processing"), 0);
+static int __ad_bloom =
+    (addcommanddetail("bloom", "Toggles bloom post-processing"), 0);
 VARP(bloomintensity, 0, 30, 100);
-static int __ad_bloomintensity = (addcommanddetail("bloomintensity", "Bloom intensity level"), 0);
+static int __ad_bloomintensity =
+    (addcommanddetail("bloomintensity", "Bloom intensity level"), 0);
 
 void addbloom(int w, int h) {
   if (!bloom || w < 8 || h < 8)
@@ -647,17 +654,23 @@ static GLuint grtex[2] = {0, 0};
 static int grw = 0, grh = 0;
 
 VARP(godrays, 0, 1, 1);
-static int __ad_godrays = (addcommanddetail("godrays", "Toggles god rays effect"), 0);
+static int __ad_godrays =
+    (addcommanddetail("godrays", "Toggles god rays effect"), 0);
 VAR(godraysintensity, 0, 10, 100);
-static int __ad_godraysintensity = (addcommanddetail("godraysintensity", "God rays intensity"), 0);
+static int __ad_godraysintensity =
+    (addcommanddetail("godraysintensity", "God rays intensity"), 0);
 VARP(godrayssamples, 1, 24, 64);
-static int __ad_godrayssamples = (addcommanddetail("godrayssamples", "God rays sample count"), 0);
+static int __ad_godrayssamples =
+    (addcommanddetail("godrayssamples", "God rays sample count"), 0);
 VARP(godraysscale, 10, 200, 500);
-static int __ad_godraysscale = (addcommanddetail("godraysscale", "God rays scale factor"), 0);
+static int __ad_godraysscale =
+    (addcommanddetail("godraysscale", "God rays scale factor"), 0);
 VARP(godrayslightx, 0, 50, 100);
-static int __ad_godrayslightx = (addcommanddetail("godrayslightx", "God rays light X position"), 0);
+static int __ad_godrayslightx =
+    (addcommanddetail("godrayslightx", "God rays light X position"), 0);
 VARP(godrayslighty, 0, 30, 100);
-static int __ad_godrayslighty = (addcommanddetail("godrayslighty", "God rays light Y position"), 0);
+static int __ad_godrayslighty =
+    (addcommanddetail("godrayslighty", "God rays light Y position"), 0);
 
 void addgodrays(int w, int h) {
   if (!godrays || w < 8 || h < 8)
@@ -787,11 +800,15 @@ void addgodrays(int w, int h) {
 static GLuint flaretex = 0;
 
 VARP(lensflare, 0, 1, 1);
-static int __ad_lensflare = (addcommanddetail("lensflare", "Toggles lens flare effect"), 0);
+static int __ad_lensflare =
+    (addcommanddetail("lensflare", "Toggles lens flare effect"), 0);
 VARP(lensflareintensity, 0, 12, 100);
-static int __ad_lensflareintensity = (addcommanddetail("lensflareintensity", "Lens flare intensity"), 0);
+static int __ad_lensflareintensity =
+    (addcommanddetail("lensflareintensity", "Lens flare intensity"), 0);
 VARP(lensflarethreshold, 0, 60, 255);
-static int __ad_lensflarethreshold = (addcommanddetail("lensflarethreshold", "Lens flare brightness threshold"), 0);
+static int __ad_lensflarethreshold =
+    (addcommanddetail("lensflarethreshold", "Lens flare brightness threshold"),
+     0);
 VARP(sunyaw, 0, 270, 360);
 static int __ad_sunyaw = (addcommanddetail("sunyaw", "Sun yaw angle"), 0);
 VARP(sunpitch, -90, 30, 90);
@@ -981,9 +998,11 @@ static int checkssao() {
 VARP(ssao, 0, 1, 1);
 static int __ad_ssao = (addcommanddetail("ssao", "Toggles SSAO effect"), 0);
 VARP(ssaostrength, 0, 10, 100);
-static int __ad_ssaostrength = (addcommanddetail("ssaostrength", "SSAO strength"), 0);
+static int __ad_ssaostrength =
+    (addcommanddetail("ssaostrength", "SSAO strength"), 0);
 VARP(ssaoradius, 1, 2, 10);
-static int __ad_ssaoradius = (addcommanddetail("ssaoradius", "SSAO sampling radius"), 0);
+static int __ad_ssaoradius =
+    (addcommanddetail("ssaoradius", "SSAO sampling radius"), 0);
 
 static GLuint ssaotex[3] = {0, 0, 0};
 static int ssaow = 0, ssaoh = 0;
@@ -1145,9 +1164,11 @@ void addssao(int w, int h) {
 };
 
 VARP(vignette, 0, 1, 1);
-static int __ad_vignette = (addcommanddetail("vignette", "Toggles vignette effect"), 0);
+static int __ad_vignette =
+    (addcommanddetail("vignette", "Toggles vignette effect"), 0);
 VARP(vignettestrength, 0, 10, 100);
-static int __ad_vignettestrength = (addcommanddetail("vignettestrength", "Vignette darkness strength"), 0);
+static int __ad_vignettestrength =
+    (addcommanddetail("vignettestrength", "Vignette darkness strength"), 0);
 
 static GLuint vigtex = 0;
 
@@ -1173,6 +1194,90 @@ void genvigtex() {
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+};
+
+VARP(exposure, 1, 100, 500);
+VARP(contrast, 1, 100, 500);
+VARP(saturation, 0, 100, 500);
+VARP(redgain, 1, 100, 500);
+VARP(greengain, 1, 100, 500);
+VARP(bluegain, 1, 100, 500);
+
+static int __ad_exposure =
+    (addcommanddetail("exposure", "Overall brightness multiplier (100 = 1.0)"),
+     0);
+static int __ad_contrast =
+    (addcommanddetail("contrast", "Contrast adjustment (100 = 1.0)"), 0);
+static int __ad_saturation =
+    (addcommanddetail("saturation", "Color saturation (100 = 1.0)"), 0);
+static int __ad_redgain =
+    (addcommanddetail("redgain", "Red channel gain multiplier (100 = 1.0)"), 0);
+static int __ad_greengain =
+    (addcommanddetail("greengain", "Green channel gain multiplier (100 = 1.0)"),
+     0);
+static int __ad_bluegain =
+    (addcommanddetail("bluegain", "Blue channel gain multiplier (100 = 1.0)"),
+     0);
+
+static void addcolorgrade(int w, int h) {
+  float exp = exposure / 100.0f;
+  float con = contrast / 100.0f;
+  float sat = saturation / 100.0f;
+  float rg = redgain / 100.0f;
+  float gg = greengain / 100.0f;
+  float bg = bluegain / 100.0f;
+
+  if (exp == 1.0f && con == 1.0f && sat == 1.0f && rg == 1.0f && gg == 1.0f &&
+      bg == 1.0f)
+    return;
+
+  float mult_r = con * exp * rg * sat;
+  float mult_g = con * exp * gg * sat;
+  float mult_b = con * exp * bg * sat;
+  float add_r =
+      (0.5f * (1.0f - con) * exp * rg * sat) + (0.5f * (1.0f - sat) * exp * rg);
+  float add_g =
+      (0.5f * (1.0f - con) * exp * gg * sat) + (0.5f * (1.0f - sat) * exp * gg);
+  float add_b =
+      (0.5f * (1.0f - con) * exp * bg * sat) + (0.5f * (1.0f - sat) * exp * bg);
+
+  glMatrixMode(GL_PROJECTION);
+  glPushMatrix();
+  glMatrixMode(GL_MODELVIEW);
+  glPushMatrix();
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
+  glOrtho(0, w, 0, h, -1, 1);
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity();
+  glDisable(GL_DEPTH_TEST);
+  glDisable(GL_TEXTURE_2D);
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_DST_COLOR, GL_ZERO);
+  glColor3f(mult_r, mult_g, mult_b);
+  glBegin(GL_QUADS);
+  glVertex2i(0, 0);
+  glVertex2i(w, 0);
+  glVertex2i(w, h);
+  glVertex2i(0, h);
+  glEnd();
+
+  glBlendFunc(GL_ONE, GL_ONE);
+  glColor3f(add_r, add_g, add_b);
+  glBegin(GL_QUADS);
+  glVertex2i(0, 0);
+  glVertex2i(w, 0);
+  glVertex2i(w, h);
+  glVertex2i(0, h);
+  glEnd();
+
+  glDisable(GL_BLEND);
+  glEnable(GL_TEXTURE_2D);
+  glEnable(GL_DEPTH_TEST);
+  glMatrixMode(GL_PROJECTION);
+  glPopMatrix();
+  glMatrixMode(GL_MODELVIEW);
+  glPopMatrix();
 };
 
 void addvignette(int w, int h) {
@@ -1219,14 +1324,18 @@ void addvignette(int w, int h) {
 VAR(fog, 64, 180, 1024);
 static int __ad_fog = (addcommanddetail("fog", "Fog distance"), 0);
 VAR(fogcolour, 0, 0x8099B3, 0xFFFFFF);
-static int __ad_fogcolour = (addcommanddetail("fogcolour", "Fog color as hex RGB"), 0);
+static int __ad_fogcolour =
+    (addcommanddetail("fogcolour", "Fog color as hex RGB"), 0);
 
 VARP(hudgun, 0, 1, 1);
-static int __ad_hudgun = (addcommanddetail("hudgun", "Toggles HUD gun display"), 0);
+static int __ad_hudgun =
+    (addcommanddetail("hudgun", "Toggles HUD gun display"), 0);
 VARP(viewbob, 0, 1, 1);
-static int __ad_viewbob = (addcommanddetail("viewbob", "Toggles view bobbing"), 0);
+static int __ad_viewbob =
+    (addcommanddetail("viewbob", "Toggles view bobbing"), 0);
 VARP(viewbobamp, 0, 10, 50);
-static int __ad_viewbobamp = (addcommanddetail("viewbobamp", "View bobbing amplitude"), 0);
+static int __ad_viewbobamp =
+    (addcommanddetail("viewbobamp", "View bobbing amplitude"), 0);
 
 char *hudgunnames[] = {"hudguns/hate_csaw",    "hudguns/hate_shotg",
                        "hudguns/hate_cgun",    "hudguns/hate_rocket",
@@ -1516,6 +1625,7 @@ void gl_drawframe(int w, int h, float curfps) {
   addgodrays(w, h);
   addlensflare(w, h);
   addvignette(w, h);
+  addcolorgrade(w, h);
 
   glDisable(GL_FOG);
   glDisable(GL_TEXTURE_2D);
