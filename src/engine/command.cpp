@@ -72,7 +72,7 @@ char *parseexp(char *&p, int right) // parse any nested set of () or []
   for (int brak = 1; brak;) {
     int c = *p++;
     if (c == '\r')
-      *(p - 1) = ' '; // hack
+      *(p - 1) = ' ';
     if (c == left)
       brak++;
     else if (c == right)
@@ -129,7 +129,7 @@ char *lookup(char *n) // find value of ident referenced with $ in exp
     case ID_ALIAS:
       return exchangestr(n, id->action);
     };
-  conoutf("unknown alias lookup: %s", n + 1);
+  conoutf("Unknown alias lookup: %s", n + 1);
   return n;
 };
 
@@ -171,10 +171,16 @@ int execute(char *p, bool isdown) // all evaluation happens here, recursively
         conoutf("Unknown command: %s", c);
     } else
       switch (id->type) {
-      case ID_COMMAND: // game defined commands
-        switch (
-            id->narg) // use very ad-hoc function signature, and just call it
-        {
+      case ID_COMMAND: {
+        static int argcounts[] = {1, 2, 3, 4, 0, 1, 2, 3, 5, 0, 1, 1, 2, 1, 2};
+        if (id->narg != ARG_VARI) {
+          int want = argcounts[id->narg];
+          if (numargs - 1 > want) {
+            conoutf("The %s function accepts only %d argument(s)", c, want);
+            break;
+          }
+        }
+        switch (id->narg) {
         case ARG_1INT:
           if (isdown)
             ((void(__cdecl *)(int))id->fun)(ATOI(w[1]));
@@ -253,8 +259,13 @@ int execute(char *p, bool isdown) // all evaluation happens here, recursively
           }
         };
         break;
+      }
 
-      case ID_VAR: // game defined variabled
+      case ID_VAR:
+        if (numargs > 2) {
+          conoutf("The %s function accepts only 1 argument", c);
+          break;
+        }
         if (isdown) {
           if (!w[1][0])
             conoutf("%s = %d", c, *id->storage); // var with no value just
@@ -385,6 +396,7 @@ void intset(char *name, int v) {
 void ifthen(char *cond, char *thenp, char *elsep) {
   execute(cond[0] != '0' ? thenp : elsep);
 };
+
 void loopa(char *times, char *body) {
   int t = atoi(times);
   loopi(t) {
@@ -392,10 +404,12 @@ void loopa(char *times, char *body) {
     execute(body);
   };
 };
+
 void whilea(char *cond, char *body) {
   while (execute(cond))
     execute(body);
-}; // can't get any simpler than this :)
+};
+
 void onrelease(bool on, char *body) {
   if (!on)
     execute(body);

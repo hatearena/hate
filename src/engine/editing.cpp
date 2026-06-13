@@ -590,6 +590,30 @@ void newent(char *what, char *a1, char *a2, char *a3, char *a4) {
   };
 };
 
+void smapmodel(char *name) {
+  if (noteditmode())
+    return;
+  int found = -1;
+  loopi(nummapmodels()) if (strstr(getmminfo(i).name, name)) {
+    found = i;
+    break;
+  }
+  if (found < 0) {
+    conoutf("No mapmodel found matching \"%s\"", name);
+    return;
+  }
+  if (selset) {
+    loop(x, sel.xs) loop(y, sel.ys) {
+      sqr *s = S(sel.x + x, sel.y + y);
+      if (SOLID(s))
+        continue;
+      newentity(sel.x + x, sel.y + y, s->floor + 1, "mapmodel", found, 0, 0, 0);
+    };
+  } else {
+    newentity(cx, cy, ch + 1, "mapmodel", found, 0, 0, 0);
+  };
+};
+
 COMMANDN(select, selectpos, ARG_4INT);
 COMMAND(edittag, ARG_1INT);
 COMMAND(replace, ARG_NONE);
@@ -603,4 +627,5 @@ COMMAND(paste, ARG_NONE);
 COMMAND(edittex, ARG_2INT);
 COMMANDN(editdrag, editdrag, ARG_DOWN);
 COMMAND(newent, ARG_5STR);
+COMMANDN(smapmodel, smapmodel, ARG_1STR);
 COMMAND(perlin, ARG_3INT);
