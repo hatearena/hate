@@ -3,8 +3,8 @@
 enum { ID_VAR, ID_COMMAND, ID_ALIAS };
 
 struct ident {
-  int type; // one of ID_* above
-  char *name;
+  int type;      // One of ID_* above
+  char *name;    // The identifier name
   int min, max;  // ID_VAR
   int *storage;  // ID_VAR
   void (*fun)(); // ID_VAR, ID_COMMAND
@@ -19,7 +19,8 @@ char *exchangestr(char *o, char *n) {
   return newstring(n);
 };
 
-hashtable<ident> *idents = NULL; // contains ALL vars/commands/aliases
+/// Contains ALL vars/commands/aliases
+hashtable<ident> *idents = NULL;
 
 void alias(char *name, char *action) {
   ident *b = idents->access(name);
@@ -37,8 +38,7 @@ void alias(char *name, char *action) {
 
 COMMAND(alias, ARG_2STR);
 
-// variables and commands are registered through globals, see cube.h
-
+/// Variables and commands are registered through globals, see cube.h
 int variable(char *name, int min, int cur, int max, int *storage, void (*fun)(),
              bool persist) {
   if (!idents)
@@ -382,10 +382,6 @@ void writecfg() {
 };
 
 COMMAND(writecfg, ARG_NONE);
-
-// below the commands that implement a small imperative language. thanks to the
-// semantics of
-// () and [] expressions, any control construct can be defined trivially.
 
 void intset(char *name, int v) {
   string b;
