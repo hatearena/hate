@@ -640,7 +640,7 @@ static GLuint grtex[2] = {0, 0};
 static int grw = 0, grh = 0;
 
 VARP(godrays, 0, 1, 1);
-VAR(godraysintensity, 0, 20, 100);
+VAR(godraysintensity, 0, 10, 100);
 VARP(godrayssamples, 1, 24, 64);
 VARP(godraysscale, 10, 200, 500);
 VARP(godrayslightx, 0, 50, 100);
@@ -1205,14 +1205,19 @@ char *hudgunnames[] = {"hudguns/hate_csaw",    "hudguns/hate_shotg",
                        "hudguns/hate_lightgun"};
 
 void drawhudmodel(int start, int end, float speed, int base) {
-  float target_intensity = (viewbob && player1->onfloor && (player1->move || player1->strafe)) ? 1.0f : 0.0f;
+  float target_intensity =
+      (viewbob && player1->onfloor && (player1->move || player1->strafe))
+          ? 1.0f
+          : 0.0f;
   static float bob_intensity = 0.0f;
   if (target_intensity > bob_intensity) {
     bob_intensity += curtime * 0.008f;
-    if (bob_intensity > target_intensity) bob_intensity = target_intensity;
+    if (bob_intensity > target_intensity)
+      bob_intensity = target_intensity;
   } else if (target_intensity < bob_intensity) {
     bob_intensity -= curtime * 0.04f;
-    if (bob_intensity < target_intensity) bob_intensity = target_intensity;
+    if (bob_intensity < target_intensity)
+      bob_intensity = target_intensity;
   }
 
   float bx = 0, bz = 0;
