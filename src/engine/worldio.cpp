@@ -147,7 +147,7 @@ void save_world(char *mname) {
   backup(cgzname, bakname);
   gzFile f = gzopen(cgzname, "wb9");
   if (!f) {
-    conoutf("could not write map to %s", cgzname);
+    conoutf("Could not write map to %s", cgzname);
     return;
   };
   hdr.version = MAPVERSION;
@@ -237,13 +237,17 @@ void load_world(char *mname) {
   if (strncmp(hdr.head, "CUBE", 4) != 0)
     fatal("While reading map: header malformatted");
   if (hdr.version > MAPVERSION)
-    fatal("This map requires a newer version of Cube/HATE.");
+    fatal("This map requires a newer version of HATE.");
   if (hdr.version >= 6) {
     gzread(f, hdr.texlists, sizeof(ushort) * 3 * 2048);
   } else {
     uchar oldtex[3][256];
     gzread(f, oldtex, 3 * 256);
-    loopk(3) { loopi(256) hdr.texlists[k][i] = oldtex[k][i]; for (int i = 256; i < 2048; i++) hdr.texlists[k][i] = i; };
+    loopk(3) {
+      loopi(256) hdr.texlists[k][i] = oldtex[k][i];
+      for (int i = 256; i < 2048; i++)
+        hdr.texlists[k][i] = i;
+    };
   };
   if (sfactor < SMALLEST_FACTOR || sfactor > LARGEST_FACTOR)
     fatal("Illegal map size");
@@ -372,4 +376,5 @@ void load_world(char *mname) {
 };
 
 COMMANDN(savemap, save_world, ARG_1STR);
-static int __ad_savemap = (addcommanddetail("savemap", "Saves the current map to a file"), 0);
+static int __ad_savemap =
+    (addcommanddetail("savemap", "Saves the current map to a file"), 0);
