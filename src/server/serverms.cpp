@@ -5,7 +5,7 @@ ENetSocket mssock = ENET_SOCKET_NULL;
 void httpgetsend(ENetAddress &ad, char *hostname, char *req, char *ref,
                  char *agent) {
   if (ad.host == ENET_HOST_ANY) {
-    printf("looking up %s...\n", hostname);
+    printf("Looking up %s...\n", hostname);
     enet_address_set_host(&ad, hostname);
     if (ad.host == ENET_HOST_ANY)
       return;
@@ -14,11 +14,11 @@ void httpgetsend(ENetAddress &ad, char *hostname, char *req, char *ref,
     enet_socket_destroy(mssock);
   mssock = enet_socket_create(ENET_SOCKET_TYPE_STREAM);
   if (mssock == ENET_SOCKET_NULL) {
-    printf("could not open socket\n");
+    printf("Could not open socket\n");
     return;
   };
   if (enet_socket_connect(mssock, &ad) < 0) {
-    printf("could not connect to %s\n", hostname);
+    printf("Could not connect to %s\n", hostname);
     enet_socket_destroy(mssock);
     mssock = ENET_SOCKET_NULL;
     return;
@@ -29,7 +29,7 @@ void httpgetsend(ENetAddress &ad, char *hostname, char *req, char *ref,
       hostname, ref, agent);
   buf.data = httpget;
   buf.dataLength = strlen((char *)buf.data);
-  printf("sending request to %s...\n", hostname);
+  printf("Sending request to %s...\n", hostname);
   enet_socket_send(mssock, NULL, &buf, 1);
 };
 
@@ -81,14 +81,14 @@ void checkmasterreply() {
   bool busy = mssock != ENET_SOCKET_NULL;
   httpgetrecieve(masterb);
   if (busy && mssock == ENET_SOCKET_NULL)
-    printf("masterserver replied. %s\n", stripheader(masterrep));
+    printf("Masterserver replied. %s\n", stripheader(masterrep));
 };
 
 uchar *retrieveservers(uchar *buf, int buflen) {
   sprintf_sd(path)("%sretrieve.do?item=list", masterpath);
   httpgetsend(masterserver, masterbase, path, "hateserver", "HATE Server");
   if (mssock == ENET_SOCKET_NULL) {
-    printf("failed to connect to master server\n");
+    printf("Failed to connect to master server\n");
     buf[0] = 0;
     return buf;
   };
@@ -160,8 +160,8 @@ void servermsinit(const char *master, char *sdesc, bool listen) {
     ENetAddress address = {ENET_HOST_ANY, CUBE_SERVINFO_PORT};
     pongsock = enet_socket_create(ENET_SOCKET_TYPE_DATAGRAM);
     if (pongsock == ENET_SOCKET_NULL)
-      fatal("could not create server info socket\n");
+      fatal("Could not create server info socket\n");
     if (enet_socket_bind(pongsock, &address) < 0)
-      fatal("could not bind server info socket\n");
+      fatal("Could not bind server info socket\n");
   };
 };
