@@ -525,7 +525,8 @@ bool rendermenu() {
   int mdisp = m.items.length();
   int w = 0;
   loopi(mdisp) {
-    if (m.items[i].separator) continue;
+    if (m.items[i].separator)
+      continue;
     int tw = text_width(m.items[i].text);
     if (m.items[i].slider) {
       string buf;
@@ -728,6 +729,7 @@ void showmapmodels() {
     mi2.checkbox = false;
     mi2.slider = false;
     mi2.textinput = false;
+    mi2.separator = false;
   };
   if (menustack.empty())
     menustack.add(mi);
@@ -863,7 +865,8 @@ void separatorcmd() {
 };
 COMMANDN(separator, separatorcmd, ARG_NONE);
 static int __ad_separator =
-    (addcommanddetail("separator", "Adds a separator line to the current menu"), 0);
+    (addcommanddetail("separator", "Adds a separator line to the current menu"),
+     0);
 
 bool menukey(int code, bool isdown) {
   if (vmenu <= 0)
@@ -884,9 +887,8 @@ bool menukey(int code, bool isdown) {
       while (menusel < menus[vmenu].items.length() - 1 &&
              menus[vmenu].items[menusel].separator)
         menusel++;
-    }
-    else if ((code == SDLK_LEFT || code == -1) &&
-             menus[vmenu].items[menusel].slider) {
+    } else if ((code == SDLK_LEFT || code == -1) &&
+               menus[vmenu].items[menusel].slider) {
       mitem &mi = menus[vmenu].items[menusel];
       ident *id = idents->access(mi.slidervar);
       if (id && id->type == ID_VAR && *id->storage > id->min) {
@@ -927,7 +929,8 @@ bool menukey(int code, bool isdown) {
     if (vmenu > 1) {
       while (menusel < gm.items.length() && gm.items[menusel].separator)
         menusel++;
-      if (menusel >= gm.items.length()) menusel = gm.items.length() - 1;
+      if (menusel >= gm.items.length())
+        menusel = gm.items.length() - 1;
       while (menusel > 0 && gm.items[menusel].separator)
         menusel--;
     };
