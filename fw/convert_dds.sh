@@ -70,6 +70,10 @@ print(min(im.size))
   fi
 }
 
+filesize() {
+  stat -c %s "$1" 2>/dev/null || stat -f %z "$1" 2>/dev/null || echo 0
+}
+
 if [ "$dry" -eq 1 ]; then
   echo "Dry: Images that would be converted to DDS..."
 else
@@ -91,7 +95,13 @@ find "$root/packages" "$root/data" -type f \( -name '*.jpg' -o -name '*.jpeg' -o
     echo "  would convert $f -> $dds"
   else
     echo "  $dds"
-    nvcompress -rgb "$f" "$dds" >/dev/null 2>&1
+  
+    ext="${f##*.}"
+    if [[ "$ext" =~ ^(jpg|jpeg)$ ]] && [ "$(filesize "$f")" -gt $((3 * 1024 * 1024)) ]; then
+      nvcompress -rgb -bc3 -highest "$f" "$dds" >/dev/null 2>&1
+    else
+      nvcompress -rgb "$f" "$dds" >/dev/null 2>&1
+    fi
   fi
 done
 
