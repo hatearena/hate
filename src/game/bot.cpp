@@ -231,7 +231,7 @@ static void botaction(dynent *m) {
   if (m_infected && m->team[0] && !strcmp(m->team, "INFD")) {
     m->gunselect = GUN_CSAW;
   } else if (m_noitems && m_noitemsrail) {
-    m->gunselect = GUN_RIFLE;
+    m->gunselect = GUN_RAILGUN;
   } else if (disttoenemy < 8.0f) {
     if (m->gunselect != GUN_CSAW)
       m->gunselect = GUN_CSAW;
@@ -246,8 +246,8 @@ static void botaction(dynent *m) {
       m->gunselect = GUN_NAILGUN;
     else if (m->ammo[GUN_SG])
       m->gunselect = GUN_SG;
-    else if (m->ammo[GUN_RIFLE])
-      m->gunselect = GUN_RIFLE;
+    else if (m->ammo[GUN_RAILGUN])
+      m->gunselect = GUN_RAILGUN;
     else
       m->gunselect = GUN_CSAW;
   } else if (m->gunselect == GUN_CSAW && disttoenemy > 15.0f) {
@@ -261,8 +261,8 @@ static void botaction(dynent *m) {
       m->gunselect = GUN_NAILGUN;
     else if (m->ammo[GUN_SG])
       m->gunselect = GUN_SG;
-    else if (m->ammo[GUN_RIFLE])
-      m->gunselect = GUN_RIFLE;
+    else if (m->ammo[GUN_RAILGUN])
+      m->gunselect = GUN_RAILGUN;
   }
 
   vec tmp;
@@ -352,7 +352,7 @@ void botthink() {
         b->ammo[GUN_NAILGUN] = max(b->ammo[GUN_NAILGUN], 40);
         b->ammo[GUN_CG] = max(b->ammo[GUN_CG], 40);
         b->ammo[GUN_RL] = max(b->ammo[GUN_RL], 8);
-        b->ammo[GUN_RIFLE] = max(b->ammo[GUN_RIFLE], 8);
+        b->ammo[GUN_RAILGUN] = max(b->ammo[GUN_RAILGUN], 8);
       }
       botaction(b);
     } else if (b->state == CS_DEAD && lastmillis - b->lastaction > 5000) {

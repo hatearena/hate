@@ -300,7 +300,7 @@ void serverbot_spawn(int count) {
     b.roll = 0;
     b.state = CS_ALIVE;
     b.health = 150;
-    b.gunselect = (mode == 4 || mode == 5) ? GUN_RIFLE : 1 + rnd(6);
+    b.gunselect = (mode == 4 || mode == 5) ? GUN_RAILGUN : 1 + rnd(6);
     loopk(NUMGUNS) b.ammo[k] = 100;
     b.ammo[GUN_CSAW] = 1;
     b.movemode = 1;
@@ -369,10 +369,10 @@ void serverbot_reteam() {
 
 void serverbot_update_weapons() {
   loopi(numsbots) {
-    sbot[i].gunselect = (mode == 4 || mode == 5) ? GUN_RIFLE : 1 + rnd(6);
+    sbot[i].gunselect = (mode == 4 || mode == 5) ? GUN_RAILGUN : 1 + rnd(6);
     if (mode == 4 || mode == 5) {
       loopk(NUMGUNS) sbot[i].ammo[k] = 0;
-      sbot[i].ammo[GUN_RIFLE] = 100;
+      sbot[i].ammo[GUN_RAILGUN] = 100;
     }
   }
   serverbot_reteam();
@@ -678,7 +678,7 @@ void serverbot_hitscan(int gun, vec &from, vec &to, int sender) {
       case GUN_RL:
         damage = 120;
         break;
-      case GUN_RIFLE:
+      case GUN_RAILGUN:
         damage = 100;
         break;
       case GUN_NAILGUN:
@@ -1002,7 +1002,7 @@ void serverbot_update() {
     loopi(numsbots) {
       if (sbot[i].state == CS_ALIVE) {
         if (mode == 4 || mode == 5) {
-          sbot[i].ammo[GUN_RIFLE] = 100;
+          sbot[i].ammo[GUN_RAILGUN] = 100;
         } else {
           if (sbot[i].ammo[GUN_SG] < 10)
             sbot[i].ammo[GUN_SG] = 10;
@@ -1012,8 +1012,8 @@ void serverbot_update() {
             sbot[i].ammo[GUN_CG] = 40;
           if (sbot[i].ammo[GUN_RL] < 8)
             sbot[i].ammo[GUN_RL] = 8;
-          if (sbot[i].ammo[GUN_RIFLE] < 8)
-            sbot[i].ammo[GUN_RIFLE] = 8;
+          if (sbot[i].ammo[GUN_RAILGUN] < 8)
+            sbot[i].ammo[GUN_RAILGUN] = 8;
           sbot[i].ammo[GUN_CSAW] = 1;
         }
       }
@@ -1055,7 +1055,7 @@ void serverbot_update() {
         b.state = CS_ALIVE;
         b.lastmove = 0;
         b.lastattack = 0;
-        b.gunselect = (mode == 4 || mode == 5) ? GUN_RIFLE : 1 + rnd(6);
+        b.gunselect = (mode == 4 || mode == 5) ? GUN_RAILGUN : 1 + rnd(6);
         loopk(NUMGUNS) b.ammo[k] = 100;
         b.ammo[GUN_CSAW] = 1;
         b.movemode = 1;
@@ -1155,7 +1155,7 @@ void serverbot_update() {
       }
 
       if (mode == 4 || mode == 5) {
-        b.gunselect = GUN_RIFLE;
+        b.gunselect = GUN_RAILGUN;
       } else if (bestdist < 64.0f && b.gunselect != GUN_CSAW) {
         b.gunselect = GUN_CSAW;
       } else if (b.gunselect == GUN_CSAW && realdist > 15.0f) {
@@ -1169,8 +1169,8 @@ void serverbot_update() {
           b.gunselect = GUN_NAILGUN;
         else if (b.ammo[GUN_SG])
           b.gunselect = GUN_SG;
-        else if (b.ammo[GUN_RIFLE])
-          b.gunselect = GUN_RIFLE;
+        else if (b.ammo[GUN_RAILGUN])
+          b.gunselect = GUN_RAILGUN;
       } else if (!b.ammo[b.gunselect] && b.gunselect != GUN_CSAW) {
         if (b.ammo[GUN_RL])
           b.gunselect = GUN_RL;
@@ -1182,8 +1182,8 @@ void serverbot_update() {
           b.gunselect = GUN_NAILGUN;
         else if (b.ammo[GUN_SG])
           b.gunselect = GUN_SG;
-        else if (b.ammo[GUN_RIFLE])
-          b.gunselect = GUN_RIFLE;
+        else if (b.ammo[GUN_RAILGUN])
+          b.gunselect = GUN_RAILGUN;
         else
           b.gunselect = GUN_CSAW;
       }
@@ -1290,7 +1290,7 @@ void serverbot_update() {
           if (skillfactor < 0.01f)
             skillfactor = 0.01f;
           float inaccuracy = realdist * skillfactor * 0.12f;
-          if (b.gunselect == GUN_RIFLE)
+          if (b.gunselect == GUN_RAILGUN)
             inaccuracy *= 0.5f;
           float shot_tx = tx + (rnd(101) - 50) / 50.0f * inaccuracy;
           float shot_ty = ty + (rnd(101) - 50) / 50.0f * inaccuracy;

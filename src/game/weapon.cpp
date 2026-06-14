@@ -50,8 +50,8 @@ void selectgun(int a, int b, int c) {
     s = GUN_CG;
   else if (s != GUN_SG && player1->ammo[GUN_SG])
     s = GUN_SG;
-  else if (s != GUN_RIFLE && player1->ammo[GUN_RIFLE])
-    s = GUN_RIFLE;
+  else if (s != GUN_RAILGUN && player1->ammo[GUN_RAILGUN])
+    s = GUN_RAILGUN;
   else if (s != GUN_NAILGUN && player1->ammo[GUN_NAILGUN])
     s = GUN_NAILGUN;
   else if (s != GUN_LIGHTGUN && player1->ammo[GUN_LIGHTGUN])
@@ -366,7 +366,7 @@ void shootv(int gun, vec &from, vec &to, dynent *d,
     newprojectile(from, to, (float)pspeed, local, d, gun);
     break;
 
-  case GUN_RIFLE:
+  case GUN_RAILGUN:
     particle_splash(0, 80, 350, to);
     particle_splash(1, 15, 500, to);
     newbeam(from, to, 150);
@@ -447,7 +447,7 @@ void shoot(dynent *d, vec &targ) {
     d->lastattackgun = -1;
     return;
   };
-  if (d->gunselect && !(m_noitems && m_noitemsrail && d->gunselect == GUN_RIFLE))
+  if (d->gunselect && !(m_noitems && m_noitemsrail && d->gunselect == GUN_RAILGUN))
     d->ammo[d->gunselect]--;
   int nextgun = -1;
   if (!d->ammo[d->gunselect] && autoswitch) {
@@ -467,7 +467,7 @@ void shoot(dynent *d, vec &targ) {
   vec kickback = unitv;
   vmul(kickback, guns[d->gunselect].kickamount * -0.01f);
   vadd(d->vel, kickback);
-  if ((d->gunselect == GUN_SG || d->gunselect == GUN_RIFLE) && dist < 4.0f) {
+  if ((d->gunselect == GUN_SG || d->gunselect == GUN_RAILGUN) && dist < 4.0f) {
     if (d->pitch < -20.0f && d->onfloor) {
       d->vel.z += -d->pitch / 90.0f * 3.0f;
     } else {
@@ -508,7 +508,7 @@ void shoot(dynent *d, vec &targ) {
     return;
 
   if (d->gunselect != GUN_SG && d->gunselect != GUN_CG &&
-      d->gunselect != GUN_RIFLE && d->gunselect != GUN_NAILGUN &&
+      d->gunselect != GUN_RAILGUN && d->gunselect != GUN_NAILGUN &&
       d->gunselect != GUN_LIGHTGUN) {
     loopv(players) {
       dynent *o = players[i];

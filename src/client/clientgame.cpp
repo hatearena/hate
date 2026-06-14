@@ -158,13 +158,13 @@ void spawnstate(dynent *d) {
   };
   d->ammo[GUN_CSAW] = 1;
   if (m_noitems) {
-    d->gunselect = GUN_RIFLE;
+    d->gunselect = GUN_RAILGUN;
     d->armour = 0;
     if (m_noitemsrail) {
       d->health = 1;
       d->ammo[GUN_CSAW] = 0;
       d->ammo[GUN_NAILGUN] = 0;
-      d->ammo[GUN_RIFLE] = 999;
+      d->ammo[GUN_RAILGUN] = 999;
     } else {
       d->health = 256;
       if (m_tarena) {
@@ -179,7 +179,7 @@ void spawnstate(dynent *d) {
         };
       } else if (m_arena) // insta arena
       {
-        d->ammo[GUN_RIFLE] = 100;
+        d->ammo[GUN_RAILGUN] = 100;
       } else // efficiency
       {
         loopi(6) baseammo(i + 1);

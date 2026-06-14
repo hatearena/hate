@@ -1423,7 +1423,7 @@ void drawhudgun(float fovy, float aspect, int farplane) {
   int rtime = reloadtime(d->gunselect);
   if (d->lastaction && d->lastattackgun == d->gunselect &&
       lastmillis - d->lastaction < rtime) {
-    if (d->gunselect == GUN_RIFLE) {
+    if (d->gunselect == GUN_RAILGUN) {
       glMatrixMode(GL_PROJECTION);
       glPushMatrix();
       glLoadIdentity();
@@ -1459,13 +1459,13 @@ void drawhudgun(float fovy, float aspect, int farplane) {
     } else
       drawhudmodel(7, 18, rtime / 18.0f, d->lastaction);
   } else {
-    if (d->gunselect == GUN_RIFLE && d->lastaction &&
+    if (d->gunselect == GUN_RAILGUN && d->lastaction &&
         d->lastattackgun == d->gunselect)
       gunidletime = lastmillis;
     else
       gunidletime = 0;
 
-    if (d->gunselect == GUN_RIFLE) {
+    if (d->gunselect == GUN_RAILGUN) {
       glMatrixMode(GL_PROJECTION);
       glPushMatrix();
       glLoadIdentity();

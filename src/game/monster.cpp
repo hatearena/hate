@@ -27,7 +27,7 @@ monstertypes[NUMMONSTERTYPES] = {
      "monster/rhino"},
     {GUN_SG, 14, 120, 1, 100, 300, 400, 4, 14, 14, S_PAINE, S_DEATHE,
      "ratamahatta", "monster/rat"},
-    {GUN_RIFLE, 15, 200, 1, 80, 300, 300, 4, 18, 18, S_PAINS, S_DEATHS,
+    {GUN_RAILGUN, 15, 200, 1, 80, 300, 300, 4, 18, 18, S_PAINS, S_DEATHS,
      "a slith", "monster/slith"},
     {GUN_RL, 13, 500, 1, 0, 100, 200, 6, 24, 24, S_PAINB, S_DEATHB, "bauul",
      "monster/bauul"},

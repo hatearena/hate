@@ -684,9 +684,9 @@ void process(ENetPacket *packet, int sender) {
       to.z = getint(p) / DMF;
       serverbot_hitscan(gun, from, to, sender);
 
-      if (gun == GUN_SG || gun == GUN_CG || gun == GUN_RIFLE ||
+      if (gun == GUN_SG || gun == GUN_CG || gun == GUN_RAILGUN ||
           gun == GUN_NAILGUN || gun == GUN_LIGHTGUN) {
-        int qdam = gun == GUN_RIFLE     ? 100
+        int qdam = gun == GUN_RAILGUN     ? 100
                    : gun == GUN_SG      ? 10
                    : gun == GUN_CG      ? 30
                    : gun == GUN_NAILGUN ? 25
