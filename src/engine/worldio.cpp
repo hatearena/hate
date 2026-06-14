@@ -359,7 +359,11 @@ void load_world(char *mname) {
   char *dot = strrchr(cgzname, '.');
   if (dot)
     *dot = '\0';
-  conoutf("Read map %s in %d milliseconds.", cgzname,
+  char *cgzdisplayname = (char *)"";
+  if (strlen(cgzname) > 14) {
+    cgzdisplayname = cgzname + 14;
+  }
+  conoutf("Read map %s in %d milliseconds.", cgzdisplayname,
           SDL_GetTicks() - lastmillis);
   if (dot)
     *dot = '.';
