@@ -1427,7 +1427,7 @@ void drawhudgun(float fovy, float aspect, int farplane) {
       glMatrixMode(GL_PROJECTION);
       glPushMatrix();
       glLoadIdentity();
-      gluPerspective(fovy * 0.84f, aspect, 0.3f, farplane);
+      gluPerspective(fovy * 0.82f, aspect, 0.3f, farplane);
       glMatrixMode(GL_MODELVIEW);
       int sgtime = lastmillis - d->lastaction;
       if (sgtime < 610)
@@ -1469,7 +1469,7 @@ void drawhudgun(float fovy, float aspect, int farplane) {
       glMatrixMode(GL_PROJECTION);
       glPushMatrix();
       glLoadIdentity();
-      gluPerspective(fovy * 0.84f, aspect, 0.3f, farplane);
+      gluPerspective(fovy * 0.82f, aspect, 0.3f, farplane);
       glMatrixMode(GL_MODELVIEW);
       drawhudmodel(4, 1, 100, 0);
       glMatrixMode(GL_PROJECTION);
