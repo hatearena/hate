@@ -398,7 +398,7 @@ void exec(const char *cfgfile) {
 };
 
 void writecfg() {
-  FILE *f = fopen("config.cfg", "w");
+  FILE *f = fopen("config.cfg.tmp", "w");
   if (!f)
     return;
   fprintf(
@@ -424,6 +424,7 @@ void writecfg() {
         fprintf(f, "alias \"%s\" [%s]\n", id->name, id->action);
       };);
   fclose(f);
+  rename("config.cfg.tmp", "config.cfg");
 };
 
 COMMAND(writecfg, ARG_NONE);
