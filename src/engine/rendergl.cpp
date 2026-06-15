@@ -1166,7 +1166,7 @@ void addssao(int w, int h) {
 VARP(vignette, 0, 1, 1);
 static int __ad_vignette =
     (addcommanddetail("vignette", "Toggles vignette effect"), 0);
-VARP(vignettestrength, 0, 10, 100);
+VARP(vignettestrength, 0, 40, 100);
 static int __ad_vignettestrength =
     (addcommanddetail("vignettestrength", "Vignette darkness strength"), 0);
 
