@@ -119,7 +119,7 @@ void writemap(char *mname, int msize, uchar *mdata) {
   char *dot = strrchr(cgzname, '.');
   if (dot)
     *dot = '\0';
-  conoutf("Wrote map %s as file %s", mname, cgzname);
+  conoutf("Wrote map %s as file %s", mname, cgzname + 14);
 }
 
 uchar *readmap(char *mname, int *msize) {
@@ -219,7 +219,7 @@ void save_world(char *mname) {
   char *dot = strrchr(cgzname, '.');
   if (dot)
     *dot = '\0';
-  conoutf("Wrote map file %s", cgzname);
+  conoutf("Wrote map file %s", cgzname + 14);
   settagareas();
 };
 
