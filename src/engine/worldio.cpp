@@ -141,7 +141,7 @@ void save_world(char *mname) {
   resettagareas();
   voptimize();
   toptimize();
-  if (!*mname)
+  if (!*mname || !strcmp(mname, "."))
     mname = getclientmap();
   setnames(mname);
   backup(cgzname, bakname);

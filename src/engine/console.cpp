@@ -27,6 +27,10 @@ void setconskip(int n) {
 COMMANDN(conskip, setconskip, ARG_1INT);
 static int __ad_conskip = (addcommanddetail("conskip", "Scrolls console messages"), 0);
 
+void cls() { conlines.setsize(0); };
+COMMAND(cls, ARG_NONE);
+static int __ad_cls = (addcommanddetail("cls", "Clears the console"), 0);
+
 void conline(const char *sf, bool highlight) // add a line to the console buffer
 {
   cline cl;
