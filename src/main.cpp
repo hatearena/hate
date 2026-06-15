@@ -35,8 +35,8 @@ void quit() {
 };
 
 static bool __dummy_quit =
-    addcommand((char *)"Exit", (void (*)())quit, ARG_NONE);
-static int __ad_Exit = (addcommanddetail("Exit", "Quits the game"), 0);
+    addcommand((char *)"exit", (void (*)())quit, ARG_NONE);
+static int __ad_Exit = (addcommanddetail("exit", "Quits the game"), 0);
 
 void fatal(const char *s, const char *o) {
   sprintf_sd(msg)("%s%s (%s)\n", s, o, SDL_GetError());
