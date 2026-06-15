@@ -303,7 +303,7 @@ void moveplayer(dynent *pl, int moveres, bool local, int curtime) {
       } else if (local) {
         playsoundc(S_JUMP);
       };
-    } else if (pl->timeinair > 1800) {
+    } else if (pl->timeinair > 2500) {
       if (local)
         playsoundc(S_LAND);
       else if (pl->monsterstate)
