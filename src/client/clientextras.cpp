@@ -43,10 +43,10 @@ void renderclient(dynent *d, bool team, const char *mdlname, bool hellpig,
     n = 8;
   } else if (d->monsterstate == M_PAIN) {
     n = 10;
-  } else if ((!d->move && !d->strafe) || !d->moving) {
-    n = 12;
   } else if (!d->onfloor && d->timeinair > 100) {
     n = 18;
+  } else if ((!d->move && !d->strafe) || !d->moving) {
+    n = 12;
   } else {
     n = 14;
     speed = 5000 / d->maxspeed * scale;
