@@ -1,5 +1,9 @@
 #include "../include/cube.h"
 
+VARP(mmshadowintensity, 0, 72, 100);
+static int __ad_mmshadowintensity =
+    (addcommanddetail("mmshadowintensity", "Mapmodel shadow intensity"), 0);
+
 vector<entity> ents;
 
 char *entmdlnames[] = {
@@ -34,6 +38,36 @@ void renderentities() {
                   (float)S(e.x, e.y)->floor + mmi.zoff + e.attr3, e.y,
                   (float)((e.attr1 + 7) - (e.attr1 + 7) % 15), 0, false, 1.0f,
                   animrange > 1 ? 150.0f : 10.0f, mmi.snap);
+
+      float fz = (float)S(e.x, e.y)->floor;
+      float sr = (float)mmi.rad * 1.8f;
+      if (sr < 0.5f)
+        sr = 0.5f;
+
+      glEnable(GL_BLEND);
+      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+      glDepthMask(GL_FALSE);
+      glDisable(GL_TEXTURE_2D);
+
+      glPushMatrix();
+      glTranslatef((float)e.x, fz + 0.05f, (float)e.y);
+
+      glBegin(GL_TRIANGLE_FAN);
+      glColor4f(0.0f, 0.0f, 0.0f, mmshadowintensity / 100.0f);
+      glVertex3f(0.0f, 0.0f, 0.0f);
+      int segs = 20;
+      for (int i = 0; i <= segs; i++) {
+        float angle = (float)i * 2.0f * PI / (float)segs;
+        glColor4f(0.0f, 0.0f, 0.0f, 0.0f);
+        glVertex3f(cos(angle) * sr, 0.0f, sin(angle) * sr);
+      }
+      glEnd();
+
+      glPopMatrix();
+
+      glDepthMask(GL_TRUE);
+      glDisable(GL_BLEND);
+      glEnable(GL_TEXTURE_2D);
     } else {
       if (OUTBORD(e.x, e.y))
         continue;
