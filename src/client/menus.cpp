@@ -525,7 +525,7 @@ bool rendermenu() {
   int mdisp = m.items.length();
   int w = 0;
   loopi(mdisp) {
-    if (m.items[i].separator)
+    if (m.items[i].separator && !m.items[i].text)
       continue;
     int tw = text_width(m.items[i].text);
     if (m.items[i].slider) {
@@ -603,16 +603,47 @@ bool rendermenu() {
       draw_text(buf, x, y, 2);
     } else if (m.items[idx].separator) {
       int ly = y + step / 2;
-      glDisable(GL_TEXTURE_2D);
-      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-      glColor4ub(160, 160, 160, 80);
-      glBegin(GL_QUADS);
-      glVertex2i(x, ly);
-      glVertex2i(x + w, ly);
-      glVertex2i(x + w, ly + 2);
-      glVertex2i(x, ly + 2);
-      glEnd();
-      glEnable(GL_TEXTURE_2D);
+      if (m.items[idx].text) {
+        string cap;
+        char *src = m.items[idx].text;
+        int i;
+        for (i = 0; src[i]; i++)
+          cap[i] = src[i] >= 'a' && src[i] <= 'z' ? src[i] - 32 : src[i];
+        cap[i] = '\0';
+        float scale = 0.75f;
+        int tw = (int)(text_width(cap) * scale);
+        int pad = FONTH / 3;
+        int text_x = x + (w - tw) / 2;
+        int text_y = ly - (int)(FONTH * scale / 2);
+        glDisable(GL_TEXTURE_2D);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glColor4ub(160, 160, 160, 80);
+        glBegin(GL_QUADS);
+        glVertex2i(x, ly);
+        glVertex2i(text_x - pad, ly);
+        glVertex2i(text_x - pad, ly + 2);
+        glVertex2i(x, ly + 2);
+        glEnd();
+        glBegin(GL_QUADS);
+        glVertex2i(text_x + tw + pad, ly);
+        glVertex2i(x + w, ly);
+        glVertex2i(x + w, ly + 2);
+        glVertex2i(text_x + tw + pad, ly + 2);
+        glEnd();
+        glEnable(GL_TEXTURE_2D);
+        draw_text(cap, text_x, text_y, 2, 160, scale);
+      } else {
+        glDisable(GL_TEXTURE_2D);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glColor4ub(160, 160, 160, 80);
+        glBegin(GL_QUADS);
+        glVertex2i(x, ly);
+        glVertex2i(x + w, ly);
+        glVertex2i(x + w, ly + 2);
+        glVertex2i(x, ly + 2);
+        glEnd();
+        glEnable(GL_TEXTURE_2D);
+      };
     } else if (m.items[idx].textinput) {
       string buf;
       if (menutextinput && idx == m.menusel)
@@ -853,9 +884,9 @@ COMMANDN(menuitem_text, menuitem_text, ARG_2STR);
 static int __ad_menuitem_text =
     (addcommanddetail("menuitem_text", "Adds a text input menu item"), 0);
 
-void separatorcmd() {
+void separatorcmd(char *text) {
   mitem &m = menus.last().items.add();
-  m.text = NULL;
+  m.text = *text ? newstring(text) : NULL;
   m.action = NULL;
   m.checkbox = false;
   m.slider = false;
@@ -863,7 +894,7 @@ void separatorcmd() {
   m.textinput = false;
   m.separator = true;
 };
-COMMANDN(separator, separatorcmd, ARG_NONE);
+COMMANDN(separator, separatorcmd, ARG_1STR);
 static int __ad_separator =
     (addcommanddetail("separator", "Adds a separator line to the current menu"),
      0);
