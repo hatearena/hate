@@ -1050,8 +1050,8 @@ void serverbot_update() {
             sbot[i].ammo[GUN_NAILGUN] = 40;
           if (sbot[i].ammo[GUN_CG] < 40)
             sbot[i].ammo[GUN_CG] = 40;
-          if (sbot[i].ammo[GUN_RL] < 8)
-            sbot[i].ammo[GUN_RL] = 8;
+          if (sbot[i].ammo[GUN_RL] < 2)
+            sbot[i].ammo[GUN_RL] = 2;
           if (sbot[i].ammo[GUN_RAILGUN] < 8)
             sbot[i].ammo[GUN_RAILGUN] = 8;
           sbot[i].ammo[GUN_CSAW] = 1;
@@ -1199,29 +1199,29 @@ void serverbot_update() {
       } else if (bestdist < 64.0f && b.gunselect != GUN_CSAW) {
         b.gunselect = GUN_CSAW;
       } else if (b.gunselect == GUN_CSAW && realdist > 15.0f) {
-        if (b.ammo[GUN_RL])
-          b.gunselect = GUN_RL;
+        if (b.ammo[GUN_LIGHTGUN])
+          b.gunselect = GUN_LIGHTGUN;
         else if (b.ammo[GUN_CG])
           b.gunselect = GUN_CG;
-        else if (b.ammo[GUN_LIGHTGUN])
-          b.gunselect = GUN_LIGHTGUN;
         else if (b.ammo[GUN_NAILGUN])
           b.gunselect = GUN_NAILGUN;
         else if (b.ammo[GUN_SG])
           b.gunselect = GUN_SG;
+        else if (b.ammo[GUN_RL])
+          b.gunselect = GUN_RL;
         else if (b.ammo[GUN_RAILGUN])
           b.gunselect = GUN_RAILGUN;
       } else if (!b.ammo[b.gunselect] && b.gunselect != GUN_CSAW) {
-        if (b.ammo[GUN_RL])
-          b.gunselect = GUN_RL;
+        if (b.ammo[GUN_LIGHTGUN])
+          b.gunselect = GUN_LIGHTGUN;
         else if (b.ammo[GUN_CG])
           b.gunselect = GUN_CG;
-        else if (b.ammo[GUN_LIGHTGUN])
-          b.gunselect = GUN_LIGHTGUN;
         else if (b.ammo[GUN_NAILGUN])
           b.gunselect = GUN_NAILGUN;
         else if (b.ammo[GUN_SG])
           b.gunselect = GUN_SG;
+        else if (b.ammo[GUN_RL])
+          b.gunselect = GUN_RL;
         else if (b.ammo[GUN_RAILGUN])
           b.gunselect = GUN_RAILGUN;
         else

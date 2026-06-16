@@ -333,6 +333,8 @@ void shootv(int gun, vec &from, vec &to, dynent *d,
 {
   if (gun != GUN_LIGHTGUN)
     playsound(guns[gun].sound, d == player1 ? NULL : &d->o);
+  else if (d != player1)
+    playsound(guns[gun].sound, &d->o);
   int pspeed = 25;
   switch (gun) {
   case GUN_CSAW:
