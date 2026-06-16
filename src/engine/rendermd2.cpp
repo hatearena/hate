@@ -251,7 +251,7 @@ void md2::render(vec &light, int frame, int range, float x, float y, float z,
 
 hashtable<md2 *> *mdllookup = NULL;
 vector<md2 *> mapmodels;
-const int FIRSTMDL = 20;
+const int FIRSTMDL = 10000;
 
 void delayedload(md2 *m) {
   if (!m->loaded) {
@@ -300,9 +300,11 @@ mapmodelinfo &getmminfo(int i) {
 int nummapmodels() { return mapmodels.length(); };
 
 COMMAND(mapmodel, ARG_5STR);
-static int __ad_mapmodel = (addcommanddetail("mapmodel", "Registers a map model"), 0);
+static int __ad_mapmodel =
+    (addcommanddetail("mapmodel", "Registers a map model"), 0);
 COMMAND(mapmodelreset, ARG_NONE);
-static int __ad_mapmodelreset = (addcommanddetail("mapmodelreset", "Resets all map models"), 0);
+static int __ad_mapmodelreset =
+    (addcommanddetail("mapmodelreset", "Resets all map models"), 0);
 
 void preloadhudmodels() {
   char *names[] = {"hudguns/hate_csaw",    "hudguns/hate_shotg",

@@ -18,6 +18,7 @@ float entzoffsets[] = {
 
 int triggertime = 0;
 int teleporttime = -10000;
+vec teleportdest = {0, 0, 0};
 
 void renderent(entity &e, char *mdlname, float z, float yaw, int frame = 0,
                int numf = 1, int basetime = 0, float speed = 10.0f) {
@@ -77,7 +78,8 @@ void renderentities() {
           continue;
         if (e.type < I_SHELLS || e.type > TELEPORT)
           continue;
-        float zoffset = e.type == TELEPORT ? 0.2f * sinf(lastmillis / 800.0f) : 0.0f;
+        float zoffset =
+            e.type == TELEPORT ? 0.2f * sinf(lastmillis / 800.0f) : 0.0f;
         float yaw = e.type == TELEPORT ? (float)e.attr3 : lastmillis / 10.0f;
         renderent(e, entmdlnames[e.type - I_SHELLS],
                   entzoffsets[e.type - I_SHELLS] + zoffset, yaw);
@@ -234,6 +236,7 @@ void teleport(int n, dynent *d) {
       d->vel.x = d->vel.y = d->vel.z = 0;
       entinmap(d);
       playsoundc(S_TELEPORT);
+      teleportdest = d->o;
       loopi(30) {
         vec vel = {(rnd(41) - 20) * 1.5f, (rnd(41) - 20) * 1.5f,
                    (rnd(41) - 20) * 1.5f};
@@ -353,14 +356,17 @@ void checkitems() {
       pickup(i, player1);
   };
   if (lastmillis - teleporttime < 1000) {
-    loopi(6) {
-      vec pos = player1->o;
-      pos.x += (rnd(21) - 10) * 0.3f;
-      pos.y += (rnd(21) - 10) * 0.3f;
-      pos.z += (rnd(21) - 10) * 0.3f;
-      vec vel = {(rnd(41) - 20) * 0.6f, (rnd(41) - 20) * 0.6f,
-                 (rnd(41) - 20) * 0.6f};
-      newparticlecol(pos, vel, rnd(300) + 400, 12, 140, 20, 20);
+    float fwd_x = sinf(player1->yaw * PI / 180.0f);
+    float fwd_y = -cosf(player1->yaw * PI / 180.0f);
+    loopi(28) {
+      vec pos = teleportdest;
+      pos.x += (rnd(21) - 10) * 0.6f;
+      pos.y += (rnd(21) - 10) * 0.6f;
+      pos.z += (rnd(21) - 10) * 0.4f + 0.5f;
+      vec vel = {(rnd(41) - 20) * 0.4f + fwd_x * 50.0f,
+                 (rnd(41) - 20) * 0.4f + fwd_y * 50.0f,
+                 (rnd(41) - 20) * 0.2f + 1.0f};
+      newparticlecol(pos, vel, rnd(200) + 300, 12, 140, 20, 20);
     };
   };
 };
