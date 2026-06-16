@@ -133,7 +133,13 @@ static bool server_los(float lx, float ly, float lz, float bx, float by,
     walkinfo &wi = walkdata[cy * mapsize + cx];
     if (!wi.walkable)
       return false;
-    if (z < (float)wi.floor - 0.5f || z > (float)wi.ceil + 0.5f)
+    float wfloor = (float)wi.floor;
+    float wceil = (float)wi.ceil;
+    if (wi.type == 2)
+      wfloor -= wi.vdelta / 4.0f;
+    else if (wi.type == 3)
+      wceil += wi.vdelta / 4.0f;
+    if (z < wfloor - 0.5f || z > wceil + 0.5f)
       return false;
   }
   return true;
