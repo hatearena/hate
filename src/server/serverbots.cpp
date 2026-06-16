@@ -141,7 +141,7 @@ static bool server_los(float lx, float ly, float lz, float bx, float by,
 
 static const char *bnames[] = {
     "Cerelo", "Diaso", "Ceria",  "Deathly", "Ra",      "Va",     "Never",
-    "Abu",    "Re",    "Why",    "Lucky",   "Lano",    "Cliff",  "Cobra",
+    "Abzu",   "Re",    "Why",    "Lucky",   "Lano",    "Cliff",  "Cobra",
     "Liner",  "Chiba", "Dragon", "Sabre",   "Koffman", "Stuff",  "Bones",
     "Xor",    "Snuff", "Sniff",  "Pain",    "Time",    "Fake",   "Headup",
     "MX",     "Moon",  "Wine",   "Tux",     "Crash",   "Threed", "Backlotter",
