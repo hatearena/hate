@@ -108,7 +108,10 @@ static void updategibs() {
     gibs[i].o.z += gibs[i].vel.z * dt;
     int x = (int)gibs[i].o.x, y = (int)gibs[i].o.y;
     if (!OUTBORD(x, y)) {
-      float floor = S(x, y)->floor;
+      sqr *s = S(x, y);
+      float floor = (float)s->floor;
+      if (s->type == FHF)
+        floor -= s->vdelta / 4.0f;
       if (gibs[i].o.z < floor) {
         gibs[i].o.z = floor;
         gibs[i].vel.x *= -0.3f;
