@@ -227,7 +227,12 @@ static void loadspawns() {
       wi.walkable = false;
       wi.floor = 0;
       wi.ceil = 16;
-      gzgetc(f);
+      if (hdr.version >= 6) {
+        gzgetc(f);
+        gzgetc(f);
+      } else {
+        gzgetc(f);
+      }
       gzgetc(f);
       if (hdr.version <= 2) {
         gzgetc(f);
@@ -237,16 +242,35 @@ static void loadspawns() {
       wi.floor = (char)gzgetc(f);
       wi.ceil = (char)gzgetc(f);
       wi.walkable = (type != 1);
-      gzgetc(f);
-      gzgetc(f);
-      gzgetc(f);
+      if (hdr.version >= 6) {
+        gzgetc(f);
+        gzgetc(f);
+      } else {
+        gzgetc(f);
+      }
+      if (hdr.version >= 6) {
+        gzgetc(f);
+        gzgetc(f);
+      } else {
+        gzgetc(f);
+      }
+      if (hdr.version >= 6) {
+        gzgetc(f);
+        gzgetc(f);
+      } else {
+        gzgetc(f);
+      }
       if (hdr.version <= 2) {
         gzgetc(f);
         gzgetc(f);
       }
       gzgetc(f);
-      if (hdr.version >= 2)
+      if (hdr.version >= 6) {
         gzgetc(f);
+        gzgetc(f);
+      } else if (hdr.version >= 2) {
+        gzgetc(f);
+      }
       if (hdr.version >= 5)
         gzgetc(f);
     }
