@@ -19,6 +19,7 @@ static parttype parttypes[] = {
     {1.0f, 1.0f, 1.0f, 0, 7, 0.05f},  // 9:  white pickup glow
     {0.4f, 0.8f, 1.0f, 0, 6, 0.06f},  // 10: water bubble
     {1.0f, 1.0f, 1.0f, 20, 7, 0.04f}, // 11: water mist
+    {0.5f, 0.1f, 0.1f, 0, 7, 0.015f}, // 12: small dark red
 };
 
 struct particle {
