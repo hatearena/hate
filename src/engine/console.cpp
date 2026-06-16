@@ -11,8 +11,8 @@ const int WORDWRAP = 256;
 VARP(msglimit, 1, 6, 50);
 static int __ad_msglimit =
     (addcommanddetail("msglimit", "Number of visible console messages"), 0);
-int conskip = 0;
 
+int conskip = 0;
 bool saycommandon = false;
 int saycommand_start = 0;
 int saycommand_end = 0;
@@ -33,8 +33,7 @@ void cls() { conlines.setsize(0); };
 COMMAND(cls, ARG_NONE);
 static int __ad_cls = (addcommanddetail("cls", "Clears the console"), 0);
 
-void conline(const char *sf, bool highlight) // add a line to the console buffer
-{
+void conline(const char *sf, bool highlight) {
   cline cl;
   cl.cref = conlines.length() > 100 ? conlines.pop().cref : newstringbuf("");
   cl.outtime = lastmillis;
