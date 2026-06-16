@@ -14,8 +14,9 @@ jobs:
               run: brew update && brew install enet sdl2 sdl2_image sdl2_mixer sdl2_ttf
             - name: Build
               run: |
-                  cmake -B build -DCMAKE_BUILD_TYPE=Release -S .
+                  cmake -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_APPBUNDLE=ON -S .
                   cmake --build build --config Release
+                  cmake --build build --target appbundle
             - name: Package .app bundle
               run: |
                   cd build
