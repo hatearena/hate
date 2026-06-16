@@ -188,7 +188,7 @@ void md2::render(vec &light, int frame, int range, float x, float y, float z,
 
     float frac1 = (time - fr1 * speed) / speed;
     float frac2 = 1 - frac1;
-    fr1 = fr1 % range + frame;
+    fr1 = ((fr1 % range) + range) % range + frame;
     int fr2 = fr1 + 1;
     if (fr2 >= frame + range)
       fr2 = frame;
