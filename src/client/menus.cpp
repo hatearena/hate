@@ -872,6 +872,8 @@ bool menukey(int code, bool isdown) {
   if (vmenu <= 0)
     return false;
   int menusel = menus[vmenu].menusel;
+  gmenu &gm = menus[vmenu];
+  int n = vmenu == 1 ? max(servercount, 1) : gm.items.length();
   if (isdown) {
     if (code == SDLK_ESCAPE) {
       menuset(-1);
@@ -880,12 +882,13 @@ bool menukey(int code, bool isdown) {
       return true;
     } else if (code == SDLK_UP || code == -4) {
       menusel--;
+      if (menusel < 0) menusel = n - 1;
       while (menusel > 0 && menus[vmenu].items[menusel].separator)
         menusel--;
     } else if (code == SDLK_DOWN || code == -5) {
       menusel++;
-      while (menusel < menus[vmenu].items.length() - 1 &&
-             menus[vmenu].items[menusel].separator)
+      if (menusel >= n) menusel = 0;
+      while (menusel < n - 1 && menus[vmenu].items[menusel].separator)
         menusel++;
     } else if ((code == SDLK_LEFT || code == -1) &&
                menus[vmenu].items[menusel].slider) {
@@ -908,8 +911,6 @@ bool menukey(int code, bool isdown) {
       };
       return true;
     };
-    gmenu &gm = menus[vmenu];
-    int n = vmenu == 1 ? max(servercount, 1) : gm.items.length();
     int maxvis = (VIRTH - 3 * (FONTH / 4 * 5)) / (FONTH / 4 * 5);
     if (maxvis < 1)
       maxvis = 1;
