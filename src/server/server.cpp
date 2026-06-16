@@ -570,8 +570,17 @@ void process(ENetPacket *packet, int sender) {
           mode = reqmode;
         }
       } else {
-        mode = reqmode;
-        strcpy_s(smapname, text);
+        if (maprotation.length() > 0) {
+          map_rotation_index = 0;
+          strcpy_s(smapname, maprotation[0]);
+          if (moderotation.length() > 0)
+            mode = moderotation[0];
+          else
+            mode = reqmode;
+        } else {
+          mode = reqmode;
+          strcpy_s(smapname, text);
+        }
       }
       minremain = timelimit ? timelimit : 10;
       mapend = lastsec + minremain * 60;
