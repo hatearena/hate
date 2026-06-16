@@ -22,6 +22,7 @@ char *menutextcmd = NULL;
 
 struct gmenu {
   char *name;
+  char *displayname;
   vector<mitem> items;
   int mwidth;
   int menusel;
@@ -521,7 +522,7 @@ bool rendermenu() {
     return true;
   };
 
-  sprintf_sd(title)(vmenu > 1 ? "%s" : "%s", m.name);
+  sprintf_sd(title)(vmenu > 1 ? "%s" : "%s", m.displayname ? m.displayname : m.name);
   int mdisp = m.items.length();
   int w = 0;
   loopi(mdisp) {
@@ -666,9 +667,16 @@ bool rendermenu() {
 void newmenu(const char *name) {
   gmenu &menu = menus.add();
   menu.name = newstring(name);
+  menu.displayname = NULL;
   menu.menusel = 0;
   menu.menuselvis = 0.0f;
   menu.scrolloff = 0;
+};
+
+void newmenucmd(char *name, char *disp) {
+  newmenu(name);
+  if (*disp)
+    menus.last().displayname = newstring(disp);
 };
 
 void menumanual(int m, int n, char *text) {
@@ -877,7 +885,7 @@ static int __ad_menuitem_slider =
 COMMAND(showmenu, ARG_1STR);
 static int __ad_showmenu =
     (addcommanddetail("showmenu", "Opens a menu by name"), 0);
-COMMAND(newmenu, ARG_1STR);
+COMMANDN(newmenu, newmenucmd, ARG_2STR);
 static int __ad_newmenu =
     (addcommanddetail("newmenu", "Creates a new menu"), 0);
 COMMANDN(menuitem_text, menuitem_text, ARG_2STR);
