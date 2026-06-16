@@ -76,9 +76,21 @@ void renderentities() {
           continue;
         if (e.type < I_SHELLS || e.type > TELEPORT)
           continue;
+        float zoffset = e.type == TELEPORT ? 0.2f * sinf(lastmillis / 800.0f) : 0.0f;
+        float yaw = e.type == TELEPORT ? (float)e.attr3 : lastmillis / 10.0f;
         renderent(e, entmdlnames[e.type - I_SHELLS],
-                  entzoffsets[e.type - I_SHELLS], lastmillis / 10.0f);
-        if (e.spawned && (rnd(8) == 0)) {
+                  entzoffsets[e.type - I_SHELLS] + zoffset, yaw);
+        if (e.type == TELEPORT) {
+          if (rnd(4) == 0) {
+            float f = S(e.x, e.y)->floor;
+            vec pos = {(float)e.x + (rnd(21) - 10) * 0.1f,
+                       (float)e.y + (rnd(21) - 10) * 0.1f,
+                       f + 0.5f + (rnd(11) - 5) * 0.1f};
+            vec vel = {(rnd(21) - 10) * 0.4f, (rnd(21) - 10) * 0.4f,
+                       1.5f + rnd(4) * 0.3f};
+            newparticlecol(pos, vel, rnd(400) + 400, 9, 140, 20, 20);
+          };
+        } else if (e.spawned && (rnd(8) == 0)) {
           float f = S(e.x, e.y)->floor;
           vec pos = {(float)e.x + (rnd(21) - 10) * 0.1f,
                      (float)e.y + (rnd(21) - 10) * 0.1f,
@@ -212,6 +224,7 @@ void teleport(int n, dynent *d) {
     if (beenhere < 0)
       beenhere = e;
     if (ents[e].attr2 == tag) {
+      vec src = d->o;
       d->o.x = ents[e].x;
       d->o.y = ents[e].y;
       d->o.z = ents[e].z;
@@ -220,6 +233,16 @@ void teleport(int n, dynent *d) {
       d->vel.x = d->vel.y = d->vel.z = 0;
       entinmap(d);
       playsoundc(S_TELEPORT);
+      loopi(20) {
+        vec vel = {(rnd(41) - 20) * 0.6f, (rnd(41) - 20) * 0.6f,
+                   (rnd(41) - 20) * 0.6f};
+        newparticlecol(src, vel, rnd(300) + 300, 9, 140, 20, 20);
+      };
+      loopi(20) {
+        vec vel = {(rnd(41) - 20) * 0.6f, (rnd(41) - 20) * 0.6f,
+                   (rnd(41) - 20) * 0.6f};
+        newparticlecol(d->o, vel, rnd(300) + 300, 9, 140, 20, 20);
+      };
       break;
     };
   };
