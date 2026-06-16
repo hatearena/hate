@@ -1,4 +1,5 @@
 #include "../include/cube.h"
+#include <sys/stat.h>
 
 extern int islittleendian;
 
@@ -190,6 +191,11 @@ void record(char *name) {
   if (cn < 0)
     return;
   sprintf_sd(fn)("demos/%s.hdemo", name);
+#ifndef _WIN32
+  mkdir("demos", 0755);
+#else
+  mkdir("demos");
+#endif
   savestate(fn);
   gzputi(cn);
   conoutf("Started recording demo to %s", fn);
@@ -265,7 +271,7 @@ void startdemo() {
   democlientnum = gzgeti();
   demoplayback = true;
   starttime = lastmillis;
-  conoutf("now playing demo");
+  conoutf("Now playing demo");
   dynent *d = getclient(democlientnum);
   assert(d);
   *d = *player1;
@@ -406,7 +412,7 @@ void stopn() {
     stopreset();
   else
     stop();
-  conoutf("demo stopped");
+  conoutf("Demo stopped");
 };
 
 COMMAND(record, ARG_1STR);
