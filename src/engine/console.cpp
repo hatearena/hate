@@ -8,8 +8,9 @@ struct cline {
 vector<cline> conlines;
 
 const int WORDWRAP = 256;
-VARP(msglimit, 1, 8, 50);
-static int __ad_msglimit = (addcommanddetail("msglimit", "Number of visible console messages"), 0);
+VARP(msglimit, 1, 6, 50);
+static int __ad_msglimit =
+    (addcommanddetail("msglimit", "Number of visible console messages"), 0);
 int conskip = 0;
 
 bool saycommandon = false;
@@ -25,7 +26,8 @@ void setconskip(int n) {
 };
 
 COMMANDN(conskip, setconskip, ARG_1INT);
-static int __ad_conskip = (addcommanddetail("conskip", "Scrolls console messages"), 0);
+static int __ad_conskip =
+    (addcommanddetail("conskip", "Scrolls console messages"), 0);
 
 void cls() { conlines.setsize(0); };
 COMMAND(cls, ARG_NONE);
@@ -57,13 +59,16 @@ void conoutf(const char *s, ...) {
   while (strlen(s) > WORDWRAP) // cut strings to fit on screen
   {
     int wrap = WORDWRAP;
-    while (wrap > 0 && s[wrap] != ' ') wrap--;
-    if (wrap <= 0) wrap = WORDWRAP;
+    while (wrap > 0 && s[wrap] != ' ')
+      wrap--;
+    if (wrap <= 0)
+      wrap = WORDWRAP;
     string t;
     strn0cpy(t, s, wrap + 1);
     conline(t, n++ != 0);
     s += wrap;
-    while (*s == ' ') s++;
+    while (*s == ' ')
+      s++;
   };
   conline(s, n != 0);
 };
@@ -125,7 +130,8 @@ void keymap(char *code, char *key) {
 };
 
 COMMAND(keymap, ARG_2STR);
-static int __ad_keymap = (addcommanddetail("keymap", "Maps a key code to a name"), 0);
+static int __ad_keymap =
+    (addcommanddetail("keymap", "Maps a key code to a name"), 0);
 
 void bindkey(char *key, char *action) {
   for (char *x = key; *x; x++)
@@ -138,7 +144,8 @@ void bindkey(char *key, char *action) {
 };
 
 COMMANDN(bind, bindkey, ARG_2STR);
-static int __ad_bind = (addcommanddetail("bind", "Binds an action to a key"), 0);
+static int __ad_bind =
+    (addcommanddetail("bind", "Binds an action to a key"), 0);
 
 bool dont_query_next_key = false;
 
@@ -162,9 +169,11 @@ void saycommand(char *init) // turns input to the command line on or off
 void mapmsg(char *s) { strn0cpy(hdr.maptitle, s, 128); };
 
 COMMAND(saycommand, ARG_VARI);
-static int __ad_saycommand = (addcommanddetail("saycommand", "Opens the command input console"), 0);
+static int __ad_saycommand =
+    (addcommanddetail("saycommand", "Opens the command input console"), 0);
 COMMAND(mapmsg, ARG_1STR);
-static int __ad_mapmsg = (addcommanddetail("mapmsg", "Sets the map description message"), 0);
+static int __ad_mapmsg =
+    (addcommanddetail("mapmsg", "Sets the map description message"), 0);
 
 #if 0
 #ifndef WIN32
@@ -214,7 +223,9 @@ static int numsuggestions = 0;
 static int sel_suggestion = -1;
 
 int get_numsuggestions() { return numsuggestions; }
-const char *get_suggestion(int i) { return (i >= 0 && i < numsuggestions) ? suggestions[i] : NULL; }
+const char *get_suggestion(int i) {
+  return (i >= 0 && i < numsuggestions) ? suggestions[i] : NULL;
+}
 int get_sel_suggestion() { return sel_suggestion; }
 
 static void clear_suggestions() {
@@ -224,19 +235,20 @@ static void clear_suggestions() {
 
 static void build_suggestions() {
   clear_suggestions();
-  if (!saycommandon || commandbuf[0] != '/' || !commandbuf[1]) return;
+  if (!saycommandon || commandbuf[0] != '/' || !commandbuf[1])
+    return;
 
   const char *prefix = commandbuf + 1;
   int plen = strlen(prefix);
-  if (plen == 0) return;
+  if (plen == 0)
+    return;
 
-  enumerate(idents, ident *, id,
-    if (strncmp(id->name, prefix, plen) == 0) {
-      if (numsuggestions < MAX_SUGGESTIONS) {
-        suggestions[numsuggestions++] = id->name;
-      }
-    }
-  );
+  enumerate(
+      idents, ident *, id, if (strncmp(id->name, prefix, plen) == 0) {
+        if (numsuggestions < MAX_SUGGESTIONS) {
+          suggestions[numsuggestions++] = id->name;
+        }
+      });
 
   if (numsuggestions > 1) {
     loopi(numsuggestions - 1) loopj(numsuggestions - i - 1) {
@@ -248,15 +260,18 @@ static void build_suggestions() {
     }
   }
 
-  if (numsuggestions > 0) sel_suggestion = 0;
+  if (numsuggestions > 0)
+    sel_suggestion = 0;
 }
 
 const char *get_command_word() {
   static string word;
-  if (!saycommandon || commandbuf[0] != '/') return NULL;
+  if (!saycommandon || commandbuf[0] != '/')
+    return NULL;
   const char *p = commandbuf + 1;
   int len = strcspn(p, " \t\r\n\0");
-  if (len == 0) return NULL;
+  if (len == 0)
+    return NULL;
   strn0cpy(word, p, len + 1);
   return word;
 }
@@ -271,7 +286,8 @@ void history(int n) {
 };
 
 COMMAND(history, ARG_1INT);
-static int __ad_history = (addcommanddetail("history", "Shows command history"), 0);
+static int __ad_history =
+    (addcommanddetail("history", "Shows command history"), 0);
 
 extern bool menutextinput;
 extern char menutextbuf[];
@@ -379,7 +395,8 @@ void keypress(int code, bool isdown, bool textinput, char text[32]) {
       case SDLK_UP:
         if (numsuggestions > 0) {
           sel_suggestion--;
-          if (sel_suggestion < 0) sel_suggestion = numsuggestions - 1;
+          if (sel_suggestion < 0)
+            sel_suggestion = numsuggestions - 1;
         } else if (histpos) {
           strcpy_s(commandbuf, vhistory[--histpos]);
           commandpos = strlen(commandbuf);
@@ -389,7 +406,8 @@ void keypress(int code, bool isdown, bool textinput, char text[32]) {
       case SDLK_DOWN:
         if (numsuggestions > 0) {
           sel_suggestion++;
-          if (sel_suggestion >= numsuggestions) sel_suggestion = 0;
+          if (sel_suggestion >= numsuggestions)
+            sel_suggestion = 0;
         } else if (histpos < vhistory.length()) {
           strcpy_s(commandbuf, vhistory[histpos++]);
           commandpos = strlen(commandbuf);
