@@ -38,6 +38,8 @@ struct serverbot {
 struct walkinfo {
   char floor;
   char ceil;
+  uchar type;
+  uchar vdelta;
   bool walkable;
 };
 
@@ -223,6 +225,8 @@ static void loadspawns() {
       continue;
     }
     walkinfo &wi = walkdata[k];
+    wi.type = type;
+    wi.vdelta = 0;
     if (type == 0) {
       wi.walkable = false;
       wi.floor = 0;
@@ -233,7 +237,7 @@ static void loadspawns() {
       } else {
         gzgetc(f);
       }
-      gzgetc(f);
+      wi.vdelta = (uchar)gzgetc(f);
       if (hdr.version <= 2) {
         gzgetc(f);
         gzgetc(f);
@@ -264,7 +268,7 @@ static void loadspawns() {
         gzgetc(f);
         gzgetc(f);
       }
-      gzgetc(f);
+      wi.vdelta = (uchar)gzgetc(f);
       if (hdr.version >= 6) {
         gzgetc(f);
         gzgetc(f);
@@ -831,7 +835,10 @@ static bool try_move_bot(serverbot &b, int diff, int move, int strafe) {
   if (move == 0 && strafe == 0) {
     int cx = (int)b.x, cy = (int)b.y;
     if (cx >= 0 && cy >= 0 && cx < mapsize && cy < mapsize) {
-      float floor = (float)walkdata[cy * mapsize + cx].floor;
+      walkinfo &wi = walkdata[cy * mapsize + cx];
+      float floor = (float)wi.floor;
+      if (wi.type == 2)
+        floor -= wi.vdelta / 4.0f;
       float targetZ = floor + BOT_EYEHEIGHT;
       if (targetZ < b.z - 0.01f) {
         b.fallvelocity += 600.0f * dt;
@@ -867,7 +874,7 @@ static bool try_move_bot(serverbot &b, int diff, int move, int strafe) {
   int x2 = (int)(nx + BOT_RADIUS);
   int y2 = (int)(ny + BOT_RADIUS);
   bool blocked = false;
-  char bestfloor = -128;
+  float bestfloor = -128.0f;
   for (int cx = x1; cx <= x2 && !blocked; cx++) {
     for (int cy = y1; cy <= y2; cy++) {
       if (cx < 0 || cy < 0 || cx >= mapsize || cy >= mapsize) {
@@ -879,14 +886,17 @@ static bool try_move_bot(serverbot &b, int diff, int move, int strafe) {
         blocked = true;
         break;
       }
-      if (wi.floor > bestfloor)
-        bestfloor = wi.floor;
+      float f = (float)wi.floor;
+      if (wi.type == 2)
+        f -= wi.vdelta / 4.0f;
+      if (f > bestfloor)
+        bestfloor = f;
     }
   }
   if (blocked)
     return false;
   float curfloor = b.z - BOT_EYEHEIGHT;
-  float targetfloor = (float)bestfloor;
+  float targetfloor = bestfloor;
   if (targetfloor > curfloor + BOT_MAXSTEP)
     return false;
   b.x = nx;
