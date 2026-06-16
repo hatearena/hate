@@ -110,6 +110,12 @@ void render_particles(int time) {
       if (t > 0.5f)
         sscale = 1.0f + ((t - 0.5f) / 0.5f) * 0.3f;
     };
+    if (p->type == 12) {
+      float total = (float)(p->fade + (lastmillis - p->millis));
+      float t = total > 0 ? (float)(lastmillis - p->millis) / total : 0.0f;
+      if (t > 0.7f)
+        mul = 1.0f - (t - 0.7f) / 0.3f;
+    };
     glColor3d(p->cr / 255.0f * mul, p->cg / 255.0f * mul, p->cb / 255.0f * mul);
     float sz = pt->sz * particlesize / 100.0f * sscale;
     // perf varray?
