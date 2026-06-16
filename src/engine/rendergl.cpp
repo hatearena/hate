@@ -1344,7 +1344,7 @@ char *hudgunnames[] = {"hudguns/hate_csaw",    "hudguns/hate_shotg",
 
 void drawhudmodel(int start, int end, float speed, int base) {
   float target_intensity =
-      (viewbob && player1->timeinair < 10 && (player1->move || player1->strafe))
+      (viewbob && player1->onfloor && (player1->move || player1->strafe))
           ? 1.0f
           : 0.0f;
   static float bob_intensity = 0.0f;
