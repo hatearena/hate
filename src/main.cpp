@@ -344,7 +344,7 @@ int main(int argc, char **argv) {
 
   log("localconnect");
   localconnect();
-  changemap("flux");
+  changemap("horizon");
   log("mainloop");
 
   int ignore = 5;
