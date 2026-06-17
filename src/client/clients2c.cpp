@@ -255,13 +255,17 @@ void localservertoclient(uchar *buf,
       int target = getint(p);
       int damage = getint(p);
       int ls = getint(p);
+      int actor = getint(p);
       if (target == clientnum) {
         if (d && player1->team[0] && d->team[0] && !strcmp(d->team, player1->team))
           ;
         else if (ls == player1->lifesequence)
           selfdamage(damage, cn, d);
-      } else
+      } else {
         playsound(S_PAIN1 + rnd(5), &getclient(target)->o);
+        if (actor == clientnum)
+          playsound(S_HIT);
+      }
       break;
     };
 

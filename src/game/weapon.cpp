@@ -205,7 +205,7 @@ void hit(int target, int damage, dynent *d, dynent *at) {
     monsterpain(d, damage, at);
   else if (at && (at->gunselect == GUN_RL || at->gunselect == GUN_FIREBALL ||
            at->gunselect == GUN_ICEBALL || at->gunselect == GUN_SLIMEBALL)) {
-    addmsg(1, 4, SV_DAMAGE, target, damage, d->lifesequence);
+    addmsg(1, 5, SV_DAMAGE, target, damage, d->lifesequence, getclientnum());
     playsound(S_PAIN1 + rnd(5), &d->o);
   } else {
     particle_splash(3, damage, 1000, d->o);

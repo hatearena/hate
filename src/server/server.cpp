@@ -808,6 +808,7 @@ void process(ENetPacket *packet, int sender) {
             putint(dp, i);
             putint(dp, damage);
             putint(dp, clients[i].lifesequence);
+            putint(dp, sender);
             *(ushort *)dpkt = ENET_HOST_TO_NET_16(dp - dpkt);
             enet_packet_resize(dmgpkt, dp - dpkt);
             multicast(dmgpkt, -1);

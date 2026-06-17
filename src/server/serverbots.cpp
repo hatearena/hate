@@ -482,6 +482,7 @@ void serverbot_damage(int cn, int damage, int attacker) {
       putint(p, cn);
       putint(p, damage);
       putint(p, 0);
+      putint(p, attacker);
     }
     *(ushort *)start = ENET_HOST_TO_NET_16(p - start);
     enet_packet_resize(packet, p - start);
@@ -814,6 +815,7 @@ static void send_bot_damage_player(serverbot &b, int target, int damage,
   putint(p, target);
   putint(p, damage);
   putint(p, lifeseq);
+  putint(p, b.cn);
   *(ushort *)start = ENET_HOST_TO_NET_16(p - start);
   enet_packet_resize(packet, p - start);
   loopv(clients) {

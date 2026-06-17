@@ -88,7 +88,7 @@ char msgsizesl[] = // size inclusive message token, 0 for variable or
      SV_DIED,
      2,
      SV_DAMAGE,
-     4,
+     5,
      SV_SHOT,
      8,
      SV_FRAGS,

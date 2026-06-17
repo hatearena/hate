@@ -39,6 +39,10 @@ static bool isgunshot(int n) {
   }
 }
 
+static bool ishitsound(int n) {
+  return n == S_HIT || n == S_KILL;
+}
+
 #ifdef USE_MIXER
 #include "SDL_mixer.h"
 #define MAXVOL MIX_MAX_VOLUME
@@ -264,13 +268,15 @@ void playsound(int n, vec *loc) {
     if (lastmillis - itemspawntime < 10000)
       return;
   }
-  if (lastmillis == lastsoundmillis)
-    soundsatonce++;
-  else
-    soundsatonce = 1;
-  lastsoundmillis = lastmillis;
-  if (soundsatonce > 5)
-    return;
+  if (!ishitsound(n)) {
+    if (lastmillis == lastsoundmillis)
+      soundsatonce++;
+    else
+      soundsatonce = 1;
+    lastsoundmillis = lastmillis;
+    if (soundsatonce > 5)
+      return;
+  }
   if (n < 0 || n >= samples.length()) {
     if (n == 22018) {
       if (!samples[53]) {
@@ -325,7 +331,9 @@ void playsound(int n, vec *loc) {
   };
 
   int prio;
-  if (!loc) {
+  if (ishitsound(n)) {
+    prio = 4;
+  } else if (!loc) {
     prio = 3;
   } else if (isgunshot(n)) {
     prio = 2;
@@ -335,10 +343,10 @@ void playsound(int n, vec *loc) {
 
 #ifdef USE_MIXER
   int chan = Mix_PlayChannel(-1, samples[n], 0);
-  if (chan < 0 && prio > 1) {
+  if (chan < 0) {
     int worst = 0;
     loopi(MAXCHAN) if (chanprio[i] < chanprio[worst]) worst = i;
-    if (chanprio[worst] < prio) {
+    if (ishitsound(n) || (prio > 1 && chanprio[worst] < prio)) {
       stopchan(worst);
       chan = worst;
       Mix_PlayChannel(chan, samples[n], 0);
