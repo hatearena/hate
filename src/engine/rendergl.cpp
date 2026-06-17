@@ -1163,6 +1163,187 @@ void addssao(int w, int h) {
   glEnable(GL_DEPTH_TEST);
 };
 
+static GLuint doftex[2] = {0, 0};
+static int dofw = 0, dofh = 0;
+
+VARP(dof, 0, 0, 1);
+static int __ad_dof =
+    (addcommanddetail("dof", "Toggles depth of field effect"), 0);
+VARP(dofstrength, 1, 4, 5);
+static int __ad_dofstrength =
+    (addcommanddetail("dofstrength", "Depth of field blur strength"), 0);
+
+void adddof(int w, int h) {
+  if (!dof || w < 8 || h < 8)
+    return;
+  if (!doftex[0])
+    glGenTextures(2, doftex);
+
+  int bw = max(8, w >> 2);
+  int bh = max(8, h >> 2);
+
+  glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+  loopi(2) {
+    glBindTexture(GL_TEXTURE_2D, doftex[i]);
+    if (dofw != w || dofh != h)
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, i == 0 ? w : bw, i == 0 ? h : bh,
+                   0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  };
+  dofw = w;
+  dofh = h;
+
+  glMatrixMode(GL_PROJECTION);
+  glPushMatrix();
+  glMatrixMode(GL_MODELVIEW);
+  glPushMatrix();
+  glMatrixMode(GL_TEXTURE);
+  glPushMatrix();
+
+  glBindTexture(GL_TEXTURE_2D, doftex[0]);
+  glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, w, h);
+
+  glViewport(0, 0, bw, bh);
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
+  glOrtho(0, bw, 0, bh, -1, 1);
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity();
+  glMatrixMode(GL_TEXTURE);
+  glLoadIdentity();
+
+  glDisable(GL_DEPTH_TEST);
+  glDisable(GL_BLEND);
+  glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+  glColor3f(1, 1, 1);
+  glBindTexture(GL_TEXTURE_2D, doftex[0]);
+  glBegin(GL_QUADS);
+  glTexCoord2f(0, 0);
+  glVertex2i(0, 0);
+  glTexCoord2f(1, 0);
+  glVertex2i(bw, 0);
+  glTexCoord2f(1, 1);
+  glVertex2i(bw, bh);
+  glTexCoord2f(0, 1);
+  glVertex2i(0, bh);
+  glEnd();
+
+  glBindTexture(GL_TEXTURE_2D, doftex[1]);
+  glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, bw, bh);
+
+  float hweights[7] = {0.015f, 0.085f, 0.22f, 0.36f, 0.22f, 0.085f, 0.015f};
+  float tw = 0;
+  loopi(7) tw += hweights[i];
+  loopi(7) hweights[i] /= tw;
+
+  float strength = dofstrength / (float)bw;
+
+  glClearColor(0, 0, 0, 0);
+  glClear(GL_COLOR_BUFFER_BIT);
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_ONE, GL_ONE);
+
+  glBindTexture(GL_TEXTURE_2D, doftex[1]);
+  loopi(7) {
+    float ox = (i - 3) * strength;
+    glMatrixMode(GL_TEXTURE);
+    glLoadIdentity();
+    glTranslatef(ox, 0, 0);
+    float wgt = hweights[i];
+    glColor3f(wgt, wgt, wgt);
+    glBegin(GL_QUADS);
+    glTexCoord2f(0, 0);
+    glVertex2i(0, 0);
+    glTexCoord2f(1, 0);
+    glVertex2i(bw, 0);
+    glTexCoord2f(1, 1);
+    glVertex2i(bw, bh);
+    glTexCoord2f(0, 1);
+    glVertex2i(0, bh);
+    glEnd();
+  };
+
+  glBindTexture(GL_TEXTURE_2D, doftex[1]);
+  glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, bw, bh);
+
+  glClear(GL_COLOR_BUFFER_BIT);
+  loopi(7) {
+    float oy = (i - 3) * strength;
+    glMatrixMode(GL_TEXTURE);
+    glLoadIdentity();
+    glTranslatef(0, oy, 0);
+    float wgt = hweights[i];
+    glColor3f(wgt, wgt, wgt);
+    glBegin(GL_QUADS);
+    glTexCoord2f(0, 0);
+    glVertex2i(0, 0);
+    glTexCoord2f(1, 0);
+    glVertex2i(bw, 0);
+    glTexCoord2f(1, 1);
+    glVertex2i(bw, bh);
+    glTexCoord2f(0, 1);
+    glVertex2i(0, bh);
+    glEnd();
+  };
+
+  glBindTexture(GL_TEXTURE_2D, doftex[1]);
+  glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, bw, bh);
+  glViewport(0, 0, w, h);
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
+  glOrtho(0, w, 0, h, -1, 1);
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity();
+  glMatrixMode(GL_TEXTURE);
+  glLoadIdentity();
+
+  glDisable(GL_BLEND);
+  glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+  glBindTexture(GL_TEXTURE_2D, doftex[0]);
+  glColor3f(1, 1, 1);
+  glBegin(GL_QUADS);
+  glTexCoord2f(0, 0);
+  glVertex2i(0, 0);
+  glTexCoord2f(1, 0);
+  glVertex2i(w, 0);
+  glTexCoord2f(1, 1);
+  glVertex2i(w, h);
+  glTexCoord2f(0, 1);
+  glVertex2i(0, h);
+  glEnd();
+
+  float blurAmount = dofstrength / 20.0f;
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  glBindTexture(GL_TEXTURE_2D, doftex[1]);
+  glColor4f(1, 1, 1, blurAmount);
+  glBegin(GL_QUADS);
+  glTexCoord2f(0, 0);
+  glVertex2i(0, 0);
+  glTexCoord2f(1, 0);
+  glVertex2i(w, 0);
+  glTexCoord2f(1, 1);
+  glVertex2i(w, h);
+  glTexCoord2f(0, 1);
+  glVertex2i(0, h);
+  glEnd();
+
+  glDisable(GL_BLEND);
+  glEnable(GL_DEPTH_TEST);
+
+  glMatrixMode(GL_TEXTURE);
+  glLoadIdentity();
+  glPopMatrix();
+  glMatrixMode(GL_PROJECTION);
+  glPopMatrix();
+  glMatrixMode(GL_MODELVIEW);
+  glPopMatrix();
+};
+
 VARP(vignette, 0, 1, 1);
 static int __ad_vignette =
     (addcommanddetail("vignette", "Toggles vignette effect"), 0);
@@ -1656,6 +1837,7 @@ void gl_drawframe(int w, int h, float curfps) {
   addbloom(w, h);
   addgodrays(w, h);
   addlensflare(w, h);
+  adddof(w, h);
   addvignette(w, h);
   addcolorgrade(w, h);
 
