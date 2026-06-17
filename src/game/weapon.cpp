@@ -17,7 +17,8 @@ int gunswitchtime = 0;
 int gunidletime = 0;
 
 VARP(autoswitch, 0, 1, 1);
-static int __ad_autoswitch = (addcommanddetail("autoswitch", "Toggles automatic weapon switching"), 0);
+static int __ad_autoswitch =
+    (addcommanddetail("autoswitch", "Toggles automatic weapon switching"), 0);
 
 guninfo guns[NUMGUNS] = {
     {S_CSAW, 150, 20, 0, 0, 3, "chainsaw"},
@@ -74,7 +75,8 @@ void weapon(char *a1, char *a2, char *a3) {
 };
 
 COMMAND(weapon, ARG_3STR);
-static int __ad_weapon = (addcommanddetail("weapon", "Selects a weapon by name"), 0);
+static int __ad_weapon =
+    (addcommanddetail("weapon", "Selects a weapon by name"), 0);
 
 void nextweapon() {
   int s = player1->gunselect;
@@ -203,8 +205,9 @@ void hit(int target, int damage, dynent *d, dynent *at) {
     botpain(d, damage, at);
   else if (d->monsterstate)
     monsterpain(d, damage, at);
-  else if (at && (at->gunselect == GUN_RL || at->gunselect == GUN_FIREBALL ||
-           at->gunselect == GUN_ICEBALL || at->gunselect == GUN_SLIMEBALL)) {
+  else if (at &&
+           (at->gunselect == GUN_RL || at->gunselect == GUN_FIREBALL ||
+            at->gunselect == GUN_ICEBALL || at->gunselect == GUN_SLIMEBALL)) {
     addmsg(1, 5, SV_DAMAGE, target, damage, d->lifesequence, getclientnum());
     playsound(S_PAIN1 + rnd(5), &d->o);
   } else {
@@ -246,28 +249,28 @@ void splash(projectile *p, vec &v, vec &vold, int notthisplayer,
   particle_splash(1, 20, 600, v);
   particle_splash(5, 5, 800, v);
   if (p->gun == GUN_RL) {
-    loopi(10) {
-      vec d = {float(rnd(51)-25), float(rnd(51)-25), float(rnd(31)-15)};
-      newparticlecol(v, d, rnd(200)+100, 4, 255, 180+rnd(76), rnd(80));
+    loopi(100) {
+      vec d = {float(rnd(51) - 25), float(rnd(51) - 25), float(rnd(31) - 15)};
+      newparticlecol(v, d, rnd(200) + 100, 4, 255, 180 + rnd(76), rnd(80));
     }
-    loopi(35) {
-      vec d = {float(rnd(81)-40), float(rnd(81)-40), float(rnd(50)+15)};
-      newparticle(v, d, rnd(400)+300, 1);
+    loopi(350) {
+      vec d = {float(rnd(81) - 40), float(rnd(81) - 40), float(rnd(50) + 15)};
+      newparticle(v, d, rnd(400) + 300, 1);
     }
-    loopi(12) {
-      vec d = {float(rnd(141)-70), float(rnd(141)-70), float(rnd(30))};
-      newparticle(v, d, rnd(500)+400, 5);
+    loopi(120) {
+      vec d = {float(rnd(141) - 70), float(rnd(141) - 70), float(rnd(30))};
+      newparticle(v, d, rnd(500) + 400, 5);
     }
     particle_splash(0, 60, 500, v);
     particle_splash(1, 15, 400, v);
   } else {
     loopi(4) {
-      vec d = {float(rnd(41)-20), float(rnd(41)-20), float(rnd(21)-10)};
-      newparticlecol(v, d, rnd(150)+80, 4, 255, 200+rnd(56), rnd(60));
+      vec d = {float(rnd(41) - 20), float(rnd(41) - 20), float(rnd(21) - 10)};
+      newparticlecol(v, d, rnd(150) + 80, 4, 255, 200 + rnd(56), rnd(60));
     }
     loopi(10) {
-      vec d = {float(rnd(51)-25), float(rnd(51)-25), float(rnd(30)+10)};
-      newparticle(v, d, rnd(250)+200, 1);
+      vec d = {float(rnd(51) - 25), float(rnd(51) - 25), float(rnd(30) + 10)};
+      newparticle(v, d, rnd(250) + 200, 1);
     }
   }
   p->inuse = false;
@@ -278,12 +281,14 @@ void splash(projectile *p, vec &v, vec &vold, int notthisplayer,
     loopi(20) {
       float angle = (2.0f * PI * i) / 20.0f;
       float speed = 30.0f + rnd(30);
-      vec d = {(float)cos(angle) * speed, (float)sin(angle) * speed, (float)(rnd(21)-10)};
-      newparticlecol(v, d, rnd(120)+80, 4, 255, rnd(80), rnd(30));
+      vec d = {(float)cos(angle) * speed, (float)sin(angle) * speed,
+               (float)(rnd(21) - 10)};
+      newparticlecol(v, d, rnd(120) + 80, 4, 255, rnd(80), rnd(30));
     }
     loopi(10) {
-      vec d = {(float)(rnd(61)-30), (float)(rnd(61)-30), (float)(rnd(31)-15)};
-      newparticlecol(v, d, rnd(70)+50, 6, 255, 200+rnd(56), rnd(40));
+      vec d = {(float)(rnd(61) - 30), (float)(rnd(61) - 30),
+               (float)(rnd(31) - 15)};
+      newparticlecol(v, d, rnd(70) + 50, 6, 255, 200 + rnd(56), rnd(40));
     }
     dodynlight(vold, v, 0, 0, p->owner);
     if (!p->local)
@@ -465,9 +470,13 @@ void shoot(dynent *d, vec &targ) {
     if (autoswitch) {
       int s = d->gunselect;
       for (int i = 1; i <= 6; i++) {
-        if (d->ammo[i]) { s = i; break; }
+        if (d->ammo[i]) {
+          s = i;
+          break;
+        }
       }
-      if (s == d->gunselect) s = GUN_CSAW;
+      if (s == d->gunselect)
+        s = GUN_CSAW;
       if (s != d->gunselect) {
         d->gunselect = s;
         if (d == player1) {
@@ -483,16 +492,22 @@ void shoot(dynent *d, vec &targ) {
     d->lastattackgun = -1;
     return;
   };
-  if (d->gunselect && !(m_noitems && m_noitemsrail && d->gunselect == GUN_RAILGUN))
+  if (d->gunselect &&
+      !(m_noitems && m_noitemsrail && d->gunselect == GUN_RAILGUN))
     d->ammo[d->gunselect]--;
   int nextgun = -1;
   if (!d->ammo[d->gunselect] && autoswitch) {
     int s = d->gunselect;
     for (int i = 1; i <= 6; i++) {
-      if (d->ammo[i]) { s = i; break; }
+      if (d->ammo[i]) {
+        s = i;
+        break;
+      }
     }
-    if (s == d->gunselect) s = GUN_CSAW;
-    if (s != d->gunselect) nextgun = s;
+    if (s == d->gunselect)
+      s = GUN_CSAW;
+    if (s != d->gunselect)
+      nextgun = s;
   }
   vec from = d->o;
   vec to = targ;
