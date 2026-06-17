@@ -245,13 +245,46 @@ void splash(projectile *p, vec &v, vec &vold, int notthisplayer,
   particle_splash(0, 80, 400, v);
   particle_splash(1, 20, 600, v);
   particle_splash(5, 5, 800, v);
+  if (p->gun == GUN_RL) {
+    loopi(10) {
+      vec d = {float(rnd(51)-25), float(rnd(51)-25), float(rnd(31)-15)};
+      newparticlecol(v, d, rnd(200)+100, 4, 255, 180+rnd(76), rnd(80));
+    }
+    loopi(35) {
+      vec d = {float(rnd(81)-40), float(rnd(81)-40), float(rnd(50)+15)};
+      newparticle(v, d, rnd(400)+300, 1);
+    }
+    loopi(12) {
+      vec d = {float(rnd(141)-70), float(rnd(141)-70), float(rnd(30))};
+      newparticle(v, d, rnd(500)+400, 5);
+    }
+    particle_splash(0, 60, 500, v);
+    particle_splash(1, 15, 400, v);
+  } else {
+    loopi(4) {
+      vec d = {float(rnd(41)-20), float(rnd(41)-20), float(rnd(21)-10)};
+      newparticlecol(v, d, rnd(150)+80, 4, 255, 200+rnd(56), rnd(60));
+    }
+    loopi(10) {
+      vec d = {float(rnd(51)-25), float(rnd(51)-25), float(rnd(30)+10)};
+      newparticle(v, d, rnd(250)+200, 1);
+    }
+  }
   p->inuse = false;
   if (p->gun != GUN_RL) {
     playsound(S_FEXPLODE, &v);
-    // no push?
   } else {
     playsound(S_RLHIT, &v);
-    newsphere(v, RL_RADIUS, 0);
+    loopi(20) {
+      float angle = (2.0f * PI * i) / 20.0f;
+      float speed = 30.0f + rnd(30);
+      vec d = {(float)cos(angle) * speed, (float)sin(angle) * speed, (float)(rnd(21)-10)};
+      newparticlecol(v, d, rnd(120)+80, 4, 255, rnd(80), rnd(30));
+    }
+    loopi(10) {
+      vec d = {(float)(rnd(61)-30), (float)(rnd(61)-30), (float)(rnd(31)-15)};
+      newparticlecol(v, d, rnd(70)+50, 6, 255, 200+rnd(56), rnd(40));
+    }
     dodynlight(vold, v, 0, 0, p->owner);
     if (!p->local)
       return;
@@ -317,9 +350,10 @@ void moveprojectiles(float time) {
       else {
         if (p->gun == GUN_RL) {
           dodynlight(p->o, v, 0, 255, p->owner);
-          particle_splash(5, 2, 200, v);
+          particle_splash(5, 4, 200, v);
+          particle_splash(1, 3, 150, v);
         } else {
-          particle_splash(1, 1, 200, v);
+          particle_splash(1, 2, 200, v);
           particle_splash(guns[p->gun].part, 1, 1, v);
         };
       };
