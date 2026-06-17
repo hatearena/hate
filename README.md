@@ -2,7 +2,7 @@ This repo contains the source code for HATE, a free and open source multiplayer 
 
 - [Site](https://hate-arena.pages.dev)
 - [Itch.io](https://endseven.itch.io/hatearena)
-- [Gameplay demo](https://www.youtube.com/watch?v=Y4KZWVmz86U)
+- [Gameplay demo](https://www.youtube.com/watch?v=Fmu1e0njJl0)
 - [Discord](https://discord.gg/YQsTNMC3Fp)
 
 ---
