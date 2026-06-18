@@ -257,14 +257,20 @@ void moveplayer(dynent *pl, int moveres, bool local, int curtime) {
   d.y += (float)(pl->strafe * sin(rad(pl->yaw - 180)));
 
   const float speed = curtime / (water ? 2000.0f : 1000.0f) * pl->maxspeed;
-  const float friction = water ? 20.0f : (pl->onfloor ? 6.0f : 30.0f);
+  const float friction = water ? 20.0f : (pl->onfloor ? 6.0f : 10.0f);
 
   const float fpsfric = friction / curtime * 20.0f;
 
+  const bool airborne = !pl->onfloor && !water;
+  float velz = airborne ? pl->vel.z : 0;
   vmul(pl->vel, fpsfric - 1); // slowly apply friction and direction to
                               // velocity, gives a smooth movement
   vadd(pl->vel, d);
   vdiv(pl->vel, fpsfric);
+  if (airborne) {
+      const float vert_fpsfric = 30.0f / curtime * 20.0f;
+      pl->vel.z = velz * (vert_fpsfric - 1) / vert_fpsfric;
+  }
   d = pl->vel;
   vmul(d, speed); // d is now frametime based velocity vector
 
@@ -275,7 +281,7 @@ void moveplayer(dynent *pl, int moveres, bool local, int curtime) {
     if (pl->jumpnext) {
       pl->jumpnext = false;
       if (pl->walljump && !pl->onfloor && !water) {
-        pl->vel.z = 1.4f;
+        pl->vel.z = 1.5f;
         pl->vel.x = pl->wallnormal_x * 1.2f;
         pl->vel.y = pl->wallnormal_y * 1.2f;
         float strafex = pl->strafe * cos(rad(pl->yaw - 180));
@@ -285,7 +291,7 @@ void moveplayer(dynent *pl, int moveres, bool local, int curtime) {
         pl->walljump = false;
         pl->walljumped = true;
       } else {
-        pl->vel.z = 1.7f;
+        pl->vel.z = 1.9f;
         if (water) {
           pl->vel.x /= 8;
           pl->vel.y /= 8;
