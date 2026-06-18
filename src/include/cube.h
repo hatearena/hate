@@ -179,7 +179,7 @@ enum {
 #define CUBE_SERVER_PORT 28765
 #define CUBE_SERVINFO_PORT 28766
 #define PROTOCOL_VERSION 122 // bump when protocol changes
-#define GAME_VERSION "0.0.3"
+#define GAME_VERSION "0.0.4"
 
 // network messages codes, c2s, c2c, s2c
 enum {
