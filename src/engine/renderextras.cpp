@@ -652,7 +652,8 @@ void gl_drawhud(int w, int h, int curfps, int nquads, int curvert,
             roundedbox(12, item_y, sx + max_w + 4, item_y + item_h, 4);
           }
           glEnable(GL_TEXTURE_2D);
-          draw_textf("/%s", sx + 2, item_y + 12, 2, get_suggestion(vis_start + i));
+          draw_textf("/%s", sx + 2, item_y + 12, 2,
+                     get_suggestion(vis_start + i));
           glDisable(GL_TEXTURE_2D);
         }
         glEnable(GL_TEXTURE_2D);
@@ -761,6 +762,27 @@ void gl_drawhud(int w, int h, int curfps, int nquads, int curvert,
     glEnd();
 
     glEnable(GL_TEXTURE_2D);
+  };
+
+  if (!screenshotmode) {
+    if (player1->quadmillis > 0) {
+      int secs = (player1->quadmillis + 999) / 1000;
+      string timestr;
+      sprintf_s(timestr)("Quad %d", secs);
+      int tw = text_width(timestr);
+      if (tw > 0) {
+        int pad = FONTH / 8;
+        int xpos = VIRTW - tw - pad * 2 - FONTH / 3;
+        int ypos = FONTH / 3;
+        glDisable(GL_TEXTURE_2D);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glColor4ub(0, 0, 0, 127);
+        roundedbox(xpos - pad, ypos - pad, xpos + tw + pad,
+                   ypos + FONTH + pad + 7, 6);
+        glEnable(GL_TEXTURE_2D);
+        draw_text(timestr, xpos, ypos, 2, 255);
+      };
+    };
   };
 
   glPopMatrix();

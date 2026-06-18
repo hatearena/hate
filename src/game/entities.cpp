@@ -372,7 +372,7 @@ void checkitems() {
 };
 
 void checkquad(int time) {
-  if (player1->quadmillis && (player1->quadmillis -= time) < 0) {
+  if (player1->quadmillis && (player1->quadmillis -= time) <= 0) {
     player1->quadmillis = 0;
     playsoundc(S_PUPOUT);
     conoutf("Quad damage is over.");
