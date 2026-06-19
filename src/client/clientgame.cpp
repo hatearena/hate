@@ -26,6 +26,9 @@ static int __ad_sensitivity =
 VARP(sensitivityscale, 1, 1, 10000);
 static int __ad_sensitivityscale =
     (addcommanddetail("sensitivityscale", "Mouse sensitivity scale"), 0);
+VARP(mousesense, 0, 10, 10000);
+static int __ad_mousesense =
+    (addcommanddetail("mousesense", "Mouse sensitivity"), 0);
 VARP(invmouse, 0, 0, 1);
 static int __ad_invmouse =
     (addcommanddetail("invmouse", "Inverts mouse Y axis"), 0);
@@ -742,9 +745,8 @@ void mousemove(int dx, int dy) {
   if (spectator && !speclook)
     return;
   const float SENSF = 33.0f; // try match quake sens
-  player1->yaw += (dx / SENSF) * (sensitivity / (float)sensitivityscale);
-  player1->pitch -= (dy / SENSF) * (sensitivity / (float)sensitivityscale) *
-                    (invmouse ? -1 : 1);
+  player1->yaw += (dx / SENSF) * mousesense;
+  player1->pitch -= (dy / SENSF) * mousesense * (invmouse ? -1 : 1);
   fixplayer1range();
 };
 
