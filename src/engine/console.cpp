@@ -450,6 +450,14 @@ void keypress(int code, bool isdown, bool textinput, char text[32]) {
       } else if (code == SDLK_ESCAPE) {
         clear_suggestions();
         saycommand(NULL);
+      } else {
+        loopi(numkm) if (keyms[i].code == code)
+        {
+          string temp;
+          strcpy_s(temp, keyms[i].action);
+          execute(temp, isdown);
+          return;
+        };
       };
     };
   } else if (!menukey(code, isdown)) // keystrokes go to menu
