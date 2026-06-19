@@ -15,6 +15,7 @@ extern void complete(char *s);
 extern void alias(char *name, char *action);
 extern char *getalias(char *name);
 extern void writecfg();
+extern void dangerresetcfg();
 extern void addcommanddetail(const char *name, const char *detail);
 extern const char *getargsig_byname(const char *name);
 extern const char *getdetail(const char *name);
