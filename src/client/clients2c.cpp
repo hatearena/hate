@@ -231,8 +231,8 @@ void localservertoclient(uchar *buf,
       cn = getint(p);
       if (!(d = getclient(cn)))
         break;
-      conoutf("Player %s disconnected",
-              d->name[0] ? d->name : "[incompatible client]");
+      if (d->name[0])
+        conoutf("Player %s disconnected", d->name);
       zapdynent(players[cn]);
       break;
 
