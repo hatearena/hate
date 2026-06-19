@@ -2,6 +2,8 @@
 
 #define USE_MIXER
 
+VARP(mastervol, 0, 255, 255);
+static int __ad_mastervol = (addcommanddetail("mastervol", "Master volume"), 0);
 VARP(soundvol, 0, 255, 255);
 static int __ad_soundvol = (addcommanddetail("soundvol", "Sound effects volume"), 0);
 VARP(musicvol, 0, 128, 255);
@@ -104,24 +106,24 @@ void music(char *name) {
   if (nosound)
     return;
   stopsound();
-  if (soundvol && musicvol) {
+  if (mastervol && soundvol && musicvol) {
     string sn;
     strcpy_s(sn, "packages/");
     strcat_s(sn, name);
 #ifdef USE_MIXER
     if (mod = Mix_LoadMUS(path(sn))) {
       Mix_PlayMusic(mod, -1);
-      Mix_VolumeMusic((musicvol * MAXVOL) / 255);
+      Mix_VolumeMusic((musicvol * mastervol * MAXVOL) / (255 * 255));
     };
 #else
     if (mod = FMUSIC_LoadSong(path(sn))) {
       FMUSIC_PlaySong(mod);
-      FMUSIC_SetMasterVolume(mod, musicvol);
+      FMUSIC_SetMasterVolume(mod, (musicvol * mastervol) / 255);
     } else if (stream =
                    FSOUND_Stream_Open(path(sn), FSOUND_LOOP_NORMAL, 0, 0)) {
       int chan = FSOUND_Stream_Play(FSOUND_FREE, stream);
       if (chan >= 0) {
-        FSOUND_SetVolume(chan, (musicvol * MAXVOL) / 255);
+        FSOUND_SetVolume(chan, (musicvol * mastervol * MAXVOL) / (255 * 255));
         FSOUND_SetPaused(chan, false);
       };
     } else {
@@ -188,6 +190,7 @@ void updatechanvol(int chan, vec *loc) {
                           0.5f)); // range is from 0 (left) to 255 (right)
     };
   };
+  vol = (vol * mastervol) / 255;
   vol = (vol * MAXVOL) / 255;
 #ifdef USE_MIXER
   Mix_Volume(chan, vol);
@@ -258,7 +261,7 @@ void resetitemsoundtimer() { itemspawntime = 0; };
 void playsound(int n, vec *loc) {
   if (nosound)
     return;
-  if (!soundvol)
+  if (!soundvol || !mastervol)
     return;
   if (editmode)
     return;
@@ -370,7 +373,7 @@ void playsound(int n, vec *loc) {
 int playsoundloop(int n, vec *loc) {
   if (nosound)
     return -1;
-  if (!soundvol)
+  if (!soundvol || !mastervol)
     return -1;
   if (editmode)
     return -1;
