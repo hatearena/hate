@@ -1774,10 +1774,9 @@ void gl_drawframe(int w, int h, float curfps) {
   strips.setsize(0);
 
   render_world(vx, vy, vz, (int)camyaw, (int)campitch, afov, w, h);
+
   finishstrips();
-
   setupworld();
-
   renderstripssky();
 
   glLoadIdentity();
@@ -1792,9 +1791,7 @@ void gl_drawframe(int w, int h, float curfps) {
   glEnable(GL_FOG);
 
   transplayer();
-
   overbright(2);
-
   renderstrips();
 
   xtraverts = 0;
