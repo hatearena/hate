@@ -123,6 +123,21 @@ COMMAND(screenshot, ARG_NONE);
 static int __ad_screenshot =
     (addcommanddetail("screenshot", "Takes a screenshot"), 0);
 
+void openurl(char *url) {
+#ifdef WIN32
+    ShellExecute(NULL, "open", url, NULL, NULL, SW_SHOWNORMAL);
+#elif defined(__APPLE__)
+    sprintf_sd(cmd)("open '%s'", url);
+    system(cmd);
+#else
+    sprintf_sd(cmd)("xdg-open '%s'", url);
+    system(cmd);
+#endif
+}
+COMMAND(openurl, ARG_1STR);
+static int __ad_openurl =
+    (addcommanddetail("openurl", "Opens a URL in the default web browser"), 0);
+
 void var_gamespeed();
 static int gamespeed = variable((char *)"gamespeed", 10, 100, 1000, &gamespeed,
                                 var_gamespeed, false);
