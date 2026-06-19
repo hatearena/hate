@@ -594,6 +594,11 @@ bool rendermenu() {
       else if (!strncmp(action, "botamount ", 10) &&
                botamount == atoi(action + 10))
         check = 1;
+      else if (!strchr(action, ' ')) {
+        ident *id = idents->access((char *)action);
+        if (id && id->type == ID_VAR && *id->storage)
+          check = 1;
+      };
       string buf;
       sprintf_s(buf)("[%c] %s", check ? 'X' : ' ', m.items[idx].text);
       draw_text(buf, x, y, 2);
@@ -987,8 +992,19 @@ bool menukey(int code, bool isdown) {
         char *action = menus[vmenu].items[menusel].action;
         if (vmenu == 1 && servercount > 0 && menusel < servercount)
           connects(getservername(servermap[menusel]));
-        if (menus[vmenu].items[menusel].checkbox ||
-            menus[vmenu].items[menusel].slider) {
+        if (menus[vmenu].items[menusel].checkbox) {
+          if (strchr(action, ' ')) {
+            execute(action, true);
+          } else {
+            ident *id = idents->access((char *)action);
+            if (id && id->type == ID_VAR && id->min < id->max) {
+              *id->storage = *id->storage ? 0 : 1;
+              if (id->fun) id->fun();
+            } else {
+              execute(action, true);
+            };
+          };
+        } else if (menus[vmenu].items[menusel].slider) {
           execute(action, true);
         } else {
           menustack.add(vmenu);
