@@ -65,7 +65,7 @@ func NewMasterServer() *MasterServer {
 		rateLimit: make(map[string]*rateLimitEntry),
 		verifyCh:  make(chan verifyJob, jobQueueSize),
 	}
-	for i := 0; i < workerCount; i++ {
+	for i := range workerCount {
 		go ms.verificationWorker(i)
 	}
 	return ms
