@@ -1619,11 +1619,19 @@ void drawhudgun(float fovy, float aspect, int farplane) {
       glPopMatrix();
       glMatrixMode(GL_MODELVIEW);
     } else if (d->gunselect == GUN_SG) {
+      glMatrixMode(GL_PROJECTION);
+      glPushMatrix();
+      glLoadIdentity();
+      gluPerspective(fovy * 0.86f, aspect, 0.3f, farplane);
+      glMatrixMode(GL_MODELVIEW);
       int sgtime = lastmillis - d->lastaction;
       if (sgtime < 690)
         drawhudmodel(0, 7, 100.0f, d->lastaction);
       else
         drawhudmodel(0, 1, 100, 0);
+      glMatrixMode(GL_PROJECTION);
+      glPopMatrix();
+      glMatrixMode(GL_MODELVIEW);
     } else if (d->gunselect == GUN_CSAW)
       drawhudmodel(2, 3, rtime / 3.0f, d->lastaction);
     else if (d->gunselect == GUN_NAILGUN)
@@ -1664,9 +1672,18 @@ void drawhudgun(float fovy, float aspect, int farplane) {
       glMatrixMode(GL_PROJECTION);
       glPopMatrix();
       glMatrixMode(GL_MODELVIEW);
-    } else if (d->gunselect == GUN_SG)
+    } else if (d->gunselect == GUN_SG) {
+
+      glMatrixMode(GL_PROJECTION);
+      glPushMatrix();
+      glLoadIdentity();
+      gluPerspective(fovy * 0.86f, aspect, 0.3f, farplane);
+      glMatrixMode(GL_MODELVIEW);
       drawhudmodel(0, 0, 100, 0);
-    else if (d->gunselect == GUN_NAILGUN)
+      glMatrixMode(GL_PROJECTION);
+      glPopMatrix();
+      glMatrixMode(GL_MODELVIEW);
+    } else if (d->gunselect == GUN_NAILGUN)
       drawhudmodel(0, 1, 100, 0);
     else if (d->gunselect == GUN_CG) {
       glMatrixMode(GL_PROJECTION);
