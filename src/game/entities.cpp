@@ -333,8 +333,7 @@ void pickup(int n, dynent *d) {
     lastjumppad = lastmillis;
     vec v = {(int)(char)ents[n].attr3 / 10.0f, (int)(char)ents[n].attr2 / 10.0f,
              ents[n].attr1 / 10.0f};
-    player1->vel.z = 0;
-    vadd(player1->vel, v);
+    player1->vel = v;
     playsoundc(S_JUMPPAD);
     break;
   };
@@ -352,6 +351,15 @@ void checkitems() {
       continue;
     if (OUTBORD(e.x, e.y))
       continue;
+    if (e.type == JUMPPAD) {
+      if (player1->onfloor) {
+        vec v = {e.x, e.y, S(e.x, e.y)->floor + player1->eyeheight};
+        vdist(dist, t, player1->o, v);
+        if (dist < 4.0f)
+          pickup(i, player1);
+      }
+      continue;
+    }
     vec v = {e.x, e.y, S(e.x, e.y)->floor + player1->eyeheight};
     vdist(dist, t, player1->o, v);
     if (dist < (e.type == TELEPORT ? 4 : 2.5))
