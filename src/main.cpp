@@ -77,10 +77,10 @@ void screenshot() {
   SDL_Surface *image;
   SDL_Surface *temp;
   int idx;
-  if (image = SDL_CreateRGBSurface(SDL_SWSURFACE, scr_w, scr_h, 24, 0x0000FF,
-                                   0x00FF00, 0xFF0000, 0)) {
-    if (temp = SDL_CreateRGBSurface(SDL_SWSURFACE, scr_w, scr_h, 24, 0x0000FF,
-                                    0x00FF00, 0xFF0000, 0)) {
+  if ((image = SDL_CreateRGBSurface(SDL_SWSURFACE, scr_w, scr_h, 24, 0x0000FF,
+                                    0x00FF00, 0xFF0000, 0))) {
+    if ((temp = SDL_CreateRGBSurface(SDL_SWSURFACE, scr_w, scr_h, 24, 0x0000FF,
+                                     0x00FF00, 0xFF0000, 0))) {
       glReadPixels(0, 0, scr_w, scr_h, GL_RGB, GL_UNSIGNED_BYTE, image->pixels);
       for (idx = 0; idx < scr_h; idx++) {
         char *dest = (char *)temp->pixels + 3 * scr_w * idx;
@@ -125,13 +125,13 @@ static int __ad_screenshot =
 
 void openurl(char *url) {
 #ifdef WIN32
-    ShellExecute(NULL, "open", url, NULL, NULL, SW_SHOWNORMAL);
+  ShellExecute(NULL, "open", url, NULL, NULL, SW_SHOWNORMAL);
 #elif defined(__APPLE__)
-    sprintf_sd(cmd)("open '%s'", url);
-    system(cmd);
+  sprintf_sd(cmd)("open '%s'", url);
+  system(cmd);
 #else
-    sprintf_sd(cmd)("xdg-open '%s'", url);
-    system(cmd);
+  sprintf_sd(cmd)("xdg-open '%s'", url);
+  system(cmd);
 #endif
 }
 COMMAND(openurl, ARG_1STR);
