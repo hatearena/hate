@@ -19,7 +19,7 @@ struct serverbot {
   int lastaction, lastmove, lastattack;
   float targetyaw;
   int ammo[NUMGUNS];
-  int movemode, strafemode;
+  int movemode, strafemode, spawnprotectmillis;
   float fallvelocity;
   bool onfloor;
   enet_uint32 blocktime;
@@ -333,6 +333,7 @@ void serverbot_spawn(int count) {
     b.pitch = 0;
     b.roll = 0;
     b.state = CS_ALIVE;
+    b.spawnprotectmillis = 1000;
     b.health = 150;
     b.gunselect = (mode == 4 || mode == 5) ? GUN_RAILGUN : 1 + rnd(6);
     loopk(NUMGUNS) b.ammo[k] = 100;
@@ -445,6 +446,8 @@ void serverbot_fragged(int cn) {
 
 void serverbot_damage(int cn, int damage, int attacker) {
   loopi(numsbots) if (sbot[i].cn == cn) {
+    if (sbot[i].spawnprotectmillis > 0)
+      return;
     sbot[i].health -= damage;
     bool died = sbot[i].health <= 0;
     if (died) {
@@ -474,6 +477,7 @@ void serverbot_damage(int cn, int damage, int attacker) {
     putint(p, 0);
     putint(p, 0);
     putint(p, (sbot[i].state << 5));
+    putint(p, sbot[i].spawnprotectmillis);
     if (died) {
       putint(p, SV_DIED);
       putint(p, attacker);
@@ -522,6 +526,7 @@ void serverbot_broadcast() {
       putint(p, 0);
       putint(p, (b.state << 5));
     }
+    putint(p, b.spawnprotectmillis);
     putint(p, SV_FRAGS);
     putint(p, b.frags);
     *(ushort *)start = ENET_HOST_TO_NET_16(p - start);
@@ -555,11 +560,13 @@ void serverbot_sendinit(int cn) {
       putint(p, 0);
       putint(p, (b.strafemode & 3) | ((b.movemode & 3) << 2) |
                     ((b.onfloor ? 1 : 0) << 4) | (b.state << 5));
+      putint(p, b.spawnprotectmillis);
     } else {
       putint(p, 0);
       putint(p, 0);
       putint(p, 0);
       putint(p, (b.state << 5));
+      putint(p, 0);
     }
     putint(p, SV_INITC2S);
     sendstring(b.name, p);
@@ -745,6 +752,7 @@ static void send_bot_shot(serverbot &b, float tx, float ty, float tz) {
   putint(p, 0);
   putint(p, 0);
   putint(p, (b.state << 5));
+  putint(p, b.spawnprotectmillis);
   putint(p, SV_SHOT);
   putint(p, b.gunselect);
   putint(p, (int)(b.x * DMF));
@@ -811,6 +819,7 @@ static void send_bot_damage_player(serverbot &b, int target, int damage,
   putint(p, 0);
   putint(p, 0);
   putint(p, (b.state << 5));
+  putint(p, b.spawnprotectmillis);
   putint(p, SV_DAMAGE);
   putint(p, target);
   putint(p, damage);
@@ -1095,6 +1104,7 @@ void serverbot_update() {
         b.z = spawnz[si] + BOT_EYEHEIGHT;
         b.health = 150;
         b.state = CS_ALIVE;
+        b.spawnprotectmillis = 1000;
         b.lastmove = 0;
         b.lastattack = 0;
         b.gunselect = (mode == 4 || mode == 5) ? GUN_RAILGUN : 1 + rnd(6);
@@ -1362,6 +1372,11 @@ void serverbot_update() {
           }
         }
       }
+      if (b.spawnprotectmillis > 0) {
+        b.spawnprotectmillis = max(0, b.spawnprotectmillis - diff);
+        if (b.movemode || b.strafemode || now - b.lastattack < diff + 10)
+          b.spawnprotectmillis = 0;
+      }
       continue;
     }
 
@@ -1400,6 +1415,11 @@ void serverbot_update() {
 
     if (!b.onfloor)
       b.movemode = 0;
+    if (b.spawnprotectmillis > 0) {
+      b.spawnprotectmillis = max(0, b.spawnprotectmillis - diff);
+      if (b.movemode || b.strafemode || now - b.lastattack < diff + 10)
+        b.spawnprotectmillis = 0;
+    }
   }
 
   serverbot_broadcast();

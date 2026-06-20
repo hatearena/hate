@@ -360,6 +360,7 @@ void botthink() {
       botaction(b);
     } else if (b->state == CS_DEAD && lastmillis - b->lastaction > 5000) {
       spawnstate(b);
+      b->spawnprotectmillis = 1000;
       if (!findbotspawn(b)) {
         b->state = CS_DEAD;
         b->lastaction = lastmillis;
@@ -402,6 +403,8 @@ void botrender() {
 
 void botpain(dynent *m, int damage, dynent *d) {
   if (m->state == CS_DEAD)
+    return;
+  if (m->spawnprotectmillis > 0)
     return;
 
   if (d != m && d->state == CS_ALIVE)

@@ -157,6 +157,7 @@ void localservertoclient(uchar *buf,
         particle_splash(0, 20, 500, d->o);
       }
       d->state = state;
+      d->spawnprotectmillis = getint(p);
       if (cn >= BOT_CLIENT_BASE)
         d->moving = (d->move != 0 || d->strafe != 0);
       if (!demoplayback)

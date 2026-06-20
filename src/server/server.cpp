@@ -512,6 +512,7 @@ void process(ENetPacket *packet, int sender) {
       strcpy_s(clients[cn].team, text);
       clients[cn].lifesequence = getint(p);
       clients[cn].state = CS_ALIVE;
+      clients[cn].spawnprotectmillis = 1000;
       serverbot_setlifeseq(cn, clients[cn].lifesequence);
       break;
 
@@ -626,6 +627,7 @@ void process(ENetPacket *packet, int sender) {
 
     case SV_ITEMPICKUP: {
       int n = getint(p);
+      clients[sender].spawnprotectmillis = 0;
       pickup(n, getint(p), sender);
       break;
     };
@@ -651,12 +653,23 @@ void process(ENetPacket *packet, int sender) {
       getint(p); // velocity
       int flags = getint(p);
       int pstate = (flags >> 5) & 3;
+      int oldstate = clients[cn].state;
+      bool hadpos = clients[cn].o.x != 0 || clients[cn].o.y != 0 || clients[cn].o.z != 0;
+      float ox = clients[cn].o.x, oy = clients[cn].o.y;
       clients[cn].o.x = px;
       clients[cn].o.y = py;
       clients[cn].o.z = pz;
       clients[cn].yaw = pyaw;
       clients[cn].pitch = ppitch;
       clients[cn].state = pstate;
+      if (pstate == CS_ALIVE && oldstate == CS_DEAD)
+        clients[cn].spawnprotectmillis = 1000;
+      if (clients[cn].spawnprotectmillis > 0 && hadpos) {
+        float dx = px - ox;
+        float dy = py - oy;
+        if (dx * dx + dy * dy > 0.1f || (flags & 3) || ((flags >> 2) & 3))
+          clients[cn].spawnprotectmillis = 0;
+      }
       serverbot_trackplayer(cn, px, py, pz, pyaw, ppitch, pstate);
       break;
     };
@@ -683,6 +696,7 @@ void process(ENetPacket *packet, int sender) {
     };
 
     case SV_SHOT: {
+      clients[sender].spawnprotectmillis = 0;
       int gun = getint(p);
       vec from, to;
       from.x = getint(p) / DMF;
@@ -788,6 +802,8 @@ void process(ENetPacket *packet, int sender) {
             if (clients[sender].team[0] && clients[i].team[0] &&
                 !strcmp(clients[sender].team, clients[i].team))
               continue;
+            if (clients[i].spawnprotectmillis > 0)
+              continue;
             ENetPacket *dmgpkt =
                 enet_packet_create(NULL, 64, ENET_PACKET_FLAG_RELIABLE);
             uchar *dpkt = dmgpkt->data;
@@ -804,6 +820,7 @@ void process(ENetPacket *packet, int sender) {
             putint(dp, 0);
             putint(dp, 0);
             putint(dp, CS_ALIVE << 5);
+            putint(dp, clients[sender].spawnprotectmillis);
             putint(dp, SV_DAMAGE);
             putint(dp, i);
             putint(dp, damage);
@@ -946,6 +963,10 @@ void serverslice(int seconds, unsigned int timeout) {
     };
   };
 
+  int deltamsec = lastsec ? (seconds - lastsec) * 1000 : 0;
+  loopv(clients) if (clients[i].type != ST_EMPTY && clients[i].spawnprotectmillis > 0) {
+    clients[i].spawnprotectmillis = max(0, clients[i].spawnprotectmillis - deltamsec);
+  }
   lastsec = seconds;
 
   if (timelimit && mode != 1 && seconds > mapend - minremain * 60)
@@ -1016,6 +1037,30 @@ void serverslice(int seconds, unsigned int timeout) {
     if (packet->referenceCount == 0)
       enet_packet_destroy(packet);
     mapreload = false;
+  }
+
+  loopv(clients) if (clients[i].type == ST_TCPIP) {
+    ENetPacket *pkt = enet_packet_create(NULL, 40, 0);
+    uchar *start = pkt->data;
+    uchar *p = start + 2;
+    putint(p, SV_POS);
+    putint(p, i);
+    putint(p, (int)(clients[i].o.x * DMF));
+    putint(p, (int)(clients[i].o.y * DMF));
+    putint(p, (int)(clients[i].o.z * DMF));
+    putint(p, (int)(clients[i].yaw * DAF));
+    putint(p, (int)(clients[i].pitch * DAF));
+    putint(p, 0);
+    putint(p, 0);
+    putint(p, 0);
+    putint(p, 0);
+    putint(p, clients[i].state << 5);
+    putint(p, clients[i].spawnprotectmillis);
+    *(ushort *)start = ENET_HOST_TO_NET_16(p - start);
+    enet_packet_resize(pkt, p - start);
+    for (int j = 0; j < clients.length(); j++)
+      if (clients[j].type == ST_TCPIP && j != i)
+        enet_peer_send(clients[j].peer, 0, pkt);
   }
 
   serverbot_update();
