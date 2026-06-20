@@ -5,7 +5,8 @@
 VARP(mastervol, 0, 255, 255);
 static int __ad_mastervol = (addcommanddetail("mastervol", "Master volume"), 0);
 VARP(soundvol, 0, 255, 255);
-static int __ad_soundvol = (addcommanddetail("soundvol", "Sound effects volume"), 0);
+static int __ad_soundvol =
+    (addcommanddetail("soundvol", "Sound effects volume"), 0);
 VARP(musicvol, 0, 128, 255);
 static int __ad_musicvol = (addcommanddetail("musicvol", "Music volume"), 0);
 bool nosound = false;
@@ -22,7 +23,10 @@ int soundchan[MAXCHAN];
 int chanprio[MAXCHAN];
 vector<int> soundmax;
 VAR(maxsamesound, 0, 0, 8);
-static int __ad_maxsamesound = (addcommanddetail("maxsamesound", "Max simultaneous instances of same sound"), 0);
+static int __ad_maxsamesound =
+    (addcommanddetail("maxsamesound",
+                      "Max simultaneous instances of same sound"),
+     0);
 
 static bool isgunshot(int n) {
   switch (n) {
@@ -41,9 +45,7 @@ static bool isgunshot(int n) {
   }
 }
 
-static bool ishitsound(int n) {
-  return n == S_HIT || n == S_KILL;
-}
+static bool ishitsound(int n) { return n == S_HIT || n == S_KILL; }
 
 #ifdef USE_MIXER
 #include "SDL_mixer.h"
@@ -78,7 +80,8 @@ void stopsound() {
 };
 
 VAR(soundbufferlen, 128, 1024, 4096);
-static int __ad_soundbufferlen = (addcommanddetail("soundbufferlen", "Sound buffer length"), 0);
+static int __ad_soundbufferlen =
+    (addcommanddetail("soundbufferlen", "Sound buffer length"), 0);
 
 void initsound() {
   memset(soundlocs, 0, sizeof(soundloc) * MAXCHAN);
@@ -158,10 +161,12 @@ void setsoundmax(int n, int max) {
 };
 
 COMMAND(setsoundmax, ARG_2INT);
-static int __ad_setsoundmax = (addcommanddetail("setsoundmax", "Sets maximum concurrent sounds"), 0);
+static int __ad_setsoundmax =
+    (addcommanddetail("setsoundmax", "Sets maximum concurrent sounds"), 0);
 
 COMMAND(registersound, ARG_1EST);
-static int __ad_registersound = (addcommanddetail("registersound", "Registers a sound effect"), 0);
+static int __ad_registersound =
+    (addcommanddetail("registersound", "Registers a sound effect"), 0);
 
 void cleansound() {
   if (nosound)
@@ -175,7 +180,8 @@ void cleansound() {
 };
 
 VAR(stereo, 0, 1, 1);
-static int __ad_stereo = (addcommanddetail("stereo", "Toggles stereo sound"), 0);
+static int __ad_stereo =
+    (addcommanddetail("stereo", "Toggles stereo sound"), 0);
 
 void updatechanvol(int chan, vec *loc) {
   int vol = soundvol, pan = 255 / 2;
@@ -463,8 +469,7 @@ void stopchan(int chan) {
 void preloadweaponsounds() {
   if (nosound)
     return;
-  int ids[] = {S_CSAW,  S_SG,      S_CG,       S_RLFIRE,
-               S_RIFLE, S_NAILGUN, S_WEAPLOAD, S_NOAMMO};
+  int ids[] = {S_SG, S_CG, S_RLFIRE, S_RIFLE, S_NAILGUN, S_WEAPLOAD, S_NOAMMO};
   loopi(sizeof(ids) / sizeof(ids[0])) {
     int n = ids[i];
     if (n < 0 || n >= samples.length())

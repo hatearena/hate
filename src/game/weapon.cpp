@@ -2,6 +2,7 @@
 #include "../include/protos.h"
 
 static int lightgunchannel = -1;
+static int chainsawchannel = -1;
 
 struct guninfo {
   short sound, attackdelay, damage, projspeed, part, kickamount;
@@ -370,7 +371,7 @@ void moveprojectiles(float time) {
 void shootv(int gun, vec &from, vec &to, dynent *d,
             bool local) // create visual effect from a shot
 {
-  if (gun != GUN_LIGHTGUN)
+  if (gun != GUN_LIGHTGUN && gun != GUN_CSAW)
     playsound(guns[gun].sound, d == player1 ? NULL : &d->o);
   else if (d != player1)
     playsound(guns[gun].sound, &d->o);
@@ -454,6 +455,13 @@ void shoot(dynent *d, vec &targ) {
     } else if (lightgunchannel >= 0) {
       stopchan(lightgunchannel);
       lightgunchannel = -1;
+    }
+    if (d->gunselect == GUN_CSAW && d->attacking) {
+      if (chainsawchannel < 0)
+        chainsawchannel = playsoundloop(S_CSAW);
+    } else if (chainsawchannel >= 0) {
+      stopchan(chainsawchannel);
+      chainsawchannel = -1;
     }
   }
   if (editmode)
