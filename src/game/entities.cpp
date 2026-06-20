@@ -249,6 +249,8 @@ void teleport(int n, dynent *d) {
 };
 
 void pickup(int n, dynent *d) {
+  if (d->spawnprotectmillis > 0)
+    d->spawnprotectmillis = 0;
   if (m_infected && d->team[0] && !strcmp(d->team, "INFD")) {
     if (ents[n].type == I_HEALTH || ents[n].type == I_BOOST) {
       int np = 1;

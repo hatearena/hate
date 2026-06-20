@@ -140,7 +140,7 @@ struct dynent // players & monsters
   int state;        // one of CS_* below
   int frags;
   int deaths, suicides;
-  int health, armour, armourtype, quadmillis;
+  int health, armour, armourtype, quadmillis, spawnprotectmillis, spawnprotectfade;
   int gunselect, gunwait;
   int lastaction, lastattackgun, lastmove;
   bool attacking, ads;

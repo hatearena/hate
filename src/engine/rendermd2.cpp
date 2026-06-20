@@ -42,7 +42,7 @@ struct md2 {
   bool load(char *filename);
   void render(vec &light, int numFrame, int range, float x, float y, float z,
               float yaw, float pitch, float scale, float speed, int snap,
-              int basetime, float glow = 0);
+              int basetime, float glow = 0, float alpha = 1.0f);
   void scale(int frame, float scale, int sn);
 
   md2()
@@ -147,7 +147,7 @@ void md2::scale(int frame, float scale, int sn) {
 
 void md2::render(vec &light, int frame, int range, float x, float y, float z,
                  float yaw, float pitch, float sc, float speed, int snap,
-                 int basetime, float glow) {
+                 int basetime, float glow, float alpha) {
 
   if (speed <= 0.0f)
     speed = 100.0f;
@@ -169,7 +169,11 @@ void md2::render(vec &light, int frame, int range, float x, float y, float z,
 
   if (glow > 0)
     glColor4f(light.x, light.y, light.z, glow);
-  else
+  else if (alpha < 1.0f) {
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glColor4f(light.x, light.y, light.z, alpha);
+  } else
     glColor3fv((float *)&light);
 
   if (displaylist && frame == 0 && range == 1) {
@@ -246,6 +250,9 @@ void md2::render(vec &light, int frame, int range, float x, float y, float z,
     };
   };
 
+  if (alpha < 1.0f && glow <= 0.0f)
+    glDisable(GL_BLEND);
+
   glPopMatrix();
 }
 
@@ -321,7 +328,7 @@ void preloadhudmodels() {
 void rendermodel(const char *mdl, int frame, int range, int tex, float rad,
                  float x, float y, float z, float yaw, float pitch,
                  bool teammate, float scale, float speed, int snap,
-                 int basetime, float glow, const vec *glowcol) {
+                 int basetime, float glow, const vec *glowcol, float alpha) {
   md2 *m = loadmodel(mdl);
 
   if (isoccluded(player1->o.x, player1->o.y, x - rad, z - rad, rad * 2))
@@ -358,7 +365,7 @@ void rendermodel(const char *mdl, int frame, int range, int tex, float rad,
   };
 
   m->render(light, frame, range, x, y, z, yaw, pitch, scale, speed, snap,
-            basetime);
+            basetime, 0, alpha);
 
   if (glow > 0) {
     glEnable(GL_BLEND);
@@ -379,7 +386,7 @@ void rendermodel(const char *mdl, int frame, int range, int tex, float rad,
     }
 
     m->render(glowlight, frame, range, x, y, z, yaw, pitch, scale * 1.4f, speed,
-              snap, basetime, glow);
+              snap, basetime, glow, alpha);
 
     if (glowcol) glEnable(GL_DEPTH_TEST);
     glDepthMask(GL_TRUE);

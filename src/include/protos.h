@@ -233,13 +233,13 @@ extern void resetitemsoundtimer();
 
 // rendermd2
 extern void preloadhudmodels();
-extern void rendermodel(const char *mdl, int frame, int range, int tex, float rad, float x, float y, float z, float yaw, float pitch, bool teammate, float scale, float speed, int snap = 0, int basetime = 0, float glow = 0, const vec *glowcol = NULL);
+extern void rendermodel(const char *mdl, int frame, int range, int tex, float rad, float x, float y, float z, float yaw, float pitch, bool teammate, float scale, float speed, int snap = 0, int basetime = 0, float glow = 0, const vec *glowcol = NULL, float alpha = 1.0f);
 extern mapmodelinfo &getmminfo(int i);
 extern int nummapmodels();
 
 // rendermd3
 extern void preloadhudmodel_md3();
-extern void rendermodel_md3(char *mdl, int frame, int range, int tex, float rad, float x, float y, float z, float yaw, float pitch, bool teammate, float scale, float speed, int snap = 0, int basetime = 0);
+extern void rendermodel_md3(char *mdl, int frame, int range, int tex, float rad, float x, float y, float z, float yaw, float pitch, bool teammate, float scale, float speed, int snap = 0, int basetime = 0, float alpha = 1.0f);
 
 // server
 extern void initserver(bool dedicated, int uprate, char *sdesc, char *ip, char *master, char *passwd, int maxcl);

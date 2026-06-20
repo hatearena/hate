@@ -62,7 +62,7 @@ struct md3 {
   bool load(char *filename);
   void render(vec &light, int numFrame, int range, float x, float y, float z,
               float yaw, float pitch, float scale, float speed, int snap,
-              int basetime);
+              int basetime, float alpha = 1.0f);
   void scale(int mesh, int frame, float s);
   md3()
       : numFrames(0), numMeshes(0), meshes(NULL), mverts(NULL), mdlnum(0),
@@ -202,7 +202,7 @@ void md3::scale(int mesh, int frame, float s) {
 
 void md3::render(vec &light, int frame, int range, float x, float y, float z,
                  float yaw, float pitch, float sc, float speed, int snap,
-                 int basetime) {
+                 int basetime, float alpha) {
   if (speed <= 0.0f)
     speed = 100.0f;
   if (frame < 0)
@@ -232,7 +232,12 @@ void md3::render(vec &light, int frame, int range, float x, float y, float z,
   glTranslatef(x, y, z);
   glRotatef(yaw + 180, 0, -1, 0);
   glRotatef(pitch, 0, 0, 1);
-  glColor3fv((float *)&light);
+  if (alpha < 1.0f) {
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glColor4f(light.x, light.y, light.z, alpha);
+  } else
+    glColor3fv((float *)&light);
 
   loop(mi, numMeshes) {
     md3_mesh *m = &meshes[mi];
@@ -268,6 +273,9 @@ void md3::render(vec &light, int frame, int range, float x, float y, float z,
     glEnd();
     xtraverts += m->numFaces * 3;
   }
+
+  if (alpha < 1.0f)
+    glDisable(GL_BLEND);
 
   glPopMatrix();
 }
@@ -321,7 +329,7 @@ void delayedload_md3(md3 *m) {
 void rendermodel_md3(char *mdl, int frame, int range, int tex, float rad,
                      float x, float y, float z, float yaw, float pitch,
                      bool teammate, float scale, float speed, int snap,
-                     int basetime) {
+                     int basetime, float alpha) {
   md3 *m = loadmodel_md3(mdl);
   if (isoccluded(player1->o.x, player1->o.y, x - rad, z - rad, rad * 2))
     return;
@@ -346,7 +354,7 @@ void rendermodel_md3(char *mdl, int frame, int range, int tex, float rad,
     light.z *= 1.2f;
   }
   m->render(light, frame, range, x, y, z, yaw, pitch, scale, speed, snap,
-            basetime);
+            basetime, alpha);
 }
 
 void preloadhudmodel_md3() {}

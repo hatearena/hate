@@ -1596,8 +1596,13 @@ void drawhudmodel(int start, int end, float speed, int base) {
     }
   }
 
+  float alpha = 1.0f;
+  if (player1->spawnprotectfade > 0)
+    alpha = 0.3f + 0.7f * (1.0f - (float)player1->spawnprotectfade / 200.0f);
+  else if (player1->spawnprotectmillis > 0)
+    alpha = 0.3f;
   rendermodel(hudgunnames[player1->gunselect], start, end, 0, 1.0f, px, py, pz,
-              pyaw, ppitch, false, scale, speed, 0, base, glow, glowcol);
+              pyaw, ppitch, false, scale, speed, 0, base, glow, glowcol, alpha);
 };
 
 dynent *specplayer() {

@@ -152,6 +152,8 @@ void spawnstate(dynent *d) {
   d->armour = 50;
   d->armourtype = A_BLUE;
   d->quadmillis = 0;
+  d->spawnprotectmillis = 0;
+  d->spawnprotectfade = 0;
   d->lastattackgun = d->gunselect = GUN_SG;
   d->gunwait = 0;
   d->boostmillis = 0;
@@ -483,6 +485,17 @@ void updateworld(int millis) // main game update loop
                    lastmillis - player1->lastaction > 10000)
           respawn();
       } else if (!intermission) {
+        if (player1->spawnprotectmillis > 0) {
+          player1->spawnprotectmillis =
+              max(0, player1->spawnprotectmillis - curtime);
+          if (player1->move || player1->strafe || player1->attacking)
+            player1->spawnprotectmillis = 0;
+          if (player1->spawnprotectmillis == 0)
+            player1->spawnprotectfade = 200;
+        }
+        if (player1->spawnprotectfade > 0)
+          player1->spawnprotectfade =
+              max(0, player1->spawnprotectfade - curtime);
         moveplayer(player1, 20, true);
         checkitems();
       };
@@ -633,6 +646,8 @@ void spawnplayer(dynent *d) // place at random spawn. also used by monsters!
   };
   entinmap(d);
   spawnstate(d);
+  d->spawnprotectmillis = 1000;
+  d->spawnprotectfade = 0;
   d->state = CS_ALIVE;
   if (d == player1) {
     static int lastspawnsound = 0;
@@ -752,6 +767,8 @@ void mousemove(int dx, int dy) {
 
 void selfdamage(int damage, int actor, dynent *act) {
   if (player1->state != CS_ALIVE || intermission || screenshotmode)
+    return;
+  if (player1->spawnprotectmillis > 0)
     return;
   damageblend(damage);
   demoblend(damage);
