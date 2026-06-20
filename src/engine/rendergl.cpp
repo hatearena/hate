@@ -1586,11 +1586,11 @@ void drawhudmodel(int start, int end, float speed, int base) {
 
   if (m_teammode) {
     if (!strcmp(player1->team, "RED")) {
-      glow = 0.9f;
+      glow = 0.3f;
       teamcol = {1.0f, 0.0f, 0.0f};
       glowcol = &teamcol;
     } else if (!strcmp(player1->team, "BLUE")) {
-      glow = 0.9f;
+      glow = 0.2f;
       teamcol = {0.0f, 0.0f, 1.0f};
       glowcol = &teamcol;
     }
