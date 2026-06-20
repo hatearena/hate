@@ -1580,8 +1580,24 @@ void drawhudmodel(int start, int end, float speed, int base) {
   float pyaw = player1->yaw + 90;
   float ppitch = player1->pitch;
 
+  float glow = 0.0f;
+  const vec *glowcol = NULL;
+  vec teamcol;
+
+  if (m_teammode) {
+    if (!strcmp(player1->team, "RED")) {
+      glow = 0.9f;
+      teamcol = {1.0f, 0.0f, 0.0f};
+      glowcol = &teamcol;
+    } else if (!strcmp(player1->team, "BLUE")) {
+      glow = 0.9f;
+      teamcol = {0.0f, 0.0f, 1.0f};
+      glowcol = &teamcol;
+    }
+  }
+
   rendermodel(hudgunnames[player1->gunselect], start, end, 0, 1.0f, px, py, pz,
-              pyaw, ppitch, false, scale, speed, 0, base);
+              pyaw, ppitch, false, scale, speed, 0, base, glow, glowcol);
 };
 
 dynent *specplayer() {

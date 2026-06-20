@@ -321,7 +321,7 @@ void preloadhudmodels() {
 void rendermodel(const char *mdl, int frame, int range, int tex, float rad,
                  float x, float y, float z, float yaw, float pitch,
                  bool teammate, float scale, float speed, int snap,
-                 int basetime, float glow) {
+                 int basetime, float glow, const vec *glowcol) {
   md2 *m = loadmodel(mdl);
 
   if (isoccluded(player1->o.x, player1->o.y, x - rad, z - rad, rad * 2))
@@ -365,16 +365,23 @@ void rendermodel(const char *mdl, int frame, int range, int tex, float rad,
     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
     glDepthMask(GL_FALSE);
 
-    vec glowlight = {20.0f, 20.0f, 20.0f};
-    if (teammate) {
-      glowlight.x *= 0.6f;
-      glowlight.y *= 0.7f;
-      glowlight.z *= 1.2f;
+    vec glowlight;
+    if (glowcol) {
+      glowlight = {20.0f * glowcol->x, 20.0f * glowcol->y, 20.0f * glowcol->z};
+      glDisable(GL_DEPTH_TEST);
+    } else {
+      glowlight = {20.0f, 20.0f, 20.0f};
+      if (teammate) {
+        glowlight.x *= 0.6f;
+        glowlight.y *= 0.7f;
+        glowlight.z *= 1.2f;
+      }
     }
 
     m->render(glowlight, frame, range, x, y, z, yaw, pitch, scale * 1.4f, speed,
               snap, basetime, glow);
 
+    if (glowcol) glEnable(GL_DEPTH_TEST);
     glDepthMask(GL_TRUE);
     glDisable(GL_BLEND);
   }
