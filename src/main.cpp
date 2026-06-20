@@ -1,6 +1,9 @@
 #define SDL_MAIN_HANDLED
 #include "include/cube.h"
 #include <sys/stat.h>
+#ifdef WIN32
+#include <shellapi.h>
+#endif
 
 SDL_Window *window = NULL;
 SDL_GLContext glcontext = NULL;
