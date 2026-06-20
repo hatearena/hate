@@ -870,7 +870,8 @@ void gl_drawhud(int w, int h, int curfps, int nquads, int curvert,
       glVertex2i(VIRTW - 250, 1620 + 64);
       glEnd();
       xtraverts += 4;
-    } else if (d->gunselect == GUN_LIGHTGUN) {
+    } else if (d->gunselect == GUN_LIGHTGUN || d->gunselect == GUN_RL ||
+               d->gunselect == GUN_RAILGUN) {
       glBindTexture(GL_TEXTURE_2D, 12);
       glBegin(GL_QUADS);
       glTexCoord2f(0, 0);
