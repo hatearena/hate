@@ -123,6 +123,8 @@ void writemap(char *mname, int msize, uchar *mdata) {
 }
 
 uchar *readmap(char *mname, int *msize) {
+  if (!*mname || !strcmp(mname, "."))
+    mname = getclientmap();
   setnames(mname);
   uchar *mdata = (uchar *)loadfile(cgzname, msize);
   if (!mdata) {
@@ -224,6 +226,8 @@ void save_world(char *mname) {
 };
 
 void load_world(char *mname) {
+  if (!*mname || !strcmp(mname, "."))
+    mname = getclientmap();
   stopifrecording();
   cleardlights();
   setnames(mname);
