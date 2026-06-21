@@ -54,6 +54,7 @@ enum // static entity types
   MONSTER,  // attr1 = angle, attr2 = monstertype
   CARROT,   // attr1 = tag, attr2 = type
   JUMPPAD,  // attr1 = zpush, attr2 = ypush, attr3 = xpush
+  NEWPARTICLE, // attr1 = height|(color_b<<8), attr2 = freq, attr3 = r, attr4 = g
   MAXENTTYPES
 };
 

@@ -70,6 +70,21 @@ void renderentities() {
       glDepthMask(GL_TRUE);
       glDisable(GL_BLEND);
       glEnable(GL_TEXTURE_2D);
+    } else if (e.type == NEWPARTICLE) {
+      float f = S(e.x, e.y)->floor;
+      int h = (unsigned char)(e.attr1 & 0xFF);
+      int freq = e.attr2;
+      int cr = e.attr3;
+      int cg = e.attr4;
+      int cb = ((unsigned short)e.attr1 >> 8) & 0xFF;
+      if (freq && rnd(freq) == 0) {
+        vec pos = {(float)e.x + (rnd(21) - 10) * 0.1f,
+                   (float)e.y + (rnd(21) - 10) * 0.1f,
+                   f + (rnd(11) - 5) * 0.1f};
+        vec vel = {(rnd(21) - 10) * 0.3f, (rnd(21) - 10) * 0.3f,
+                   (float)(1 + rnd((int)(h * 10))) * 0.1f};
+        newparticlecol(pos, vel, rnd(400) + 600, 9, cr, cg, cb);
+      };
     } else {
       if (OUTBORD(e.x, e.y))
         continue;

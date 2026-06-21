@@ -291,30 +291,12 @@ void renderspheres(int time) {
 };
 
 char *entnames[] = {
-    "none?",
-    "light",
-    "playerstart",
-    "shells",
-    "bullets",
-    "rockets",
-    "railgunammo",
-    "nails",
-    "energy",
-    "health",
-    "healthboost",
-    "greenarmour",
-    "yellowarmour",
-    "quaddamage",
-    "teleport",
-    "teledest",
-    "mapmodel",
-    "monster",
-    "trigger",
-    "jumppad",
-    "?",
-    "?",
-    "?",
-    "?",
+    "none?",          "light",      "playerstart", "shells",
+    "bullets",        "rockets",    "railgunammo", "nails",
+    "energy",         "health",     "healthboost", "greenarmour",
+    "yellowarmour",   "quaddamage", "teleport",    "teledest",
+    "mapmodel",       "monster",    "trigger",     "jumppad",
+    "particlesource", "?",          "?",           "?",
 };
 
 void loadsky(char *basename) {
