@@ -686,6 +686,10 @@ void attack(bool on) {
 void jumpn(bool on) {
   if (spectator || intermission)
     return;
+  if (editmode && on) {
+    player1->o.z += 2;
+    return;
+  }
   if (!intermission && (player1->jumpnext = on))
     respawn();
 };
