@@ -358,6 +358,11 @@ void botthink() {
         b->ammo[GUN_RAILGUN] = max(b->ammo[GUN_RAILGUN], 8);
       }
       botaction(b);
+      if (b->spawnprotectmillis > 0) {
+        b->spawnprotectmillis = max(0, b->spawnprotectmillis - curtime);
+        if (b->attacking)
+          b->spawnprotectmillis = 0;
+      }
     } else if (b->state == CS_DEAD && lastmillis - b->lastaction > 5000) {
       spawnstate(b);
       b->spawnprotectmillis = 1000;
