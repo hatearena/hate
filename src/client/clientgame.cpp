@@ -512,19 +512,35 @@ void updateworld(int millis) // main game update loop
 void entinmap(dynent *d) // brute force but effective way to find a free
                          // spawn spot in the map
 {
-  loopi(100) // try max 100 times
-  {
-    float dx = (rnd(21) - 10) / 10.0f * i; // increasing distance
-    float dy = (rnd(21) - 10) / 10.0f * i;
-    d->o.x += dx;
-    d->o.y += dy;
-    if (collide(d, true, 0, 0))
-      return;
-    d->o.x -= dx;
-    d->o.y -= dy;
+  if (collide(d, true, 0, 0))
+    return;
+  for (int r = 1; r <= 10; r++) {
+    for (int x = -r; x <= r; x++) {
+      d->o.x += x;
+      d->o.y += r;
+      if (collide(d, true, 0, 0)) return;
+      d->o.x -= x;
+      d->o.y -= r;
+      d->o.x += x;
+      d->o.y += -r;
+      if (collide(d, true, 0, 0)) return;
+      d->o.x -= x;
+      d->o.y -= -r;
+    };
+    for (int y = -r + 1; y <= r - 1; y++) {
+      d->o.x += r;
+      d->o.y += y;
+      if (collide(d, true, 0, 0)) return;
+      d->o.x -= r;
+      d->o.y -= y;
+      d->o.x += -r;
+      d->o.y += y;
+      if (collide(d, true, 0, 0)) return;
+      d->o.x -= -r;
+      d->o.y -= y;
+    };
   };
   conoutf("Cannot find entity spawn spot. (%d, %d)", (int)d->o.x, (int)d->o.y);
-  // leave ent at original pos, possibly stuck
 };
 
 int spawncycle = -1;

@@ -304,6 +304,49 @@ int serverbot_teamscore(const char *team) {
   return total;
 }
 
+static void serverbot_avoid_overlap(serverbot &b) {
+  const float minrad = BOT_RADIUS + BOT_RADIUS;
+  for (int r = 1; r <= 5; r++) {
+    bool overlap = false;
+    loopi(MAXCLIENTS) if (playerpos[i].active && playerpos[i].state == CS_ALIVE) {
+      float dx = b.x - playerpos[i].x;
+      float dy = b.y - playerpos[i].y;
+      if (dx * dx + dy * dy < minrad * minrad) { overlap = true; break; };
+    };
+    if (!overlap) loopi(numsbots) {
+      if (sbot[i].cn == b.cn) continue;
+      if (sbot[i].state != CS_ALIVE) continue;
+      float dx = b.x - sbot[i].x;
+      float dy = b.y - sbot[i].y;
+      if (dx * dx + dy * dy < minrad * minrad) { overlap = true; break; };
+    };
+    if (!overlap) return;
+    for (int x = -r; x <= r; x++) {
+      for (int y = -r; y <= r; y++) {
+        if (abs(x) != r && abs(y) != r) continue;
+        b.x += x;
+        b.y += y;
+        overlap = false;
+        loopi(MAXCLIENTS) if (playerpos[i].active && playerpos[i].state == CS_ALIVE) {
+          float dx = b.x - playerpos[i].x;
+          float dy = b.y - playerpos[i].y;
+          if (dx * dx + dy * dy < minrad * minrad) { overlap = true; break; };
+        };
+        if (!overlap) loopi(numsbots) {
+          if (sbot[i].cn == b.cn) continue;
+          if (sbot[i].state != CS_ALIVE) continue;
+          float dx = b.x - sbot[i].x;
+          float dy = b.y - sbot[i].y;
+          if (dx * dx + dy * dy < minrad * minrad) { overlap = true; break; };
+        };
+        if (!overlap) return;
+        b.x -= x;
+        b.y -= y;
+      };
+    };
+  };
+};
+
 void serverbot_spawn(int count) {
   if (count < 1)
     count = 1;
@@ -329,6 +372,7 @@ void serverbot_spawn(int count) {
     b.z = spawnz[si] + BOT_EYEHEIGHT;
     if (b.z < -999 || b.z > 999)
       b.z = spawnz[0] + BOT_EYEHEIGHT;
+    serverbot_avoid_overlap(b);
     b.yaw = normyaw((float)rnd(360));
     b.pitch = 0;
     b.roll = 0;
@@ -1102,6 +1146,7 @@ void serverbot_update() {
         b.x = spawnx[si];
         b.y = spawny[si];
         b.z = spawnz[si] + BOT_EYEHEIGHT;
+        serverbot_avoid_overlap(b);
         b.health = 150;
         b.state = CS_ALIVE;
         b.spawnprotectmillis = 1000;
