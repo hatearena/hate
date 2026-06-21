@@ -58,6 +58,8 @@ void newteam(const char *name) {
     conoutf("Team must be RED or BLUE");
     return;
   }
+  if (m_infected && !strcmp(buf, "INFD"))
+    spawnstate(player1);
   c2sinit = false;
   strn0cpy(player1->team, buf, 5);
 };

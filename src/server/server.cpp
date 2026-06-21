@@ -576,10 +576,15 @@ void process(ENetPacket *packet, int sender) {
           strcpy_s(smapname, maprotation[0]);
           if (moderotation.length() > 0)
             mode = moderotation[0];
+          else if (cfg_gamemode >= 0)
+            mode = cfg_gamemode;
           else
             mode = reqmode;
         } else {
-          mode = reqmode;
+          if (cfg_gamemode >= 0)
+            mode = cfg_gamemode;
+          else
+            mode = reqmode;
           strcpy_s(smapname, text);
         }
       }
@@ -977,6 +982,8 @@ void serverslice(int seconds, unsigned int timeout) {
       strcpy_s(smapname, maprotation[map_rotation_index]);
       if (moderotation.length() > map_rotation_index)
         mode = moderotation[map_rotation_index];
+      else if (cfg_gamemode >= 0)
+        mode = cfg_gamemode;
     }
     rotation_done = seconds;
     minremain = timelimit ? timelimit : 10;

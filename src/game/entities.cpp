@@ -249,6 +249,27 @@ void teleport(int n, dynent *d) {
 };
 
 void pickup(int n, dynent *d) {
+  switch (ents[n].type) {
+  case TELEPORT: {
+    static int lastteleport = 0;
+    if (lastmillis - lastteleport < 500)
+      return;
+    lastteleport = lastmillis;
+    teleport(n, d);
+    return;
+  };
+  case JUMPPAD: {
+    static int lastjumppad = 0;
+    if (lastmillis - lastjumppad < 300)
+      return;
+    lastjumppad = lastmillis;
+    vec v = {(int)(char)ents[n].attr3 / 10.0f, (int)(char)ents[n].attr2 / 10.0f,
+             ents[n].attr1 / 10.0f};
+    d->vel = v;
+    playsoundc(S_JUMPPAD);
+    return;
+  };
+  };
   if (m_infected && d->team[0] && !strcmp(d->team, "INFD")) {
     if (ents[n].type == I_HEALTH || ents[n].type == I_BOOST) {
       int np = 1;
@@ -312,29 +333,8 @@ void pickup(int n, dynent *d) {
     ents[n].spawned = false;
     triggertime = lastmillis;
     trigger(ents[n].attr1, ents[n].attr2,
-            false); // needs to go over server for multiplayer
+            false);
     break;
-
-  case TELEPORT: {
-    static int lastteleport = 0;
-    if (lastmillis - lastteleport < 500)
-      break;
-    lastteleport = lastmillis;
-    teleport(n, d);
-    break;
-  };
-
-  case JUMPPAD: {
-    static int lastjumppad = 0;
-    if (lastmillis - lastjumppad < 300)
-      break;
-    lastjumppad = lastmillis;
-    vec v = {(int)(char)ents[n].attr3 / 10.0f, (int)(char)ents[n].attr2 / 10.0f,
-             ents[n].attr1 / 10.0f};
-    player1->vel = v;
-    playsoundc(S_JUMPPAD);
-    break;
-  };
   };
 };
 

@@ -411,6 +411,8 @@ void botpain(dynent *m, int damage, dynent *d) {
     return;
   if (m->spawnprotectmillis > 0)
     return;
+  if (d && m != d && m->team[0] && d->team[0] && !strcmp(m->team, d->team))
+    return;
 
   if (d != m && d->state == CS_ALIVE)
     m->enemy = d;
