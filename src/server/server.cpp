@@ -627,7 +627,6 @@ void process(ENetPacket *packet, int sender) {
 
     case SV_ITEMPICKUP: {
       int n = getint(p);
-      clients[sender].spawnprotectmillis = 0;
       pickup(n, getint(p), sender);
       break;
     };
