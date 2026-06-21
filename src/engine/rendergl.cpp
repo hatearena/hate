@@ -1584,7 +1584,17 @@ void drawhudmodel(int start, int end, float speed, int base) {
   const vec *glowcol = NULL;
   vec teamcol;
 
-  if (m_teammode) {
+  if (player1->gunselect == GUN_RAILGUN) {
+    float t = (float)(lastmillis % 1500) / 1500.0f;
+    glow = (t < 0.5f ? t * 2.0f : 2.0f - t * 2.0f) * 0.03f;
+    if (m_teammode && !strcmp(player1->team, "RED")) {
+      teamcol = {1.0f, 0.0f, 0.0f};
+      glowcol = &teamcol;
+    } else {
+      teamcol = {0.4f, 0.7f, 1.0f};
+      glowcol = &teamcol;
+    }
+  } else if (m_teammode) {
     if (!strcmp(player1->team, "RED")) {
       glow = 0.3f;
       teamcol = {1.0f, 0.0f, 0.0f};
