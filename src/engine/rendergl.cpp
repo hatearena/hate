@@ -1586,11 +1586,13 @@ void drawhudmodel(int start, int end, float speed, int base) {
 
   if (player1->gunselect == GUN_RAILGUN) {
     float t = (float)(lastmillis % 1500) / 1500.0f;
-    glow = (t < 0.5f ? t * 2.0f : 2.0f - t * 2.0f) * 0.03f;
+    float pulse = (t < 0.5f ? t * 2.0f : 2.0f - t * 2.0f) * 0.1f;
     if (m_teammode && !strcmp(player1->team, "RED")) {
+      glow = 0.3f + pulse;
       teamcol = {1.0f, 0.0f, 0.0f};
       glowcol = &teamcol;
     } else {
+      glow = pulse;
       teamcol = {0.4f, 0.7f, 1.0f};
       glowcol = &teamcol;
     }
