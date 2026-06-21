@@ -339,7 +339,7 @@ void pickup(int n, dynent *d) {
 };
 
 void checkitems() {
-  if (editmode)
+  if (editmode || screenshotmode)
     return;
   loopv(ents) {
     entity &e = ents[i];
