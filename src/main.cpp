@@ -232,7 +232,15 @@ int main(int argc, char **argv) {
   log("video: creating window");
   SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
   {
-    FILE *cfg = fopen("config.cfg", "r");
+    {
+      const char *hatedir = configdir();
+#ifndef _WIN32
+      mkdir(hatedir, 0755);
+#else
+      mkdir(hatedir);
+#endif
+    };
+    FILE *cfg = fopen(configpath(), "r");
     if (cfg) {
       char line[256];
       while (fgets(line, sizeof(line), cfg)) {
@@ -253,7 +261,7 @@ int main(int argc, char **argv) {
     }
   }
   {
-    FILE *cfg = fopen("config.cfg", "r");
+    FILE *cfg = fopen(configpath(), "r");
     if (!cfg)
       cfg = fopen("data/default.cfg", "r");
     if (cfg) {
@@ -271,7 +279,7 @@ int main(int argc, char **argv) {
     }
   }
   {
-    FILE *cfg = fopen("config.cfg", "r");
+    FILE *cfg = fopen(configpath(), "r");
     if (!cfg) {
       SDL_DisplayMode mode;
       if (SDL_GetCurrentDisplayMode(0, &mode) == 0) {
@@ -352,7 +360,7 @@ int main(int argc, char **argv) {
   preloadweaponsounds();
   exec("servers.cfg");
 
-  if (!execfile("config.cfg")) {
+  if (!execfile(configpath())) {
     execfile("data/default.cfg");
     writecfg();
   }

@@ -436,8 +436,42 @@ void exec(const char *cfgfile) {
     conoutf("Could not read \"%s\"", cfgfile);
 };
 
+const char *configdir() {
+  static string buf;
+#ifdef _WIN32
+  char *appdata = getenv("APPDATA");
+  if (appdata) {
+    sprintf_s(buf)("%s/hatearena", appdata);
+    path(buf);
+  } else {
+    strcpy_s(buf, ".");
+  }
+#else
+  char *home = getenv("HOME");
+  if (home) {
+    sprintf_s(buf)("%s/.hatearena", home);
+    path(buf);
+  } else {
+    strcpy_s(buf, ".");
+  }
+#endif
+  return buf;
+}
+
+const char *configpath() {
+  static string buf;
+  sprintf_s(buf)("%s/config.cfg", configdir());
+  return buf;
+}
+
+static const char *configtmppath() {
+  static string buf;
+  sprintf_s(buf)("%s/config.cfg.tmp", configdir());
+  return buf;
+}
+
 void writecfg() {
-  FILE *f = fopen("config.cfg.tmp", "w");
+  FILE *f = fopen(configtmppath(), "w");
   if (!f)
     return;
   fprintf(
@@ -463,7 +497,7 @@ void writecfg() {
         fprintf(f, "alias \"%s\" [%s]\n", id->name, id->action);
       };);
   fclose(f);
-  rename("config.cfg.tmp", "config.cfg");
+  rename(configtmppath(), configpath());
 };
 
 COMMAND(writecfg, ARG_NONE);
@@ -472,7 +506,7 @@ static int __ad_writecfg =
      0);
 
 void dangerresetcfg() {
-  remove("config.cfg");
+  remove(configpath());
   execfile("data/default.cfg");
   writecfg();
   conoutf("Config has been reset to defaults.");
