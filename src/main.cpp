@@ -363,7 +363,7 @@ int main(int argc, char **argv) {
   log("localconnect");
   localconnect();
   changemap("horizon");
-  log("mainloop");
+  log("main");
 
   int ignore = 5;
   int delay = 500;
