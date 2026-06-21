@@ -688,11 +688,11 @@ void newparticles(char *h, char *freq, char *cr, char *cg, char *cb) {
       sqr *s = S(sel.x + x, sel.y + y);
       if (SOLID(s))
         continue;
-      newentity(sel.x + x, sel.y + y, s->floor + 1, "newparticle", v1,
+      newentity(sel.x + x, sel.y + y, s->floor + 1, "particlesource", v1,
                 ATOI(freq), ATOI(cr), ATOI(cg));
     };
   } else {
-    newentity(cx, cy, ch + 1, "newparticle", v1, ATOI(freq), ATOI(cr),
+    newentity(cx, cy, ch + 1, "particlesource", v1, ATOI(freq), ATOI(cr),
               ATOI(cg));
   };
 };
