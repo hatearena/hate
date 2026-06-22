@@ -361,11 +361,12 @@ int main(int argc, char **argv) {
   exec("servers.cfg");
 
   bool shouldsayit = false;
+  static bool firstlaunch = false;
 
   if (!execfile(configpath())) {
     execfile("data/default.cfg");
     writecfg();
-    shouldsayit = true;
+    firstlaunch = true;
   }
 
   execute("bind F3 togglespectate");
@@ -375,11 +376,6 @@ int main(int argc, char **argv) {
   localconnect();
   changemap("horizon");
   log("main");
-
-  if (shouldsayit) {
-    conoutf("Welcome to HateArena.");
-    conoutf("Press ESC and set your player name from the Settings menu.");
-  }
 
   int ignore = 5;
   int delay = 500;
@@ -425,6 +421,10 @@ int main(int argc, char **argv) {
     gl_drawframe(scr_w, scr_h, fps);
     SDL_Event event;
     int lasttype = 0, lastbut = 0;
+    if (firstlaunch) {
+      firstlaunch = false;
+      execute("showmenu welcome");
+    };
     while (SDL_PollEvent(&event)) {
       switch (event.type) {
       case SDL_QUIT:
