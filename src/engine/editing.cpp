@@ -85,8 +85,10 @@ void togglescreenshotmode() {
   screenshotmode = !screenshotmode;
   if (screenshotmode)
     noclip = 1;
-  else
+  else {
+    noclip = 0;
     spawnplayer(player1);
+  }
 };
 
 COMMANDN(screenshotmodetoggle, togglescreenshotmode, ARG_NONE);
