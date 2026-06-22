@@ -306,7 +306,7 @@ entity *newentity(int x, int y, int z, char *what, int v1, int v2, int v3,
     break;
 
   case TELEPORT:
-    e.attr3 = (uchar)((int)player1->yaw % 360);
+    e.attr3 = (uchar)(((int)player1->yaw + 45) / 90 * 90 % 360);
     break;
 
   case MAPMODEL:
