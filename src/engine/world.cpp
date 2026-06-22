@@ -305,6 +305,10 @@ entity *newentity(int x, int y, int z, char *what, int v1, int v2, int v3,
       e.attr2 = 255;
     break;
 
+  case TELEPORT:
+    e.attr3 = (uchar)((int)player1->yaw % 360);
+    break;
+
   case MAPMODEL:
     e.attr4 = e.attr3;
     e.attr3 = e.attr2;
