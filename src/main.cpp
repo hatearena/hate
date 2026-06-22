@@ -93,7 +93,7 @@ void screenshot() {
       };
       char *home = getenv("HOME");
       if (home) {
-        sprintf_sd(hatedir)("%s/.hate", home);
+        sprintf_sd(hatedir)("%s/.hatearena", home);
         path(hatedir);
 #ifdef _WIN32
         mkdir(hatedir);
@@ -101,7 +101,7 @@ void screenshot() {
         mkdir(hatedir, 0755);
 #endif
 
-        sprintf_sd(dir)("%s/.hate/screenshots", home);
+        sprintf_sd(dir)("%s/.hatearena/screenshots", home);
         path(dir);
 #ifdef _WIN32
         mkdir(dir);
@@ -109,7 +109,7 @@ void screenshot() {
         mkdir(dir, 0755);
 #endif
 
-        sprintf_sd(buf)("%s/.hate/screenshots/screenshot_%d.png", home,
+        sprintf_sd(buf)("%s/.hatearena/screenshots/screenshot_%d.png", home,
                         lastmillis);
         path(buf);
         if (IMG_SavePNG(temp, buf) == 0)
