@@ -190,9 +190,14 @@ void remipmore(block &b, int level) {
   remip(bb, level);
 };
 
+int entcycle = -1;
+
 int closestent() {
   if (noteditmode())
     return -1;
+  if (entcycle >= 0 && entcycle < ents.length() && ents[entcycle].type != NOTUSED)
+    return entcycle;
+  entcycle = -1;
   int best;
   float bdist = 99999;
   loopv(ents) {
@@ -200,7 +205,7 @@ int closestent() {
     if (e.type == NOTUSED)
       continue;
     vec v = {e.x, e.y, e.z};
-    vdist(dist, t, player1->o, v);
+    vdist(dist, ev, player1->o, v);
     if (dist < bdist) {
       best = i;
       bdist = dist;
@@ -208,6 +213,42 @@ int closestent() {
   };
   return bdist == 99999 ? -1 : best;
 };
+
+void cycleent() {
+  if (noteditmode())
+    return;
+  struct sortent { float dist; int idx; };
+  vector<sortent> sorted;
+  loopv(ents) {
+    if (ents[i].type == NOTUSED) continue;
+    vec v = {ents[i].x, ents[i].y, ents[i].z};
+    vdist(dist, ev, player1->o, v);
+    sortent &s = sorted.add();
+    s.dist = dist;
+    s.idx = i;
+  };
+  if (sorted.length() == 0) {
+    entcycle = -1;
+    conoutf("No entities remain");
+    return;
+  };
+  loopi(sorted.length()) loopj(sorted.length() - 1) {
+    if (sorted[j].dist > sorted[j + 1].dist) {
+      sortent t = sorted[j];
+      sorted[j] = sorted[j + 1];
+      sorted[j + 1] = t;
+    };
+  };
+  int cur = -1;
+  loopv(sorted) if (sorted[i].idx == entcycle) { cur = i; break; };
+  int next = (cur + 1) % sorted.length();
+  entcycle = sorted[next].idx;
+  entity &e = ents[entcycle];
+  conoutf("Entity [%s] pos:(%d,%d,%d)", entnames[e.type], e.x, e.y, e.z);
+};
+
+COMMAND(cycleent, ARG_NONE);
+static int __ad_cycleent = (addcommanddetail("cycleent", "Cycle to next nearest entity"), 0);
 
 void entproperty(int prop, int amount) {
   int e = closestent();
@@ -238,6 +279,7 @@ void delent() {
   int t = ents[e].type;
   conoutf("Entity deleted: %s", entnames[t]);
   ents[e].type = NOTUSED;
+  entcycle = -1;
   addmsg(1, 10, SV_EDITENT, e, NOTUSED, 0, 0, 0, 0, 0, 0, 0);
   if (t == LIGHT)
     calclight();

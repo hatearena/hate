@@ -360,9 +360,12 @@ int main(int argc, char **argv) {
   preloadweaponsounds();
   exec("servers.cfg");
 
+  bool shouldsayit = false;
+
   if (!execfile(configpath())) {
     execfile("data/default.cfg");
     writecfg();
+    shouldsayit = true;
   }
 
   execute("bind F3 togglespectate");
@@ -372,6 +375,11 @@ int main(int argc, char **argv) {
   localconnect();
   changemap("horizon");
   log("main");
+
+  if (shouldsayit) {
+    conoutf("Welcome to HateArena.");
+    conoutf("Press ESC and set your player name from the Settings menu.");
+  }
 
   int ignore = 5;
   int delay = 500;
@@ -456,6 +464,9 @@ int main(int argc, char **argv) {
             break;
           case SDLK_z:
             execute("delent");
+            break;
+          case SDLK_q:
+            execute("cycleent");
             break;
           case SDLK_LEFTBRACKET:
             execute("editheight $flrceil 1");
