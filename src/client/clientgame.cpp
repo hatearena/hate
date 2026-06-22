@@ -366,9 +366,9 @@ void updateworld(int millis) // main game update loop
       if (player1->inlava && player1->state == CS_ALIVE && !clienthost) {
         static int lavadamage = 0;
         lavadamage += curtime;
-        if (lavadamage >= 500) {
+        if (lavadamage >= 300) {
           lavadamage = 0;
-          selfdamage(5, -1, player1);
+          selfdamage(10, -1, player1);
         };
       };
     };
@@ -530,24 +530,28 @@ void entinmap(dynent *d) // brute force but effective way to find a free
     for (int x = -r; x <= r; x++) {
       d->o.x += x;
       d->o.y += r;
-      if (collide(d, true, 0, 0)) return;
+      if (collide(d, true, 0, 0))
+        return;
       d->o.x -= x;
       d->o.y -= r;
       d->o.x += x;
       d->o.y += -r;
-      if (collide(d, true, 0, 0)) return;
+      if (collide(d, true, 0, 0))
+        return;
       d->o.x -= x;
       d->o.y -= -r;
     };
     for (int y = -r + 1; y <= r - 1; y++) {
       d->o.x += r;
       d->o.y += y;
-      if (collide(d, true, 0, 0)) return;
+      if (collide(d, true, 0, 0))
+        return;
       d->o.x -= r;
       d->o.y -= y;
       d->o.x += -r;
       d->o.y += y;
-      if (collide(d, true, 0, 0)) return;
+      if (collide(d, true, 0, 0))
+        return;
       d->o.x -= -r;
       d->o.y -= y;
     };
@@ -764,7 +768,7 @@ void boostn(bool on) {
   float strength = player1->onfloor ? 2.9f : 1.5f;
   player1->vel.x += sinf(yawrad) * strength;
   player1->vel.y += -cosf(yawrad) * strength;
-  player1->boostmillis = 4000;
+  player1->boostmillis = 2500;
   playsoundc(S_BOOST);
 };
 

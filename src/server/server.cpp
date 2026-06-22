@@ -1081,7 +1081,7 @@ void serverslice(int seconds, unsigned int timeout) {
   if (serverhost) {
     static int lavatick = 0;
     lavatick += 5;
-    if (lavatick >= 500 && server_lavalevel > -128) {
+    if (lavatick >= 300 && server_lavalevel > -128) {
       lavatick = 0;
       loopv(clients) if (clients[i].type != ST_EMPTY && clients[i].state == CS_ALIVE) {
         if (server_lavalevel > clients[i].o.z - 0.5f) {
@@ -1089,7 +1089,7 @@ void serverslice(int seconds, unsigned int timeout) {
           uchar *dp = dmgpkt->data + 2;
           putint(dp, SV_DAMAGE);
           putint(dp, i);
-          putint(dp, 5);
+          putint(dp, 10);
           putint(dp, clients[i].lifesequence);
           putint(dp, -1);
           *(ushort *)dmgpkt->data = ENET_HOST_TO_NET_16(dp - (uchar *)dmgpkt->data);

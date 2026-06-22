@@ -901,7 +901,7 @@ void gl_drawhud(int w, int h, int curfps, int nquads, int curvert,
       int bh = 1750 - 1580 - inner * 2;
       int by = 1580 + inner;
       float pct =
-          d->boostmillis > 0 ? 1.0f - (float)d->boostmillis / 4000.0f : 1.0f;
+          d->boostmillis > 0 ? 1.0f - (float)d->boostmillis / 2500.0f : 1.0f;
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
       glColor4ub(180, 180, 180, d->boostmillis > 0 ? 20 : 54);
       roundedbox(bx + inner, by, bx + inner + (int)(bw * pct), by + bh, 12);
@@ -923,7 +923,7 @@ void gl_drawhud(int w, int h, int curfps, int nquads, int curvert,
       glVertex2i(bx + 10, 1684);
       glEnd();
       int boostval = d->boostmillis > 0
-                         ? (int)((1.0f - (float)d->boostmillis / 4000.0f) * 100)
+                         ? (int)((1.0f - (float)d->boostmillis / 2500.0f) * 100)
                          : 100;
       draw_textf("%d", bx + 85, 1660, 2, boostval);
     };
