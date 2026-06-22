@@ -2,7 +2,8 @@
 #include "../include/protos.h"
 
 static int lightgunchannel = -1;
-static int chainsawchannel = -1;
+int chainsawchannel = -1;
+dynent *chainsawowner = NULL;
 
 struct guninfo {
   short sound, attackdelay, damage, projspeed, part, kickamount;
@@ -373,7 +374,7 @@ void shootv(int gun, vec &from, vec &to, dynent *d,
 {
   if (gun != GUN_LIGHTGUN && gun != GUN_CSAW)
     playsound(guns[gun].sound, d == player1 ? NULL : &d->o);
-  else if (d != player1)
+  else if (gun == GUN_LIGHTGUN && d != player1)
     playsound(guns[gun].sound, &d->o);
   int pspeed = 25;
   switch (gun) {
@@ -456,13 +457,19 @@ void shoot(dynent *d, vec &targ) {
       stopchan(lightgunchannel);
       lightgunchannel = -1;
     }
-    if (d->gunselect == GUN_CSAW && d->attacking) {
-      if (chainsawchannel < 0)
-        chainsawchannel = playsoundloop(S_CSAW);
-    } else if (chainsawchannel >= 0) {
-      stopchan(chainsawchannel);
-      chainsawchannel = -1;
+  }
+  if (d->gunselect == GUN_CSAW && d->attacking) {
+    if (chainsawowner == d) {
+    } else if (chainsawchannel < 0) {
+      chainsawchannel = playsoundloop(S_CSAW);
+      chainsawowner = d;
+    } else if (d == player1) {
+      chainsawowner = d;
     }
+  } else if (chainsawowner == d && chainsawchannel >= 0) {
+    stopchan(chainsawchannel);
+    chainsawchannel = -1;
+    chainsawowner = NULL;
   }
   if (editmode)
     return;

@@ -406,6 +406,9 @@ void botrender() {
   }
 }
 
+extern int chainsawchannel;
+extern dynent *chainsawowner;
+
 void botpain(dynent *m, int damage, dynent *d) {
   if (m->state == CS_DEAD)
     return;
@@ -426,6 +429,11 @@ void botpain(dynent *m, int damage, dynent *d) {
     m->state = CS_DEAD;
     m->lastaction = lastmillis;
     m->attacking = false;
+    if (chainsawowner == m && chainsawchannel >= 0) {
+      stopchan(chainsawchannel);
+      chainsawchannel = -1;
+      chainsawowner = NULL;
+    }
     m->deaths++;
     playsound(S_DEAD, &m->o);
     spawngibs(m->o, 4);
