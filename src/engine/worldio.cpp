@@ -258,8 +258,10 @@ void load_world(char *mname) {
   if (hdr.version >= 4) {
     gzread(f, &hdr.waterlevel, sizeof(int) * 16);
     endianswap(&hdr.waterlevel, sizeof(int), 16);
+    if (hdr.version < 7) hdr.lavalevel = -100000;
   } else {
     hdr.waterlevel = -100000;
+    hdr.lavalevel = -100000;
   };
   ents.setsize(0);
   loopi(hdr.numents) {

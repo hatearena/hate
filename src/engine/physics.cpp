@@ -240,6 +240,7 @@ void moveplayer(dynent *pl, int moveres, bool local, int curtime) {
   };
 
   const bool water = hdr.waterlevel > pl->o.z - 0.5f;
+  const bool lava = hdr.lavalevel > pl->o.z - 0.5f;
 
   vec d; // vector of direction we ideally want to move in
 
@@ -438,6 +439,7 @@ void moveplayer(dynent *pl, int moveres, bool local, int curtime) {
   } else if (pl->inwater && !water)
     playsound(S_SPLASH1, &pl->o);
   pl->inwater = water;
+  pl->inlava = lava;
 };
 
 void moveplayer(dynent *pl, int moveres, bool local) {

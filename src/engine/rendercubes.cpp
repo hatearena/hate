@@ -282,11 +282,12 @@ void render_square(int wtex, float floor1, float floor2, float ceil1,
 };
 
 int wx1, wy1, wx2, wy2;
+int lx1, ly1, lx2, ly2;
 
 VAR(watersubdiv, 1, 4, 64);
 static int __ad_watersubdiv = (addcommanddetail("watersubdiv", "Water surface subdivision level"), 0);
 VARF(waterlevel, -128, -128, 127,
-     if (!noteditmode()) hdr.waterlevel = waterlevel);
+     if (!noteditmode()) { hdr.waterlevel = waterlevel; if (waterlevel > -128) hdr.lavalevel = -100000; });
 static int __ad_waterlevel = (addcommanddetail("waterlevel", "Water level height"), 0);
 VARP(waterspec, 0, 40, 255);
 static int __ad_waterspec = (addcommanddetail("waterspec", "Water specular reflection amount"), 0);
@@ -299,6 +300,22 @@ static int __ad_waterg = (addcommanddetail("waterg", "Water green color componen
 VARP(waterb, 0, 200, 255);
 static int __ad_waterb = (addcommanddetail("waterb", "Water blue color component"), 0);
 
+VAR(lavasubdiv, 1, 4, 64);
+static int __ad_lavasubdiv = (addcommanddetail("lavasubdiv", "Lava surface subdivision level"), 0);
+VARF(lavalevel, -128, -128, 127,
+     if (!noteditmode()) { hdr.lavalevel = lavalevel; if (lavalevel > -128) hdr.waterlevel = -100000; });
+static int __ad_lavalevel = (addcommanddetail("lavalevel", "Lava level height"), 0);
+VARP(lavaspec, 0, 10, 255);
+static int __ad_lavaspec = (addcommanddetail("lavaspec", "Lava specular reflection amount"), 0);
+VARP(lavaalpha, 0, 200, 255);
+static int __ad_lavaalpha = (addcommanddetail("lavaalpha", "Lava transparency alpha"), 0);
+VARP(lavar, 0, 255, 255);
+static int __ad_lavar = (addcommanddetail("lavar", "Lava red color component"), 0);
+VARP(lavag, 0, 40, 255);
+static int __ad_lavag = (addcommanddetail("lavag", "Lava green color component"), 0);
+VARP(lavab, 0, 0, 255);
+static int __ad_lavab = (addcommanddetail("lavab", "Lava blue color component"), 0);
+
 inline void vertw(int v1, float v2, int v3, sqr *c, float tu, float tv,
                   float wavetime, float shimmertime) {
   vertcheck();
@@ -307,6 +324,16 @@ inline void vertw(int v1, float v2, int v3, sqr *c, float tu, float tv,
   vertf((float)v1, v2 - wave, (float)v3, c, tu, tv);
   float av = sin(v1 * 0.5f + v3 * 0.3f + shimmertime) * 0.2f + 0.8f;
   verts[curvert - 1].a = (uchar)(wateralpha * av);
+};
+
+inline void vertlava(int v1, float v2, int v3, sqr *c, float tu, float tv,
+                     float wavetime, float shimmertime) {
+  vertcheck();
+  float wave = sin(v1 * v3 * 0.1f + wavetime) * 0.2f +
+               sin(v1 * 0.13f + v3 * 0.07f + wavetime * 1.4f + 1.3f) * 0.12f;
+  vertf((float)v1, v2 - wave, (float)v3, c, tu, tv);
+  float av = sin(v1 * 0.5f + v3 * 0.3f + shimmertime) * 0.2f + 0.8f;
+  verts[curvert - 1].a = (uchar)(lavaalpha * av);
 };
 
 inline float dx(float x) {
@@ -412,11 +439,105 @@ void addwaterquad(int x, int y, int size) {
   };
 };
 
+int renderlava(float hf) {
+  if (lx1 < 0)
+    return nquads;
+
+  glDepthMask(GL_FALSE);
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  glDisable(GL_TEXTURE_2D);
+
+  lx1 &= ~(lavasubdiv - 1);
+  ly1 &= ~(lavasubdiv - 1);
+
+  float xf = 1.0f;
+  float yf = 1.0f;
+  float xs = lavasubdiv * xf;
+  float ys = lavasubdiv * yf;
+  float wavetime = lastmillis / 300.0f;
+  float scroll = lastmillis / 4000.0f;
+  float shimmertime = lastmillis / 1000.0f;
+
+  sqr dl;
+
+  for (int xx = lx1; xx < lx2; xx += lavasubdiv) {
+    for (int yy = ly1; yy < ly2; yy += lavasubdiv) {
+      float xo = xf * (xx + scroll);
+      float yo = yf * (yy + scroll);
+
+      float spec =
+          sin(xx * 0.3f + yy * 0.5f + shimmertime * 1.5f) * 0.5f + 0.5f;
+      int sv = (int)(spec * lavaspec);
+      dl.r = (uchar)min(255, lavar + sv);
+      dl.g = (uchar)min(255, lavag + sv * 3 / 4);
+      dl.b = (uchar)min(255, lavab + sv / 2);
+
+      if (yy == ly1) {
+        vertlava(xx, hf, yy, &dl, dx(xo), dy(yo), wavetime, shimmertime);
+        vertlava(xx + lavasubdiv, hf, yy, &dl, dx(xo + xs), dy(yo), wavetime,
+                 shimmertime);
+      };
+      vertlava(xx, hf, yy + lavasubdiv, &dl, dx(xo), dy(yo + ys), wavetime,
+               shimmertime);
+      vertlava(xx + lavasubdiv, hf, yy + lavasubdiv, &dl, dx(xo + xs),
+               dy(yo + ys), wavetime, shimmertime);
+    };
+    int n = (ly2 - ly1 - 1) / lavasubdiv;
+    nquads += n;
+    n = (n + 2) * 2;
+    glDrawArrays(GL_TRIANGLE_STRIP, curvert -= n, n);
+  };
+
+  glEnable(GL_TEXTURE_2D);
+  glDisable(GL_BLEND);
+  glDepthMask(GL_TRUE);
+
+  if (lx1 >= 0) {
+    int area = (lx2 - lx1) * (ly2 - ly1);
+    int np = 1 + area / 2000;
+    if (np > 5)
+      np = 5;
+    loopi(np) {
+      float px = lx1 + (float)(rnd(lx2 - lx1)) + (float)rnd(100) / 100.0f;
+      float py = ly1 + (float)(rnd(ly2 - ly1)) + (float)rnd(100) / 100.0f;
+      vec po = {px, py, hf};
+      vec pd = {(float)(rnd(21) - 10), (float)(rnd(21) - 10),
+                (float)(rnd(8) + 2)};
+      newparticlecol(po, pd, rnd(600) + 600, 10, (uchar)(rnd(100) + 155),
+                     (uchar)(rnd(40) + 30), (uchar)(rnd(20) + 10));
+    };
+  };
+
+  return nquads;
+};
+
+void addlavaquad(int x, int y, int size) {
+  int x2 = x + size;
+  int y2 = y + size;
+  if (lx1 < 0) {
+    lx1 = x;
+    ly1 = y;
+    lx2 = x2;
+    ly2 = y2;
+  } else {
+    if (x < lx1)
+      lx1 = x;
+    if (y < ly1)
+      ly1 = y;
+    if (x2 > lx2)
+      lx2 = x2;
+    if (y2 > ly2)
+      ly2 = y2;
+  };
+};
+
 void resetcubes() {
   if (!verts)
     reallocv();
   floorstrip = deltastrip = false;
   wx1 = -1;
+  lx1 = -1;
   nquads = 0;
   sbright.r = sbright.g = sbright.b = 255;
   sdark.r = sdark.g = sdark.b = 0;

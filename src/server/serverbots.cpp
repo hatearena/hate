@@ -10,6 +10,8 @@ extern string smapname;
 extern void endianswap(void *, int, int);
 extern void send2(bool, int, int, int);
 
+int server_lavalevel = -100000;
+
 struct serverbot {
   int cn;
   char name[16];
@@ -190,7 +192,11 @@ static void loadspawns() {
   if (hdr.version >= 4) {
     gzread(f, &hdr.waterlevel, sizeof(int) * 16);
     endianswap(&hdr.waterlevel, sizeof(int), 16);
+    if (hdr.version < 7) hdr.lavalevel = -100000;
+  } else {
+    hdr.lavalevel = -100000;
   };
+  server_lavalevel = hdr.lavalevel;
   loopi(hdr.numents) {
     persistent_entity e;
     gzread(f, &e, sizeof(persistent_entity));
@@ -348,9 +354,9 @@ static void serverbot_avoid_overlap(serverbot &b) {
 };
 
 void serverbot_spawn(int count) {
-  if (count < 1)
-    count = 1;
   loadspawns();
+  if (count < 1)
+    return;
   if (numspawns == 0) {
     spawnx[0] = spawny[0] = 64;
     spawnz[0] = 0;

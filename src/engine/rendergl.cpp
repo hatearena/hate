@@ -1777,7 +1777,9 @@ void gl_drawframe(int w, int h, float curfps) {
     campitch = player1->pitch;
   }
 
+  float lf = hdr.lavalevel - 0.3f;
   bool underwater = vz < hf;
+  bool inlava = vz < lf;
 
   bool cam_outside = vx < 0 || vx >= ssize || vy < 0 || vy >= ssize;
   if (!cam_outside) {
@@ -1795,11 +1797,16 @@ void gl_drawframe(int w, int h, float curfps) {
   glFogfv(GL_FOG_COLOR, fogc);
   glClearColor(fogc[0], fogc[1], fogc[2], 1.0f);
 
-  if (underwater) {
+  if (underwater || inlava) {
     fovy += (float)sin(lastmillis / 1000.0) * 2.0f;
     aspect += (float)sin(lastmillis / 1000.0 + PI) * 0.1f;
     glFogi(GL_FOG_START, 0);
     glFogi(GL_FOG_END, (fog + 96) / 8);
+  };
+  if (inlava) {
+    float lavafog[4] = {0.8f, 0.1f, 0.0f, 1.0f};
+    glFogfv(GL_FOG_COLOR, lavafog);
+    glClearColor(lavafog[0], lavafog[1], lavafog[2], 1.0f);
   };
 
   glClear((cam_outside ? GL_COLOR_BUFFER_BIT : 0) | GL_DEPTH_BUFFER_BIT);
@@ -1874,6 +1881,7 @@ void gl_drawframe(int w, int h, float curfps) {
 
   overbright(1);
   int nquads = renderwater(hf);
+  renderlava(lf);
 
   overbright(2);
   render_particles(curtime);
@@ -1900,7 +1908,7 @@ void gl_drawframe(int w, int h, float curfps) {
     glDisable(GL_BLEND);
   };
 
-  gl_drawhud(w, h, (int)curfps, nquads, curvert, underwater);
+  gl_drawhud(w, h, (int)curfps, nquads, curvert, underwater, inlava);
 
   glEnable(GL_CULL_FACE);
   glEnable(GL_FOG);

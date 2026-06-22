@@ -3,7 +3,9 @@
 
 vector<client> clients;
 int maxclients = 8;
-string smapname;
+  string smapname;
+
+extern int server_lavalevel;
 
 struct server_entity {
   bool spawned;
@@ -597,10 +599,9 @@ void process(ENetPacket *packet, int sender) {
       mapend = lastsec + minremain * 60;
       interm = 0;
       resetitems();
-      if (botcount > 0) {
+      if (botcount > 0)
         serverbot_clear();
-        serverbot_spawn(botcount);
-      }
+      serverbot_spawn(botcount);
       loopv(clients) if (clients[i].type != ST_EMPTY) {
         ENetPacket *mappkt =
             enet_packet_create(NULL, MAXTRANS, ENET_PACKET_FLAG_RELIABLE);
@@ -1016,11 +1017,11 @@ void serverslice(int seconds, unsigned int timeout) {
       break;
     };
     mapreload = true;
-    if (botcount > 0) {
+    if (botcount > 0)
       serverbot_clear();
-      serverbot_spawn(botcount);
+    serverbot_spawn(botcount);
+    if (botcount > 0)
       loopv(clients) if (clients[i].type == ST_TCPIP) serverbot_sendinit(i);
-    }
   };
 
   resetserverifempty();
@@ -1033,11 +1034,11 @@ void serverslice(int seconds, unsigned int timeout) {
     mapend = lastsec + minremain * 60;
     interm = 0;
     resetitems();
-    if (botcount > 0) {
+    if (botcount > 0)
       serverbot_clear();
-      serverbot_spawn(botcount);
+    serverbot_spawn(botcount);
+    if (botcount > 0)
       loopv(clients) if (clients[i].type == ST_TCPIP) serverbot_sendinit(i);
-    }
     ENetPacket *packet =
         enet_packet_create(NULL, MAXTRANS, ENET_PACKET_FLAG_RELIABLE);
     uchar *start = packet->data;
@@ -1077,6 +1078,29 @@ void serverslice(int seconds, unsigned int timeout) {
         enet_peer_send(clients[j].peer, 0, pkt);
   }
 
+  {
+    static int lavatick = 0;
+    lavatick += 5;
+    if (lavatick >= 500 && server_lavalevel > -128) {
+      lavatick = 0;
+      loopv(clients) if (clients[i].type != ST_EMPTY && clients[i].state == CS_ALIVE) {
+        if (server_lavalevel > clients[i].o.z - 0.5f) {
+          ENetPacket *dmgpkt = enet_packet_create(NULL, 32, ENET_PACKET_FLAG_RELIABLE);
+          uchar *dp = dmgpkt->data + 2;
+          putint(dp, SV_DAMAGE);
+          putint(dp, i);
+          putint(dp, 5);
+          putint(dp, clients[i].lifesequence);
+          putint(dp, i);
+          *(ushort *)dmgpkt->data = ENET_HOST_TO_NET_16(dp - (uchar *)dmgpkt->data);
+          enet_packet_resize(dmgpkt, dp - (uchar *)dmgpkt->data);
+          multicast(dmgpkt, -1);
+          if (dmgpkt->referenceCount == 0)
+            enet_packet_destroy(dmgpkt);
+        };
+      };
+    };
+  };
   serverbot_update();
 
   if (!isdedicated)

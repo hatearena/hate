@@ -70,7 +70,7 @@ struct entity : public persistent_entity {
   bool spawned; // the only dynamic state of a map entity
 };
 
-#define MAPVERSION 6 // bump if map format changes, see worldio.cpp
+#define MAPVERSION 7 // bump if map format changes, see worldio.cpp
 
 struct header // map file format header
 {
@@ -82,7 +82,8 @@ struct header // map file format header
   char maptitle[128];
   ushort texlists[3][2048];
   int waterlevel;
-  int reserved[15];
+  int lavalevel;
+  int reserved[14];
 };
 
 #define SWS(w, x, y, s) (&(w)[(y) * (s) + (x)])
@@ -130,7 +131,7 @@ struct dynent // players & monsters
   float yaw, pitch, roll; // used as vec in one place
   float maxspeed;         // cubes per second, 24 for player
   bool outsidemap;        // from his eyes
-  bool inwater;
+  bool inwater, inlava;
   bool onfloor, jumpnext;
   int move, strafe;
   bool k_left, k_right, k_up, k_down; // see input code

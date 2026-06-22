@@ -396,7 +396,8 @@ void empty_world(int factor,
   } else {
     strn0cpy(hdr.maptitle, "Untitled Map by Unknown", 128);
     hdr.waterlevel = -100000;
-    loopi(15) hdr.reserved[i] = 0;
+    hdr.lavalevel = -100000;
+    loopi(14) hdr.reserved[i] = 0;
     loopk(3) loopi(2048) hdr.texlists[k][i] = i;
     ents.setsize(0);
     block b = {8, 8, ssize - 16, ssize - 16};

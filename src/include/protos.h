@@ -67,6 +67,8 @@ extern void render_square(int wtex, float floor1, float floor2, float ceil1, flo
 extern void render_tris(int x, int y, int size, bool topleft, sqr *h1, sqr *h2, sqr *s, sqr *t, sqr *u, sqr *v);
 extern void addwaterquad(int x, int y, int size);
 extern int renderwater(float hf);
+extern void addlavaquad(int x, int y, int size);
+extern int renderlava(float hf);
 extern void finishstrips();
 extern void setarraypointers();
 
@@ -180,7 +182,7 @@ extern void dot(int x, int y, float z);
 extern void linestyle(float width, int r, int g, int b);
 extern void newsphere(vec &o, float max, int type);
 extern void renderspheres(int time);
-extern void gl_drawhud(int w, int h, int curfps, int nquads, int curvert, bool underwater);
+extern void gl_drawhud(int w, int h, int curfps, int nquads, int curvert, bool underwater, bool inlava);
 extern void readdepth(int w, int h);
 extern void drawicon(float tx, float ty, int x, int y, int s);
 extern void blendbox(int x1, int y1, int x2, int y2, bool border);

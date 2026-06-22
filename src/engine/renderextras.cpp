@@ -490,7 +490,7 @@ void roundedbox(int x1, int y1, int x2, int y2, int r) {
 }
 
 void gl_drawhud(int w, int h, int curfps, int nquads, int curvert,
-                bool underwater) {
+                bool underwater, bool inlava) {
   readmatrices();
 
   glDisable(GL_DEPTH_TEST);
@@ -535,6 +535,17 @@ void gl_drawhud(int w, int h, int curfps, int nquads, int curvert,
     glBlendFunc(GL_ZERO, GL_ONE_MINUS_SRC_COLOR);
     glBegin(GL_QUADS);
     glColor3d(0.9f, 0.5f, 0.0f);
+    glVertex2i(0, 0);
+    glVertex2i(VIRTW, 0);
+    glVertex2i(VIRTW, VIRTH);
+    glVertex2i(0, VIRTH);
+    glEnd();
+  };
+
+  if (inlava) {
+    glBlendFunc(GL_ZERO, GL_ONE_MINUS_SRC_COLOR);
+    glBegin(GL_QUADS);
+    glColor3d(0.8f, 0.0f, 0.0f);
     glVertex2i(0, 0);
     glVertex2i(VIRTW, 0);
     glVertex2i(VIRTW, VIRTH);
