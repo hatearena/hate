@@ -363,13 +363,24 @@ void updateworld(int millis) // main game update loop
     physicsframe();
     {
       extern ENetHost *clienthost;
-      if (player1->inlava && player1->state == CS_ALIVE && !clienthost) {
-        static int lavadamage = 0;
-        lavadamage += curtime;
-        if (lavadamage >= 300) {
-          lavadamage = 0;
-          selfdamage(10, -1, player1);
-        };
+      static int lavadamage = 0;
+      lavadamage += curtime;
+      if (lavadamage >= 300) {
+        lavadamage = 0;
+        if (player1->inlava && player1->state == CS_ALIVE && !clienthost) {
+          float depth = hdr.lavalevel - (player1->o.z - 0.5f);
+          if (depth < 0) depth = 0;
+          selfdamage(10 + min(int(depth * 7), 30), -1, player1);
+        }
+        dvector &bv = getbots();
+        loopv(bv) {
+          dynent *b = bv[i];
+          if (b->inlava && b->state == CS_ALIVE) {
+            float depth = hdr.lavalevel - (b->o.z - 0.5f);
+            if (depth < 0) depth = 0;
+            botpain(b, 10 + min(int(depth * 7), 30), b);
+          }
+        }
       };
     };
     checkquad(curtime);
