@@ -1078,7 +1078,7 @@ void serverslice(int seconds, unsigned int timeout) {
         enet_peer_send(clients[j].peer, 0, pkt);
   }
 
-  {
+  if (serverhost) {
     static int lavatick = 0;
     lavatick += 5;
     if (lavatick >= 500 && server_lavalevel > -128) {
@@ -1091,7 +1091,7 @@ void serverslice(int seconds, unsigned int timeout) {
           putint(dp, i);
           putint(dp, 5);
           putint(dp, clients[i].lifesequence);
-          putint(dp, i);
+          putint(dp, -1);
           *(ushort *)dmgpkt->data = ENET_HOST_TO_NET_16(dp - (uchar *)dmgpkt->data);
           enet_packet_resize(dmgpkt, dp - (uchar *)dmgpkt->data);
           multicast(dmgpkt, -1);

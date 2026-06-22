@@ -363,13 +363,12 @@ void updateworld(int millis) // main game update loop
     physicsframe();
     {
       extern ENetHost *clienthost;
-      extern int clientnum;
       if (player1->inlava && player1->state == CS_ALIVE && !clienthost) {
         static int lavadamage = 0;
         lavadamage += curtime;
         if (lavadamage >= 500) {
           lavadamage = 0;
-          selfdamage(5, clientnum, player1);
+          selfdamage(5, -1, player1);
         };
       };
     };
