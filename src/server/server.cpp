@@ -521,13 +521,13 @@ void process(ENetPacket *packet, int sender) {
       int reqmode = getint(p);
       if (reqmode < 0)
         reqmode = 0;
+      int total = 0;
+      loopv(clients) if (clients[i].type != ST_EMPTY) total++;
       if (smapname[0] && !mapreload) {
         if (clients[sender].rcon) {
           resetvotes();
           solovotetime = 0;
         } else {
-          int total = 0;
-          loopv(clients) if (clients[i].type != ST_EMPTY) total++;
           if (total == 1) {
             if (!solovotetime) {
               solovotetime = lastsec + 3;
@@ -550,13 +550,17 @@ void process(ENetPacket *packet, int sender) {
               return;
             }
             solovotetime = 0;
+            strcpy_s(smapname, text);
+            mode = reqmode;
+            goto skipmodechange;
           } else if (!vote(text, reqmode, sender)) {
             return;
           }
         }
       }
       mapreload = false;
-      if (maprotation.length() > 0 && smapname[0] && rotation_done != lastsec) {
+      if (maprotation.length() > 0 && smapname[0] && rotation_done != lastsec &&
+          total != 1) {
         rotation_done = lastsec;
         map_rotation_index = (map_rotation_index + 1) % maprotation.length();
         strcpy_s(smapname, maprotation[map_rotation_index]);
@@ -565,7 +569,7 @@ void process(ENetPacket *packet, int sender) {
         } else if (cfg_gamemode == 6) {
           int modes[] = {0, 3, 4, 5};
           mode = modes[rand() % 4];
-        } else if (cfg_gamemode >= 0) {
+        } else if (cfg_gamemode >= 0 && total != 1) {
           mode = cfg_gamemode;
         } else {
           mode = reqmode;
@@ -576,18 +580,19 @@ void process(ENetPacket *packet, int sender) {
           strcpy_s(smapname, maprotation[0]);
           if (moderotation.length() > 0)
             mode = moderotation[0];
-          else if (cfg_gamemode >= 0)
+          else if (cfg_gamemode >= 0 && total != 1)
             mode = cfg_gamemode;
           else
             mode = reqmode;
         } else {
-          if (cfg_gamemode >= 0)
+          if (cfg_gamemode >= 0 && total != 1)
             mode = cfg_gamemode;
           else
             mode = reqmode;
           strcpy_s(smapname, text);
         }
       }
+    skipmodechange:
       minremain = timelimit ? timelimit : 10;
       mapend = lastsec + minremain * 60;
       interm = 0;
@@ -658,7 +663,8 @@ void process(ENetPacket *packet, int sender) {
       int flags = getint(p);
       int pstate = (flags >> 5) & 3;
       int oldstate = clients[cn].state;
-      bool hadpos = clients[cn].o.x != 0 || clients[cn].o.y != 0 || clients[cn].o.z != 0;
+      bool hadpos =
+          clients[cn].o.x != 0 || clients[cn].o.y != 0 || clients[cn].o.z != 0;
       float ox = clients[cn].o.x, oy = clients[cn].o.y;
       clients[cn].o.x = px;
       clients[cn].o.y = py;
@@ -713,7 +719,7 @@ void process(ENetPacket *packet, int sender) {
 
       if (gun == GUN_SG || gun == GUN_CG || gun == GUN_RAILGUN ||
           gun == GUN_NAILGUN || gun == GUN_LIGHTGUN) {
-        int qdam = gun == GUN_RAILGUN     ? 100
+        int qdam = gun == GUN_RAILGUN   ? 100
                    : gun == GUN_SG      ? 10
                    : gun == GUN_CG      ? 30
                    : gun == GUN_NAILGUN ? 25
@@ -968,8 +974,10 @@ void serverslice(int seconds, unsigned int timeout) {
   };
 
   int deltamsec = lastsec ? (seconds - lastsec) * 1000 : 0;
-  loopv(clients) if (clients[i].type != ST_EMPTY && clients[i].spawnprotectmillis > 0) {
-    clients[i].spawnprotectmillis = max(0, clients[i].spawnprotectmillis - deltamsec);
+  loopv(clients) if (clients[i].type != ST_EMPTY &&
+                     clients[i].spawnprotectmillis > 0) {
+    clients[i].spawnprotectmillis =
+        max(0, clients[i].spawnprotectmillis - deltamsec);
   }
   lastsec = seconds;
 

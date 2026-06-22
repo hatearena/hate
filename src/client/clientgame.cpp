@@ -641,6 +641,7 @@ static void autoteamplayer(dynent *d) {
   if (d == player1 && strcmp(d->team, oldteam)) {
     extern bool c2sinit;
     c2sinit = false;
+    conoutf("Teams were autobalanced.");
   }
 }
 
