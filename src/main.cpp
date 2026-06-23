@@ -480,7 +480,10 @@ int main(int argc, char **argv) {
           case SDLK_v:
             if (event.key.keysym.mod & KMOD_SHIFT) {
               extern int showentoverlay;
-              execute(showentoverlay ? "showentoverlay 0" : "showentoverlay 1");
+              if (showentoverlay)
+                execute("showentoverlay 0");
+              else
+                execute("showentoverlay 1");
             } else
               handled = false;
             break;
