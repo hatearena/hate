@@ -185,7 +185,7 @@ bool collide(dynent *d, bool spawn, float drop, float rise) {
       d->vel.z = 0;              // cancel out jumping velocity
     };
 
-    d->onfloor = d->o.z - d->eyeheight - lo < 0.001f;
+    d->onfloor = d->o.z - d->eyeheight - lo < 0.1f;
   };
   return true;
 }
