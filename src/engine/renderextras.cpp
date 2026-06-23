@@ -942,7 +942,7 @@ skiphud:
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glDisable(GL_TEXTURE_2D);
     glColor4ub(10, 10, 10, 180);
-    roundedbox(20, 1510, VIRTW - 20, 1600, 10);
+    roundedbox(20, 1490, VIRTW - 20, 1580, 10);
     glEnable(GL_TEXTURE_2D);
     glColor4ub(255, 255, 255, 255);
     {
@@ -957,15 +957,15 @@ skiphud:
           *dot = '\0';
           strcat_s(displayname, ".dds");
         }
-        draw_textf("[tex %s #%d]: %s", 30, 1522, 2, tname, lasttex,
+        draw_textf("[tex %s #%d]: %s", 30, 1496, 2, tname, lasttex,
                    displayname);
       } else
-        draw_textf("[tex %s #%d]", 30, 1522, 2, tname, lasttex);
+        draw_textf("[tex %s #%d]", 30, 1496, 2, tname, lasttex);
     }
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glDisable(GL_TEXTURE_2D);
     glColor4ub(10, 10, 10, 180);
-    roundedbox(20, 1610, VIRTW - 20, 1700, 10);
+    roundedbox(20, 1590, VIRTW - 20, 1680, 10);
     glEnable(GL_TEXTURE_2D);
     glColor4ub(255, 255, 255, 255);
     {
@@ -973,24 +973,24 @@ skiphud:
       extern int selh;
       extern block sel;
       if (selset)
-        draw_textf("[selection]: (x: %d, y: %d, z: %d)", 30, 1618, 2, sel.xs,
+        draw_textf("[selection]: (x: %d, y: %d, z: %d)", 30, 1596, 2, sel.xs,
                    sel.ys, selh);
       else
-        draw_text("[selection]: (none)", 30, 1618, 2);
+        draw_text("[selection]: (none)", 30, 1596, 2);
     }
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glDisable(GL_TEXTURE_2D);
     glColor4ub(10, 10, 10, 180);
-    roundedbox(20, 1710, VIRTW - 20, 1800, 10);
+    roundedbox(20, 1690, VIRTW - 20, 1780, 10);
     glEnable(GL_TEXTURE_2D);
     glColor4ub(255, 255, 255, 255);
     if (e >= 0) {
       entity &ent = ents[e];
-      draw_textf("[%s] pos:(%d,%d,%d)  a1:%d a2:%d a3:%d a4:%d", 30, 1722, 2,
+      draw_textf("[%s] pos:(%d,%d,%d) a1:%d a2:%d a3:%d a4:%d", 30, 1696, 2,
                  entnames[ent.type], ent.x, ent.y, ent.z, ent.attr1, ent.attr2,
                  ent.attr3, ent.attr4);
     } else {
-      draw_text("[ ]", 30, 1722, 2);
+      draw_text("[ ]", 30, 1696, 2);
     }
     glPopMatrix();
   };
