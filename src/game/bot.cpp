@@ -235,7 +235,7 @@ static void botaction(dynent *m) {
     m->gunselect = GUN_CSAW;
   } else if (m_noitems && m_noitemsrail) {
     m->gunselect = GUN_RAILGUN;
-  } else if (disttoenemy < 8.0f) {
+  } else if (disttoenemy < 5.0f) {
     if (m->gunselect != GUN_CSAW)
       m->gunselect = GUN_CSAW;
     } else if (!m->ammo[m->gunselect]) {
@@ -253,7 +253,7 @@ static void botaction(dynent *m) {
       m->gunselect = GUN_RAILGUN;
     else
       m->gunselect = GUN_CSAW;
-  } else if (m->gunselect == GUN_CSAW && disttoenemy > 15.0f) {
+  } else if (m->gunselect == GUN_CSAW && disttoenemy > 7.0f) {
     if (m->ammo[GUN_RL])
       m->gunselect = GUN_RL;
     else if (m->ammo[GUN_CG])
