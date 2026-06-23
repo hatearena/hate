@@ -992,6 +992,16 @@ skiphud:
     } else {
       draw_text("[ ]", 30, 1696, 2);
     }
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glDisable(GL_TEXTURE_2D);
+    glColor4ub(10, 10, 10, 140);
+    roundedbox(VIRTW - 220, 10, VIRTW - 10, 100, 10);
+    glEnable(GL_TEXTURE_2D);
+    glColor4ub(255, 255, 255, 255);
+    {
+      extern int entselectmode;
+      draw_text(entselectmode ? "MANL" : "PROX", VIRTW - 205, 22, 2);
+    }
     glPopMatrix();
   };
 
@@ -1002,7 +1012,8 @@ skiphud:
 };
 
 void rendereditentities() {
-  if (!editmode) return;
+  if (!editmode)
+    return;
   extern int closestent();
   int sel = closestent();
 
@@ -1015,8 +1026,10 @@ void rendereditentities() {
 
   loopv(ents) {
     entity &e = ents[i];
-    if (e.type == NOTUSED) continue;
-    if (OUTBORD(e.x, e.y)) continue;
+    if (e.type == NOTUSED)
+      continue;
+    if (OUTBORD(e.x, e.y))
+      continue;
 
     float x = (float)e.x;
     float y = (float)e.y;
@@ -1028,23 +1041,35 @@ void rendereditentities() {
       glColor4f(0.5f, 0.5f, 0.5f, 0.3f);
 
     glBegin(GL_QUADS);
-    glVertex3f(x-sz, z+sz, y-sz); glVertex3f(x+sz, z+sz, y-sz);
-    glVertex3f(x+sz, z+sz, y+sz); glVertex3f(x-sz, z+sz, y+sz);
+    glVertex3f(x - sz, z + sz, y - sz);
+    glVertex3f(x + sz, z + sz, y - sz);
+    glVertex3f(x + sz, z + sz, y + sz);
+    glVertex3f(x - sz, z + sz, y + sz);
 
-    glVertex3f(x-sz, z-sz, y-sz); glVertex3f(x+sz, z-sz, y-sz);
-    glVertex3f(x+sz, z-sz, y+sz); glVertex3f(x-sz, z-sz, y+sz);
+    glVertex3f(x - sz, z - sz, y - sz);
+    glVertex3f(x + sz, z - sz, y - sz);
+    glVertex3f(x + sz, z - sz, y + sz);
+    glVertex3f(x - sz, z - sz, y + sz);
 
-    glVertex3f(x-sz, z-sz, y+sz); glVertex3f(x+sz, z-sz, y+sz);
-    glVertex3f(x+sz, z+sz, y+sz); glVertex3f(x-sz, z+sz, y+sz);
+    glVertex3f(x - sz, z - sz, y + sz);
+    glVertex3f(x + sz, z - sz, y + sz);
+    glVertex3f(x + sz, z + sz, y + sz);
+    glVertex3f(x - sz, z + sz, y + sz);
 
-    glVertex3f(x-sz, z-sz, y-sz); glVertex3f(x+sz, z-sz, y-sz);
-    glVertex3f(x+sz, z+sz, y-sz); glVertex3f(x-sz, z+sz, y-sz);
+    glVertex3f(x - sz, z - sz, y - sz);
+    glVertex3f(x + sz, z - sz, y - sz);
+    glVertex3f(x + sz, z + sz, y - sz);
+    glVertex3f(x - sz, z + sz, y - sz);
 
-    glVertex3f(x-sz, z-sz, y-sz); glVertex3f(x-sz, z-sz, y+sz);
-    glVertex3f(x-sz, z+sz, y+sz); glVertex3f(x-sz, z+sz, y-sz);
+    glVertex3f(x - sz, z - sz, y - sz);
+    glVertex3f(x - sz, z - sz, y + sz);
+    glVertex3f(x - sz, z + sz, y + sz);
+    glVertex3f(x - sz, z + sz, y - sz);
 
-    glVertex3f(x+sz, z-sz, y-sz); glVertex3f(x+sz, z-sz, y+sz);
-    glVertex3f(x+sz, z+sz, y+sz); glVertex3f(x+sz, z+sz, y-sz);
+    glVertex3f(x + sz, z - sz, y - sz);
+    glVertex3f(x + sz, z - sz, y + sz);
+    glVertex3f(x + sz, z + sz, y + sz);
+    glVertex3f(x + sz, z + sz, y - sz);
     glEnd();
     xtraverts += 24;
   };

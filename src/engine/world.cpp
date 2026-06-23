@@ -57,7 +57,8 @@ void trigger(int tag, int type, bool savegame) {
 };
 
 COMMAND(trigger, ARG_2INT);
-static int __ad_trigger = (addcommanddetail("trigger", "Triggers a map event by tag"), 0);
+static int __ad_trigger =
+    (addcommanddetail("trigger", "Triggers a map event by tag"), 0);
 
 // main geometric mipmapping routine, recursively rebuild mipmaps within block
 // b. tries to produce cube out of 4 lower level mips as well as possible, sets
@@ -191,11 +192,13 @@ void remipmore(block &b, int level) {
 };
 
 int entcycle = -1;
+int entselectmode = 0;
 
 int closestent() {
   if (noteditmode())
     return -1;
-  if (entcycle >= 0 && entcycle < ents.length() && ents[entcycle].type != NOTUSED)
+  if (entselectmode && entcycle >= 0 && entcycle < ents.length() &&
+      ents[entcycle].type != NOTUSED)
     return entcycle;
   entcycle = -1;
   int best;
@@ -217,10 +220,16 @@ int closestent() {
 void cycleent() {
   if (noteditmode())
     return;
-  struct sortent { float dist; int idx; };
+  if (!entselectmode)
+    return;
+  struct sortent {
+    float dist;
+    int idx;
+  };
   vector<sortent> sorted;
   loopv(ents) {
-    if (ents[i].type == NOTUSED) continue;
+    if (ents[i].type == NOTUSED)
+      continue;
     vec v = {ents[i].x, ents[i].y, ents[i].z};
     vdist(dist, ev, player1->o, v);
     sortent &s = sorted.add();
@@ -240,7 +249,10 @@ void cycleent() {
     };
   };
   int cur = -1;
-  loopv(sorted) if (sorted[i].idx == entcycle) { cur = i; break; };
+  loopv(sorted) if (sorted[i].idx == entcycle) {
+    cur = i;
+    break;
+  };
   int next = (cur + 1) % sorted.length();
   entcycle = sorted[next].idx;
   entity &e = ents[entcycle];
@@ -248,7 +260,22 @@ void cycleent() {
 };
 
 COMMAND(cycleent, ARG_NONE);
-static int __ad_cycleent = (addcommanddetail("cycleent", "Cycle to next nearest entity"), 0);
+static int __ad_cycleent =
+    (addcommanddetail("cycleent", "Cycle to next nearest entity"), 0);
+
+void togglementselect() {
+  entselectmode = !entselectmode;
+  if (entselectmode)
+    conoutf("Entity selection: Manual");
+  else
+    conoutf("Entity selection: Proximity");
+};
+
+COMMAND(togglementselect, ARG_NONE);
+static int __ad_togglementselect =
+    (addcommanddetail("togglementselect",
+                      "Toggle entity selection mode (proximity/manual)"),
+     0);
 
 void entproperty(int prop, int amount) {
   int e = closestent();
@@ -341,7 +368,8 @@ void clearents(char *name) {
 };
 
 COMMAND(clearents, ARG_1STR);
-static int __ad_clearents = (addcommanddetail("clearents", "Removes entities by type"), 0);
+static int __ad_clearents =
+    (addcommanddetail("clearents", "Removes entities by type"), 0);
 
 void scalecomp(uchar &c, int intens) {
   int n = c * intens / 100;
@@ -370,7 +398,8 @@ void scalelights(int f, int intens) {
 };
 
 COMMAND(scalelights, ARG_2INT);
-static int __ad_scalelights = (addcommanddetail("scalelights", "Scales light intensity"), 0);
+static int __ad_scalelights =
+    (addcommanddetail("scalelights", "Scales light intensity"), 0);
 
 int findentity(int type, int index) {
   for (int i = index; i < ents.length(); i++)
@@ -464,12 +493,17 @@ void mapenlarge() { empty_world(-1, false); };
 void newmap(int i) { empty_world(i, false); };
 
 COMMAND(mapenlarge, ARG_NONE);
-static int __ad_mapenlarge = (addcommanddetail("mapenlarge", "Enlarges the map"), 0);
+static int __ad_mapenlarge =
+    (addcommanddetail("mapenlarge", "Enlarges the map"), 0);
 COMMAND(newmap, ARG_1INT);
-static int __ad_newmap = (addcommanddetail("newmap", "Creates a new empty map"), 0);
+static int __ad_newmap =
+    (addcommanddetail("newmap", "Creates a new empty map"), 0);
 COMMANDN(recalc, calclight, ARG_NONE);
-static int __ad_recalc = (addcommanddetail("recalc", "Recalculates map lighting"), 0);
+static int __ad_recalc =
+    (addcommanddetail("recalc", "Recalculates map lighting"), 0);
 COMMAND(delent, ARG_NONE);
-static int __ad_delent = (addcommanddetail("delent", "Deletes the nearest entity"), 0);
+static int __ad_delent =
+    (addcommanddetail("delent", "Deletes the nearest entity"), 0);
 COMMAND(entproperty, ARG_2INT);
-static int __ad_entproperty = (addcommanddetail("entproperty", "Sets an entity property"), 0);
+static int __ad_entproperty =
+    (addcommanddetail("entproperty", "Sets an entity property"), 0);

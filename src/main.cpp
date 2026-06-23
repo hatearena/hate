@@ -472,7 +472,10 @@ int main(int argc, char **argv) {
             execute("delent");
             break;
           case SDLK_q:
-            execute("cycleent");
+            if (event.key.keysym.mod & KMOD_SHIFT)
+              execute("togglementselect");
+            else
+              execute("cycleent");
             break;
           case SDLK_LEFTBRACKET:
             execute("editheight $flrceil 1");
