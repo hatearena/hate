@@ -1000,3 +1000,54 @@ skiphud:
   glDisable(GL_TEXTURE_2D);
   glEnable(GL_DEPTH_TEST);
 };
+
+void rendereditentities() {
+  if (!editmode) return;
+  extern int closestent();
+  int sel = closestent();
+
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  glDisable(GL_TEXTURE_2D);
+  glDepthMask(GL_FALSE);
+
+  float sz = 0.3f;
+
+  loopv(ents) {
+    entity &e = ents[i];
+    if (e.type == NOTUSED) continue;
+    if (OUTBORD(e.x, e.y)) continue;
+
+    float x = (float)e.x;
+    float y = (float)e.y;
+    float z = (float)S(e.x, e.y)->floor + 0.5f;
+
+    if (sel >= 0 && i == sel)
+      glColor4f(1.0f, 0.0f, 0.0f, 0.4f);
+    else
+      glColor4f(0.5f, 0.5f, 0.5f, 0.3f);
+
+    glBegin(GL_QUADS);
+    glVertex3f(x-sz, z+sz, y-sz); glVertex3f(x+sz, z+sz, y-sz);
+    glVertex3f(x+sz, z+sz, y+sz); glVertex3f(x-sz, z+sz, y+sz);
+
+    glVertex3f(x-sz, z-sz, y-sz); glVertex3f(x+sz, z-sz, y-sz);
+    glVertex3f(x+sz, z-sz, y+sz); glVertex3f(x-sz, z-sz, y+sz);
+
+    glVertex3f(x-sz, z-sz, y+sz); glVertex3f(x+sz, z-sz, y+sz);
+    glVertex3f(x+sz, z+sz, y+sz); glVertex3f(x-sz, z+sz, y+sz);
+
+    glVertex3f(x-sz, z-sz, y-sz); glVertex3f(x+sz, z-sz, y-sz);
+    glVertex3f(x+sz, z+sz, y-sz); glVertex3f(x-sz, z+sz, y-sz);
+
+    glVertex3f(x-sz, z-sz, y-sz); glVertex3f(x-sz, z-sz, y+sz);
+    glVertex3f(x-sz, z+sz, y+sz); glVertex3f(x-sz, z+sz, y-sz);
+
+    glVertex3f(x+sz, z-sz, y-sz); glVertex3f(x+sz, z-sz, y+sz);
+    glVertex3f(x+sz, z+sz, y+sz); glVertex3f(x+sz, z+sz, y-sz);
+    glEnd();
+    xtraverts += 24;
+  };
+
+  glDepthMask(GL_TRUE);
+};

@@ -1904,6 +1904,7 @@ void gl_drawframe(int w, int h, float curfps) {
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     extern void cursorupdate();
     cursorupdate();
+    rendereditentities();
     glEnable(GL_DEPTH_TEST);
     glDisable(GL_BLEND);
   };
