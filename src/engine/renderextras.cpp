@@ -395,7 +395,7 @@ void damageblend(int n) {
 VARP(showstats, 0, 0, 1);
 static int __ad_showstats =
     (addcommanddetail("showstats", "Toggles performance stats display"), 0);
-VARP(showentoverlay, 0, 1, 1);
+VARP(showentoverlay, 0, 0, 1);
 static int __ad_showentoverlay =
     (addcommanddetail("showentoverlay", "Toggles entity overlay in edit mode"),
      0);
