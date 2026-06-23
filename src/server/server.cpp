@@ -3,7 +3,7 @@
 
 vector<client> clients;
 int maxclients = 8;
-  string smapname;
+string smapname;
 
 extern int server_lavalevel;
 
@@ -371,7 +371,7 @@ void process(ENetPacket *packet, int sender) {
         serverlog("[chat] %s (%s) [%s]: %s\n", clients[sender].name,
                   clients[sender].hostname, clients[sender].uuid, text);
       if (text[0] == '/') {
-        if (strcmp(text + 1, "kick_all_bots") == 0) {
+        if (strcmp(text + 1, "kickallbots") == 0) {
           if (!clients[sender].rcon) {
             sendservmsg("You are not authorized.");
             return;
@@ -1083,16 +1083,19 @@ void serverslice(int seconds, unsigned int timeout) {
     lavatick += 5;
     if (lavatick >= 300 && server_lavalevel > -128) {
       lavatick = 0;
-      loopv(clients) if (clients[i].type != ST_EMPTY && clients[i].state == CS_ALIVE) {
+      loopv(clients) if (clients[i].type != ST_EMPTY &&
+                         clients[i].state == CS_ALIVE) {
         if (server_lavalevel > clients[i].o.z - 0.5f) {
-          ENetPacket *dmgpkt = enet_packet_create(NULL, 32, ENET_PACKET_FLAG_RELIABLE);
+          ENetPacket *dmgpkt =
+              enet_packet_create(NULL, 32, ENET_PACKET_FLAG_RELIABLE);
           uchar *dp = dmgpkt->data + 2;
           putint(dp, SV_DAMAGE);
           putint(dp, i);
           putint(dp, 10);
           putint(dp, clients[i].lifesequence);
           putint(dp, -1);
-          *(ushort *)dmgpkt->data = ENET_HOST_TO_NET_16(dp - (uchar *)dmgpkt->data);
+          *(ushort *)dmgpkt->data =
+              ENET_HOST_TO_NET_16(dp - (uchar *)dmgpkt->data);
           enet_packet_resize(dmgpkt, dp - (uchar *)dmgpkt->data);
           multicast(dmgpkt, -1);
           if (dmgpkt->referenceCount == 0)

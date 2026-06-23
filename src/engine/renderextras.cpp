@@ -392,9 +392,9 @@ void damageblend(int n) {
   lastdamage = lastmillis;
 };
 
-VARP(show_stats, 0, 0, 1);
-static int __ad_show_stats =
-    (addcommanddetail("show_stats", "Toggles performance stats display"), 0);
+VARP(showstats, 0, 0, 1);
+static int __ad_showstats =
+    (addcommanddetail("showstats", "Toggles performance stats display"), 0);
 VARP(crosshairfx, 0, 1, 1);
 static int __ad_crosshairfx =
     (addcommanddetail("crosshairfx", "Toggles crosshair dynamic effects"), 0);
@@ -784,7 +784,7 @@ void gl_drawhud(int w, int h, int curfps, int nquads, int curvert,
   glOrtho(0, VIRTW * 4 / 3, VIRTH * 4 / 3, 0, -1, 1);
   renderconsole();
 
-  if (show_stats) {
+  if (showstats) {
     glPopMatrix();
     glPushMatrix();
     glOrtho(0, VIRTW * 3 / 2, VIRTH * 3 / 2, 0, -1, 1);

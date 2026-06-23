@@ -25,11 +25,14 @@ static int __ad_rate = (addcommanddetail("rate", "Network data rate limit"), 0);
 void throttle();
 
 VARF(throttle_interval, 0, 5, 30, throttle());
-static int __ad_throttle_interval = (addcommanddetail("throttle_interval", "Network throttle interval"), 0);
+static int __ad_throttle_interval =
+    (addcommanddetail("throttle_interval", "Network throttle interval"), 0);
 VARF(throttle_accel, 0, 2, 32, throttle());
-static int __ad_throttle_accel = (addcommanddetail("throttle_accel", "Network throttle acceleration"), 0);
+static int __ad_throttle_accel =
+    (addcommanddetail("throttle_accel", "Network throttle acceleration"), 0);
 VARF(throttle_decel, 0, 2, 32, throttle());
-static int __ad_throttle_decel = (addcommanddetail("throttle_decel", "Network throttle deceleration"), 0);
+static int __ad_throttle_decel =
+    (addcommanddetail("throttle_decel", "Network throttle deceleration"), 0);
 
 void throttle() {
   if (!clienthost || connecting)
@@ -153,13 +156,16 @@ void toserver(char *text) {
 void echo(char *text) { conoutf("%s", text); };
 
 COMMAND(echo, ARG_VARI);
-static int __ad_echo = (addcommanddetail("echo", "Prints text to the console"), 0);
+static int __ad_echo =
+    (addcommanddetail("echo", "Prints text to the console"), 0);
 COMMANDN(say, toserver, ARG_VARI);
 static int __ad_say = (addcommanddetail("say", "Sends a chat message"), 0);
 COMMANDN(connect, connects, ARG_1STR);
-static int __ad_connect = (addcommanddetail("connect", "Connects to a server by address"), 0);
+static int __ad_connect =
+    (addcommanddetail("connect", "Connects to a server by address"), 0);
 COMMANDN(disconnect, trydisconnect, ARG_NONE);
-static int __ad_disconnect = (addcommanddetail("disconnect", "Disconnects from the server"), 0);
+static int __ad_disconnect =
+    (addcommanddetail("disconnect", "Disconnects from the server"), 0);
 
 void kickcmd(char *name) {
   if (clienthost) {
@@ -179,7 +185,7 @@ void kickcmd(char *name) {
 };
 void kickallcmd() {
   if (clienthost) {
-    strn0cpy(ctext, "/kick_all_bots", 80);
+    strn0cpy(ctext, "/kickallbots", 80);
     return;
   }
   botclear();
@@ -187,8 +193,9 @@ void kickallcmd() {
 };
 COMMANDN(kick, kickcmd, ARG_1STR);
 static int __ad_kick = (addcommanddetail("kick", "Kicks a player by name"), 0);
-COMMANDN(kick_all_bots, kickallcmd, ARG_NONE);
-static int __ad_kick_all_bots = (addcommanddetail("kick_all_bots", "Kicks all bots"), 0);
+COMMANDN(kickallbots, kickallcmd, ARG_NONE);
+static int __ad_kickallbots =
+    (addcommanddetail("kickallbots", "Kicks all bots"), 0);
 
 void rconcmd(char *pass) {
   sprintf_sd(buf)("/rcon %s", pass);
@@ -201,17 +208,24 @@ void bancmd(char *uuid) {
 void listcmd() { strn0cpy(ctext, "/list", 80); };
 void timecmd() { strn0cpy(ctext, "/time", 80); };
 COMMANDN(rcon, rconcmd, ARG_1STR);
-static int __ad_rcon = (addcommanddetail("rcon", "Sends a remote console command"), 0);
+static int __ad_rcon =
+    (addcommanddetail("rcon", "Sends a remote console command"), 0);
 COMMANDN(ban, bancmd, ARG_1STR);
 static int __ad_ban = (addcommanddetail("ban", "Bans a player by name"), 0);
 COMMANDN(list, listcmd, ARG_NONE);
-static int __ad_list = (addcommanddetail("list", "Lists all connected players"), 0);
+static int __ad_list =
+    (addcommanddetail("list", "Lists all connected players"), 0);
 COMMANDN(time, timecmd, ARG_NONE);
-static int __ad_time = (addcommanddetail("time", "Shows current server time"), 0);
+static int __ad_time =
+    (addcommanddetail("time", "Shows current server time"), 0);
 
-void viewposcmd() { conoutf("Position: %.0f %.0f %.0f  yaw=%.0f", player1->o.x, player1->o.y, player1->o.z, player1->yaw); };
+void viewposcmd() {
+  conoutf("Position: %.0f %.0f %.0f  yaw=%.0f", player1->o.x, player1->o.y,
+          player1->o.z, player1->yaw);
+};
 COMMANDN(viewpos, viewposcmd, ARG_NONE);
-static int __ad_viewpos = (addcommanddetail("viewpos", "Shows current position and rotation"), 0);
+static int __ad_viewpos =
+    (addcommanddetail("viewpos", "Shows current position and rotation"), 0);
 
 vector<ivector> messages;
 
@@ -249,7 +263,8 @@ bool senditemstoserver = false;
 string clientpassword;
 void password(char *p) { strcpy_s(clientpassword, p); };
 COMMAND(password, ARG_1STR);
-static int __ad_password = (addcommanddetail("password", "Sets the server password"), 0);
+static int __ad_password =
+    (addcommanddetail("password", "Sets the server password"), 0);
 
 bool netmapstart() {
   senditemstoserver = true;
