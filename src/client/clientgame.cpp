@@ -369,7 +369,8 @@ void updateworld(int millis) // main game update loop
         lavadamage = 0;
         if (player1->inlava && player1->state == CS_ALIVE && !clienthost) {
           float depth = hdr.lavalevel - (player1->o.z - 0.5f);
-          if (depth < 0) depth = 0;
+          if (depth < 0)
+            depth = 0;
           selfdamage(10 + min(int(depth * 7), 30), -1, player1);
         }
         dvector &bv = getbots();
@@ -377,7 +378,8 @@ void updateworld(int millis) // main game update loop
           dynent *b = bv[i];
           if (b->inlava && b->state == CS_ALIVE) {
             float depth = hdr.lavalevel - (b->o.z - 0.5f);
-            if (depth < 0) depth = 0;
+            if (depth < 0)
+              depth = 0;
             botpain(b, 10 + min(int(depth * 7), 30), b);
           }
         }
@@ -779,7 +781,7 @@ void boostn(bool on) {
   float strength = player1->onfloor ? 2.9f : 1.5f;
   player1->vel.x += sinf(yawrad) * strength;
   player1->vel.y += -cosf(yawrad) * strength;
-  player1->boostmillis = 2500;
+  player1->boostmillis = 2400;
   playsoundc(S_BOOST);
 };
 
