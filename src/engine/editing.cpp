@@ -61,6 +61,7 @@ void toggleedit() {
     stopsounds();
     resettagareas();
     player1->health = 100;
+    player1->quadmillis = 0;
     if (m_classicsp)
       monsterclear();
     projreset();
@@ -83,8 +84,10 @@ void togglescreenshotmode() {
     return;
   }
   screenshotmode = !screenshotmode;
-  if (screenshotmode)
+  if (screenshotmode) {
     noclip = 1;
+    player1->quadmillis = 0;
+  }
   else {
     noclip = 0;
     spawnplayer(player1);
