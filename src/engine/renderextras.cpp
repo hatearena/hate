@@ -1000,7 +1000,7 @@ skiphud:
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
       glDisable(GL_TEXTURE_2D);
       glColor4ub(10, 10, 10, 140);
-      roundedbox(VIRTW - 220, 10, VIRTW - 10, 100, 10);
+      roundedbox(VIRTW - 220, 10, VIRTW - 15, 100, 10);
       glEnable(GL_TEXTURE_2D);
       glColor4ub(255, 255, 255, 255);
       {
