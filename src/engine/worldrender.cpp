@@ -154,9 +154,9 @@ void render_seg_new(float vx, float vy, float vh, int mip, int x, int y, int xs,
           continue;                                                            \
         if (s->defer && !s->occluded && mip)
 #define LOOPD                                                                  \
-  sqr *t = SWS(s, 1, 0, sz);                                                   \
-  sqr *u = SWS(s, 1, 1, sz);                                                   \
-  sqr *v = SWS(s, 0, 1, sz);
+  sqr *t = xx < sz - 1 ? SWS(s, 1, 0, sz) : s;                                 \
+  sqr *u = (xx < sz - 1 && yy < sz - 1) ? SWS(s, 1, 1, sz) : s;                \
+  sqr *v = yy < sz - 1 ? SWS(s, 0, 1, sz) : s;
 
   LOOPH // ceils
   {
@@ -209,8 +209,8 @@ LOOPD
 // zSt
 //  vu
 
-sqr *w = SWS(s, 0, -1, sz);
-sqr *z = SWS(s, -1, 0, sz);
+sqr *w = yy > 0 ? SWS(s, 0, -1, sz) : s;
+sqr *z = xx > 0 ? SWS(s, -1, 0, sz) : s;
 bool normalwall = true;
 
 if (s->type == CORNER) {

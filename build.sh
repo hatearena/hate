@@ -60,6 +60,12 @@ case "$1" in
         cmake --build build --target appbundle
         echo "Build complete. .app bundle: build/HateArena-MacOS.app"
         ;;
+    -clean)
+        echo "Cleaning build artifacts..."
+        rm -rf build
+        rm -f content/hate_client content/hate_server
+        echo "Done."
+        ;;
     *)
         show_usage
         ;;

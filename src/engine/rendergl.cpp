@@ -1809,7 +1809,7 @@ void gl_drawframe(int w, int h, float curfps) {
     glClearColor(lavafog[0], lavafog[1], lavafog[2], 1.0f);
   };
 
-  glClear((cam_outside ? GL_COLOR_BUFFER_BIT : 0) | GL_DEPTH_BUFFER_BIT);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
