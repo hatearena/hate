@@ -1005,7 +1005,10 @@ skiphud:
       glColor4ub(255, 255, 255, 255);
       {
         extern int entselectmode;
-        draw_text(entselectmode ? "MANL" : "PROX", VIRTW - 205, 22, 2);
+        if (entselectmode)
+          draw_text("MANL", VIRTW - 205, 22, 2);
+        else
+          draw_text("PROX", VIRTW - 205, 22, 2);
       }
     }
     glPopMatrix();
