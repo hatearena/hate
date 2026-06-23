@@ -395,6 +395,10 @@ void damageblend(int n) {
 VARP(showstats, 0, 0, 1);
 static int __ad_showstats =
     (addcommanddetail("showstats", "Toggles performance stats display"), 0);
+VARP(showentoverlay, 0, 1, 1);
+static int __ad_showentoverlay =
+    (addcommanddetail("showentoverlay", "Toggles entity overlay in edit mode"),
+     0);
 VARP(crosshairfx, 0, 1, 1);
 static int __ad_crosshairfx =
     (addcommanddetail("crosshairfx", "Toggles crosshair dynamic effects"), 0);
@@ -992,15 +996,17 @@ skiphud:
     } else {
       draw_text("[ ]", 30, 1696, 2);
     }
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glDisable(GL_TEXTURE_2D);
-    glColor4ub(10, 10, 10, 140);
-    roundedbox(VIRTW - 220, 10, VIRTW - 10, 100, 10);
-    glEnable(GL_TEXTURE_2D);
-    glColor4ub(255, 255, 255, 255);
-    {
-      extern int entselectmode;
-      draw_text(entselectmode ? "MANL" : "PROX", VIRTW - 205, 22, 2);
+    if (showentoverlay) {
+      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+      glDisable(GL_TEXTURE_2D);
+      glColor4ub(10, 10, 10, 140);
+      roundedbox(VIRTW - 220, 10, VIRTW - 10, 100, 10);
+      glEnable(GL_TEXTURE_2D);
+      glColor4ub(255, 255, 255, 255);
+      {
+        extern int entselectmode;
+        draw_text(entselectmode ? "MANL" : "PROX", VIRTW - 205, 22, 2);
+      }
     }
     glPopMatrix();
   };
@@ -1012,7 +1018,7 @@ skiphud:
 };
 
 void rendereditentities() {
-  if (!editmode)
+  if (!editmode || !showentoverlay)
     return;
   extern int closestent();
   int sel = closestent();

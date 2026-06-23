@@ -477,6 +477,13 @@ int main(int argc, char **argv) {
             else
               execute("cycleent");
             break;
+          case SDLK_v:
+            if (event.key.keysym.mod & KMOD_SHIFT) {
+              extern int showentoverlay;
+              execute(showentoverlay ? "showentoverlay 0" : "showentoverlay 1");
+            } else
+              handled = false;
+            break;
           case SDLK_LEFTBRACKET:
             execute("editheight $flrceil 1");
             break;
