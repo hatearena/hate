@@ -226,7 +226,8 @@ void moveplayer(dynent *pl, int moveres, bool local, int curtime) {
     d.x += (float)(pl->strafe * cos(rad(pl->yaw - 180)));
     d.y += (float)(pl->strafe * sin(rad(pl->yaw - 180)));
 
-    const float speed = curtime / 1000.0f * pl->maxspeed;
+    const float speed = curtime / 1000.0f * pl->maxspeed *
+                        (shiftheld ? 2.5f : 1.0f) * (rshiftheld ? 0.25f : 1.0f);
     vmul(d, speed);
     pl->o.x += d.x;
     pl->o.y += d.y;

@@ -7,6 +7,8 @@
 
 SDL_Window *window = NULL;
 SDL_GLContext glcontext = NULL;
+bool shiftheld = false;
+bool rshiftheld = false;
 
 void cleanup(char *msg) {
   stop();
@@ -438,6 +440,10 @@ int main(int argc, char **argv) {
       case SDL_KEYDOWN:
       case SDL_KEYUP:
         extern bool saycommandon;
+        if (event.key.keysym.sym == SDLK_LSHIFT)
+          shiftheld = event.key.state == SDL_PRESSED;
+        if (event.key.keysym.sym == SDLK_RSHIFT)
+          rshiftheld = event.key.state == SDL_PRESSED;
         if (editmode && event.key.state == SDL_PRESSED && !saycommandon) {
           bool handled = true;
           switch (event.key.keysym.sym) {
@@ -531,6 +537,7 @@ int main(int argc, char **argv) {
         } else if (event.key.keysym.sym == SDLK_LSHIFT) {
           extern void boostn(bool);
           boostn(event.key.state == SDL_PRESSED);
+          shiftheld = event.key.state == SDL_PRESSED;
         } else {
           keypress(event.key.keysym.sym, event.key.state == SDL_PRESSED, false,
                    0);
