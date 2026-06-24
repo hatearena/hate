@@ -238,7 +238,7 @@ void addmsg(int rel, int num, int type, ...) {
     fatal(s);
   };
   if (messages.length() == 100) {
-    conoutf("command flood protection (type %d)", type);
+    conoutf("Command flood protection (type %d)", type);
     return;
   };
   ivector &msg = messages.add();
