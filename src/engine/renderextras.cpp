@@ -1006,9 +1006,9 @@ skiphud:
       {
         extern int entselectmode;
         if (entselectmode)
-          draw_text("MANL", VIRTW - 205, 22, 2);
+          draw_text("MANL", VIRTW - 205, 20, 2);
         else
-          draw_text("PROX", VIRTW - 205, 22, 2);
+          draw_text("PROX", VIRTW - 205, 20, 2);
       }
     }
     glPopMatrix();
