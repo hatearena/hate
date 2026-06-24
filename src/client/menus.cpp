@@ -522,7 +522,8 @@ bool rendermenu() {
     return true;
   };
 
-  sprintf_sd(title)(vmenu > 1 ? "%s" : "%s", m.displayname ? m.displayname : m.name);
+  sprintf_sd(title)(vmenu > 1 ? "%s" : "%s",
+                    m.displayname ? m.displayname : m.name);
   int mdisp = m.items.length();
   int w = 0;
   loopi(mdisp) {
@@ -544,7 +545,7 @@ bool rendermenu() {
     w = VIRTW * 2 / 3;
   int step = FONTH / 4 * 5;
   int pad = FONTH / 2 * 3;
-  int maxvis = (VIRTH - 3 * step) / step;
+  int maxvis = (VIRTH * 2 / 3) / step;
   if (maxvis < 1)
     maxvis = 1;
   if (m.scrolloff > mdisp - maxvis)
@@ -746,7 +747,7 @@ void showmapmodels() {
     return;
   if (menustack.empty() && vmenu > 0)
     menustack.add(vmenu);
-  string mname = "mapmodelpreview";
+  string mname = "Mapmodel Preview";
   int mi = -1;
   loopv(menus) if (i > 1 && strcmp(menus[i].name, mname) == 0) {
     mi = i;
@@ -926,12 +927,14 @@ bool menukey(int code, bool isdown) {
       return true;
     } else if (code == SDLK_UP || code == -4) {
       menusel--;
-      if (menusel < 0) menusel = n - 1;
+      if (menusel < 0)
+        menusel = n - 1;
       while (menusel > 0 && menus[vmenu].items[menusel].separator)
         menusel--;
     } else if (code == SDLK_DOWN || code == -5) {
       menusel++;
-      if (menusel >= n) menusel = 0;
+      if (menusel >= n)
+        menusel = 0;
       while (menusel < n - 1 && menus[vmenu].items[menusel].separator)
         menusel++;
     } else if ((code == SDLK_LEFT || code == -1) &&
@@ -955,7 +958,7 @@ bool menukey(int code, bool isdown) {
       };
       return true;
     };
-    int maxvis = (VIRTH - 3 * (FONTH / 4 * 5)) / (FONTH / 4 * 5);
+    int maxvis = (VIRTH * 2 / 3) / (FONTH / 4 * 5);
     if (maxvis < 1)
       maxvis = 1;
     if (menusel < 0) {
@@ -999,7 +1002,8 @@ bool menukey(int code, bool isdown) {
             ident *id = idents->access((char *)action);
             if (id && id->type == ID_VAR && id->min < id->max) {
               *id->storage = *id->storage ? 0 : 1;
-              if (id->fun) id->fun();
+              if (id->fun)
+                id->fun();
             } else {
               execute(action, true);
             };
