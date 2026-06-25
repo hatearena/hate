@@ -170,31 +170,30 @@ static void render_loading_frame(bool done) {
   glOrtho(0, VIRTW, VIRTH, 0, -1, 1);
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
-  glClearColor(0.04f, 0.04f, 0.04f, 1.0f);
+  glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT);
   glDisable(GL_DEPTH_TEST);
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  glEnable(GL_TEXTURE_2D);
+  {
+    float bp = 0.5f + 0.5f * sinf(time / 800.0f);
+    float a = 0.04f + 0.9 * bp;
+    glDisable(GL_TEXTURE_2D);
+    glColor4f(0.15f, 0.01f, 0.01f, a);
+    glBegin(GL_QUADS);
+    glVertex2i(0, 0);
+    glVertex2i(VIRTW, 0);
+    glVertex2i(VIRTW, VIRTH);
+    glVertex2i(0, VIRTH);
+    glEnd();
+    glEnable(GL_TEXTURE_2D);
+  }
   glColor4ub(255, 255, 255, 255);
   {
     int vs = VIRTH / 3;
     int vw = vs * scr_h * VIRTW / max(scr_w * VIRTH, 1);
     int ix = (VIRTW - vw) / 2;
     int iy = (VIRTH - vs) / 2 - VIRTH / 10;
-    {
-      float gp = 0.02f + 0.05f * sinf(time / 500.0f);
-      int gs = max(vw, vs) * 11 / 10;
-      int gx = ix - (gs - vw) / 2;
-      int gy = iy - (gs - vs) / 2;
-      glDisable(GL_TEXTURE_2D);
-      glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-      glColor4f(0.5f, 0.02f, 0.01f, gp);
-      roundedbox(gx + 100, gy, gx + gs - 100, gy + gs, gs / 3);
-      glEnable(GL_TEXTURE_2D);
-      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-      glColor4ub(255, 255, 255, 255);
-    }
     glBindTexture(GL_TEXTURE_2D, LOADICON);
     glBegin(GL_QUADS);
     glTexCoord2f(0, 0);
