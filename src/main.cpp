@@ -159,6 +159,69 @@ int maxfps = variable((char *)"maxfps", 0, 144, 1000, &maxfps, __null, true);
 int islittleendian = 1;
 int framesinmap = 0;
 
+enum { LOADING = 0, TITLE = 1, PLAYING = 2 };
+int gamestate = LOADING;
+#define LOADICON 13
+
+static void render_loading_frame(bool done) {
+  int time = SDL_GetTicks();
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
+  glOrtho(0, VIRTW, VIRTH, 0, -1, 1);
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity();
+  glClearColor(0.04f, 0.04f, 0.04f, 1.0f);
+  glClear(GL_COLOR_BUFFER_BIT);
+  glDisable(GL_DEPTH_TEST);
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  glEnable(GL_TEXTURE_2D);
+  glColor4ub(255, 255, 255, 255);
+  {
+    int s = 240;
+    int ix = (VIRTW - s) / 2;
+    glBindTexture(GL_TEXTURE_2D, LOADICON);
+    glBegin(GL_QUADS);
+    glTexCoord2f(0, 0);
+    glVertex2i(ix, 540);
+    glTexCoord2f(1, 0);
+    glVertex2i(ix + s, 540);
+    glTexCoord2f(1, 1);
+    glVertex2i(ix + s, 540 + s);
+    glTexCoord2f(0, 1);
+    glVertex2i(ix, 540 + s);
+    glEnd();
+    xtraverts += 4;
+  }
+  {
+    int w = text_width("HateArena");
+    draw_text("HateArena", (VIRTW - w * 2) / 2 + 70, 840, 2, 255, 1.5f);
+  }
+  {
+    sprintf_sd(ver)("v%s", GAME_VERSION);
+    int w = text_width(ver);
+    draw_text(ver, (VIRTW - w) / 2, 950, 2, 150, 1.0f);
+  }
+  if (!done) {
+    int n = (time / 500) % 4;
+    sprintf_sd(loadtext)("loading%s", n == 1   ? "."
+                                      : n == 2 ? ".."
+                                      : n == 3 ? "..."
+                                               : "");
+    int w = text_width(loadtext);
+    draw_text(loadtext, (VIRTW - w) / 2, 1100, 2, 180, 1.0f);
+  } else {
+    float pulse = 0.6f + 0.4f * sinf(time / 400.0f);
+    const char *msg = "press ENTER to continue";
+    int w = text_width((char *)msg);
+    draw_text((char *)msg, (VIRTW - w) / 2, 1100, 2, (int)(255 * pulse), 1.0f);
+  }
+  glDisable(GL_TEXTURE_2D);
+  glDisable(GL_BLEND);
+  glEnable(GL_DEPTH_TEST);
+  SDL_GL_SwapWindow(window);
+}
+
 int main(int argc, char **argv) {
   bool dedicated = false;
   int uprate = 0, maxcl = 4;
@@ -324,6 +387,14 @@ int main(int argc, char **argv) {
   log("gl");
   gl_init(scr_w, scr_h);
 
+  log("font");
+  init_font();
+  {
+    int icon_xs, icon_ys;
+    installtex(LOADICON, path(newstring("data/icon.png")), icon_xs, icon_ys);
+  }
+  render_loading_frame(false);
+
   log("basetex");
   int xs, ys;
   if (!installtex(3, path(newstring("data/martin/base.png")), xs, ys) ||
@@ -339,17 +410,17 @@ int main(int argc, char **argv) {
   installtex(10, path(newstring("data/boost.png")), xs, ys);
   installtex(11, path(newstring("data/nailgun.png")), xs, ys);
   installtex(12, path(newstring("data/energy.png")), xs, ys);
+  render_loading_frame(false);
 
   log("preload weapons");
   preloadhudmodels();
   preloadhudmodel_md3();
-
-  log("font");
-  init_font();
+  render_loading_frame(false);
 
   log("sound");
 
   initsound();
+  render_loading_frame(false);
 
   log("cfg");
 
@@ -377,6 +448,8 @@ int main(int argc, char **argv) {
   log("localconnect");
   localconnect();
   changemap("horizon");
+  render_loading_frame(true);
+  gamestate = TITLE;
   log("main");
 
   int ignore = 5;
@@ -394,39 +467,39 @@ int main(int argc, char **argv) {
       if (millis - lastmillis < maxfpsdelay)
         SDL_Delay(maxfpsdelay - (millis - lastmillis));
     }
-    cleardlights();
-    updateworld(millis);
-    if (!demoplayback)
-      serverslice((int)time(NULL), 0);
-    static float fps = 30.0f;
-    fps = (1000.0f / curtime + fps * 50) / 51;
-    float vx, vy, vz;
-    getcamerapos(vx, vy, vz);
-    {
-      static float last_vx = -1e10f, last_vy = -1e10f;
-      static float last_yaw = -1e10f, last_pitch = -1e10f;
-      float yaw = player1->yaw, pitch = player1->pitch;
-      if (fabs(vx - last_vx) > 1.5f || fabs(vy - last_vy) > 1.5f ||
-          fabs(yaw - last_yaw) > 3.0f || fabs(pitch - last_pitch) > 3.0f) {
-        computeraytable(vx, vy);
-        last_vx = vx;
-        last_vy = vy;
-        last_yaw = yaw;
-        last_pitch = pitch;
+    if (gamestate == PLAYING) {
+      cleardlights();
+      updateworld(millis);
+      if (!demoplayback)
+        serverslice((int)time(NULL), 0);
+      static float fps = 30.0f;
+      fps = (1000.0f / curtime + fps * 50) / 51;
+      float vx, vy, vz;
+      getcamerapos(vx, vy, vz);
+      {
+        static float last_vx = -1e10f, last_vy = -1e10f;
+        static float last_yaw = -1e10f, last_pitch = -1e10f;
+        float yaw = player1->yaw, pitch = player1->pitch;
+        if (fabs(vx - last_vx) > 1.5f || fabs(vy - last_vy) > 1.5f ||
+            fabs(yaw - last_yaw) > 3.0f || fabs(pitch - last_pitch) > 3.0f) {
+          computeraytable(vx, vy);
+          last_vx = vx;
+          last_vy = vy;
+          last_yaw = yaw;
+          last_pitch = pitch;
+        }
       }
+      readdepth(scr_w, scr_h);
+      SDL_GL_SwapWindow(window);
+      extern void updatevol();
+      updatevol();
+      framesinmap++;
+      gl_drawframe(scr_w, scr_h, fps);
+    } else {
+      render_loading_frame(true);
     }
-    readdepth(scr_w, scr_h);
-    SDL_GL_SwapWindow(window);
-    extern void updatevol();
-    updatevol();
-    framesinmap++;
-    gl_drawframe(scr_w, scr_h, fps);
     SDL_Event event;
     int lasttype = 0, lastbut = 0;
-    if (firstlaunch) {
-      firstlaunch = false;
-      execute("showmenu welcome");
-    };
     while (SDL_PollEvent(&event)) {
       switch (event.type) {
       case SDL_QUIT:
@@ -439,6 +512,18 @@ int main(int argc, char **argv) {
 
       case SDL_KEYDOWN:
       case SDL_KEYUP:
+        if (gamestate == TITLE && event.key.state == SDL_PRESSED) {
+          if (event.key.keysym.sym == SDLK_RETURN ||
+              event.key.keysym.sym == SDLK_KP_ENTER) {
+            gamestate = PLAYING;
+            ignore = 5;
+            if (firstlaunch) {
+              firstlaunch = false;
+              execute("showmenu welcome");
+            }
+          }
+          break;
+        }
         extern bool saycommandon;
         if (event.key.keysym.sym == SDLK_LSHIFT)
           shiftheld = event.key.state == SDL_PRESSED;
