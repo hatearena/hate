@@ -178,43 +178,41 @@ static void render_loading_frame(bool done) {
   glEnable(GL_TEXTURE_2D);
   glColor4ub(255, 255, 255, 255);
   {
-    int s = 240;
-    int ix = (VIRTW - s) / 2;
+    int vs = VIRTH / 3;
+    int vw = vs * scr_h * VIRTW / max(scr_w * VIRTH, 1);
+    int ix = (VIRTW - vw) / 2;
+    int iy = (VIRTH - vs) / 2 - VIRTH / 10;
     glBindTexture(GL_TEXTURE_2D, LOADICON);
     glBegin(GL_QUADS);
     glTexCoord2f(0, 0);
-    glVertex2i(ix, 540);
+    glVertex2i(ix, iy);
     glTexCoord2f(1, 0);
-    glVertex2i(ix + s, 540);
+    glVertex2i(ix + vw, iy);
     glTexCoord2f(1, 1);
-    glVertex2i(ix + s, 540 + s);
+    glVertex2i(ix + vw, iy + vs);
     glTexCoord2f(0, 1);
-    glVertex2i(ix, 540 + s);
+    glVertex2i(ix, iy + vs);
     glEnd();
     xtraverts += 4;
   }
   {
-    int w = text_width("HateArena");
-    draw_text("HateArena", (VIRTW - w * 2) / 2 + 70, 840, 2, 255, 1.5f);
-  }
-  {
     sprintf_sd(ver)("v%s", GAME_VERSION);
     int w = text_width(ver);
-    draw_text(ver, (VIRTW - w) / 2, 950, 2, 150, 1.0f);
+    draw_text(ver, (VIRTW - w) / 2, 1050, 2, 150, 1.0f);
   }
   if (!done) {
     int n = (time / 500) % 4;
-    sprintf_sd(loadtext)("loading%s", n == 1   ? "."
+    sprintf_sd(loadtext)("Loading%s", n == 1   ? "."
                                       : n == 2 ? ".."
                                       : n == 3 ? "..."
                                                : "");
     int w = text_width(loadtext);
-    draw_text(loadtext, (VIRTW - w) / 2, 1100, 2, 180, 1.0f);
+    draw_text(loadtext, (VIRTW - w) / 2, 1150, 2, 180, 1.0f);
   } else {
     float pulse = 0.6f + 0.4f * sinf(time / 400.0f);
-    const char *msg = "press ENTER to continue";
+    const char *msg = "Press ENTER to continue";
     int w = text_width((char *)msg);
-    draw_text((char *)msg, (VIRTW - w) / 2, 1100, 2, (int)(255 * pulse), 1.0f);
+    draw_text((char *)msg, (VIRTW - w) / 2, 1150, 2, (int)(255 * pulse), 1.0f);
   }
   glDisable(GL_TEXTURE_2D);
   glDisable(GL_BLEND);
