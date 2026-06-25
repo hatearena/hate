@@ -165,6 +165,13 @@ int gamestate = LOADING;
 
 static void render_loading_frame(bool done) {
   int time = SDL_GetTicks();
+  static int lasttime = 0;
+  static int animtime = 0;
+  if (!lasttime) lasttime = time;
+  int dt = time - lasttime;
+  if (dt > 50) dt = 50;
+  lasttime = time;
+  animtime += dt;
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
   glOrtho(0, VIRTW, VIRTH, 0, -1, 1);
@@ -176,7 +183,7 @@ static void render_loading_frame(bool done) {
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   {
-    float bp = 0.5f + 0.5f * sinf(time / 800.0f);
+    float bp = 0.5f + 0.5f * sinf(animtime / 800.0f);
     float a = 0.04f + 0.9 * bp;
     glDisable(GL_TEXTURE_2D);
     glColor4f(0.15f, 0.01f, 0.01f, a);
