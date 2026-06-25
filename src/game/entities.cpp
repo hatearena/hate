@@ -77,8 +77,8 @@ void renderentities() {
                    (float)e.y + (rnd(21) - 10) * 0.1f,
                    f + (rnd(11) - 5) * 0.2f};
         vec vel = {(rnd(21) - 10) * 0.3f, (rnd(21) - 10) * 0.3f,
-                   8.0f + rnd(8) * 1.0f};
-        newparticlecol(pos, vel, rnd(400) + 500, 9, 255, 50, 50);
+                   40.0f + rnd(8) * 1.0f};
+        newparticlecol(pos, vel, rnd(400) + 1900, 9, 255, 50, 50);
       };
     } else if (e.type == NEWPARTICLE) {
       float f = S(e.x, e.y)->floor;
