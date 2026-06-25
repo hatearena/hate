@@ -221,10 +221,17 @@ static void render_loading_frame(bool done) {
     int w = text_width(loadtext);
     draw_text(loadtext, (VIRTW - w) / 2, 1150, 2, 180, 1.0f);
   } else {
+    static int start = 0;
+    if (!start)
+      start = time;
+    float t = min((time - start) / 400.0f, 1.0f);
+    float ease = 1.0f - (1.0f - t) * (1.0f - t);
+    int yoff = 30 - (int)(30 * ease);
     float pulse = 0.6f + 0.4f * sinf(time / 400.0f);
-    const char *msg = "Press ENTER to continue";
+    const char *msg = "Press ENTER";
     int w = text_width((char *)msg);
-    draw_text((char *)msg, (VIRTW - w) / 2, 1150, 2, (int)(255 * pulse), 1.0f);
+    draw_text((char *)msg, (VIRTW - w) / 2, 1150 + yoff, 2,
+              (int)(255 * ease * pulse), 1.0f);
   }
   glDisable(GL_TEXTURE_2D);
   glDisable(GL_BLEND);
