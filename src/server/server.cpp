@@ -1130,7 +1130,7 @@ void serverslice(int seconds, unsigned int timeout) {
     loopv(clients) if (clients[i].type == ST_TCPIP) nonlocalclients++;
     laststatus = seconds;
     if (nonlocalclients || bsend || brec)
-      serverlog("status: %d remote clients, %.1f send, %.1f rec (K/sec)\n",
+      serverlog("Status: %d remote clients, %.1f send, %.1f rec (K/sec)\n",
                 nonlocalclients, bsend / 60.0f / 1024, brec / 60.0f / 1024);
     bsend = brec = 0;
   };
@@ -1154,11 +1154,11 @@ void serverslice(int seconds, unsigned int timeout) {
         sprintf_sd(msg)("Your IP (%s) is banned.", c.hostname);
         enet_peer_disconnect(c.peer, 0);
         c.type = ST_EMPTY;
-        serverlog("rejected banned client (%s)\n", c.hostname);
+        serverlog("Rejected banned client (%s)\n", c.hostname);
         break;
       }
       genuuid(c, &c - &clients[0]);
-      serverlog("client connected (%s) uuid %s\n", c.hostname, c.uuid);
+      serverlog("Client connected (%s) uuid %s\n", c.hostname, c.uuid);
       send_welcome(lastconnect = &c - &clients[0]);
       break;
     }
