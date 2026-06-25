@@ -2,7 +2,7 @@
 
 #define USE_MIXER
 
-VARP(mastervol, 0, 255, 255);
+VARP(mastervol, 0, 200, 255);
 static int __ad_mastervol = (addcommanddetail("mastervol", "Master volume"), 0);
 VARP(soundvol, 0, 255, 255);
 static int __ad_soundvol =

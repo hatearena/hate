@@ -1347,7 +1347,7 @@ void adddof(int w, int h) {
 VARP(vignette, 0, 1, 1);
 static int __ad_vignette =
     (addcommanddetail("vignette", "Toggles vignette effect"), 0);
-VARP(vignettestrength, 0, 20, 100);
+VARP(vignettestrength, 0, 22, 100);
 static int __ad_vignettestrength =
     (addcommanddetail("vignettestrength", "Vignette darkness strength"), 0);
 
@@ -1587,7 +1587,8 @@ void drawhudmodel(int start, int end, float speed, int base) {
   if (player1->gunselect == GUN_RAILGUN) {
     float t = (float)(lastmillis % 2000) / 2000.0f;
     float pulse = (t < 0.5f ? t * 2.0f : 2.0f - t * 2.0f) * 0.05f;
-    if (m_teammode && (!strcmp(player1->team, "RED") || (m_infected && !strcmp(player1->team, "INFD")))) {
+    if (m_teammode && (!strcmp(player1->team, "RED") ||
+                       (m_infected && !strcmp(player1->team, "INFD")))) {
       glow = 0.2f + pulse;
       teamcol = {1.0f, 0.0f, 0.0f};
       glowcol = &teamcol;
@@ -1597,11 +1598,13 @@ void drawhudmodel(int start, int end, float speed, int base) {
       glowcol = &teamcol;
     }
   } else if (m_teammode) {
-    if (!strcmp(player1->team, "RED") || (m_infected && !strcmp(player1->team, "INFD"))) {
+    if (!strcmp(player1->team, "RED") ||
+        (m_infected && !strcmp(player1->team, "INFD"))) {
       glow = 0.3f;
       teamcol = {1.0f, 0.0f, 0.0f};
       glowcol = &teamcol;
-    } else if (!strcmp(player1->team, "BLUE") || (m_infected && !strcmp(player1->team, "RES"))) {
+    } else if (!strcmp(player1->team, "BLUE") ||
+               (m_infected && !strcmp(player1->team, "RES"))) {
       glow = 0.2f;
       teamcol = {0.0f, 0.0f, 1.0f};
       glowcol = &teamcol;
