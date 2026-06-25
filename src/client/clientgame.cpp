@@ -631,7 +631,8 @@ static void autoteamplayer(dynent *d) {
   if (m_infected) {
     string oldteam;
     strcpy_s(oldteam, d->team);
-    strn0cpy(d->team, "RES", 5);
+    if (strcmp(d->team, "INFD") && strcmp(d->team, "RES"))
+      strn0cpy(d->team, "RES", 5);
     if (d == player1 && strcmp(d->team, oldteam)) {
       extern bool c2sinit;
       c2sinit = false;

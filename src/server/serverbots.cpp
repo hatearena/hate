@@ -430,9 +430,16 @@ void serverbot_spawn(int count) {
         else
           reds++;
       }
-      if (mode == 12)
-        strn0cpy(b.team, blues <= reds ? "RES" : "INFD", 16);
-      else
+      if (mode == 12) {
+        int infected = 0;
+        loopj(numsbots) if (!strcmp(sbot[j].team, "INFD")) { infected = 1; break; }
+        strn0cpy(b.team, infected ? "RES" : "INFD", 16);
+        if (!strcmp(b.team, "INFD")) {
+          b.gunselect = GUN_CSAW;
+          loopk(NUMGUNS) b.ammo[k] = 0;
+          b.ammo[GUN_CSAW] = 1;
+        }
+      } else
         strn0cpy(b.team, blues <= reds ? "BLUE" : "RED", 16);
     } else {
       b.team[0] = 0;
@@ -453,13 +460,15 @@ void serverbot_clear() {
 
 void serverbot_reteam() {
   loopi(numsbots) {
+    if (mode == 12)
+      continue;
     sbot[i].team[0] = 0;
-    if ((mode & 1 && mode > 2) || mode == 12) {
+    if (mode & 1 && mode > 2) {
       int blues = 0, reds = 0;
       loopj(numsbots) {
         if (j >= i)
           break;
-        if (!strcmp(sbot[j].team, "BLUE") || !strcmp(sbot[j].team, "RES"))
+        if (!strcmp(sbot[j].team, "BLUE"))
           blues++;
         else
           reds++;
@@ -527,6 +536,21 @@ void serverbot_damage(int cn, int damage, int attacker) {
           sbot[k].frags++;
           break;
         }
+      }
+      if (mode == 12 && strcmp(sbot[i].team, "INFD")) {
+        bool infected_kill = false;
+        if (attacker >= BOT_CLIENT_BASE) {
+          loopk(numsbots) if (sbot[k].cn == attacker) {
+            if (!strcmp(sbot[k].team, "INFD"))
+              infected_kill = true;
+            break;
+          }
+        } else if (attacker >= 0 && attacker < MAXCLIENTS) {
+          if (clients[attacker].team[0] && !strcmp(clients[attacker].team, "INFD"))
+            infected_kill = true;
+        }
+        if (infected_kill)
+          strn0cpy(sbot[i].team, "INFD", 16);
       }
     }
     ENetPacket *packet = enet_packet_create(NULL, 80, 0);
@@ -1119,6 +1143,8 @@ void serverbot_update() {
     lastammorefill = now;
     loopi(numsbots) {
       if (sbot[i].state == CS_ALIVE) {
+        if (mode == 12 && sbot[i].team[0] && !strcmp(sbot[i].team, "INFD"))
+          continue;
         if (mode == 4 || mode == 5) {
           sbot[i].ammo[GUN_RAILGUN] = 100;
         } else {
@@ -1175,9 +1201,15 @@ void serverbot_update() {
         b.spawnprotectmillis = 1000;
         b.lastmove = 0;
         b.lastattack = 0;
-        b.gunselect = (mode == 4 || mode == 5) ? GUN_RAILGUN : 1 + rnd(6);
-        loopk(NUMGUNS) b.ammo[k] = 100;
-        b.ammo[GUN_CSAW] = 1;
+        if (mode == 12 && b.team[0] && !strcmp(b.team, "INFD")) {
+          b.gunselect = GUN_CSAW;
+          loopk(NUMGUNS) b.ammo[k] = 0;
+          b.ammo[GUN_CSAW] = 1;
+        } else {
+          b.gunselect = (mode == 4 || mode == 5) ? GUN_RAILGUN : 1 + rnd(6);
+          loopk(NUMGUNS) b.ammo[k] = 100;
+          b.ammo[GUN_CSAW] = 1;
+        }
         b.movemode = 1;
         b.strafemode = 0;
         b.fallvelocity = 0;
@@ -1209,9 +1241,10 @@ void serverbot_update() {
       }
     }
 
+    bool is_infected = mode == 12 && b.team[0] && !strcmp(b.team, "INFD");
     bool target_is_player = false;
     int targetidx = -1;
-    float bestdist = BOT_ATTACK_RANGE_SQ;
+    float bestdist = is_infected ? 1e10f : BOT_ATTACK_RANGE_SQ;
 
     loopj(MAXCLIENTS) {
       if (!playerpos[j].active || playerpos[j].state != CS_ALIVE)
@@ -1249,7 +1282,7 @@ void serverbot_update() {
       }
     }
 
-    if (targetidx >= 0 && bestdist < BOT_ATTACK_RANGE_SQ) {
+    if (targetidx >= 0 && (is_infected || bestdist < BOT_ATTACK_RANGE_SQ)) {
       float tx, ty, tz;
       int lifeseq = 0;
       if (target_is_player) {
@@ -1267,14 +1300,18 @@ void serverbot_update() {
       int acquiredelay = (101 - botskill) * 20;
       if (acquiredelay < 20)
         acquiredelay = 20;
-      if (!b.acquired) {
+      if (is_infected) {
+        b.acquired = true;
+      } else if (!b.acquired) {
         if (b.acquiretime == 0)
           b.acquiretime = now;
         else if (now - b.acquiretime >= (enet_uint32)acquiredelay)
           b.acquired = true;
       }
 
-      if (mode == 4 || mode == 5) {
+      if (is_infected) {
+        b.gunselect = GUN_CSAW;
+      } else if (mode == 4 || mode == 5) {
         b.gunselect = GUN_RAILGUN;
       } else if (bestdist < 64.0f && b.gunselect != GUN_CSAW) {
         b.gunselect = GUN_CSAW;
