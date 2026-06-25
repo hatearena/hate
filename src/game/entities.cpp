@@ -99,7 +99,7 @@ void renderentities() {
       if (OUTBORD(e.x, e.y))
         continue;
       if (e.type != CARROT) {
-        if (!e.spawned && e.type != TELEPORT)
+        if (!e.spawned && e.type != TELEPORT && !editmode)
           continue;
         if (e.type < I_SHELLS || e.type > TELEPORT)
           continue;
@@ -118,7 +118,7 @@ void renderentities() {
                        1.5f + rnd(4) * 0.3f};
             newparticlecol(pos, vel, rnd(400) + 400, 9, 140, 20, 20);
           };
-        } else if (e.spawned && (rnd(8) == 0)) {
+        } else if ((e.spawned || editmode) && (rnd(8) == 0)) {
           float f = S(e.x, e.y)->floor;
           vec pos = {(float)e.x + (rnd(21) - 10) * 0.1f,
                      (float)e.y + (rnd(21) - 10) * 0.1f,
