@@ -268,6 +268,7 @@ set(CLIENT_SOURCES
 
 set(GAME_SOURCES
   src/game/bot.cpp
+  src/game/botcommon.cpp
   src/game/entities.cpp
   src/game/monster.cpp
   src/game/weapon.cpp

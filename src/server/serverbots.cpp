@@ -1,3 +1,4 @@
+#include "../game/botcommon.cpp"
 #include "../include/cube.h"
 #include <zlib.h>
 
@@ -147,14 +148,6 @@ static bool server_los(float lx, float ly, float lz, float bx, float by,
   return true;
 }
 
-static const char *bnames[] = {
-    "Cerelo", "Diaso", "Ceria",  "Deathly", "Ra",      "Va",     "Never",
-    "Abzu",   "Re",    "Why",    "Lucky",   "Lano",    "Cliff",  "Cobra",
-    "Liner",  "Chiba", "Dragon", "Sabre",   "Koffman", "Stuff",  "Bones",
-    "Xor",    "Snuff", "Sniff",  "Pain",    "Time",    "Fake",   "Headup",
-    "MX",     "Moon",  "Wine",   "Tux",     "Crash",   "Threed", "Backlotter",
-    "Risco",  "Disco", "Cheque", "Will",    "Who",     "Cares",  "Anyway"};
-
 static void loadspawns() {
   numspawns = 0;
   mapsize = 512;
@@ -192,7 +185,8 @@ static void loadspawns() {
   if (hdr.version >= 4) {
     gzread(f, &hdr.waterlevel, sizeof(int) * 16);
     endianswap(&hdr.waterlevel, sizeof(int), 16);
-    if (hdr.version < 7) hdr.lavalevel = -100000;
+    if (hdr.version < 7)
+      hdr.lavalevel = -100000;
   } else {
     hdr.lavalevel = -100000;
   };
@@ -314,38 +308,61 @@ static void serverbot_avoid_overlap(serverbot &b) {
   const float minrad = BOT_RADIUS + BOT_RADIUS;
   for (int r = 1; r <= 5; r++) {
     bool overlap = false;
-    loopi(MAXCLIENTS) if (playerpos[i].active && playerpos[i].state == CS_ALIVE) {
+    loopi(MAXCLIENTS) if (playerpos[i].active &&
+                          playerpos[i].state == CS_ALIVE) {
       float dx = b.x - playerpos[i].x;
       float dy = b.y - playerpos[i].y;
-      if (dx * dx + dy * dy < minrad * minrad) { overlap = true; break; };
+      if (dx * dx + dy * dy < minrad * minrad) {
+        overlap = true;
+        break;
+      };
     };
-    if (!overlap) loopi(numsbots) {
-      if (sbot[i].cn == b.cn) continue;
-      if (sbot[i].state != CS_ALIVE) continue;
-      float dx = b.x - sbot[i].x;
-      float dy = b.y - sbot[i].y;
-      if (dx * dx + dy * dy < minrad * minrad) { overlap = true; break; };
-    };
-    if (!overlap) return;
+    if (!overlap)
+      loopi(numsbots) {
+        if (sbot[i].cn == b.cn)
+          continue;
+        if (sbot[i].state != CS_ALIVE)
+          continue;
+        float dx = b.x - sbot[i].x;
+        float dy = b.y - sbot[i].y;
+        if (dx * dx + dy * dy < minrad * minrad) {
+          overlap = true;
+          break;
+        };
+      };
+    if (!overlap)
+      return;
     for (int x = -r; x <= r; x++) {
       for (int y = -r; y <= r; y++) {
-        if (abs(x) != r && abs(y) != r) continue;
+        if (abs(x) != r && abs(y) != r)
+          continue;
         b.x += x;
         b.y += y;
         overlap = false;
-        loopi(MAXCLIENTS) if (playerpos[i].active && playerpos[i].state == CS_ALIVE) {
+        loopi(MAXCLIENTS) if (playerpos[i].active &&
+                              playerpos[i].state == CS_ALIVE) {
           float dx = b.x - playerpos[i].x;
           float dy = b.y - playerpos[i].y;
-          if (dx * dx + dy * dy < minrad * minrad) { overlap = true; break; };
+          if (dx * dx + dy * dy < minrad * minrad) {
+            overlap = true;
+            break;
+          };
         };
-        if (!overlap) loopi(numsbots) {
-          if (sbot[i].cn == b.cn) continue;
-          if (sbot[i].state != CS_ALIVE) continue;
-          float dx = b.x - sbot[i].x;
-          float dy = b.y - sbot[i].y;
-          if (dx * dx + dy * dy < minrad * minrad) { overlap = true; break; };
-        };
-        if (!overlap) return;
+        if (!overlap)
+          loopi(numsbots) {
+            if (sbot[i].cn == b.cn)
+              continue;
+            if (sbot[i].state != CS_ALIVE)
+              continue;
+            float dx = b.x - sbot[i].x;
+            float dy = b.y - sbot[i].y;
+            if (dx * dx + dy * dy < minrad * minrad) {
+              overlap = true;
+              break;
+            };
+          };
+        if (!overlap)
+          return;
         b.x -= x;
         b.y -= y;
       };
@@ -367,7 +384,7 @@ void serverbot_spawn(int count) {
     int i = numsbots;
     serverbot &b = sbot[i];
     b.cn = nextcn++;
-    strn0cpy(b.name, bnames[rnd(24)], 16);
+    strn0cpy(b.name, botnames[rnd(24)], 16);
     int si = rnd(numspawns);
     b.x = spawnx[si];
     b.y = spawny[si];

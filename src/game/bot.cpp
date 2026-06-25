@@ -1,4 +1,5 @@
 #include "../include/cube.h"
+#include "botcommon.cpp"
 
 extern bool los(float lx, float ly, float lz, float bx, float by, float bz,
                 vec &v);
@@ -7,19 +8,13 @@ dvector bots;
 int numbots = 0;
 
 VAR(botdifficulty, -1, 4, 4);
-static int __ad_botdifficulty = (addcommanddetail("botdifficulty", "Bot AI difficulty level"), 0);
+static int __ad_botdifficulty =
+    (addcommanddetail("botdifficulty", "Bot AI difficulty level"), 0);
 VAR(botamount, 1, 4, 16);
-static int __ad_botamount = (addcommanddetail("botamount", "Number of bots to spawn"), 0);
+static int __ad_botamount =
+    (addcommanddetail("botamount", "Number of bots to spawn"), 0);
 
 static int botspawncycle = -1;
-
-static const char *botnames[] = {
-    "Cerelo", "Diaso", "Ceria",  "Deathly", "Ra",      "Va",     "Never",
-    "Abu",    "Re",    "Why",    "Lucky",   "Lano",    "Cliff",  "Cobra",
-    "Liner",  "Chiba", "Dragon", "Sabre",   "Koffman", "Stuff",  "Bones",
-    "Xor",    "Snuff", "Sniff",  "Pain",    "Time",    "Fake",   "Headup",
-    "MX",     "Moon",  "Wine",   "Tux",     "Crash",   "Threed", "Backlotter",
-    "Risco",  "Disco", "Cheque", "Will",    "Who",     "Cares",  "Anyway"};
 
 static const int numbotnames = sizeof(botnames) / sizeof(botnames[0]);
 
@@ -238,7 +233,7 @@ static void botaction(dynent *m) {
   } else if (disttoenemy < 5.0f) {
     if (m->gunselect != GUN_CSAW)
       m->gunselect = GUN_CSAW;
-    } else if (!m->ammo[m->gunselect]) {
+  } else if (!m->ammo[m->gunselect]) {
     if (m->ammo[GUN_RL])
       m->gunselect = GUN_RL;
     else if (m->ammo[GUN_CG])
@@ -401,7 +396,8 @@ void botrender() {
     bots[i]->maxspeed = saved;
   }
   loopv(players) if (players[i] && i >= BOT_CLIENT_BASE) {
-    if (players[i]->state == CS_DEAD) continue;
+    if (players[i]->state == CS_DEAD)
+      continue;
     renderclient(players[i], false, "monster/player", false, 1.25f);
   }
 }
@@ -595,6 +591,8 @@ void addbotcmd(int n) {
 void addbotspawn() { addbotcmd(botamount); }
 
 COMMANDN(addbot, addbotcmd, ARG_1INT);
-static int __ad_addbot = (addcommanddetail("addbot", "Adds a bot to the game"), 0);
+static int __ad_addbot =
+    (addcommanddetail("addbot", "Adds a bot to the game"), 0);
 COMMANDN(addbotspawn, addbotspawn, ARG_NONE);
-static int __ad_addbotspawn = (addcommanddetail("addbotspawn", "Spawns bot at current position"), 0);
+static int __ad_addbotspawn =
+    (addcommanddetail("addbotspawn", "Spawns bot at current position"), 0);
