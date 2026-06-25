@@ -452,6 +452,7 @@ int main(int argc, char **argv) {
 
   int ignore = 5;
   int delay = 500;
+  bool ignore_enter_up = false;
 
   for (;;) {
     delay--;
@@ -493,6 +494,10 @@ int main(int argc, char **argv) {
       updatevol();
       framesinmap++;
       gl_drawframe(scr_w, scr_h, fps);
+      if (firstlaunch) {
+        firstlaunch = false;
+        execute("showmenu welcome");
+      }
     } else {
       render_loading_frame(true);
     }
@@ -515,13 +520,17 @@ int main(int argc, char **argv) {
               event.key.keysym.sym == SDLK_KP_ENTER) {
             gamestate = PLAYING;
             ignore = 5;
-            if (firstlaunch) {
-              firstlaunch = false;
-              execute("showmenu welcome");
-            }
+            ignore_enter_up = true;
           }
           break;
         }
+        if (ignore_enter_up && event.key.state == SDL_RELEASED &&
+            (event.key.keysym.sym == SDLK_RETURN ||
+             event.key.keysym.sym == SDLK_KP_ENTER)) {
+          ignore_enter_up = false;
+          break;
+        }
+        ignore_enter_up = false;
         extern bool saycommandon;
         if (event.key.keysym.sym == SDLK_LSHIFT)
           shiftheld = event.key.state == SDL_PRESSED;
