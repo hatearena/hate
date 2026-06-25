@@ -155,7 +155,7 @@ static void loadspawns() {
   walkdata = NULL;
   if (!smapname[0])
     return;
-  char cgzname[256], pakname[64], mapname[64];
+  string cgzname; char pakname[64], mapname[64];
   char *slash = strpbrk(smapname, "/\\");
   if (slash) {
     strn0cpy(pakname, smapname, slash - smapname + 1);
