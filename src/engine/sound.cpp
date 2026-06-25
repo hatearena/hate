@@ -7,7 +7,7 @@ static int __ad_mastervol = (addcommanddetail("mastervol", "Master volume"), 0);
 VARP(soundvol, 0, 255, 255);
 static int __ad_soundvol =
     (addcommanddetail("soundvol", "Sound effects volume"), 0);
-VARP(musicvol, 0, 128, 255);
+VARP(musicvol, 0, 180, 255);
 static int __ad_musicvol = (addcommanddetail("musicvol", "Music volume"), 0);
 int musicfade_dur = 0;
 int musicfade_start = 0;
