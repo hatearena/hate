@@ -70,6 +70,16 @@ void renderentities() {
       glDepthMask(GL_TRUE);
       glDisable(GL_BLEND);
       glEnable(GL_TEXTURE_2D);
+
+      if (!strcmp(mmi.name, "dcp/jumppad2") && rnd(6) == 0) {
+        float f = S(e.x, e.y)->floor;
+        vec pos = {(float)e.x + (rnd(21) - 10) * 0.1f,
+                   (float)e.y + (rnd(21) - 10) * 0.1f,
+                   f + (rnd(11) - 5) * 0.2f};
+        vec vel = {(rnd(21) - 10) * 0.3f, (rnd(21) - 10) * 0.3f,
+                   8.0f + rnd(8) * 1.0f};
+        newparticlecol(pos, vel, rnd(400) + 500, 9, 255, 50, 50);
+      };
     } else if (e.type == NEWPARTICLE) {
       float f = S(e.x, e.y)->floor;
       int h = (unsigned char)(e.attr1 & 0xFF);
@@ -347,8 +357,7 @@ void pickup(int n, dynent *d) {
   case CARROT:
     ents[n].spawned = false;
     triggertime = lastmillis;
-    trigger(ents[n].attr1, ents[n].attr2,
-            false);
+    trigger(ents[n].attr1, ents[n].attr2, false);
     break;
   };
 };
