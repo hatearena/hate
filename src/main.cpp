@@ -182,6 +182,19 @@ static void render_loading_frame(bool done) {
     int vw = vs * scr_h * VIRTW / max(scr_w * VIRTH, 1);
     int ix = (VIRTW - vw) / 2;
     int iy = (VIRTH - vs) / 2 - VIRTH / 10;
+    {
+      float gp = 0.02f + 0.05f * sinf(time / 500.0f);
+      int gs = max(vw, vs) * 11 / 10;
+      int gx = ix - (gs - vw) / 2;
+      int gy = iy - (gs - vs) / 2;
+      glDisable(GL_TEXTURE_2D);
+      glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+      glColor4f(0.5f, 0.02f, 0.01f, gp);
+      roundedbox(gx + 100, gy, gx + gs - 100, gy + gs, gs / 3);
+      glEnable(GL_TEXTURE_2D);
+      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+      glColor4ub(255, 255, 255, 255);
+    }
     glBindTexture(GL_TEXTURE_2D, LOADICON);
     glBegin(GL_QUADS);
     glTexCoord2f(0, 0);
