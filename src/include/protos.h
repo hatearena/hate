@@ -235,6 +235,7 @@ extern void stopsounds();
 extern void initsound();
 extern void cleansound();
 extern void resetitemsoundtimer();
+extern void musicfadeout(int ms);
 
 // rendermd2
 extern void preloadhudmodels();

@@ -9,6 +9,8 @@ static int __ad_soundvol =
     (addcommanddetail("soundvol", "Sound effects volume"), 0);
 VARP(musicvol, 0, 128, 255);
 static int __ad_musicvol = (addcommanddetail("musicvol", "Music volume"), 0);
+int musicfade_dur = 0;
+int musicfade_start = 0;
 bool nosound = false;
 
 #define MAXCHAN 32
@@ -139,6 +141,13 @@ void music(char *name) {
 COMMAND(music, ARG_1STR);
 static int __ad_music = (addcommanddetail("music", "Plays a music file"), 0);
 
+void musicfadeout(int ms) {
+  if (nosound || !mod)
+    return;
+  musicfade_start = lastmillis;
+  musicfade_dur = ms;
+};
+
 #ifdef USE_MIXER
 vector<Mix_Chunk *> samples;
 #else
@@ -227,6 +236,35 @@ void updatevol() {
       soundlocs[i].inuse = false;
       soundchan[i] = -1;
     };
+  };
+  if (musicfade_dur > 0) {
+#ifdef USE_MIXER
+    if (mod) {
+      int elapsed = lastmillis - musicfade_start;
+      if (elapsed >= musicfade_dur) {
+        stopsound();
+        musicfade_dur = 0;
+      } else {
+        float t = (float)elapsed / musicfade_dur;
+        int vol = (int)((musicvol * mastervol * MAXVOL) / (255 * 255) * (1.0f - t));
+        Mix_VolumeMusic(vol);
+      }
+    } else
+      musicfade_dur = 0;
+#else
+    if (mod) {
+      int elapsed = lastmillis - musicfade_start;
+      if (elapsed >= musicfade_dur) {
+        stopsound();
+        musicfade_dur = 0;
+      } else {
+        float t = (float)elapsed / musicfade_dur;
+        int vol = (int)((musicvol * mastervol) / 255 * (1.0f - t));
+        FMUSIC_SetMasterVolume(mod, vol);
+      }
+    } else
+      musicfade_dur = 0;
+#endif
   };
 };
 

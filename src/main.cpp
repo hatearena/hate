@@ -517,6 +517,7 @@ int main(int argc, char **argv) {
   localconnect();
   changemap("horizon");
   render_loading_frame(true);
+  execute("music music/hate_menu.wav");
   gamestate = TITLE;
   log("main");
 
@@ -591,6 +592,7 @@ int main(int argc, char **argv) {
             gamestate = PLAYING;
             ignore = 5;
             ignore_enter_up = true;
+            musicfadeout(10000);
           }
           break;
         }
