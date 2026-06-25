@@ -167,9 +167,11 @@ static void render_loading_frame(bool done) {
   int time = SDL_GetTicks();
   static int lasttime = 0;
   static int animtime = 0;
-  if (!lasttime) lasttime = time;
+  if (!lasttime)
+    lasttime = time;
   int dt = time - lasttime;
-  if (dt > 50) dt = 50;
+  if (dt > 50)
+    dt = 50;
   lasttime = time;
   animtime += dt;
   glMatrixMode(GL_PROJECTION);
@@ -241,6 +243,48 @@ static void render_loading_frame(bool done) {
               (int)(255 * ease * pulse), 1.0f);
   }
   glDisable(GL_TEXTURE_2D);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  {
+    float va = 0.2f;
+    int vs = min(VIRTW, VIRTH) / 7;
+    glBegin(GL_QUADS);
+    glColor4f(0, 0, 0, va);
+    glVertex2i(0, 0);
+    glColor4f(0, 0, 0, va);
+    glVertex2i(VIRTW, 0);
+    glColor4f(0, 0, 0, 0);
+    glVertex2i(VIRTW, vs);
+    glColor4f(0, 0, 0, 0);
+    glVertex2i(0, vs);
+
+    glColor4f(0, 0, 0, 0);
+    glVertex2i(0, VIRTH - vs);
+    glColor4f(0, 0, 0, 0);
+    glVertex2i(VIRTW, VIRTH - vs);
+    glColor4f(0, 0, 0, va);
+    glVertex2i(VIRTW, VIRTH);
+    glColor4f(0, 0, 0, va);
+    glVertex2i(0, VIRTH);
+
+    glColor4f(0, 0, 0, va);
+    glVertex2i(0, 0);
+    glColor4f(0, 0, 0, 0);
+    glVertex2i(vs, 0);
+    glColor4f(0, 0, 0, 0);
+    glVertex2i(vs, VIRTH);
+    glColor4f(0, 0, 0, va);
+    glVertex2i(0, VIRTH);
+
+    glColor4f(0, 0, 0, 0);
+    glVertex2i(VIRTW - vs, 0);
+    glColor4f(0, 0, 0, va);
+    glVertex2i(VIRTW, 0);
+    glColor4f(0, 0, 0, va);
+    glVertex2i(VIRTW, VIRTH);
+    glColor4f(0, 0, 0, 0);
+    glVertex2i(VIRTW - vs, VIRTH);
+    glEnd();
+  }
   glDisable(GL_BLEND);
   glEnable(GL_DEPTH_TEST);
   SDL_GL_SwapWindow(window);
