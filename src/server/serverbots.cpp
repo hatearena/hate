@@ -571,7 +571,7 @@ void serverbot_damage(int cn, int damage, int attacker) {
     putint(p, sbot[i].spawnprotectmillis);
     if (died) {
       putint(p, SV_DIED);
-      putint(p, attacker);
+      putint(p, attacker >= 0 ? attacker : cn);
     } else {
       putint(p, SV_DAMAGE);
       putint(p, cn);
@@ -1136,6 +1136,18 @@ void serverbot_update() {
   if (interm) {
     serverbot_broadcast();
     return;
+  }
+
+  static int lavatick = 0;
+  lavatick += diff;
+  if (lavatick >= 300 && server_lavalevel > -128) {
+    lavatick = 0;
+    loopi(numsbots) {
+      serverbot &b = sbot[i];
+      if (b.state == CS_ALIVE && server_lavalevel > b.z - 0.5f) {
+        serverbot_damage(b.cn, 10, -1);
+      }
+    }
   }
 
   static enet_uint32 lastammorefill = 0;
