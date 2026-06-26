@@ -382,6 +382,7 @@ void rendermodel(const char *mdl, int frame, int range, int tex, float rad,
       glowlight.x = 20.0f;
       glowlight.y = 20.0f;
       glowlight.z = 20.0f;
+
       if (teammate) {
         glowlight.x *= 0.6f;
         glowlight.y *= 0.7f;
