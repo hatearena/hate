@@ -1590,23 +1590,23 @@ void drawhudmodel(int start, int end, float speed, int base) {
     if (m_teammode && (!strcmp(player1->team, "RED") ||
                        (m_infected && !strcmp(player1->team, "INFD")))) {
       glow = 0.2f + pulse;
-      teamcol = {1.0f, 0.0f, 0.0f};
+      teamcol.x = 1.0f; teamcol.y = 0.0f; teamcol.z = 0.0f;
       glowcol = &teamcol;
     } else {
       glow = pulse;
-      teamcol = {0.4f, 0.7f, 1.0f};
+      teamcol.x = 0.4f; teamcol.y = 0.7f; teamcol.z = 1.0f; 
       glowcol = &teamcol;
     }
   } else if (m_teammode) {
     if (!strcmp(player1->team, "RED") ||
         (m_infected && !strcmp(player1->team, "INFD"))) {
       glow = 0.3f;
-      teamcol = {1.0f, 0.0f, 0.0f};
+      teamcol.x = 1.0f; teamcol.y = 0.0f; teamcol.z = 0.0f;
       glowcol = &teamcol;
     } else if (!strcmp(player1->team, "BLUE") ||
                (m_infected && !strcmp(player1->team, "RES"))) {
       glow = 0.2f;
-      teamcol = {0.0f, 0.0f, 1.0f};
+      teamcol.x = 0.0f; teamcol.y = 0.0f; teamcol.z = 1.0f;
       glowcol = &teamcol;
     }
   }
