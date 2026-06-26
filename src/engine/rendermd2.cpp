@@ -374,10 +374,14 @@ void rendermodel(const char *mdl, int frame, int range, int tex, float rad,
 
     vec glowlight;
     if (glowcol) {
-      glowlight.x = 20.0f * glowcol->x; glowlight.y = 20.0f * glowcol->y; glowlight.z = 20.0f * glowcol->z;
+      glowlight.x = 20.0f * glowcol->x;
+      glowlight.y = 20.0f * glowcol->y;
+      glowlight.z = 20.0f * glowcol->z;   
       glDisable(GL_DEPTH_TEST);
     } else {
-      glowlight.x = 20.0f; glowlight.y = 20.0f; glowlight.z = 20.0f;
+      glowlight.x = 20.0f;
+      glowlight.y = 20.0f;
+      glowlight.z = 20.0f;
       if (teammate) {
         glowlight.x *= 0.6f;
         glowlight.y *= 0.7f;
