@@ -506,7 +506,7 @@ void process(ENetPacket *packet, int sender) {
       sgetstr();
       if (strcmp(text, GAME_VERSION)) {
         disconnect_client(sender, "version mismatch");
-        break;
+        return;
       }
       sgetstr();
       strcpy_s(clients[sender].name, text);
@@ -521,6 +521,19 @@ void process(ENetPacket *packet, int sender) {
             enet_packet_create(NULL, MAXTRANS, ENET_PACKET_FLAG_RELIABLE);
         uchar *start = pkt->data;
         uchar *pp = start + 2;
+        putint(pp, SV_POS);
+        putint(pp, sender);
+        putint(pp, (int)(clients[sender].o.x * DMF));
+        putint(pp, (int)(clients[sender].o.y * DMF));
+        putint(pp, (int)(clients[sender].o.z * DMF));
+        putint(pp, (int)(clients[sender].yaw * DAF));
+        putint(pp, (int)(clients[sender].pitch * DAF));
+        putint(pp, 0);
+        putint(pp, 0);
+        putint(pp, 0);
+        putint(pp, 0);
+        putint(pp, clients[sender].state << 5);
+        putint(pp, clients[sender].spawnprotectmillis);
         putint(pp, SV_INITC2S);
         sendstring(clients[sender].name, pp);
         sendstring(clients[sender].team, pp);
