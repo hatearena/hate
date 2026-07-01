@@ -502,12 +502,14 @@ void process(ENetPacket *packet, int sender) {
       break;
     }
 
-    case SV_INITC2S:
+    case SV_INITC2S: {
+      uchar *verstart = p;
       sgetstr();
       if (strcmp(text, GAME_VERSION)) {
         disconnect_client(sender, "version mismatch");
         return;
       }
+      int verskip = p - verstart;
       sgetstr();
       strcpy_s(clients[sender].name, text);
       sgetstr();
@@ -516,35 +518,17 @@ void process(ENetPacket *packet, int sender) {
       clients[sender].state = CS_ALIVE;
       clients[sender].spawnprotectmillis = 1000;
       serverbot_setlifeseq(sender, clients[sender].lifesequence);
-      loopv(clients) if (i != sender && clients[i].type != ST_EMPTY) {
-        ENetPacket *pkt =
-            enet_packet_create(NULL, MAXTRANS, ENET_PACKET_FLAG_RELIABLE);
-        uchar *start = pkt->data;
-        uchar *pp = start + 2;
-        putint(pp, SV_POS);
-        putint(pp, sender);
-        putint(pp, (int)(clients[sender].o.x * DMF));
-        putint(pp, (int)(clients[sender].o.y * DMF));
-        putint(pp, (int)(clients[sender].o.z * DMF));
-        putint(pp, (int)(clients[sender].yaw * DAF));
-        putint(pp, (int)(clients[sender].pitch * DAF));
-        putint(pp, 0);
-        putint(pp, 0);
-        putint(pp, 0);
-        putint(pp, 0);
-        putint(pp, clients[sender].state << 5);
-        putint(pp, clients[sender].spawnprotectmillis);
-        putint(pp, SV_INITC2S);
-        sendstring(clients[sender].name, pp);
-        sendstring(clients[sender].team, pp);
-        putint(pp, clients[sender].lifesequence);
-        *(ushort *)start = ENET_HOST_TO_NET_16(pp - start);
-        enet_packet_resize(pkt, pp - start);
-        send(i, pkt);
-        if (pkt->referenceCount == 0)
-          enet_packet_destroy(pkt);
+      if (verskip > 0) {
+        int copylen = (end - p) + (p - verstart) - verskip;
+        memmove(verstart, verstart + verskip, copylen);
+        p -= verskip;
+        end -= verskip;
+        int newlen = end - packet->data;
+        packet->dataLength = newlen;
+        *(ushort *)packet->data = ENET_HOST_TO_NET_16(newlen);
       }
-      return;
+      break;
+    }
 
     case SV_MAPCHANGE: {
       sgetstr();
