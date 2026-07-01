@@ -363,6 +363,14 @@ void process(ENetPacket *packet, int sender) {
   char text[MAXTRANS];
   int cn = -1, type;
 
+  if (sender >= 0 && sender < clients.length() && clients[sender].type != ST_EMPTY)
+    serverlog("DEBUG process: sender=%d (%s) datalen=%d\n", sender,
+              clients[sender].name[0] ? clients[sender].name : "unnamed",
+              packet->dataLength);
+  else
+    serverlog("DEBUG process: sender=%d (unknown) datalen=%d\n", sender,
+              packet->dataLength);
+
   while (p < end)
     switch (type = getint(p)) {
     case SV_TEXT: {
@@ -884,6 +892,11 @@ void process(ENetPacket *packet, int sender) {
     disconnect_client(sender, "end of packet");
     return;
   };
+  int multi_type = -1;
+  if (packet->dataLength > 2)
+    multi_type = packet->data[2];
+  serverlog("DEBUG process end: sender=%d multi_type=%d p_end=%ld datalen=%d\n",
+            sender, multi_type, (long)(end - p), packet->dataLength);
   multicast(packet, sender);
 };
 
@@ -911,12 +924,17 @@ void send_welcome(int n) {
   };
   *(ushort *)start = ENET_HOST_TO_NET_16(p - start);
   enet_packet_resize(packet, p - start);
+  serverlog("DEBUG send_welcome: client=%d datalen=%d smapname[0]=%d\n", n,
+            packet->dataLength, smapname[0]);
   send(n, packet);
   if (serverbot_count())
     serverbot_sendinit(n);
 };
 
 void multicast(ENetPacket *packet, int sender) {
+  int first = packet->data[2];
+  serverlog("DEBUG multicast: sender=%d first_type=%d datalen=%d nclients=%d\n",
+            sender, first, packet->dataLength, clients.length());
   loopv(clients) {
     if (i == sender)
       continue;
@@ -1170,7 +1188,8 @@ void serverslice(int seconds, unsigned int timeout) {
         break;
       }
       genuuid(c, &c - &clients[0]);
-      serverlog("Client connected (%s) uuid %s\n", c.hostname, c.uuid);
+      serverlog("Client connected (%s) uuid %s index %d\n", c.hostname, c.uuid,
+                &c - &clients[0]);
       send_welcome(lastconnect = &c - &clients[0]);
       break;
     }

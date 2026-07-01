@@ -378,6 +378,8 @@ void localservertoclient(uchar *buf,
     };
 
     default:
+      conoutf("DEBUG neterr: unknown type=%d cn=%d remaining=%d", type, cn,
+              (int)(end - p));
       neterr("type");
       return;
     };
