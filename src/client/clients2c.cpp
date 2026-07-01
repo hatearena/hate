@@ -212,19 +212,26 @@ void localservertoclient(uchar *buf,
     case SV_INITC2S: // another client either connected or changed name/team
     {
       sgetstr();
-      if (d->name[0]) // already connected
-      {
-        if (strcmp(d->name, text))
-          conoutf("%s is now known as %s", d->name, text);
-      } else // new client
-      {
-        c2sinit = false; // send new players my info again
-        conoutf("Connected: %s", text);
-      };
-      strcpy_s(d->name, text);
-      sgetstr();
-      strcpy_s(d->team, text);
-      d->lifesequence = getint(p);
+      if (strcmp(text, GAME_VERSION) == 0)
+        sgetstr();
+      if (!d && cn >= 0)
+        d = getclient(cn);
+      if (d) {
+        if (d->name[0]) {
+          if (strcmp(d->name, text))
+            conoutf("%s is now known as %s", d->name, text);
+        } else {
+          c2sinit = false;
+          conoutf("Connected: %s", text);
+        };
+        strcpy_s(d->name, text);
+        sgetstr();
+        strcpy_s(d->team, text);
+        d->lifesequence = getint(p);
+      } else {
+        sgetstr();
+        getint(p);
+      }
       break;
     };
 
