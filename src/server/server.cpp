@@ -509,14 +509,29 @@ void process(ENetPacket *packet, int sender) {
         break;
       }
       sgetstr();
-      strcpy_s(clients[cn].name, text);
+      strcpy_s(clients[sender].name, text);
       sgetstr();
-      strcpy_s(clients[cn].team, text);
-      clients[cn].lifesequence = getint(p);
-      clients[cn].state = CS_ALIVE;
-      clients[cn].spawnprotectmillis = 1000;
-      serverbot_setlifeseq(cn, clients[cn].lifesequence);
-      break;
+      strcpy_s(clients[sender].team, text);
+      clients[sender].lifesequence = getint(p);
+      clients[sender].state = CS_ALIVE;
+      clients[sender].spawnprotectmillis = 1000;
+      serverbot_setlifeseq(sender, clients[sender].lifesequence);
+      loopv(clients) if (i != sender && clients[i].type != ST_EMPTY) {
+        ENetPacket *pkt =
+            enet_packet_create(NULL, MAXTRANS, ENET_PACKET_FLAG_RELIABLE);
+        uchar *start = pkt->data;
+        uchar *pp = start + 2;
+        putint(pp, SV_INITC2S);
+        sendstring(clients[sender].name, pp);
+        sendstring(clients[sender].team, pp);
+        putint(pp, clients[sender].lifesequence);
+        *(ushort *)start = ENET_HOST_TO_NET_16(pp - start);
+        enet_packet_resize(pkt, pp - start);
+        send(i, pkt);
+        if (pkt->referenceCount == 0)
+          enet_packet_destroy(pkt);
+      }
+      return;
 
     case SV_MAPCHANGE: {
       sgetstr();
