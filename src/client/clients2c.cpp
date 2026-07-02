@@ -148,10 +148,8 @@ void localservertoclient(uchar *buf,
       int state = f >> 3;
       if (state == CS_DEAD && d->state != CS_DEAD) {
         d->lastaction = lastmillis;
-        if (cn >= BOT_CLIENT_BASE) {
-          spawngibs(d->o, 4);
-          playsound(S_DEAD, &d->o);
-        }
+        spawngibs(d->o, 4);
+        playsound(S_DEAD, &d->o);
       }
       if (state == CS_ALIVE && d->state == CS_DEAD && cn >= BOT_CLIENT_BASE) {
         particle_splash(0, 20, 500, d->o);
