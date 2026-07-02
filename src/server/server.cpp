@@ -822,7 +822,8 @@ void process(ENetPacket *packet, int sender) {
               damage = qdam;
           };
           if (damage > 0) {
-            if (clients[sender].team[0] && clients[i].team[0] &&
+            if ((mode & 1) && mode >= 3 && clients[sender].team[0] &&
+                clients[i].team[0] &&
                 !strcmp(clients[sender].team, clients[i].team))
               continue;
             if (clients[i].spawnprotectmillis > 0)
@@ -1086,7 +1087,7 @@ void serverslice(int seconds, unsigned int timeout) {
     putint(p, (int)(clients[i].o.y * DMF));
     putint(p, (int)(clients[i].o.z * DMF));
     putint(p, (int)(clients[i].yaw * DAF));
-    putint(p, (int)(clients[i].pitch * DAF));
+    putint(p, 0);
     putint(p, 0);
     putint(p, 0);
     putint(p, 0);
