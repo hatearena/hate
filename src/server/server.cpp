@@ -730,7 +730,41 @@ void process(ENetPacket *packet, int sender) {
       to.z = getint(p) / DMF;
       serverbot_hitscan(gun, from, to, sender);
 
-      if (gun == GUN_SG || gun == GUN_CG || gun == GUN_RAILGUN ||
+      if (gun == GUN_CSAW) {
+        loopv(clients) {
+          if (i == sender || clients[i].type == ST_EMPTY)
+            continue;
+          if (clients[i].state != CS_ALIVE)
+            continue;
+          if (i >= BOT_CLIENT_BASE)
+            continue;
+          vec diff = clients[i].o;
+          vsub(diff, clients[sender].o);
+          float dist = sqrtf(dotprod(diff, diff));
+          if (dist > 4.0f)
+            continue;
+          if ((mode & 1) && mode >= 3 && clients[sender].team[0] &&
+              clients[i].team[0] &&
+              !strcmp(clients[sender].team, clients[i].team))
+            continue;
+          if (clients[i].spawnprotectmillis > 0)
+            continue;
+          ENetPacket *dmgpkt =
+              enet_packet_create(NULL, 64, ENET_PACKET_FLAG_RELIABLE);
+          uchar *dpkt = dmgpkt->data;
+          uchar *dp = dpkt + 2;
+          putint(dp, SV_DAMAGE);
+          putint(dp, i);
+          putint(dp, 20);
+          putint(dp, clients[i].lifesequence);
+          putint(dp, sender);
+          *(ushort *)dpkt = ENET_HOST_TO_NET_16(dp - dpkt);
+          enet_packet_resize(dmgpkt, dp - dpkt);
+          multicast(dmgpkt, -1);
+          if (dmgpkt->referenceCount == 0)
+            enet_packet_destroy(dmgpkt);
+        }
+      } else if (gun == GUN_SG || gun == GUN_CG || gun == GUN_RAILGUN ||
           gun == GUN_NAILGUN || gun == GUN_LIGHTGUN) {
         int qdam = gun == GUN_RAILGUN   ? 100
                    : gun == GUN_SG      ? 10
