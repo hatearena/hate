@@ -320,6 +320,7 @@ void c2sinfo(dynent *d) // send update to the server
     // pack rest in 1 byte: strafe:2, move:2, onfloor:1, state:3
     putint(p, (d->strafe & 3) | ((d->move & 3) << 2) |
                   (((int)d->onfloor) << 4) | (d->state << 5));
+    putint(p, d->spawnprotectmillis);
 
     if (senditemstoserver) {
       packet->flags = ENET_PACKET_FLAG_RELIABLE;

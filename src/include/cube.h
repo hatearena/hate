@@ -180,7 +180,7 @@ enum {
 #define MAXTRANS 5000  // max amount of data to swallow in 1 go
 #define CUBE_SERVER_PORT 28765
 #define CUBE_SERVINFO_PORT 28766
-#define PROTOCOL_VERSION 122 // bump when protocol changes
+#define PROTOCOL_VERSION 123 // bump when protocol changes
 #define GAME_VERSION "0.0.5"
 
 // network messages codes, c2s, c2c, s2c
