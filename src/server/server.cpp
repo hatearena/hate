@@ -363,7 +363,8 @@ void process(ENetPacket *packet, int sender) {
   char text[MAXTRANS];
   int cn = -1, type;
 
-  if (sender >= 0 && sender < clients.length() && clients[sender].type != ST_EMPTY)
+  if (sender >= 0 && sender < clients.length() &&
+      clients[sender].type != ST_EMPTY)
     serverlog("DEBUG process: sender=%d (%s) datalen=%d\n", sender,
               clients[sender].name[0] ? clients[sender].name : "unnamed",
               packet->dataLength);
@@ -511,13 +512,11 @@ void process(ENetPacket *packet, int sender) {
     }
 
     case SV_INITC2S: {
-      uchar *verstart = p;
       sgetstr();
       if (strcmp(text, GAME_VERSION)) {
         disconnect_client(sender, "version mismatch");
         return;
       }
-      int verskip = p - verstart;
       sgetstr();
       strcpy_s(clients[sender].name, text);
       sgetstr();
@@ -526,15 +525,6 @@ void process(ENetPacket *packet, int sender) {
       clients[sender].state = CS_ALIVE;
       clients[sender].spawnprotectmillis = 1000;
       serverbot_setlifeseq(sender, clients[sender].lifesequence);
-      if (verskip > 0) {
-        int copylen = (end - p) + (p - verstart) - verskip;
-        memmove(verstart, verstart + verskip, copylen);
-        p -= verskip;
-        end -= verskip;
-        int newlen = end - packet->data;
-        packet->dataLength = newlen;
-        *(ushort *)packet->data = ENET_HOST_TO_NET_16(newlen);
-      }
       break;
     }
 
