@@ -673,6 +673,7 @@ void process(ENetPacket *packet, int sender) {
       getint(p); // velocity
       int flags = getint(p);
       clients[cn].spawnprotectmillis = getint(p);
+      clients[cn].flags = flags;
       int pstate = (flags >> 5) & 3;
       int oldstate = clients[cn].state;
       bool hadpos =
@@ -1090,7 +1091,7 @@ void serverslice(int seconds, unsigned int timeout) {
     putint(p, 0);
     putint(p, 0);
     putint(p, 0);
-    putint(p, clients[i].state << 5);
+    putint(p, clients[i].flags);
     putint(p, clients[i].spawnprotectmillis);
     *(ushort *)start = ENET_HOST_TO_NET_16(p - start);
     enet_packet_resize(pkt, p - start);

@@ -240,7 +240,7 @@ struct client {
   bool rcon;
   vec o;
   float yaw, pitch;
-  int state, lifesequence, spawnprotectmillis;
+  int state, lifesequence, spawnprotectmillis, flags;
 };
 
 enum { CS_ALIVE = 0, CS_DEAD, CS_LAGGED, CS_SPECTATOR };
