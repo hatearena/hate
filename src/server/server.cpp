@@ -525,7 +525,38 @@ void process(ENetPacket *packet, int sender) {
       clients[sender].state = CS_ALIVE;
       clients[sender].spawnprotectmillis = 1000;
       serverbot_setlifeseq(sender, clients[sender].lifesequence);
-      break;
+
+      ENetPacket *pkt =
+          enet_packet_create(NULL, MAXTRANS, ENET_PACKET_FLAG_RELIABLE);
+      uchar *start = pkt->data;
+      uchar *pp = start + 2;
+      putint(pp, SV_POS);
+      putint(pp, sender);
+      putint(pp, (int)(clients[sender].o.x * DMF));
+      putint(pp, (int)(clients[sender].o.y * DMF));
+      putint(pp, (int)(clients[sender].o.z * DMF));
+      putint(pp, (int)(clients[sender].yaw * DAF));
+      putint(pp, (int)(clients[sender].pitch * DAF));
+      putint(pp, 0);
+      putint(pp, 0);
+      putint(pp, 0);
+      putint(pp, 0);
+      putint(pp, (clients[sender].state << 5));
+      putint(pp, clients[sender].spawnprotectmillis);
+      putint(pp, SV_INITC2S);
+      sendstring(clients[sender].name, pp);
+      sendstring(clients[sender].team, pp);
+      putint(pp, clients[sender].lifesequence);
+      *(ushort *)start = ENET_HOST_TO_NET_16(pp - start);
+      enet_packet_resize(pkt, pp - start);
+      loopv(clients) {
+        if (i == sender || clients[i].type == ST_EMPTY)
+          continue;
+        send(i, pkt);
+      };
+      if (pkt->referenceCount == 0)
+        enet_packet_destroy(pkt);
+      return;
     }
 
     case SV_MAPCHANGE: {
