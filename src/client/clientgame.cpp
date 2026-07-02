@@ -914,7 +914,6 @@ void timeupdate(int timeremain) {
 dynent *getclient(int cn) // ensure valid entity
 {
   if (cn < 0 || cn >= MAXCLIENTS) {
-    conoutf("DEBUG getclient: cn=%d < 0 or >= %d", cn, MAXCLIENTS);
     neterr("clientnum");
     return NULL;
   };

@@ -263,7 +263,8 @@ void localservertoclient(uchar *buf,
       int ls = getint(p);
       int actor = getint(p);
       if (target == clientnum) {
-        if (d && player1->team[0] && d->team[0] && !strcmp(d->team, player1->team))
+        if (d && player1->team[0] && d->team[0] &&
+            !strcmp(d->team, player1->team))
           ;
         else if (ls == player1->lifesequence)
           selfdamage(damage, actor, d);
@@ -383,8 +384,6 @@ void localservertoclient(uchar *buf,
     };
 
     default:
-      conoutf("DEBUG neterr: unknown type=%d cn=%d remaining=%d", type, cn,
-              (int)(end - p));
       neterr("type");
       return;
     };
