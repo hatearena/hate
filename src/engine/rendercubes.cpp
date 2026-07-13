@@ -14,7 +14,7 @@ void reallocv() {
   verts = (vertex *)realloc(verts, (curmaxverts *= 2) * sizeof(vertex));
   curmaxverts -= 10;
   if (!verts)
-    fatal("no vertex memory!");
+    fatal("No vertex memory.");
   setarraypointers();
 };
 
