@@ -858,6 +858,12 @@ void showentities() {
     case JUMPPAD:
       desc = "zpush, ypush, xpush";
       break;
+    case REDFLAG:
+      desc = "ctf red flag";
+      break;
+    case BLUEFLAG:
+      desc = "ctf blue flag";
+      break;
     };
     sprintf_s(buf)("%d: %s (%s)", i, entnames[i], desc);
     mitem &mi2 = m.items.add();

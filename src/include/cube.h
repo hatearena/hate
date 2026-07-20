@@ -55,6 +55,8 @@ enum // static entity types
   CARROT,   // attr1 = tag, attr2 = type
   JUMPPAD,  // attr1 = zpush, attr2 = ypush, attr3 = xpush
   NEWPARTICLE, // attr1 = height|(color_b<<8), attr2 = freq, attr3 = r, attr4 = g
+  REDFLAG,     // CTF: red team's flag/base
+  BLUEFLAG,    // CTF: blue team's flag/base
   MAXENTTYPES
 };
 
@@ -217,6 +219,10 @@ enum {
   SV_SERVMSG,
   SV_ITEMLIST,
   SV_EXT,
+  SV_CTFSTATE,   // server -> client: flag state (flagtype,state,carrier,x,y,z)
+  SV_CTFPICKUP,  // client -> server: I picked up a flag (flagtype)
+  SV_CTFCAPTURE, // server -> client: flag captured (team)
+  SV_CTFINIT,    // client -> server: init flag positions (flagtype,x,y,z)
 };
 
 #define MAXBOTS 16
@@ -408,17 +414,17 @@ extern bool demoplayback;
     } while (*t++);                                                            \
   } // used by networking
 
-#define m_noitems (gamemode >= 4 && gamemode != 12)
-#define m_noitemsrail (gamemode <= 5)
-#define m_arena (gamemode >= 8 && gamemode != 12)
-#define m_tarena (gamemode >= 10 && gamemode != 12)
-#define m_teammode ((gamemode & 1 && gamemode > 2) || gamemode == 12)
+#define m_noitems (gamemode >= 4 && gamemode != 12 && gamemode != 13)
+#define m_noitemsrail (gamemode <= 5 || gamemode == 13)
+#define m_arena (gamemode >= 8 && gamemode != 12 && gamemode != 13)
+#define m_tarena (gamemode >= 10 && gamemode != 12 && gamemode != 13)
+#define m_teammode ((gamemode & 1 && gamemode > 2) || gamemode == 12 || gamemode == 13)
 #define m_infected (gamemode == 12)
+#define m_ctf (gamemode == 13)
 #define isteam(a, b) (m_teammode && strcmp(a, b) == 0)
 #define m_sp (gamemode < 0)
 #define m_dmsp (gamemode == -1)
 #define m_classicsp (gamemode == -2)
-#define isteam(a, b) (m_teammode && strcmp(a, b) == 0)
 
 enum // function signatures for script functions, see command.cpp
 {

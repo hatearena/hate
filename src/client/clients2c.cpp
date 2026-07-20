@@ -8,6 +8,10 @@ extern string clientpassword;
 vec bot_target[MAXBOTS];
 float bot_yaw_target[MAXBOTS];
 int bot_target_time[MAXBOTS];
+int ctf_carrier[2] = {-1, -1};                  // cn of carrier for each flag
+int ctf_flagstate[2] = {0, 0};                  // 0=home, 1=carried, 2=dropped
+int ctf_flagpos[2][3] = {{0, 0, 0}, {0, 0, 0}}; // x,y,z position
+int ctf_teamcaptures[2] = {0, 0}; // captures per team (0=RED, 1=BLUE)
 
 void neterr(char *s) {
   conoutf("Illegal network message: %s", s);
@@ -374,6 +378,33 @@ void localservertoclient(uchar *buf,
       sgetstr();
       conoutf("%s", text);
       break;
+
+    case SV_CTFSTATE: {
+      int flagtype = getint(p);
+      int state = getint(p);
+      int carrier = getint(p);
+      int fx = getint(p);
+      int fy = getint(p);
+      int fz = getint(p);
+      if (flagtype >= 0 && flagtype <= 1) {
+        ctf_flagstate[flagtype] = state;
+        ctf_carrier[flagtype] = carrier;
+        ctf_flagpos[flagtype][0] = fx;
+        ctf_flagpos[flagtype][1] = fy;
+        ctf_flagpos[flagtype][2] = fz;
+      }
+      break;
+    };
+
+    case SV_CTFCAPTURE: {
+      int team = getint(p);
+      if (team >= 0 && team <= 1) {
+        ctf_teamcaptures[team]++;
+        conoutf("Team %s captured the flag. (%d captures)",
+                team == 0 ? "RED" : "BLUE", ctf_teamcaptures[team]);
+      }
+      break;
+    };
 
     case SV_EXT: // so we can messages without breaking previous
                  // clients/servers, if necessary

@@ -65,6 +65,22 @@ void renderclient(dynent *d, bool team, const char *mdlname, bool hellpig,
 
 extern int democlientnum;
 
+extern int ctf_carrier[2];
+extern int ctf_flagstate[2];
+extern int ctf_teamcaptures[2];
+
+void renderflagoverhead(dynent *d, int cn) {
+  if (!m_ctf) return;
+  int flagtype = -1;
+  loopi(2) if (ctf_carrier[i] == cn && ctf_flagstate[i] == 1) { flagtype = i; break; }
+  if (flagtype < 0) return;
+  const char *mdl = flagtype == 0 ? "flagred" : "flagblue";
+  float mz = d->o.z + 4.5f;
+  rendermodel(mdl, 0, 1, 0, 1.5f,
+              d->o.x, mz, d->o.y,
+              lastmillis / 5.0f, 0, false, 0.8f, 10.0f);
+}
+
 void renderclients() {
   dynent *d;
   loopv(players) if ((d = players[i]) &&
@@ -79,6 +95,7 @@ void renderclients() {
         mdl = "monster/redplayer";
     }
     renderclient(d, isteam(player1->team, d->team), mdl, false, 1.25f);
+    renderflagoverhead(d, i);
   }
 };
 

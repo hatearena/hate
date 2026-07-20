@@ -15,6 +15,10 @@ struct server_entity {
 vector<server_entity> sents;
 bool notgotitems = true;
 int mode = 0;
+#ifdef STANDALONE
+int gamemode = 0;
+int nextmode = 0;
+#endif
 string rconpass;
 vector<char *> blacklist;
 bool allowvotes = true;
@@ -24,6 +28,17 @@ bool allowmodevotes = true;
 bool allowkickvotes = true;
 int maxping = 0;
 int botcount = 0;
+
+struct ctf_flagstate {
+  int state;   // 0=home, 1=carried, 2=dropped
+  int carrier; // cn of carrier, -1 if none
+  int x, y, z; // position (when dropped, or home position)
+};
+
+ctf_flagstate ctf_flags[2];
+bool ctf_flags_init[2] = {false, false};
+
+void resetctf() { ctf_flags_init[0] = ctf_flags_init[1] = false; }
 int botskill = 50;
 char logfile_str[_MAXDEFSTR] = "";
 int cfg_gamemode = -1;
@@ -56,6 +71,9 @@ static int solovotemode = 0;
 
 void process(ENetPacket *packet, int sender);
 void multicast(ENetPacket *packet, int sender);
+void send2(bool rel, int cn, int a, int b);
+void sendservmsg(char *msg);
+void send(int n, ENetPacket *packet);
 void disconnect_client(int n, char *reason);
 
 void serverlog(const char *fmt, ...) {
@@ -73,6 +91,78 @@ void serverlog(const char *fmt, ...) {
     };
   };
 };
+
+void sendctfstate(int flagtype) {
+  ctf_flagstate &fs = ctf_flags[flagtype];
+  ENetPacket *pkt = enet_packet_create(NULL, 64, ENET_PACKET_FLAG_RELIABLE);
+  uchar *start = pkt->data;
+  uchar *p = start + 2;
+  putint(p, SV_CTFSTATE);
+  putint(p, flagtype);
+  putint(p, fs.state);
+  putint(p, fs.carrier);
+  putint(p, fs.x);
+  putint(p, fs.y);
+  putint(p, fs.z);
+  *(ushort *)start = ENET_HOST_TO_NET_16(p - start);
+  enet_packet_resize(pkt, p - start);
+  multicast(pkt, -1);
+  if (pkt->referenceCount == 0)
+    enet_packet_destroy(pkt);
+}
+
+void ctf_initflag(int flagtype, int x, int y, int z) {
+  ctf_flags[flagtype].state = 0;
+  ctf_flags[flagtype].carrier = -1;
+  ctf_flags[flagtype].x = x;
+  ctf_flags[flagtype].y = y;
+  ctf_flags[flagtype].z = z;
+  ctf_flags_init[flagtype] = true;
+}
+
+void ctf_dropflag(int carrier) {
+  if (carrier < 0 || carrier >= clients.length())
+    return;
+  if (clients[carrier].type == ST_EMPTY)
+    return;
+  loopi(2) {
+    ctf_flagstate &fs = ctf_flags[i];
+    if (fs.state == 1 && fs.carrier == carrier) {
+      fs.state = 2;
+      fs.carrier = -1;
+      fs.x = (int)clients[carrier].o.x;
+      fs.y = (int)clients[carrier].o.y;
+      fs.z = (int)clients[carrier].o.z;
+      sendctfstate(i);
+      sprintf_sd(msg)("Flag dropped by %s", clients[carrier].name);
+      sendservmsg(msg);
+    }
+  }
+}
+
+void ctf_flaghome(int flagtype) {
+  ctf_flagstate &fs = ctf_flags[flagtype];
+  fs.state = 0;
+  fs.carrier = -1;
+  sendctfstate(flagtype);
+}
+
+void ctf_capture(int scoring_team) {
+  sprintf_sd(msg)("Team %s scored", scoring_team == 0 ? "RED" : "BLUE");
+  sendservmsg(msg);
+  ctf_flaghome(0);
+  ctf_flaghome(1);
+  ENetPacket *pkt = enet_packet_create(NULL, 32, ENET_PACKET_FLAG_RELIABLE);
+  uchar *start = pkt->data;
+  uchar *p = start + 2;
+  putint(p, SV_CTFCAPTURE);
+  putint(p, scoring_team);
+  *(ushort *)start = ENET_HOST_TO_NET_16(p - start);
+  enet_packet_resize(pkt, p - start);
+  multicast(pkt, -1);
+  if (pkt->referenceCount == 0)
+    enet_packet_destroy(pkt);
+}
 
 void genuuid(client &c, int cn) {
   uint h = (uint)c.peer->address.host;
@@ -315,6 +405,7 @@ void disconnect_client(int n, char *reason) {
 void resetitems() {
   sents.setsize(0);
   notgotitems = true;
+  resetctf();
 };
 
 void pickup(uint i, int sec, int sender) {
@@ -596,6 +687,7 @@ void process(ENetPacket *packet, int sender) {
         }
       }
     skipmodechange:
+      gamemode = mode;
       minremain = timelimit ? timelimit : 10;
       mapend = lastsec + minremain * 60;
       interm = 0;
@@ -875,11 +967,55 @@ void process(ENetPacket *packet, int sender) {
 
     case SV_DIED: {
       int actor = getint(p);
+      if (m_ctf) {
+        ctf_dropflag(cn);
+        if (actor >= 0)
+          ctf_dropflag(actor);
+      }
       clients[cn].lifesequence++;
       clients[cn].state = CS_DEAD;
       extern void serverbot_fragged(int);
       serverbot_fragged(actor);
       serverbot_player_died(cn);
+      break;
+    };
+
+    case SV_CTFPICKUP: {
+      int flagtype = getint(p);
+      if (!m_ctf || flagtype < 0 || flagtype > 1)
+        break;
+      ctf_flagstate &fs = ctf_flags[flagtype];
+      if (fs.state != 0 && fs.state != 2)
+        break;
+      if (clients[sender].state != CS_ALIVE)
+        break;
+      bool is_red = !strcmp(clients[sender].team, "RED");
+      if ((flagtype == 0 && is_red) || (flagtype == 1 && !is_red))
+        break;
+      fs.state = 1;
+      fs.carrier = sender;
+      fs.x = (int)clients[sender].o.x;
+      fs.y = (int)clients[sender].o.y;
+      fs.z = (int)clients[sender].o.z;
+      sendctfstate(flagtype);
+      sprintf_sd(msg)("%s picked up the %s flag.", clients[sender].name,
+                      flagtype == 0 ? "red" : "blue");
+      sendservmsg(msg);
+      break;
+    };
+
+    case SV_CTFINIT: {
+      if (!m_ctf)
+        break;
+      int flagtype = getint(p);
+      int fx = getint(p);
+      int fy = getint(p);
+      int fz = getint(p);
+      if (flagtype >= 0 && flagtype <= 1)
+        ctf_initflag(flagtype, fx, fy, fz);
+      if (ctf_flags_init[0] && ctf_flags_init[1]) {
+        loopi(2) sendctfstate(i);
+      }
       break;
     };
 
@@ -923,6 +1059,17 @@ void send_welcome(int n) {
       putint(p, SV_ITEMLIST);
       loopv(sents) if (sents[i].spawned) putint(p, i);
       putint(p, -1);
+    };
+    if (m_ctf && ctf_flags_init[0] && ctf_flags_init[1]) {
+      loopi(2) {
+        putint(p, SV_CTFSTATE);
+        putint(p, i);
+        putint(p, ctf_flags[i].state);
+        putint(p, ctf_flags[i].carrier);
+        putint(p, ctf_flags[i].x);
+        putint(p, ctf_flags[i].y);
+        putint(p, ctf_flags[i].z);
+      }
     };
   };
   *(ushort *)start = ENET_HOST_TO_NET_16(p - start);
@@ -995,6 +1142,7 @@ int nonlocalclients = 0;
 int lastconnect = 0;
 
 void serverslice(int seconds, unsigned int timeout) {
+  gamemode = mode;
   loopv(sents) {
     if (sents[i].spawnsecs && (sents[i].spawnsecs -= seconds - lastsec) <= 0) {
       sents[i].spawnsecs = 0;
@@ -1002,6 +1150,31 @@ void serverslice(int seconds, unsigned int timeout) {
       send2(true, -1, SV_ITEMSPAWN, i);
     };
   };
+
+  if (m_ctf && ctf_flags_init[0] && ctf_flags_init[1]) {
+    loopi(2) {
+      ctf_flagstate &fs = ctf_flags[i];
+      if (fs.state == 1 && fs.carrier >= 0 && fs.carrier < clients.length()) {
+        client &carrier = clients[fs.carrier];
+        if (carrier.type != ST_EMPTY) {
+          int enemy = 1 - i;
+          ctf_flagstate &enemyfs = ctf_flags[enemy];
+          float dx = carrier.o.x - enemyfs.x;
+          float dy = carrier.o.y - enemyfs.y;
+          float dist = sqrtf(dx * dx + dy * dy);
+          if (dist < 4.0f) {
+            bool carrier_is_red = !strcmp(carrier.team, "RED");
+            ctf_capture(carrier_is_red ? 1 : 0);
+            int cn = fs.carrier;
+            if (cn < BOT_CLIENT_BASE) {
+              clients[cn].frags++;
+              send2(true, -1, SV_FRAGS, clients[cn].frags);
+            }
+          }
+        }
+      }
+    }
+  }
 
   int deltamsec = lastsec ? (seconds - lastsec) * 1000 : 0;
   loopv(clients) if (clients[i].type != ST_EMPTY &&
@@ -1022,6 +1195,7 @@ void serverslice(int seconds, unsigned int timeout) {
         mode = moderotation[map_rotation_index];
       else if (cfg_gamemode >= 0)
         mode = cfg_gamemode;
+      gamemode = mode;
     }
     rotation_done = seconds;
     minremain = timelimit ? timelimit : 10;
@@ -1058,6 +1232,7 @@ void serverslice(int seconds, unsigned int timeout) {
   if (solovotetime && seconds >= solovotetime) {
     solovotetime = 0;
     mode = solovotemode;
+    gamemode = mode;
     strcpy_s(smapname, solovotemap);
     minremain = timelimit ? timelimit : 10;
     mapend = lastsec + minremain * 60;

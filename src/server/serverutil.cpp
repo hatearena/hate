@@ -55,10 +55,11 @@ const char *modenames[] = {
     "tactics arena",
     "tactics clan arena",
     "infected",
+    "ctf",
 };
 
 const char *modestr(int n) {
-  return (n >= -2 && n < 13) ? modenames[n + 2] : "unknown";
+  return (n >= -2 && n < 14) ? modenames[n + 2] : "unknown";
 };
 
 char msgsizesl[] = // size inclusive message token, 0 for variable or
@@ -125,9 +126,17 @@ char msgsizesl[] = // size inclusive message token, 0 for variable or
      0,
      SV_ITEMLIST,
      0,
-     SV_EXT,
-     0,
-     -1};
+      SV_EXT,
+      0,
+      SV_CTFSTATE,
+      7,
+      SV_CTFPICKUP,
+      3,
+      SV_CTFCAPTURE,
+      3,
+      SV_CTFINIT,
+      6,
+      -1};
 
 char msgsizelookup(int msg) {
   for (char *p = msgsizesl; *p >= 0; p += 2)

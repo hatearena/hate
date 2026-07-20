@@ -930,6 +930,11 @@ void initclient() {
 extern int numbots;
 extern void addbotcmd(int n);
 
+extern int ctf_carrier[2];
+extern int ctf_flagstate[2];
+extern int ctf_flagpos[2][3];
+extern int ctf_teamcaptures[2];
+
 void startmap(char *name) // called just after a map load
 {
   if (netmapstart() && m_sp) {
@@ -962,6 +967,14 @@ void startmap(char *name) // called just after a map load
   showscores(false);
   intermission = false;
   framesinmap = 0;
+  if (m_ctf) {
+    loopi(2) {
+      ctf_carrier[i] = -1;
+      ctf_flagstate[i] = 0;
+      ctf_flagpos[i][0] = ctf_flagpos[i][1] = ctf_flagpos[i][2] = 0;
+      ctf_teamcaptures[i] = 0;
+    }
+  }
   conoutf("Gamemode: %s", modestr(gamemode));
 };
 

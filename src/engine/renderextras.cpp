@@ -296,7 +296,7 @@ char *entnames[] = {
     "energy",         "health",     "healthboost", "greenarmour",
     "yellowarmour",   "quaddamage", "teleport",    "teledest",
     "mapmodel",       "monster",    "trigger",     "jumppad",
-    "particlesource", "?",          "?",           "?",
+    "particlesource", "redflag",    "blueflag",    "?",
 };
 
 void loadsky(char *basename) {

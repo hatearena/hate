@@ -80,6 +80,38 @@ void renderentities() {
                    40.0f + rnd(8) * 1.0f};
         newparticlecol(pos, vel, rnd(400) + 1900, 9, 255, 50, 50);
       };
+    } else if (e.type == REDFLAG) {
+      if (OUTBORD(e.x, e.y))
+        continue;
+      extern int ctf_flagstate[2];
+      extern int ctf_flagpos[2][3];
+      float fx = (float)e.x, fy = (float)e.y, fz;
+      if (m_ctf && ctf_flagstate[0] == 2) {
+        fx = (float)ctf_flagpos[0][0];
+        fy = (float)ctf_flagpos[0][1];
+        fz = (float)ctf_flagpos[0][2];
+      } else {
+        fz = S(e.x, e.y)->floor;
+      }
+      rendermodel("flagred", 0, 1, 0, 1.5f, fx,
+                  (ctf_flagstate[0] == 2 ? fz : S(e.x, e.y)->floor) + 1.0f, fy,
+                  lastmillis / 10.0f, 0, false, 1.0f, 10.0f);
+    } else if (e.type == BLUEFLAG) {
+      if (OUTBORD(e.x, e.y))
+        continue;
+      extern int ctf_flagstate[2];
+      extern int ctf_flagpos[2][3];
+      float fx = (float)e.x, fy = (float)e.y, fz;
+      if (m_ctf && ctf_flagstate[1] == 2) {
+        fx = (float)ctf_flagpos[1][0];
+        fy = (float)ctf_flagpos[1][1];
+        fz = (float)ctf_flagpos[1][2];
+      } else {
+        fz = S(e.x, e.y)->floor;
+      }
+      rendermodel("flagblue", 0, 1, 0, 1.5f, fx,
+                  (ctf_flagstate[1] == 2 ? fz : S(e.x, e.y)->floor) + 1.0f, fy,
+                  lastmillis / 10.0f, 0, false, 1.0f, 10.0f);
     } else if (e.type == NEWPARTICLE) {
       float f = S(e.x, e.y)->floor;
       int h = (unsigned char)(e.attr1 & 0xFF);
@@ -369,6 +401,20 @@ void checkitems() {
     entity &e = ents[i];
     if (e.type == NOTUSED)
       continue;
+    if (m_ctf && (e.type == REDFLAG || e.type == BLUEFLAG)) {
+      if (OUTBORD(e.x, e.y))
+        continue;
+      vec v = {e.x, e.y, S(e.x, e.y)->floor + player1->eyeheight};
+      vdist(dist, t, player1->o, v);
+      if (dist < 3.0f) {
+        int flagtype = e.type == REDFLAG ? 0 : 1;
+        bool is_red = player1->team[0] && !strcmp(player1->team, "RED");
+        if ((flagtype == 0 && is_red) || (flagtype == 1 && !is_red))
+          continue;
+        addmsg(1, 2, SV_CTFPICKUP, flagtype);
+      }
+      continue;
+    }
     if (!ents[i].spawned && e.type != TELEPORT && e.type != JUMPPAD)
       continue;
     if (OUTBORD(e.x, e.y))

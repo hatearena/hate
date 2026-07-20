@@ -328,6 +328,24 @@ void c2sinfo(dynent *d) // send update to the server
       if (!m_noitems)
         putitems(p);
       putint(p, -1);
+      if (m_ctf) {
+        loopv(ents) {
+          entity &e = ents[i];
+          if (e.type == REDFLAG) {
+            putint(p, SV_CTFINIT);
+            putint(p, 0);
+            putint(p, e.x);
+            putint(p, e.y);
+            putint(p, e.z);
+          } else if (e.type == BLUEFLAG) {
+            putint(p, SV_CTFINIT);
+            putint(p, 1);
+            putint(p, e.x);
+            putint(p, e.y);
+            putint(p, e.z);
+          }
+        }
+      }
       senditemstoserver = false;
       serveriteminitdone = true;
     };
