@@ -81,7 +81,8 @@ void renderentities() {
         newparticlecol(pos, vel, rnd(400) + 1900, 9, 255, 50, 50);
       };
     } else if (e.type == REDFLAG) {
-      if (!m_ctf) continue;
+      if (!m_ctf)
+        continue;
       if (OUTBORD(e.x, e.y))
         continue;
       extern int ctf_flagstate[2];
@@ -98,7 +99,8 @@ void renderentities() {
                   (ctf_flagstate[0] == 2 ? fz : S(e.x, e.y)->floor) + 1.0f, fy,
                   lastmillis / 10.0f, 0, false, 1.0f, 10.0f);
     } else if (e.type == BLUEFLAG) {
-      if (!m_ctf) continue;
+      if (!m_ctf)
+        continue;
       if (OUTBORD(e.x, e.y))
         continue;
       extern int ctf_flagstate[2];
