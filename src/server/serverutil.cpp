@@ -126,17 +126,17 @@ char msgsizesl[] = // size inclusive message token, 0 for variable or
      0,
      SV_ITEMLIST,
      0,
-      SV_EXT,
-      0,
-      SV_CTFSTATE,
-      7,
-      SV_CTFPICKUP,
-      3,
-      SV_CTFCAPTURE,
-      3,
-      SV_CTFINIT,
-      6,
-      -1};
+     SV_EXT,
+     0,
+     SV_CTFSTATE,
+     7,
+     SV_CTFPICKUP,
+     2,
+     SV_CTFCAPTURE,
+     2,
+     SV_CTFINIT,
+     5,
+     -1};
 
 char msgsizelookup(int msg) {
   for (char *p = msgsizesl; *p >= 0; p += 2)
